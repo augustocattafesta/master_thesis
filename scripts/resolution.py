@@ -1,12 +1,11 @@
 import numpy as np
 from aptapy.modeling import AbstractFitModel
-from aptapy.models import Gaussian, Fe55Forest
+from aptapy.models import Fe55Forest, Gaussian
 from aptapy.plotting import plt
 
 from analysis import ANALYSIS_DATA
-from analysis.utils import Detector, KALPHA
 from analysis.fileio import DataFolder, PulsatorFile, SourceFile
-
+from analysis.utils import KALPHA, Detector
 
 folder_path = ANALYSIS_DATA / "251118"
 folder = DataFolder(folder_path)
@@ -28,6 +27,7 @@ def estimate_gain(model: AbstractFitModel):
         raise ValueError("Pass a valid class")
 
     gain = detector.gain(line_model, voltages, line_ADC)
+    print(gain)
 
 def estimate_resolution(model: AbstractFitModel):
     detector = Detector('Ar', 1e-12)
@@ -39,7 +39,8 @@ def estimate_resolution(model: AbstractFitModel):
     elif issubclass(model, Gaussian):
         models = [source.fit_line() for source in source_files]
         line_ADC = np.array([_model.mu.ufloat() for _model in models])
-    
+    else:
+        raise ValueError("Pass a valid class")
     sigma = np.array([_model.sigma.ufloat() for _model in models])
     resolution = detector.energy_resolution(voltages, line_ADC, sigma)
     print(resolution)

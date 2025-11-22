@@ -1,10 +1,10 @@
-"""
+"""Test FileIO
 """
 
-import pytest
 import numpy as np
 
-from analysis.fileio import SourceFile, PulsatorFile
+from analysis.fileio import PulsatorFile, SourceFile
+
 
 def test_source_file(datadir):
     file_path = datadir / "live_data_chip18112025_D1000_B370.mca"
@@ -12,7 +12,7 @@ def test_source_file(datadir):
 
     assert source.voltage == 370
 
-def test_source_file(datadir):
+def test_pulse_file(datadir):
     file_path = datadir / "live_data_chip18112025_ci5-10-15_hvon.mca"
     pulses = PulsatorFile(file_path)
 

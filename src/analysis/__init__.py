@@ -1,6 +1,4 @@
 import pathlib
-
-import pathlib
 import subprocess
 
 from ._version import __version__ as __base_version__

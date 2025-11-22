@@ -22,7 +22,12 @@ authors = [
   { name = "Augusto Cattafesta", email = "a.cattafesta@studenti.unipi.it" }
   ]
 dependencies = [
+  "aptapy",
+  "matplotlib",
   "numpy",
+  "scipy",
+  "uncertainties",
+  "xraydb",
   ]
 
 # Optional dependencies are listed here, grouped into logical sections.

@@ -1,11 +1,14 @@
-from pathlib import Path
-import re
+"""FileIO
+"""
 
+import re
+from pathlib import Path
+
+import numpy as np
 from aptapy.hist import Histogram1d
 from aptapy.modeling import AbstractFitModel
 from aptapy.models import Fe55Forest, Gaussian, Line
 from aptapy.plotting import plt
-import numpy as np
 from uncertainties import unumpy
 
 from .utils import PeakAnalyzer
@@ -22,8 +25,8 @@ class FileBase:
 class DataFolder:
     def __init__(self, folder_path: Path):
         self.folder_path = folder_path
-        self.input_files = [input_file for input_file in folder_path.iterdir()]
-    
+        self.input_files = list(folder_path.iterdir())
+
     @property
     def source_files(self):
         return [_f for _f in self.input_files if re.search(r"_B(\d+)", _f.name) is not None]
@@ -33,14 +36,16 @@ class DataFolder:
         return [_f for _f in self.input_files if re.search(r"ci([\d\-]+)", _f.name) is not None]
 
 class SourceFile(FileBase):
-    
+
     @property
     def voltage(self) -> float:
         match = re.search(r"_B(\d+)", self.file_path.name)
         if match is not None:
-            return float(match.group(1))
+            _voltage = float(match.group(1))
         else:
             raise ValueError("Incorrect file type or different name used.")
+
+        return _voltage
 
     def fit_line_forest(self, num_sigma_left: float = 2., num_sigma_right: float = 2.):
         plt.figure(f"{self.voltage} Fe55Forest")
@@ -77,9 +82,11 @@ class PulsatorFile(FileBase):
     def voltage(self) -> np.ndarray:
         match = re.search(r"ci([\d\-]+)", self.file_path.name).group(1)
         if match is not None:
-            return np.array([int(n) for n in match.split("-")])
+            _voltage = np.array([int(n) for n in match.split("-")])
         else:
             raise ValueError("Incorrect file type or different name used.")
+
+        return _voltage
 
     @property
     def num_pulses(self) -> int:
@@ -103,7 +110,7 @@ class PulsatorFile(FileBase):
         models = [self.fit_pulse(xpeak, **kwargs) for xpeak in xpeaks]
         plt.legend()
         mu = np.array([model.mu.ufloat() for model in models])
-        
+
         plt.figure()
         plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
         line_model = Line('Conversion factor', "Voltage [mV]", "ADC Channel")
@@ -112,6 +119,3 @@ class PulsatorFile(FileBase):
         plt.legend()
 
         return line_model
-
-
-

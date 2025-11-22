@@ -1,14 +1,14 @@
-"""
+"""Utils
 """
 
 from typing import Tuple
 
-from aptapy.plotting import plt
-from aptapy.typing_ import ArrayLike
 import numpy as np
 import scipy.signal
-from uncertainties import unumpy
 import xraydb
+from aptapy.plotting import plt
+from aptapy.typing_ import ArrayLike
+from uncertainties import unumpy
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 
@@ -32,16 +32,17 @@ def weighted_energy(element: str, *lines: str) -> float:
         Intensity-weighted mean energy of the lines.
     """
     line_data = [xraydb.xray_line(element=element, line=line) for line in lines]
-    total_intensity = sum(l.intensity for l in line_data)
+    total_intensity = sum(line.intensity for line in line_data)
 
-    return sum(l.energy * l.intensity for l in line_data) / total_intensity
+    return sum(line.energy * line.intensity for line in line_data) / total_intensity
+
 
 
 KALPHA = weighted_energy('Mn', 'Ka1', 'Ka2', 'Ka3') * 1e-3
 
 
 class PeakAnalyzer:
-    
+
     @staticmethod
     def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
                               npeaks: int) -> Tuple[ArrayLike, ArrayLike]:
@@ -82,12 +83,12 @@ class Detector:
     def __init__(self, gas: str, capacity: float) -> None:
         self.gas = gas
         self.capacity = capacity
-    
-    def gain(self, line_model, voltages, line_ADC):
+
+    def gain(self, line_model, voltages, line_adc):
         plt.figure("Gain")
         exp_electrons = KALPHA / (xraydb.ionization_potential(self.gas) * 1e-3)
         slope = line_model.slope.ufloat() * 1e3 / self.capacity * ELEMENTARY_CHARGE
-        meas_electrons = (line_ADC - line_model.intercept.ufloat()) / slope
+        meas_electrons = (line_adc - line_model.intercept.ufloat()) / slope
         gain = meas_electrons / exp_electrons
         plt.errorbar(voltages, unumpy.nominal_values(gain), unumpy.std_devs(gain), fmt='ko')
         plt.xlabel("Voltage [V]")
@@ -95,10 +96,10 @@ class Detector:
 
         return gain
 
-    def energy_resolution(self, voltages, line_ADC, sigma):
+    def energy_resolution(self, voltages, line_adc, sigma):
         plt.figure("Energy Resolution")
         fwhm = sigma * 2 * np.sqrt(2 * np.log(2))
-        resolution = fwhm / line_ADC
+        resolution = fwhm / line_adc
         plt.errorbar(voltages, unumpy.nominal_values(resolution), unumpy.std_devs(resolution),
                      fmt='ko')
         plt.xlabel("Voltage [V]")
