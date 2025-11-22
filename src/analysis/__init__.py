@@ -33,4 +33,5 @@ __package_name__ = 'analysis'
 
 ANALYSIS_BASE = pathlib.Path(__file__).parent
 ANALYSIS_ROOT = ANALYSIS_BASE.parent.parent
-ANALYSIS_DATA = ANALYSIS_ROOT / 'data'
+ANALYSIS_DATA = ANALYSIS_ROOT / "data"
+ANALYSIS_FIGURES = ANALYSIS_ROOT / "latex/figures"
