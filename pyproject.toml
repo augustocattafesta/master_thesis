@@ -49,6 +49,9 @@ docs = [
 Homepage = "https://github.com/lucabaldini/metarep"
 Issues = "https://github.com/lucabaldini/metarep/issues"
 
+[project.scripts]
+analysis = "analysis.cli.main:main"
+
 # Specify the python file that hatchling should read the version string from.
 [tool.hatch.version]
 path = "src/analysis/_version.py"

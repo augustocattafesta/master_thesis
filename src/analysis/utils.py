@@ -6,6 +6,8 @@ from typing import Tuple
 import numpy as np
 import scipy.signal
 import xraydb
+import aptapy.models
+from aptapy.models import Line
 from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
@@ -78,31 +80,67 @@ class PeakAnalyzer:
         return xdata[peaks], ydata[peaks]
 
 
-class Detector:
+def gain(W: float, capacity: float, voltages: ArrayLike, line_adc: ArrayLike, line_pars: ArrayLike,
+         **kwargs) -> ArrayLike:
+    """_summary_
 
-    def __init__(self, gas: str, capacity: float) -> None:
-        self.gas = gas
-        self.capacity = capacity
+    Arguments
+    ----------
+    W : float
+        _description_
+    capacity : float
+        _description_
+    voltages : ArrayLike
+        _description_
+    line_adc : ArrayLike
+        _description_
+    line_model : Line
+        _description_
 
-    def gain(self, line_model, voltages, line_adc):
-        plt.figure("Gain")
-        exp_electrons = KALPHA / (xraydb.ionization_potential(self.gas) * 1e-3)
-        slope = line_model.slope.ufloat() * 1e3 / self.capacity * ELEMENTARY_CHARGE
-        meas_electrons = (line_adc - line_model.intercept.ufloat()) / slope
-        gain = meas_electrons / exp_electrons
-        plt.errorbar(voltages, unumpy.nominal_values(gain), unumpy.std_devs(gain), fmt='ko')
-        plt.xlabel("Voltage [V]")
-        plt.ylabel("Gain")
+    Returns
+    -------
+    ArrayLike
+        _description_
+    """
+    exp_electrons = KALPHA / (W * 1e-3)
+    slope = line_pars[0] * 1e3 / capacity * ELEMENTARY_CHARGE
+    meas_electrons = (line_adc - line_pars[1]) / slope
+    gain = meas_electrons / exp_electrons
+    plt.figure("Gain")
+    plt.errorbar(voltages, unumpy.nominal_values(gain), unumpy.std_devs(gain), fmt='ko')
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("Gain")
 
-        return gain
+    if kwargs.get("fit", False):
+        model = aptapy.models.Exponential()
+        model.fit(voltages, unumpy.nominal_values(gain), sigma=unumpy.std_devs(gain), absolute_sigma=True)
+        model.plot(label=f"scale: {-model.scale.ufloat()} V")
 
-    def energy_resolution(self, voltages, line_adc, sigma):
-        plt.figure("Energy Resolution")
-        fwhm = sigma * 2 * np.sqrt(2 * np.log(2))
-        resolution = fwhm / line_adc
-        plt.errorbar(voltages, unumpy.nominal_values(resolution), unumpy.std_devs(resolution),
-                     fmt='ko')
-        plt.xlabel("Voltage [V]")
-        plt.ylabel("FWHM / E")
+    return gain
 
-        return resolution
+def energy_resolution(voltages: ArrayLike, line_adc: ArrayLike, sigma: ArrayLike) -> ArrayLike:
+    """_summary_
+
+    Arguments
+    ----------
+    voltages : ArrayLike
+        _description_
+    line_adc : ArrayLike
+        _description_
+    sigma : ArrayLike
+        _description_
+
+    Returns
+    -------
+    ArrayLike
+        _description_
+    """
+    plt.figure("Energy Resolution")
+    fwhm = sigma * 2 * np.sqrt(2 * np.log(2))
+    resolution = fwhm / line_adc
+    plt.errorbar(voltages, unumpy.nominal_values(resolution), unumpy.std_devs(resolution),
+                    fmt='ko')
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("FWHM / E")
+
+    return resolution
