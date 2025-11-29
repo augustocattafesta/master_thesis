@@ -1,9 +1,10 @@
 import numpy as np
-from aptapy.models import Fe55Forest
+import uncertainties
 from aptapy.hist import Histogram1d
+from aptapy.models import Fe55Forest
 from aptapy.plotting import plt
 from uncertainties import unumpy
-import uncertainties
+
 E_SCALE = 0.2
 SIGMA = 3.
 AMP_R = 5.
