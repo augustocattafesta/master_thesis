@@ -10,7 +10,7 @@ from analysis.analyze import compare_folders
 def run(args):
     # call your function with positional + keyword args
     compare_folders(
-        args.foldername,
+        args.foldernames,
         getattr(aptapy.models, args.model),
         args.W,
         args.capacity,
@@ -26,7 +26,7 @@ def register(subparsers):
         help="An example subcommand",
     )
     parser.add_argument(
-        "foldername",
+        "foldernames",
         nargs="+",
         help="Name of the pulse file")
     parser.add_argument(

@@ -68,40 +68,40 @@ class SourceFile(FileBase):
         else:
             raise ValueError("Not reading REAL_TIME")
 
-    def fit_line_forest(self, num_sigma_left: float = 2., num_sigma_right: float = 2.):
-        plt.figure(f"{self.voltage} Fe55Forest")
-        plt.title(f"{self.voltage} V Fe55Forest")
-        self.hist.plot()
+    def fit_line_forest(self, num_sigma_left: float = 2., num_sigma_right: float = 2., **kwargs):
         mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
         xmin = mu0 - num_sigma_left * np.sqrt(mu0)
         xmax = mu0 + num_sigma_right * np.sqrt(mu0)
         model = Fe55Forest()
         for _i in range(2):
-            fitstatus = model.fit(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
+            fitstatus = model.fit(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True, **kwargs)
             xmin = mu0 - num_sigma_left * model.sigma.value
             xmax = mu0 + num_sigma_right * model.sigma.value
         model.plot(fit_output=True)
+        plt.figure(f"{self.voltage} Fe55Forest")
+        plt.title(f"{self.voltage} V Fe55Forest")
+        self.hist.plot()
         plt.xlim(model.default_plotting_range())
         plt.legend()
         corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
         return corr_pars
 
     def fit_line(self, **kwargs):
-        plt.figure(f"{self.voltage} Gaussian")
-        plt.title(f"{self.voltage} V Gaussian")
-        self.hist.plot()
         mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
         xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
         xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
         model = Gaussian()
         fitstatus = model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True,
                                         **kwargs)
+        
+        plt.figure(f"{self.voltage} Gaussian")
+        plt.title(f"{self.voltage} V Gaussian")
+        self.hist.plot()
         model.plot(fit_output=True)
         plt.xlim(model.default_plotting_range())
         plt.legend()
 
         corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
-
         return corr_pars
 
 
