@@ -1,5 +1,7 @@
+
 import argparse
-from .commands import trend, single
+
+from .commands import compare, folder, single, trend
 
 
 def main():
@@ -14,10 +16,10 @@ def main():
     )
 
     # Register all commands here
-    # cmd_example.register(subparsers)
     trend.register(subparsers)
     single.register(subparsers)
-
+    folder.register(subparsers)
+    compare.register(subparsers)
     # Parse args
     args = parser.parse_args()
 

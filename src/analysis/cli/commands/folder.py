@@ -1,16 +1,22 @@
-"""Trend CLI
+"""Folder CLI
 """
+
 import aptapy.models
 from aptapy.plotting import plt
 
-from analysis.analyze import analyze_trend
+from analysis.analyze import analyze_folder
 
 
 def run(args):
     # call your function with positional + keyword args
-    analyze_trend(
-        args.dirname,
-        getattr(aptapy.models, args.model),
+    models_arg = args.model
+    if isinstance(models_arg, str):
+        models_arg = [models_arg]  # make sure it's a list
+
+    models = [getattr(aptapy.models, m) for m in models_arg]
+    analyze_folder(
+        args.foldername,
+        models,
         args.W,
         args.capacity,
         # pass additional kwargs here if needed
@@ -21,14 +27,21 @@ def run(args):
 
 def register(subparsers):
     parser = subparsers.add_parser(
-        "trend",
+        "folder",
         help="An example subcommand",
     )
     parser.add_argument(
-        "dirname",
-        help="Name of the directory of data to analyze.")
+        "foldername",
+        help="Name of the pulse file")
     parser.add_argument(
-        "model",
+        "--model",
+        default="Gaussian",
+        nargs="+",
+        help="Model to fit lines.")
+    parser.add_argument(
+        "--plot",
+        type=bool,
+        default=False,
         help="Model to fit lines.")
     parser.add_argument(
         "--sigmaleft",
