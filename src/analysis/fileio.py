@@ -64,7 +64,7 @@ class DataFolder:
     @property
     def source_files(self):
         # Keep files containing _B<number>
-        filtered = [_f for _f in self.input_files if re.search(r"_B\d+", _f.name)]
+        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
 
         # Sort by the last number in the filename
         def numeric_sort_key(p: Path):
@@ -83,7 +83,17 @@ class SourceFile(FileBase):
 
     @property
     def voltage(self) -> float:
-        match = re.search(r"_B(\d+)", self.file_path.name)
+        match = re.search(r"B(\d+)", self.file_path.name)
+        if match is not None:
+            _voltage = float(match.group(1))
+        else:
+            raise ValueError("Incorrect file type or different name used.")
+
+        return _voltage
+
+    @property
+    def drift_voltage(self) -> float:
+        match = re.search(r"D(\d+)", self.file_path.name)
         if match is not None:
             _voltage = float(match.group(1))
         else:

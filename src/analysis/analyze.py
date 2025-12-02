@@ -139,7 +139,9 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     plt.close("all")
 
     plt.figure("Gain")
-    labels = {"251118":"W2b 86.6 top-right", "251127":"W8b 86.6 top-left high rate"}
+    plt.title(f"{model.__name__}")
+    labels = {"251118":"W2b 86.6 top-right", "251127":"W8b 86.6 top-left high rate",
+              "251201/1000": "Drift 1000 V", "251201/1300": "Drift 1300 V"}
     model = aptapy.models.Exponential()
     for i, folder_name in enumerate(folder_names):
         if folder_name == "251118":
@@ -185,6 +187,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     g = g[0]
     source_files = [SourceFile(_s) for _s in folder_data.source_files]
     real_times = np.array([SourceFile(_s).real_time for _s in folder_data.source_files])
+    drift_voltage = np.array([SourceFile(_s).drift_voltage for _s in folder_data.source_files])
     time = real_times.cumsum()
 
 
@@ -205,6 +208,12 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
     plt.xlabel("Time [s]")
     plt.ylabel("FWHM/E")
+    plt.legend()
+
+    plt.figure("Gain vs drift")
+    plt.errorbar(drift_voltage, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
+    plt.xlabel("Drift voltage [v]")
+    plt.ylabel("Gain")
     plt.legend()
 
     return time, g
