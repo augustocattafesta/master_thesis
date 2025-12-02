@@ -5,7 +5,7 @@ import aptapy.models
 import numpy as np
 from aptapy.plotting import plt
 
-from analysis.fileio import PulsatorFile, SourceFile
+from analysis.fileio import PulsatorFile, SourceFile, output_log
 
 
 def test_source_file(datadir):
@@ -42,3 +42,9 @@ def test_new_fit(datadir):
     source.hist.plot()
     model.plot(fit_output=True)
     plt.legend()
+
+
+def test_log_caller(a, b, c, **kwargs):
+    print(output_log())
+
+test_log_caller(1, 2, 3, x=10)

@@ -16,8 +16,9 @@ from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
+from. import ANALYSIS_RESULTS
 from .utils import find_peaks_iterative
-
+from .logging import logger
 
 def load_class(class_path: str):
     """
@@ -71,7 +72,7 @@ class DataFolder:
             numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
             return numbers[-1]  # sort by the last number
 
-        return sorted(filtered, key=numeric_sort_key)
+        return sorted(filtered, key=lambda p: p.name)
 
 
     @property
@@ -167,6 +168,7 @@ class SourceFile(FileBase):
         else:
             raise TypeError("Choose between Gaussian or GaussianForest child class")
 
+        logger.info(self.file_path.name)
         corr_pars = uncertainties.correlated_values(model_instance.parameter_values(), fitstatus.pcov)
         return corr_pars, model_instance
 
@@ -199,17 +201,21 @@ class PulsatorFile(FileBase):
         return model
 
     def analyze_pulse(self, **kwargs) -> ArrayLike:
-        plt.figure(self.file_path.name)
+        logger.info(f"PULSE FILE ANALYZED:")
+        logger.info(f"{self.file_path.name}\n")
+        
+        fig = plt.figure(self.file_path.name)
+        plt.title("Calibration pulses")
         self.hist.plot()
         xpeaks, _ = find_peaks_iterative(self.hist.bin_centers(),
                                                              self.hist.content, self.num_pulses)
         models = [self.fit_pulse(xpeak, **kwargs) for xpeak in xpeaks]
-        plt.legend()
         mu = np.array([model.mu.ufloat() for model in models])
+        plt.legend()
 
-        plt.figure()
+        line_fig = plt.figure("Calibration fit")
         plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
-        line_model = Line('Conversion factor', "Voltage [mV]", "ADC Channel")
+        line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
         fitstatus = line_model.fit(self.voltage, unumpy.nominal_values(mu),
                                    sigma=unumpy.std_devs(mu))
         line_model.plot(fit_output=True)
@@ -217,4 +223,6 @@ class PulsatorFile(FileBase):
 
         corr_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
 
-        return corr_pars
+        return corr_pars, fig, line_fig
+
+

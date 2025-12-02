@@ -27,6 +27,7 @@ def run(args):
         plot=args.plot,
         xmin=args.xmin,
         xmax=args.xmax,
+        save=args.save
     )
     plt.show()
 
@@ -80,6 +81,10 @@ def register(subparsers):
         help="Energy of the main peak in keV")
     parser.add_argument(
         "--plot",
+        action="store_true",
+        help="")
+    parser.add_argument(
+        "--save",
         action="store_true",
         help="")
 

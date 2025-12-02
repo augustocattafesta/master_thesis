@@ -23,7 +23,8 @@ def run(args):
         num_sigma_right=args.sigmaright,
         xmin=args.xmin,
         xmax=args.xmax,
-        plot=args.plot
+        plot=args.plot,
+        save=args.save
     )
     plt.show()
     
@@ -84,5 +85,8 @@ def register(subparsers):
         "--plot",
         action="store_true",
         help="")
-
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help="")
     parser.set_defaults(func=run)

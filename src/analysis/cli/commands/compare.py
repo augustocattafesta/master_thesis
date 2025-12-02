@@ -19,6 +19,7 @@ def run(args):
         num_sigma_right=args.sigmaright,
         xmin=args.xmin,
         xmax=args.xmax,
+        save=args.save
     )
     plt.show()
 
@@ -70,5 +71,9 @@ def register(subparsers):
         type=float,
         default=float("inf"),
         help="xmax.")
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help="")
 
     parser.set_defaults(func=run)
