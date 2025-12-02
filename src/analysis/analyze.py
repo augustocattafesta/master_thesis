@@ -175,40 +175,36 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
 
 
 def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity: float,
-                  **kwargs) -> Tuple[ArrayLike, ArrayLike]:
+                  e_peak, plot: bool = False, **kwargs) -> Tuple[ArrayLike, ArrayLike]:
     folder_path = ANALYSIS_DATA / folder_name
     folder_data = DataFolder(folder_path)
-    pulses = PulsatorFile(folder_data.pulse_files[0])
-    line_pars = pulses.analyze_pulse()
-
+    pulse = PulsatorFile(folder_data.pulse_files[0])
+    line_pars = pulse.analyze_pulse()
+    _, res, g = analyze_folder(folder_name, [model], W, capacity, e_peak, plot, **kwargs)
+    res = res[0]
+    g = g[0]
     source_files = [SourceFile(_s) for _s in folder_data.source_files]
-    voltage = [_source.voltage for _source in source_files]
-    real_times = np.array([_source.real_time for _source in source_files])
-    if issubclass(model, aptapy.models.Fe55Forest):
-        pars_Fe = np.array([source.fit_line_forest(**kwargs) for source in source_files])
-        line_adc = KALPHA / pars_Fe[:, 2]
-    elif issubclass(model, aptapy.models.Gaussian):
-        pars = np.array([source.fit_line(**kwargs) for source in source_files])
-        line_adc = pars[:, 1]
-    else:
-        raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-
-    g = gain(W, capacity, line_adc, line_pars, KALPHA)
+    real_times = np.array([SourceFile(_s).real_time for _s in folder_data.source_files])
     time = real_times.cumsum()
-    
-    pars = np.array([source.fit_line(xmin=25, xmax=53, num_sigma_left=1.5, num_sigma_right=1.5) for source in source_files])
+
+
+    results = [source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
+                          num_sigma_right=1.5) for source in source_files]
+    pars, _ = zip(*results)
+    pars = np.stack(pars)
     line_adc = pars[:, 1]
     g_esc = gain(W, capacity, line_adc, line_pars, 3.)
-    plt.close('all')
     plt.figure("Gain vs time")
-    plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.k', label=r'K$\alpha$')
-    plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt='.b', label="Esc. Peak")
+    plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
+    plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt='.', label="Esc. Peak")
     plt.xlabel("Time [s]")
     plt.ylabel("Gain")
-    # model = aptapy.models.Exponential() + aptapy.models.Constant()
-    # model.fit(time, unumpy.nominal_values(g), sigma=unumpy.std_devs(g))
-    # model.plot(fit_output=True)
+    plt.legend()
 
+    plt.figure("Resolution vs time")
+    plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
+    plt.xlabel("Time [s]")
+    plt.ylabel("FWHM/E")
     plt.legend()
 
     return time, g
