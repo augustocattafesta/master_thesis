@@ -1,16 +1,15 @@
 """Trend CLI
 """
-import aptapy.models
 from aptapy.plotting import plt
 
 from analysis.analyze import analyze_trend
-
+from analysis.fileio import load_class
 
 def run(args):
     # call your function with positional + keyword args
     analyze_trend(
         args.dirname,
-        getattr(aptapy.models, args.model),
+        load_class(args.model),
         args.W,
         args.capacity,
         # pass additional kwargs here if needed

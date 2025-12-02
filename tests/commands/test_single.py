@@ -37,10 +37,8 @@ def test_single_cli_runs():
         assert args[2] == [aptapy.models.Gaussian]
         assert args[3] == 30              # W
         assert args[4] == 2e-12           # capacity
-
         # keyword args
         assert kwargs["num_sigma_left"] == 2.0
         assert kwargs["num_sigma_right"] == 3.0
-
         # plt.show should be called too
         mock_plt.show.assert_called_once()

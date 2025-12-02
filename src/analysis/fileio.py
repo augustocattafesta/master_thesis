@@ -1,19 +1,51 @@
 """FileIO
 """
 
+import importlib
+import inspect
 import re
+import sys
 from pathlib import Path
 
 import numpy as np
 import uncertainties
 from aptapy.hist import Histogram1d
 from aptapy.modeling import AbstractFitModel
-from aptapy.models import Fe55Forest, Gaussian, Line
+from aptapy.models import Fe55Forest, Gaussian, GaussianForest, Line
 from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
 from .utils import find_peaks_iterative
+
+
+def load_class(class_path: str):
+    """
+    Load a class from a string.
+    Supports:
+      - "ClassName" (local or global)
+      - "module.ClassName"
+      - "package.module.ClassName"
+    """
+
+    # Case 1: "ClassName" – search locals, globals, and all loaded modules
+    if "." not in class_path:
+        frame = inspect.currentframe().f_back
+        # Search locals first
+        if class_path in frame.f_locals:
+            return frame.f_locals[class_path]
+        # Then globals
+        if class_path in frame.f_globals:
+            return frame.f_globals[class_path]
+        # Search through all loaded modules
+        for module in sys.modules.values():
+            if module and hasattr(module, class_path):
+                return getattr(module, class_path)
+        raise ImportError(f"Class '{class_path}' not found in locals, globals, or loaded modules.")
+    # Case 2: dotted path → module + class
+    module_name, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 class FileBase:
@@ -68,28 +100,42 @@ class SourceFile(FileBase):
         else:
             raise ValueError("Not reading REAL_TIME")
 
-    def fit_line_forest(self, num_sigma_left: float = 2., num_sigma_right: float = 2., **kwargs):
-        mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
-        xmin = mu0 - num_sigma_left * np.sqrt(mu0)
-        xmax = mu0 + num_sigma_right * np.sqrt(mu0)
+    def fit_line_forest(self, **kwargs):
+        if kwargs.get('xmin', float("-inf")) == float("-inf"):
+            mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
+            xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
+            xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
+        else:
+            xmin = kwargs["xmin"]
+            kwargs.pop("xmin")
+            xmax = kwargs["xmax"]
+            kwargs.pop("xmax")
         model = Fe55Forest()
         for _i in range(2):
-            fitstatus = model.fit(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True, **kwargs)
-            xmin = mu0 - num_sigma_left * model.sigma.value
-            xmax = mu0 + num_sigma_right * model.sigma.value
-        model.plot(fit_output=True)
+            fitstatus = model.fit(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
+            xmin = mu0 - kwargs.get("num_sigma_left", 2.) * model.sigma.value
+            xmax = mu0 + kwargs.get("num_sigma_right", 2.) * model.sigma.value
         plt.figure(f"{self.voltage} Fe55Forest")
         plt.title(f"{self.voltage} V Fe55Forest")
         self.hist.plot()
+        # model.plot(fit_output=True)
+        label = f"Fe55Forest\nFWHM@5.9keV: {model.fwhm()}"
+        model.plot(label=label)
         plt.xlim(model.default_plotting_range())
         plt.legend()
         corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
         return corr_pars
 
     def fit_line(self, **kwargs):
-        mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
-        xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
-        xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
+        if kwargs.get('xmin', None) is None:
+            mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
+            xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
+            xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
+        else:
+            xmin = kwargs["xmin"]
+            kwargs.pop("xmin")
+            xmax = kwargs["xmax"]
+            kwargs.pop("xmax")
         model = Gaussian()
         fitstatus = model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True,
                                         **kwargs)
@@ -104,6 +150,16 @@ class SourceFile(FileBase):
         corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
         return corr_pars
 
+    def fit(self, model, **kwargs):
+        if issubclass(model, Gaussian) or issubclass(model, GaussianForest):
+            model_instance = model()
+            fitstatus = model_instance.fit_iterative(self.hist, **kwargs)
+        else:
+            raise TypeError("Choose between Gaussian or GaussianForest child class")
+
+        corr_pars = uncertainties.correlated_values(model_instance.parameter_values(), fitstatus.pcov)
+        return corr_pars, model_instance
+
 
 class PulsatorFile(FileBase):
 
@@ -111,7 +167,8 @@ class PulsatorFile(FileBase):
     def voltage(self) -> np.ndarray:
         match = re.search(r"ci([\d_-]+)(?=[^\d_-])", self.file_path.name, re.IGNORECASE)
         if match is not None:
-            _voltage = np.array([int(n) for n in re.split(r"[-_]", match.group(1))])
+            parts = [n for n in re.split(r"[-_]", match.group(1)) if n]  # <-- filter empty strings
+            _voltage = np.array([int(n) for n in parts])
         else:
             raise ValueError("Incorrect file type or different name used.")
 
