@@ -30,8 +30,8 @@ def run(args):
         args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed
-        num_sigma_left=args.sigmaleft,
-        num_sigma_right=args.sigmaright,
+        num_sigma_left=args.numsigmaleft,
+        num_sigma_right=args.numsigmaright,
         xmin=args.xmin,
         xmax=args.xmax,
         absolute_sigma=args.absolutesigma,

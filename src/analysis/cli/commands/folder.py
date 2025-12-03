@@ -26,6 +26,7 @@ __description__ =     """
 def run(args):
     # call your function with positional + keyword args
     models_arg = args.model
+    print(models_arg)
     if isinstance(models_arg, str):
         models_arg = [models_arg]  # make sure it's a list
 

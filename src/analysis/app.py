@@ -40,7 +40,7 @@ def add_singlemodel(parser: ArgumentParser) -> None:
                         help="Model to fit the emission line(s). Default is Gaussian.")
 
 def add_multiplemodel(parser: ArgumentParser) -> None:
-    parser.add_argument("--model", default="Gaussian", nargs='+', type=tuple,
+    parser.add_argument("--model", default="Gaussian", nargs='+', type=str,
                         help="Model to fit the emission line(s). Multiple models can be given.\
                              Default is Gaussian.")
 
