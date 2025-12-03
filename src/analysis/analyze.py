@@ -61,9 +61,13 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
     if save:
         logger.enable("analyze")
         log_folder = logging.start_logging()
+        log_main = logging.log_main
+        log_fit = logging.log_fit
         logging.log_args()
     else:
         logger.disable("analyze")
+        log_main = logging.logger
+        log_fit = logging.logger
     # Pulse file analysis and plotting
     pulse_data = PulsatorFile(Path(pulse_file))
     line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
@@ -76,7 +80,7 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         line_fig.savefig(log_folder / "cal_fit.pdf", format="pdf")
     # Source file analysis
     if source_file is not None:
-        logger.info("SOURCE FILE(S) ANALYZED:")
+        log_main.info("SOURCE FILE(S) ANALYZED:")
         source_data = SourceFile(Path(source_file))
         # Create empty arrays for the results
         g = np.zeros(shape=len(models), dtype=object)
@@ -104,12 +108,12 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
             g[i] = gain(W, capacity, line_adc, line_pars, e_peak)
             res[i] = energy_resolution(line_adc, sigma)
             # Results logging
-            logger.info("\nSOURCE FILE RESULTS:")
-            logger.info(f"{'model:':<12} {fit_model.name()}")
-            logger.info(f"{'gain:':<12} {g[i]}")
-            logger.info(f"{'resolution:':<12} {res[i]} %\n")
-            logger.info("FIT RESULTS:")
-            logger.info(str(fit_model))
+            log_main.info("\nSOURCE FILE RESULTS:")
+            log_main.info(f"{'model:':<12} {fit_model.name()}")
+            log_main.info(f"{'gain:':<12} {g[i]}")
+            log_main.info(f"{'resolution:':<12} {res[i]} %\n")
+            log_fit.info("FIT RESULTS:\n")
+            logging.log_fit_results(source_data.file_path.name, fit_model)
             # Source file plotting and saving
             if plot or save:
                 plt.figure(f"{source_data.file_path.name}")
@@ -165,9 +169,13 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
     if save:
         logger.enable("analyze")
         log_folder = logging.start_logging()
+        log_main = logging.log_main
+        log_fit = logging.log_fit
         logging.log_args()
     else:
         logger.disable("analyze")
+        log_main = logging.logger
+        log_fit = logging.logger
     # Open the folder and select the first calibration file
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
@@ -181,7 +189,7 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
         pulse_fig.savefig(log_folder / "cal_pulses.pdf", format="pdf")
         line_fig.savefig(log_folder / "cal_fit.pdf", format="pdf")
     # Source files analysis
-    logger.info("SOURCE FILE(S) ANALYZED:")
+    log_main.info("SOURCE FILE(S) ANALYZED:")
     source_data = [SourceFile(_s) for _s in data_folder.source_files]
     voltage = np.array([file.voltage for file in source_data])
     # Create empty arrays for the results
@@ -202,11 +210,16 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
             # Fit the spectrum in the given range
             results.append(source.fit(model, **kwargs))
-        logger.info("")
+        log_main.info("")
         # Collect fit parameters and fit models from the results
         pars, fit_models = zip(*results)
         pars = np.stack(pars)
         fit_models = list(fit_models)
+        # Log fit results in another log file
+        log_fit.info(f"FIT RESULTS FOLDER: {folder_name}\n")
+        for _i, source in enumerate(source_data):
+            logging.log_fit_results(source.file_path.name, fit_models[_i])
+
         # Order and number of parameters differ based on the model
         if issubclass(model, aptapy.models.GaussianForest):
             line_adc = fit_models[0].energies[0] / pars[:, 2]
@@ -255,12 +268,12 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
     if save:
         gain_fig.savefig(log_folder / "gain.pdf", format="pdf")
         res_fig.savefig(log_folder / "energy_resolution.pdf", format="pdf")
-        # Save .csv files with the results of gain and energy resolution for each model given
+        # Save .txt files with the results of gain and energy resolution for each model given
         for i, model in enumerate(models):
             output = np.array([voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), \
                            unumpy.nominal_values(res[i]), unumpy.std_devs(res[i])]).T
             header = "voltage [v], gain, s_gain, resolution, s_resolution"
-            np.savetxt(log_folder / f"results_{folder_name.split("/")[1]}_{model.__name__}.csv", output,
+            np.savetxt(log_folder / f"results_{folder_name.split("/")[-1]}_{model.__name__}.txt", output,
                        delimiter=",", header=header)
     return voltage, res, g
 
@@ -431,6 +444,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     line_adc = pars[:, 1]
     g_esc = gain(W, capacity, line_adc, line_pars, 2.9)
     # Plotting and saving
+    out_name = folder_name.split("/")[-1]
     if plot or save:
         fig = plt.figure("Gain vs time")
         plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
@@ -441,7 +455,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"gain_time_{folder_name}.pdf", format="pdf")
+            plt.savefig(log_folder / f"gain_time_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -452,7 +466,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
         plt.ylabel("FWHM/E")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"resolution_time_{folder_name}.pdf", format="pdf")
+            plt.savefig(log_folder / f"resolution_time_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -463,7 +477,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"gain_drift_{folder_name}.pdf", format="pdf")
+            plt.savefig(log_folder / f"gain_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -474,7 +488,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"resolution_drift_{folder_name}.pdf", format="pdf")
+            plt.savefig(log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     return g, res, time, drift_voltage
