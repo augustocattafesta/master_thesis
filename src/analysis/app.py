@@ -1,7 +1,8 @@
 import argparse
 
-from . import ANALYSIS_RESULTS, ANALYSIS_DATA
+from . import ANALYSIS_DATA, ANALYSIS_RESULTS
 from .utils import KALPHA
+
 
 class ArgumentParser(argparse.ArgumentParser):
     def __init__(self, prog: str = None, usage: str = None, description: str = None) -> None:
@@ -65,7 +66,7 @@ def add_source_options(parser: ArgumentParser) -> None:
     group.add_argument("--e_peak", type=float, default=KALPHA,
                        help=f"Energy value of the main line to analyzed. The value is expressed in\
                          keV. Default is K-alpha of the Fe55. Default is {KALPHA:.3f}.")
-    
+
 def add_detector_options(parser: ArgumentParser) -> None:
     group = parser.add_argument_group("detector", "Detector options")
     group.add_argument("--W", type=float, default=26.,

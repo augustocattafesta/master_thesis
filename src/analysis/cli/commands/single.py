@@ -1,8 +1,8 @@
 import argparse
+
 from aptapy.plotting import plt
 
 from analysis.analyze import analyze_file
-from analysis.fileio import load_class
 from analysis.app import (
     add_detector_options,
     add_fit_options,
@@ -10,9 +10,9 @@ from analysis.app import (
     add_output_options,
     add_pulsefile,
     add_source_options,
-    add_sourcefile
+    add_sourcefile,
 )
-
+from analysis.fileio import load_class
 
 __description__ = """
     Analyze a calibration pulses file to determine the calibration parameters of the readout
@@ -23,7 +23,7 @@ __description__ = """
 def run(args):
     models_arg = args.model
     if isinstance(models_arg, str):
-        models_arg = [models_arg] 
+        models_arg = [models_arg]
     models = [load_class(m) for m in models_arg]
 
     analyze_file(
@@ -42,11 +42,11 @@ def run(args):
         save=args.save
     )
     plt.show()
-    
+
 
 def register(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser("single", description=__description__)
-    
+
     add_pulsefile(parser)
     add_sourcefile(parser)
     add_multiplemodel(parser)
@@ -54,5 +54,5 @@ def register(subparsers: argparse._SubParsersAction):
     add_source_options(parser)
     add_detector_options(parser)
     add_output_options(parser)
-    
+
     parser.set_defaults(func=run)

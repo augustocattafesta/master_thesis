@@ -73,11 +73,12 @@
 # # plt.show()
 
 
-from analysis.utils import gain, KALPHA
-from analysis.analyze import analyze_file
-from aptapy.models import Gaussian
 import numpy as np
+from aptapy.models import Gaussian
 from uncertainties import unumpy
+
+from analysis.analyze import analyze_file
+from analysis.utils import KALPHA, gain
 
 pars = analyze_file("data/251118/live_data_chip18112025_ci5-10-15.mca", None, Gaussian, 26, 1e-12)
 l = np.array([12, 16, 21])

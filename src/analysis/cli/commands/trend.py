@@ -3,16 +3,15 @@
 from aptapy.plotting import plt
 
 from analysis.analyze import analyze_trend
-from analysis.fileio import load_class
 from analysis.app import (
     add_detector_options,
     add_fit_options,
     add_foldername,
     add_output_options,
-    add_source_options,
     add_singlemodel,
+    add_source_options,
 )
-
+from analysis.fileio import load_class
 
 __description__ = """
     Analyze a folder containing calibration pulse files and source data (spectrum) files. If

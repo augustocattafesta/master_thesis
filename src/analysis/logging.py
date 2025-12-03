@@ -1,12 +1,12 @@
-import re
-import inspect
-import sys
 import datetime
+import inspect
 import pathlib
-
-from . import ANALYSIS_RESULTS
+import re
+import sys
 
 from loguru import logger
+
+from . import ANALYSIS_RESULTS
 
 _LOG_FOLDER = None
 
@@ -22,15 +22,14 @@ def strip_before_analysis(cmd: str):
 
 def start_logging():
     global _LOG_FOLDER
-    
-    # Se una cartella di log è già stata creata, restituisci semplicemente il percorso attivo.
+
     if _LOG_FOLDER is not None:
         return _LOG_FOLDER
     logger.remove()
-    
+
     date = datetime.datetime.now().strftime("%Y-%m-%d__%H:%M:%S")
     cmd = " ".join(sys.argv)
-    log_folder_name = f"{date}_{get_word_after_analysis(cmd)}" 
+    log_folder_name = f"{date}_{get_word_after_analysis(cmd)}"
     log_file = f"{date}_{get_word_after_analysis(cmd)}.log"
     pathlib.Path.mkdir(ANALYSIS_RESULTS / log_folder_name)
     log_folder = ANALYSIS_RESULTS / log_folder_name

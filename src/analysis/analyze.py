@@ -7,16 +7,15 @@ from typing import Tuple, Union
 import aptapy.models
 import numpy as np
 from aptapy.modeling import AbstractFitModel, line_forest
-from aptapy.plotting import plt, last_line_color
+from aptapy.plotting import last_line_color, plt
 from aptapy.typing_ import ArrayLike
-from loguru import logger
 from uncertainties import unumpy
-
 
 from . import ANALYSIS_DATA, logging
 from .fileio import DataFolder, PulsatorFile, SourceFile
 from .logging import logger
 from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
+
 
 @line_forest(KALPHA - AR_ESCAPE, KBETA - AR_ESCAPE)
 class ArEscape(aptapy.models.GaussianForest):
@@ -82,7 +81,7 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         g = np.zeros(shape=len(models), dtype=object)
         res = np.zeros(shape=len(models), dtype=object)
         for i, model in enumerate(models):
-            pars, fit_model = source_data.fit(model, **kwargs)            
+            pars, fit_model = source_data.fit(model, **kwargs)
             if issubclass(model, aptapy.models.GaussianForest):
                 line_adc = fit_model.energies[0] / pars[2]
                 sigma = pars[3]
@@ -250,7 +249,8 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
             output = np.array([voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), \
                            unumpy.nominal_values(res[i]), unumpy.std_devs(res[i])]).T
             header = "voltage [v], gain, s_gain, resolution, s_resolution"
-            np.savetxt(log_folder / f"results_{folder_name}_{model.__name__}.csv", output, delimiter=",", header=header)
+            np.savetxt(log_folder / f"results_{folder_name}_{model.__name__}.csv", output,
+                       delimiter=",", header=header)
     return voltage, res, g
 
 
@@ -299,7 +299,8 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     g = np.zeros(shape=len(folder_names), dtype=object)
     # Analyze each folder and store the results
     for i, folder_name in enumerate(folder_names):
-        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], W, capacity, e_peak, save=save, **kwargs)
+        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], W, capacity, e_peak,
+                                                  save=save, **kwargs)
     # Plot the gain
     gain_fig = plt.figure("Gain")
     plt.title(f"Gain {model.__name__}")
@@ -311,7 +312,8 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     for i, folder_name in enumerate(folder_names):
         if folder_name == "251118":
             voltage[i] = np.append(voltage[i], [300, 310, 320])
-            g[i][0] = np.append(g[i][0], unumpy.uarray([33.821245688904206, 40.060014190288435, 47.85847481701872],
+            g[i][0] = np.append(g[i][0], unumpy.uarray([33.821245688904206, 40.060014190288435, \
+                                                        47.85847481701872],
                           [0.004015431655164531, 0.003950437657169777, 0.0038697164947474323]))
         if folder_name == "251127":
             g_350 = g[i][0][voltage[i] == 350.]
@@ -324,7 +326,8 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
                     label=labels[folder_name])
         # Fit the gain with an exponential function
         model = aptapy.models.Exponential()
-        model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]), absolute_sigma=True)
+        model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
+                  absolute_sigma=True)
         model.plot(label=f"scale: {-model.scale.ufloat()} V", color=last_line_color())
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
@@ -347,7 +350,7 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     #                  fmt="o", label=f"")
     # plt.xlabel("Voltage [V]")
     # plt.ylabel("FWHM / E")
-    # plt.legend()       
+    # plt.legend()
 
 
 def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity: float,
@@ -355,9 +358,9 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
                   **kwargs) -> Tuple[ArrayLike, ArrayLike]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
-    spectrum a fit of the emission line(s) is done using the model(s) specified. If multiple models
-    are given, the fit is done using both of them, and for each result the energy resolution and
-    the gain is calculated. 
+    spectrum a fit of the emission line(s) is done using the given model. The gain and the
+    resolution are calculated with the fit results and their trend with time and drift voltage
+    is plotted. 
 
     Arguments
     ----------
@@ -420,8 +423,10 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     # Plotting and saving
     if plot or save:
         fig = plt.figure("Gain vs time")
-        plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
-        plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt='.', label="Esc. Peak")
+        plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
+                     label=r"K$\alpha$")
+        plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt=".",
+                     label="Esc. Peak")
         plt.xlabel("Time [s]")
         plt.ylabel("Gain")
         plt.legend()
@@ -431,7 +436,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
             plt.close(fig)
     if plot or save:
         fig = plt.figure("Resolution vs time")
-        plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
+        plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt=".",
+                     label=r"K$\alpha$")
         plt.xlabel("Time [s]")
         plt.ylabel("FWHM/E")
         plt.legend()
@@ -441,7 +447,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
             plt.close(fig)
     if plot or save:
         fig = plt.figure("Gain vs drift")
-        plt.errorbar(drift_voltage, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
+        plt.errorbar(drift_voltage, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
+                     label=r"K$\alpha$")
         plt.xlabel("Drift voltage [v]")
         plt.ylabel("Gain")
         plt.legend()
@@ -451,7 +458,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
             plt.close(fig)
     if plot or save:
         fig = plt.figure("Resolution vs drift")
-        plt.errorbar(drift_voltage, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
+        plt.errorbar(drift_voltage, unumpy.nominal_values(res), unumpy.std_devs(res), fmt=".",
+                     label=r"K$\alpha$")
         plt.xlabel("Drift voltage [v]")
         plt.ylabel("Gain")
         plt.legend()

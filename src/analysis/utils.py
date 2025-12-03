@@ -8,7 +8,6 @@ import scipy.signal
 import xraydb
 from aptapy.typing_ import ArrayLike
 
-
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 W_ARGON = 26.   # eV
 
@@ -76,7 +75,8 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike, energy: float) -> ArrayLike:
+def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike,
+         energy: float) -> ArrayLike:
     """_summary_
 
     Arguments

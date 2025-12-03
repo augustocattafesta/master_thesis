@@ -16,9 +16,9 @@ from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from. import ANALYSIS_RESULTS
-from .utils import find_peaks_iterative
 from .logging import logger
+from .utils import find_peaks_iterative
+
 
 def load_class(class_path: str):
     """
@@ -71,14 +71,11 @@ class DataFolder:
         def numeric_sort_key(p: Path):
             numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
             return numbers[-1]  # sort by the last number
-        
+
         def custom_sort_key(p: Path):
             if "trend" in p.stem:
-                # Se contiene "trend", usa l'ordinamento numerico
                 return numeric_sort_key(p)
-            else:
-                # Altrimenti, usa l'ordinamento standard per nome del file (stringa)
-                return p.name
+            return p.name
 
         return sorted(filtered, key=custom_sort_key)
 
@@ -116,8 +113,7 @@ class SourceFile(FileBase):
             real_time_str = input_file.readlines()[8]
         if real_time_str.split('-')[0].strip() == 'REAL_TIME':
             return float(real_time_str.split('-')[1].strip())
-        else:
-            raise ValueError("Not reading REAL_TIME")
+        raise ValueError("Not reading REAL_TIME")
 
     def fit_line_forest(self, **kwargs):
         if kwargs.get('xmin', float("-inf")) == float("-inf"):
@@ -146,7 +142,7 @@ class SourceFile(FileBase):
         return corr_pars
 
     def fit_line(self, **kwargs):
-        if kwargs.get('xmin', None) is None:
+        if kwargs.get('xmin') is None:
             mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
             xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
             xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
@@ -158,7 +154,7 @@ class SourceFile(FileBase):
         model = Gaussian()
         fitstatus = model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True,
                                         **kwargs)
-        
+
         plt.figure(f"{self.voltage} Gaussian")
         plt.title(f"{self.voltage} V Gaussian")
         self.hist.plot()
@@ -177,7 +173,8 @@ class SourceFile(FileBase):
             raise TypeError("Choose between Gaussian or GaussianForest child class")
 
         logger.info(self.file_path.name)
-        corr_pars = uncertainties.correlated_values(model_instance.parameter_values(), fitstatus.pcov)
+        corr_pars = uncertainties.correlated_values(model_instance.parameter_values(),
+                                                    fitstatus.pcov)
         return corr_pars, model_instance
 
 
@@ -209,9 +206,9 @@ class PulsatorFile(FileBase):
         return model
 
     def analyze_pulse(self, **kwargs) -> ArrayLike:
-        logger.info(f"PULSE FILE ANALYZED:")
+        logger.info("PULSE FILE ANALYZED:")
         logger.info(f"{self.file_path.name}\n")
-        
+
         fig = plt.figure(self.file_path.name)
         plt.title("Calibration pulses")
         self.hist.plot()
@@ -232,5 +229,3 @@ class PulsatorFile(FileBase):
         corr_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
 
         return corr_pars, fig, line_fig
-
-
