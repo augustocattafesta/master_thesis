@@ -1,10 +1,11 @@
 """Test for compare CLI command
 """
 
-import pytest
+
+from unittest.mock import patch
 
 import aptapy.models
-from unittest.mock import patch
+
 from analysis.cli.main import main
 
 

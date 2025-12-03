@@ -8,7 +8,6 @@ import scipy.signal
 import xraydb
 from aptapy.typing_ import ArrayLike
 
-
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 W_ARGON = 26.   # eV
 
@@ -37,7 +36,9 @@ def weighted_energy(element: str, *lines: str) -> float:
 
 
 KALPHA = weighted_energy('Mn', 'Ka1', 'Ka2', 'Ka3') * 1e-3  # keV
-KBETA = weighted_energy('Mn', 'Kb1', 'Kb3', 'Kb5')
+KBETA = weighted_energy('Mn', 'Kb1', 'Kb3', 'Kb5') * 1e-3   # keV
+
+AR_ESCAPE = weighted_energy("Ar", "Ka1", "Ka2", "Ka3", "Kb1", "Kb3") * 1e-3 # keV
 
 
 def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
@@ -74,7 +75,8 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike) -> ArrayLike:
+def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike,
+         energy: float) -> ArrayLike:
     """_summary_
 
     Arguments
@@ -93,7 +95,7 @@ def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike) -
     ArrayLike
         _description_
     """
-    exp_electrons = KALPHA / (W * 1e-3)
+    exp_electrons = energy / (W * 1e-3)
     slope = line_pars[0] * 1e3 / capacity * ELEMENTARY_CHARGE
     meas_electrons = (line_adc - line_pars[1]) / slope
     return meas_electrons / exp_electrons

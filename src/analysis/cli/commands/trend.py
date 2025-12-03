@@ -1,54 +1,52 @@
 """Trend CLI
 """
-import aptapy.models
 from aptapy.plotting import plt
 
 from analysis.analyze import analyze_trend
+from analysis.app import (
+    add_detector_options,
+    add_fit_options,
+    add_foldername,
+    add_output_options,
+    add_singlemodel,
+    add_source_options,
+)
+from analysis.fileio import load_class
+
+__description__ = """
+    Analyze a folder containing calibration pulse files and source data (spectrum) files. If
+    multiple calibration files are present, the first in alphabetical order is taken. For each
+    spectrum a fit of the emission line(s) is done using the given model. The gain and the
+    resolution are calculated with the fit results and their trend with time and drift voltage
+    is plotted."""
 
 
 def run(args):
     # call your function with positional + keyword args
     analyze_trend(
-        args.dirname,
-        getattr(aptapy.models, args.model),
+        args.foldername,
+        load_class(args.model),
         args.W,
         args.capacity,
+        args.e_peak,
         # pass additional kwargs here if needed
-        num_sigma_left=args.sigmaleft,
-        num_sigma_right=args.sigmaright,
+        num_sigma_left=args.numsigmaleft,
+        num_sigma_right=args.numsigmaright,
+        xmin=args.xmin,
+        xmax=args.xmax,
+        absolute_sigma=args.absolutesigma,
+        plot=args.plot,
+        save=args.save
     )
     plt.show()
 
 def register(subparsers):
-    parser = subparsers.add_parser(
-        "trend",
-        help="An example subcommand",
-    )
-    parser.add_argument(
-        "dirname",
-        help="Name of the directory of data to analyze.")
-    parser.add_argument(
-        "model",
-        help="Model to fit lines.")
-    parser.add_argument(
-        "--sigmaleft",
-        type=float,
-        default=1.5,
-        help="Number of sigma to fit left.")
-    parser.add_argument(
-        "--sigmaright",
-        type=float,
-        default=1.5,
-        help="Number of sigma to fit right.")
-    parser.add_argument(
-        "--W",
-        type=float,
-        default=26.,
-        help="W-value of  the gas. Default is 26 eV for Argon.")
-    parser.add_argument(
-        "--capacity",
-        type=float,
-        default=1e-12,
-        help="Value of the capacity of the circuit. Default to 1e-12 F.")
+    parser = subparsers.add_parser("trend", description=__description__)
 
+    add_foldername(parser)
+    add_singlemodel(parser)
+    add_fit_options(parser)
+    add_source_options(parser)
+    add_detector_options(parser)
+    add_output_options(parser)
     parser.set_defaults(func=run)
