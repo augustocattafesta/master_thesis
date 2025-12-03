@@ -1,16 +1,31 @@
-
+import argparse
 from aptapy.plotting import plt
 
 from analysis.analyze import analyze_file
 from analysis.fileio import load_class
+from analysis.app import (
+    add_detector_options,
+    add_fit_options,
+    add_multiplemodel,
+    add_output_options,
+    add_pulsefile,
+    add_source_options,
+    add_sourcefile
+)
+
+
+__description__ = """
+    Analyze a calibration pulses file to determine the calibration parameters of the readout
+    circuit. If a source data file (spectrum) is given, the emission line(s) is fitted using the
+    given model. If multiple models are given, the fit is done with each model. """
+
 
 def run(args):
-    # call your function with positional + keyword args
     models_arg = args.model
     if isinstance(models_arg, str):
-        models_arg = [models_arg]  # make sure it's a list
-
+        models_arg = [models_arg] 
     models = [load_class(m) for m in models_arg]
+
     analyze_file(
         args.pulsefile,
         args.sourcefile,
@@ -18,75 +33,26 @@ def run(args):
         args.W,
         args.capacity,
         args.e_peak,
-        # pass additional kwargs here if needed
-        num_sigma_left=args.sigmaleft,
-        num_sigma_right=args.sigmaright,
+        num_sigma_left=args.numsigmaleft,
+        num_sigma_right=args.numsigmaright,
         xmin=args.xmin,
         xmax=args.xmax,
+        absolute_sigma=args.absolutesigma,
         plot=args.plot,
         save=args.save
     )
     plt.show()
     
 
-def register(subparsers):
-    parser = subparsers.add_parser(
-        "single",
-        help="An example subcommand",
-    )
-    parser.add_argument(
-        "pulsefile",
-        help="Name of the pulse file")
-    parser.add_argument(
-        "--model",
-        default="Gaussian",
-        nargs='+',
-        help="Model to fit lines.")
-    parser.add_argument(
-        "--sourcefile",
-        default=None,
-        help="Name of the directory of data to analyze.")
-    parser.add_argument(
-        "--sigmaleft",
-        type=float,
-        default=1.5,
-        help="Number of sigma to fit left.")
-    parser.add_argument(
-        "--sigmaright",
-        type=float,
-        default=1.5,
-        help="Number of sigma to fit right.")
-    parser.add_argument(
-        "--xmin",
-        type=float,
-        default=float("-inf"),
-        help="xmin.")
-    parser.add_argument(
-        "--xmax",
-        type=float,
-        default=float("inf"),
-        help="xmax.")
-    parser.add_argument(
-        "--W",
-        type=float,
-        default=26.,
-        help="W-value of  the gas. Default is 26 eV for Argon.")
-    parser.add_argument(
-        "--capacity",
-        type=float,
-        default=1e-12,
-        help="Value of the capacity of the circuit. Default to 1e-12 F.")
-    parser.add_argument(
-        "--e_peak",
-        type=float,
-        default=5.9,
-        help="Energy of the main peak in keV")
-    parser.add_argument(
-        "--plot",
-        action="store_true",
-        help="")
-    parser.add_argument(
-        "--save",
-        action="store_true",
-        help="")
+def register(subparsers: argparse._SubParsersAction):
+    parser = subparsers.add_parser("single", description=__description__)
+    
+    add_pulsefile(parser)
+    add_sourcefile(parser)
+    add_multiplemodel(parser)
+    add_fit_options(parser)
+    add_source_options(parser)
+    add_detector_options(parser)
+    add_output_options(parser)
+    
     parser.set_defaults(func=run)

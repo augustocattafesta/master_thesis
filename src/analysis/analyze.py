@@ -128,10 +128,9 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
 
     Arguments
     ----------
-    pulse_file : Union[str, Path]
-        Path of the calibration pulses file.
-    source_file : Union[str, Path]
-        Path of the source file.
+    folder_name : str
+        Name of the folder to analyze. Please note that only the path after the data folder path
+        must be given. The path is automatically added during the analysis.
     models : Tuple[AbstractFitModel]
         Model(s) to fit the source emission line.
     W : float
@@ -352,50 +351,112 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
 
 
 def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity: float,
-                  e_peak, plot: bool = False, **kwargs) -> Tuple[ArrayLike, ArrayLike]:
-    folder_path = ANALYSIS_DATA / folder_name
-    folder_data = DataFolder(folder_path)
-    pulse = PulsatorFile(folder_data.pulse_files[0])
-    line_pars = pulse.analyze_pulse()
-    _, res, g = analyze_folder(folder_name, [model], W, capacity, e_peak, plot, **kwargs)
+                  e_peak, plot: bool = False, save: bool = False,
+                  **kwargs) -> Tuple[ArrayLike, ArrayLike]:
+    """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
+    multiple calibration files are present, the first in alphabetical order is taken. For each
+    spectrum a fit of the emission line(s) is done using the model(s) specified. If multiple models
+    are given, the fit is done using both of them, and for each result the energy resolution and
+    the gain is calculated. 
+
+    Arguments
+    ----------
+    folder_name : str
+        Name of the folder to analyze. Please note that only the path after the data folder path
+        must be given. The path is automatically added during the analysis.
+    model : AbstractFitModel
+        Model to fit the source emission line.
+    W : float
+        W-value of the detector gas.
+    capacity : float
+        Capacity of the capacitance of the readout circuit of the detector.
+    e_peak : float
+        Energy of the main emission line of the source (in keV).
+    plot : bool, optional
+        If True, plot the figures of the analysis, by default False.
+    save : bool, optional
+        If True, save a log file and plots of the analysis, by default False.
+    **kwargs : dict
+        Refer to `fileio.SourceFile.fit`.
+
+    Returns
+    -------
+    g, res, time, drift_voltage : ArrayLike
+        Returns arrays with the gain, the energy resolution, time and drift voltage.
+    """
+    # Start logging
+    if save:
+        logger.enable("analyze")
+        log_folder = logging.start_logging()
+        logging.log_args()
+    else:
+        logger.disable("analyze")
+    # Open the folder and select the first calibration file, we need the fit parameters for the
+    # analysis of the gain using the escape peak
+    data_folder = DataFolder(ANALYSIS_DATA / folder_name)
+    pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
+    # Analyzing, without plotting and saving, that is done in analyze_folder. Also no need to log
+    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
+    plt.close(pulse_fig)
+    plt.close(line_fig)
+    # Analyze the folder and take gain and resolution
+    _, res, g = analyze_folder(folder_name, [model], W, capacity, e_peak, plot, save, **kwargs)
     res = res[0]
     g = g[0]
-    source_files = [SourceFile(_s) for _s in folder_data.source_files]
-    real_times = np.array([SourceFile(_s).real_time for _s in folder_data.source_files])
-    drift_voltage = np.array([SourceFile(_s).drift_voltage for _s in folder_data.source_files])
+    # Extracting real times and drift voltage
+    logger.info("SOURCE FILES ANALYZED FOR THE ESCAPE PEAK:")
+    source_files = [SourceFile(_s) for _s in data_folder.source_files]
+    real_times = np.array([_source.real_time for _source in source_files])
+    drift_voltage = np.array([_source.drift_voltage for _source in source_files])
+    # Cumulating time for consecutive data
     time = real_times.cumsum()
-
-
-    results = [source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
-                          num_sigma_right=1.5) for source in source_files]
+    # Analyze the escape peak with a single gaussian to estimate the gain
+    results = [_source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
+                          num_sigma_right=1.5) for _source in source_files]
     pars, _ = zip(*results)
     pars = np.stack(pars)
     line_adc = pars[:, 1]
     g_esc = gain(W, capacity, line_adc, line_pars, 3.)
-    plt.figure("Gain vs time")
-    plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
-    plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt='.', label="Esc. Peak")
-    plt.xlabel("Time [s]")
-    plt.ylabel("Gain")
-    plt.legend()
-
-    plt.figure("Resolution vs time")
-    plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
-    plt.xlabel("Time [s]")
-    plt.ylabel("FWHM/E")
-    plt.legend()
-
-    plt.figure("Gain vs drift")
-    plt.errorbar(drift_voltage, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
-    plt.xlabel("Drift voltage [v]")
-    plt.ylabel("Gain")
-    plt.legend()
-
-    plt.figure("Resolution vs drift")
-    plt.errorbar(drift_voltage, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
-    plt.xlabel("Drift voltage [v]")
-    plt.ylabel("Gain")
-    plt.legend()
-    print(drift_voltage)
-    print(res)
-    return time, g
+    # Plotting and saving
+    if plot or save:
+        fig = plt.figure("Gain vs time")
+        plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
+        plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt='.', label="Esc. Peak")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Gain")
+        plt.legend()
+        if save:
+            plt.savefig(log_folder / f"gain_time_{folder_name}.pdf", format="pdf")
+        if not plot:
+            plt.close(fig)
+    if plot or save:
+        fig = plt.figure("Resolution vs time")
+        plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
+        plt.xlabel("Time [s]")
+        plt.ylabel("FWHM/E")
+        plt.legend()
+        if save:
+            plt.savefig(log_folder / f"resolution_time_{folder_name}.pdf", format="pdf")
+        if not plot:
+            plt.close(fig)
+    if plot or save:
+        fig = plt.figure("Gain vs drift")
+        plt.errorbar(drift_voltage, unumpy.nominal_values(g), unumpy.std_devs(g), fmt='.', label=r'K$\alpha$')
+        plt.xlabel("Drift voltage [v]")
+        plt.ylabel("Gain")
+        plt.legend()
+        if save:
+            plt.savefig(log_folder / f"gain_drift_{folder_name}.pdf", format="pdf")
+        if not plot:
+            plt.close(fig)
+    if plot or save:
+        fig = plt.figure("Resolution vs drift")
+        plt.errorbar(drift_voltage, unumpy.nominal_values(res), unumpy.std_devs(res), fmt='.', label=r'K$\alpha$')
+        plt.xlabel("Drift voltage [v]")
+        plt.ylabel("Gain")
+        plt.legend()
+        if save:
+            plt.savefig(log_folder / f"resolution_drift_{folder_name}.pdf", format="pdf")
+        if not plot:
+            plt.close(fig)
+    return g, res, time, drift_voltage

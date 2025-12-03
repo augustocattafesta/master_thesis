@@ -71,8 +71,16 @@ class DataFolder:
         def numeric_sort_key(p: Path):
             numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
             return numbers[-1]  # sort by the last number
+        
+        def custom_sort_key(p: Path):
+            if "trend" in p.stem:
+                # Se contiene "trend", usa l'ordinamento numerico
+                return numeric_sort_key(p)
+            else:
+                # Altrimenti, usa l'ordinamento standard per nome del file (stringa)
+                return p.name
 
-        return sorted(filtered, key=lambda p: p.name)
+        return sorted(filtered, key=custom_sort_key)
 
 
     @property
