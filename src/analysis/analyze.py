@@ -11,14 +11,14 @@ from aptapy.plotting import last_line_color, plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from . import ANALYSIS_DATA, log
+from . import ANALYSIS_DATA
 from .fileio import DataFolder, PulsatorFile, SourceFile
-from .log import logger
+from .log import logger, LogManager
 from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
 
 
 @line_forest(KALPHA - AR_ESCAPE, KBETA - AR_ESCAPE)
-class ArEscape(aptapy.models.GaussianForest):
+class ArEscape(aptapy.models.GaussianForestBase):
     pass
 
 def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
@@ -58,16 +58,17 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         gain are returned.
     """
     # Start the logging
+    log = LogManager()
     if save:
         logger.enable("analyze")
         log_folder = log.start_logging()
-        log_main = log.log_main
-        log_fit = log.log_fit
+        log_main = log.log_main()
+        log_fit = log.log_fit()
         log.log_args()
     else:
         logger.disable("analyze")
-        log_main = log.logger
-        log_fit = log.logger
+        log_main = logger
+        log_fit = logger
     # Pulse file analysis and plotting
     pulse_data = PulsatorFile(Path(pulse_file))
     line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
@@ -97,7 +98,7 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
             # Fit the spectrum in the given range
             pars, fit_model = source_data.fit(model, **kwargs)
-            if issubclass(model, aptapy.models.GaussianForest):
+            if issubclass(model, aptapy.models.GaussianForestBase):
                 line_adc = fit_model.energies[0] / pars[2]
                 sigma = pars[3]
             elif issubclass(model, aptapy.models.Gaussian):
@@ -166,16 +167,17 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
         Returns arrays with the voltage, the energy resolution and the gain of each spectrum file.
     """
     # Start the logging
+    log = LogManager()
     if save:
         logger.enable("analyze")
         log_folder = log.start_logging()
-        log_main = log.log_main
-        log_fit = log.log_fit
+        log_main = log.log_main()
+        log_fit = log.log_fit()
         log.log_args()
     else:
         logger.disable("analyze")
-        log_main = log.logger
-        log_fit = log.logger
+        log_main = logger
+        log_fit = logger
     # Open the folder and select the first calibration file
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
@@ -221,7 +223,7 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
             log.log_fit_results(source.file_path.name, fit_models[_i])
 
         # Order and number of parameters differ based on the model
-        if issubclass(model, aptapy.models.GaussianForest):
+        if issubclass(model, aptapy.models.GaussianForestBase):
             line_adc = fit_models[0].energies[0] / pars[:, 2]
             sigma = pars[:, 3]
         elif issubclass(model, aptapy.models.Gaussian):
@@ -311,6 +313,7 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
         Returns arrays with the voltage, the energy resolution and the gain of each spectrum file.
     """
     # Start logging
+    log = LogManager()
     if save:
         logger.enable("analyze")
         log_folder = log.start_logging()
@@ -411,6 +414,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
         Returns arrays with the gain, the energy resolution, time and drift voltage.
     """
     # Start logging
+    log = LogManager()
     if save:
         logger.enable("analyze")
         log_folder = log.start_logging()

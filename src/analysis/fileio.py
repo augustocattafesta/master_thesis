@@ -11,7 +11,7 @@ import numpy as np
 import uncertainties
 from aptapy.hist import Histogram1d
 from aptapy.modeling import AbstractFitModel
-from aptapy.models import Fe55Forest, Gaussian, GaussianForest, Line
+from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
@@ -166,11 +166,11 @@ class SourceFile(FileBase):
         return corr_pars
 
     def fit(self, model, **kwargs):
-        if issubclass(model, Gaussian) or issubclass(model, GaussianForest):
+        if issubclass(model, Gaussian) or issubclass(model, GaussianForestBase):
             model_instance = model()
             fitstatus = model_instance.fit_iterative(self.hist, **kwargs)
         else:
-            raise TypeError("Choose between Gaussian or GaussianForest child class")
+            raise TypeError("Choose between Gaussian or GaussianForestBase child class")
 
         logger.info(self.file_path.name)
         corr_pars = uncertainties.correlated_values(model_instance.parameter_values(),
