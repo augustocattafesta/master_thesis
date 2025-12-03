@@ -1,3 +1,6 @@
+"""Module to handle logging interface.
+"""
+
 import datetime
 import inspect
 import pathlib
