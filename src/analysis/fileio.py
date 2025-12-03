@@ -16,7 +16,7 @@ from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from .logging import logger
+from .log import logger
 from .utils import find_peaks_iterative
 
 

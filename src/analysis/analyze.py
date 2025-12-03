@@ -11,9 +11,9 @@ from aptapy.plotting import last_line_color, plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from . import ANALYSIS_DATA, logging
+from . import ANALYSIS_DATA, log
 from .fileio import DataFolder, PulsatorFile, SourceFile
-from .logging import logger
+from .log import logger
 from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
 
 
@@ -60,18 +60,18 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
     # Start the logging
     if save:
         logger.enable("analyze")
-        log_folder = logging.start_logging()
-        log_main = logging.log_main
-        log_fit = logging.log_fit
-        logging.log_args()
+        log_folder = log.start_logging()
+        log_main = log.log_main
+        log_fit = log.log_fit
+        log.log_args()
     else:
         logger.disable("analyze")
-        log_main = logging.logger
-        log_fit = logging.logger
+        log_main = log.logger
+        log_fit = log.logger
     # Pulse file analysis and plotting
     pulse_data = PulsatorFile(Path(pulse_file))
     line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
-    logging.log_pulse_results(line_pars)
+    log.log_pulse_results(line_pars)
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
@@ -113,7 +113,7 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
             log_main.info(f"{'gain:':<12} {g[i]}")
             log_main.info(f"{'resolution:':<12} {res[i]} %\n")
             log_fit.info("FIT RESULTS:\n")
-            logging.log_fit_results(source_data.file_path.name, fit_model)
+            log.log_fit_results(source_data.file_path.name, fit_model)
             # Source file plotting and saving
             if plot or save:
                 plt.figure(f"{source_data.file_path.name}")
@@ -168,20 +168,20 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
     # Start the logging
     if save:
         logger.enable("analyze")
-        log_folder = logging.start_logging()
-        log_main = logging.log_main
-        log_fit = logging.log_fit
-        logging.log_args()
+        log_folder = log.start_logging()
+        log_main = log.log_main
+        log_fit = log.log_fit
+        log.log_args()
     else:
         logger.disable("analyze")
-        log_main = logging.logger
-        log_fit = logging.logger
+        log_main = log.logger
+        log_fit = log.logger
     # Open the folder and select the first calibration file
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
     # Analyzing, plotting and saving the calibration file
     line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
-    logging.log_pulse_results(line_pars)
+    log.log_pulse_results(line_pars)
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
@@ -218,7 +218,7 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
         # Log fit results in another log file
         log_fit.info(f"FIT RESULTS FOLDER: {folder_name}\n")
         for _i, source in enumerate(source_data):
-            logging.log_fit_results(source.file_path.name, fit_models[_i])
+            log.log_fit_results(source.file_path.name, fit_models[_i])
 
         # Order and number of parameters differ based on the model
         if issubclass(model, aptapy.models.GaussianForest):
@@ -313,8 +313,8 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     # Start logging
     if save:
         logger.enable("analyze")
-        log_folder = logging.start_logging()
-        logging.log_args()
+        log_folder = log.start_logging()
+        log.log_args()
     else:
         logger.disable("analyze")
     # Create empty arrays to store the results of the analysis of each folder
@@ -413,8 +413,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     # Start logging
     if save:
         logger.enable("analyze")
-        log_folder = logging.start_logging()
-        logging.log_args()
+        log_folder = log.start_logging()
+        log.log_args()
     else:
         logger.disable("analyze")
     # Open the folder and select the first calibration file, we need the fit parameters for the
