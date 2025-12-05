@@ -11,8 +11,8 @@ from analysis.app import (
     add_output_options,
     add_singlemodel,
     add_source_options,
+    load_class,
 )
-from analysis.fileio import load_class
 
 __description__ = """
     Analyze the files in different folders and compare them. In particular, the gain and the
@@ -26,7 +26,7 @@ def run(args):
     compare_folders(
         args.foldernames,
         load_class(args.model),
-        args.W,
+        args.w,
         args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed

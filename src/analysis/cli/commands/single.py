@@ -11,8 +11,8 @@ from analysis.app import (
     add_pulsefile,
     add_source_options,
     add_sourcefile,
+    load_class,
 )
-from analysis.fileio import load_class
 
 __description__ = """
     Analyze a calibration pulses file to determine the calibration parameters of the readout
@@ -30,7 +30,7 @@ def run(args):
         args.pulsefile,
         args.sourcefile,
         models,
-        args.W,
+        args.w,
         args.capacity,
         args.e_peak,
         num_sigma_left=args.numsigmaleft,

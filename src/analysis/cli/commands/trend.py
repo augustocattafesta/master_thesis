@@ -10,8 +10,8 @@ from analysis.app import (
     add_output_options,
     add_singlemodel,
     add_source_options,
+    load_class,
 )
-from analysis.fileio import load_class
 
 __description__ = """
     Analyze a folder containing calibration pulse files and source data (spectrum) files. If
@@ -26,7 +26,7 @@ def run(args):
     analyze_trend(
         args.foldername,
         load_class(args.model),
-        args.W,
+        args.w,
         args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed

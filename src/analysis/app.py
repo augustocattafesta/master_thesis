@@ -1,18 +1,40 @@
-import argparse
+
+import importlib
+import inspect
+import sys
+from argparse import ArgumentParser
 
 from . import ANALYSIS_DATA, ANALYSIS_RESULTS
 from .utils import KALPHA
 
 
-class ArgumentParser(argparse.ArgumentParser):
-    def __init__(self, prog: str = None, usage: str = None, description: str = None) -> None:
-        """Constructor.
-        """
-        super().__init__(prog, usage, description)
+def load_class(class_path: str):
+    """
+    Load a class from a string.
+    Supports:
+      - "ClassName" (local or global)
+      - "module.ClassName"
+      - "package.module.ClassName"
+    """
 
-    def add_pulsefile(self) -> None:
-        self.add_argument("pulsefile", type=str,
-                          help="Path of the calibration pulses file.")
+    # Case 1: "ClassName" – search locals, globals, and all loaded modules
+    if "." not in class_path:
+        frame = inspect.currentframe().f_back
+        # Search locals first
+        if class_path in frame.f_locals:
+            return frame.f_locals[class_path]
+        # Then globals
+        if class_path in frame.f_globals:
+            return frame.f_globals[class_path]
+        # Search through all loaded modules
+        for module in sys.modules.values():
+            if module and hasattr(module, class_path):
+                return getattr(module, class_path)
+        raise ImportError(f"Class '{class_path}' not found in locals, globals, or loaded modules.")
+    # Case 2: dotted path → module + class
+    module_name, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 def add_pulsefile(parser: ArgumentParser) -> None:
@@ -69,7 +91,7 @@ def add_source_options(parser: ArgumentParser) -> None:
 
 def add_detector_options(parser: ArgumentParser) -> None:
     group = parser.add_argument_group("detector", "Detector options")
-    group.add_argument("--W", type=float, default=26.,
+    group.add_argument("--w", type=float, default=26.,
                        help="W-value of the gas inside the detctor. Argon is 26 eV. Default is 26\
                           eV.")
     group.add_argument("--capacity", type=float, default=1e-12,

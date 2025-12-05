@@ -13,8 +13,8 @@ from analysis.app import (
     add_multiplemodel,
     add_output_options,
     add_source_options,
+    load_class,
 )
-from analysis.fileio import load_class
 
 __description__ =     """
     Analyze a folder containing calibration pulse files and source data (spectrum) files. If
@@ -34,7 +34,7 @@ def run(args):
     analyze_folder(
         args.foldername,
         models,
-        args.W,
+        args.w,
         args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed
