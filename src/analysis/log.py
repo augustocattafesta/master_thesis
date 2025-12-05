@@ -7,9 +7,7 @@ import pathlib
 import re
 import sys
 
-import aptapy.modeling
 import loguru
-import numpy as np
 from loguru import logger
 
 from . import ANALYSIS_RESULTS
@@ -46,7 +44,7 @@ class LogManager:
     _LOG_FOLDER = None
     _log_main = None
     _log_fit = None
-    _null_logger = logger.bind()
+    NULL_LOGGER = logger.bind()
 
     @classmethod
     def log_main(cls) -> None | loguru.Logger:
@@ -98,7 +96,7 @@ class LogManager:
         """Log all the arguments and the keyword arguments of the current method execution in the
         main log file.
         """
-        log = cls._log_main or cls._null_logger
+        log = cls._log_main or cls.NULL_LOGGER
         frame = inspect.currentframe().f_back
         info = inspect.getargvalues(frame)
         args_dict = {name: info.locals[name] for name in info.args}
@@ -109,32 +107,3 @@ class LogManager:
 
         log.info("FUNCTION ARGUMENTS:")
         log.info(f"{args_dict}\n")
-
-    @classmethod
-    def log_pulse_results(cls, line_pars: np.ndarray) -> None:
-        """Log the results of the calibration fit in the main log file.
-
-        Parameters
-        ----------
-        line_pars : np.ndarray
-            Parameters obtained from the calibration fit.
-        """
-        log = cls._log_main or cls._null_logger
-        log.info("PULSE CALIBRATION RESULTS:")
-        log.info(f"{'m:':<12} {line_pars[0]} ADC/mV")
-        log.info(f"{'q:':<12} {line_pars[1]} ADC\n")
-
-    @classmethod
-    def log_fit_results(cls, file_name: str, fit_model: aptapy.modeling.AbstractFitModel) -> None:
-        """Log the results of the fit of a spectrum file in the fit log file.
-
-        Parameters
-        ----------
-        file_name : str
-            Name of the spectrum file to log.
-        fit_model : aptapy.modeling.AbstractFitModel
-            Fit model returned after the analysis of the spectrum file.
-        """
-        log = cls._log_fit or cls._null_logger
-        log.info(f"FILE: {file_name}")
-        log.info(f"{str(fit_model)}\n")

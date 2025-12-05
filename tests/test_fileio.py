@@ -1,15 +1,15 @@
-"""Test FileIO
+"""Test for the module fileio.
 """
 
 import aptapy.models
 import numpy as np
 from aptapy.plotting import plt
 
-from analysis.fileio import PulsatorFile, SourceFile, output_log
+from analysis.fileio import PulsatorFile, SourceFile
 
 
 def test_source_file(datadir):
-    file_path = datadir / "live_data_chip18112025_D1000_B370.mca"
+    file_path = datadir / "folder0/live_data_chip18112025_D1000_B370.mca"
     source = SourceFile(file_path)
     real_time = source.real_time
 
@@ -17,13 +17,13 @@ def test_source_file(datadir):
     assert np.equal(real_time, 163.800000)
 
 def test_pulse_file(datadir):
-    file_path = datadir / "live_data_chip18112025_ci5-10-15_hvon.mca"
+    file_path = datadir / "folder0/live_data_chip18112025_ci5-10-15_hvon.mca"
     pulses = PulsatorFile(file_path)
 
     assert np.array_equal(pulses.voltage, [5, 10, 15])
 
-def test_new_fit(datadir):
-    file_path = datadir / "live_data_chip18112025_D1000_B370.mca"
+def test_fit(datadir):
+    file_path = datadir / "folder0/live_data_chip18112025_D1000_B370.mca"
     source = SourceFile(file_path)
     plt.figure("Test Gaussian")
     _, model = source.fit(aptapy.models.Gaussian, xmin=50, xmax=80)
@@ -42,9 +42,3 @@ def test_new_fit(datadir):
     source.hist.plot()
     model.plot(fit_output=True)
     plt.legend()
-
-
-def test_log_caller(a, b, c, **kwargs):
-    print(output_log())
-
-test_log_caller(1, 2, 3, x=10)

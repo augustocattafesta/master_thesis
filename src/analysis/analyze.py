@@ -2,7 +2,6 @@
 """
 
 from pathlib import Path
-from typing import Tuple, Union
 
 import aptapy.models
 import numpy as np
@@ -13,7 +12,7 @@ from uncertainties import unumpy
 
 from . import ANALYSIS_DATA
 from .fileio import DataFolder, PulsatorFile, SourceFile
-from .log import logger, LogManager
+from .log import LogManager, logger
 from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
 
 
@@ -21,10 +20,10 @@ from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
 class ArEscape(aptapy.models.GaussianForestBase):
     pass
 
-def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
-                 models: Tuple[AbstractFitModel], W: float, capacity: float,
+def analyze_file(pulse_file: str | Path, source_file: str | Path,
+                 models: tuple[AbstractFitModel], w: float, capacity: float,
                  e_peak: float, plot: bool = False, save: bool = False,
-                 **kwargs) -> Union[ArrayLike, Tuple[float, float]]:
+                 **kwargs) -> ArrayLike | tuple[float, float]:
     """Analyze a calibration pulses file to determine the calibration parameters of the readout
     circuit. If a source data file (spectrum) is given, the emission line(s) is fitted using the
     given model. If multiple models are given, the fit is done with each model. 
@@ -57,6 +56,8 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         returned. If also a source file is given, the results of the energy resolution and the
         gain are returned.
     """
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
     # Start the logging
     log = LogManager()
     if save:
@@ -71,8 +72,7 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         log_fit = logger
     # Pulse file analysis and plotting
     pulse_data = PulsatorFile(Path(pulse_file))
-    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
-    log.log_pulse_results(line_pars)
+    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
@@ -87,8 +87,8 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
         g = np.zeros(shape=len(models), dtype=object)
         res = np.zeros(shape=len(models), dtype=object)
         # Caching the initial values of xmin and xmax
-        xmin_init = kwargs["xmin"]
-        xmax_init = kwargs["xmax"]
+        xmin_init = kwargs.get("xmin", float("-inf"))
+        xmax_init = kwargs.get("xmax", float("inf"))
         for i, model in enumerate(models):
             # Without a proper initialization of xmin and xmax the fit doesn't converge
             x_peak = source_data.hist.bin_centers()[source_data.hist.content.argmax()]
@@ -96,25 +96,24 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
                 kwargs.update(xmin=x_peak - 0.5 * x_peak)
             if xmax_init == float("inf"):
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
-            # Fit the spectrum in the given range
+            # Fit the spectrum in the given range and log
+            log_fit.info("FIT RESULTS:\n")
             pars, fit_model = source_data.fit(model, **kwargs)
-            if issubclass(model, aptapy.models.GaussianForestBase):
-                line_adc = fit_model.energies[0] / pars[2]
-                sigma = pars[3]
+            if issubclass(model, aptapy.models.Fe55Forest):
+                line_adc = fit_model.energies[0] / pars[1]
+                sigma = pars[2]
             elif issubclass(model, aptapy.models.Gaussian):
                 line_adc = pars[1]
                 sigma = pars[2]
             else:
                 raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-            g[i] = gain(W, capacity, line_adc, line_pars, e_peak)
+            g[i] = gain(w, capacity, line_adc, line_pars, e_peak)
             res[i] = energy_resolution(line_adc, sigma)
             # Results logging
             log_main.info("\nSOURCE FILE RESULTS:")
             log_main.info(f"{'model:':<12} {fit_model.name()}")
             log_main.info(f"{'gain:':<12} {g[i]}")
             log_main.info(f"{'resolution:':<12} {res[i]} %\n")
-            log_fit.info("FIT RESULTS:\n")
-            log.log_fit_results(source_data.file_path.name, fit_model)
             # Source file plotting and saving
             if plot or save:
                 plt.figure(f"{source_data.file_path.name}")
@@ -127,14 +126,14 @@ def analyze_file(pulse_file: Union[str, Path], source_file: Union[str, Path],
                 if save:
                     plt.savefig(log_folder / source_data.file_path.name, format='pdf')
                 if not plot:
-                    plt.close("all")      
+                    plt.close("all")
         return res, g
     return line_pars
 
 
-def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, capacity: float,
+def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, capacity: float,
                    e_peak: float, plot: bool = False, save: bool = False,
-                   **kwargs) -> Tuple[ArrayLike, ArrayLike, ArrayLike]:
+                   **kwargs) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the model(s) specified. If multiple models
@@ -166,6 +165,8 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
     voltage, res, g : ArrayLike
         Returns arrays with the voltage, the energy resolution and the gain of each spectrum file.
     """
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
     # Start the logging
     log = LogManager()
     if save:
@@ -180,10 +181,9 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
         log_fit = logger
     # Open the folder and select the first calibration file
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
-    pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
+    pulse_data = data_folder.pulse_data[0]
     # Analyzing, plotting and saving the calibration file
-    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
-    log.log_pulse_results(line_pars)
+    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
@@ -192,16 +192,18 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
         line_fig.savefig(log_folder / "cal_fit.pdf", format="pdf")
     # Source files analysis
     log_main.info("SOURCE FILE(S) ANALYZED:")
-    source_data = [SourceFile(_s) for _s in data_folder.source_files]
+    source_data = data_folder.source_data
     voltage = np.array([file.voltage for file in source_data])
     # Create empty arrays for the results
     g = np.zeros(shape=len(models), dtype=object)
     res = np.zeros(shape=len(models), dtype=object)
     # Caching the initial values of xmin and xmax
-    xmin_init = kwargs["xmin"]
-    xmax_init = kwargs["xmax"]
+    xmin_init = kwargs.get("xmin", float("-inf"))
+    xmax_init = kwargs.get("xmax", float("inf"))
     # Iterating on the given models for the spectrum fit
     for i, model in enumerate(models):
+        # Log fit results in another log file
+        log_fit.info(f"FIT RESULTS FOLDER: {folder_name}\n")
         results = []
         for source in source_data:
             # Without a proper initialization of xmin and xmax the fit doesn't converge
@@ -214,25 +216,20 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
             results.append(source.fit(model, **kwargs))
         log_main.info("")
         # Collect fit parameters and fit models from the results
-        pars, fit_models = zip(*results)
+        pars, fit_models = zip(*results, strict=True)
         pars = np.stack(pars)
         fit_models = list(fit_models)
-        # Log fit results in another log file
-        log_fit.info(f"FIT RESULTS FOLDER: {folder_name}\n")
-        for _i, source in enumerate(source_data):
-            log.log_fit_results(source.file_path.name, fit_models[_i])
-
         # Order and number of parameters differ based on the model
-        if issubclass(model, aptapy.models.GaussianForestBase):
-            line_adc = fit_models[0].energies[0] / pars[:, 2]
-            sigma = pars[:, 3]
+        if issubclass(model, aptapy.models.Fe55Forest):
+            line_adc = fit_models[0].energies[0] / pars[:, 1]
+            sigma = pars[:, 2]
         elif issubclass(model, aptapy.models.Gaussian):
             line_adc = pars[:, 1]
             sigma = pars[:, 2]
         else:
             raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
         # Calculate gain and energy resolution and store them in the previously created arrays
-        g[i] = gain(W, capacity, line_adc, line_pars, KALPHA)
+        g[i] = gain(w, capacity, line_adc, line_pars, KALPHA)
         res[i] = energy_resolution(line_adc, sigma)
         # Source files plotting and saving
         if plot or save:
@@ -275,14 +272,14 @@ def analyze_folder(folder_name: str, models: Tuple[AbstractFitModel], W: float, 
             output = np.array([voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), \
                            unumpy.nominal_values(res[i]), unumpy.std_devs(res[i])]).T
             header = "voltage [v], gain, s_gain, resolution, s_resolution"
-            np.savetxt(log_folder / f"results_{folder_name.split("/")[-1]}_{model.__name__}.txt", output,
-                       delimiter=",", header=header)
+            np.savetxt(log_folder / f"results_{folder_name.split("/")[-1]}_{model.__name__}.txt",
+                       output, delimiter=",", header=header)
     return voltage, res, g
 
 
-def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
+def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
                     capacity: float, e_peak: float, plot: bool = False, save: bool = False,
-                    **kwargs) -> Tuple[ArrayLike, ArrayLike]:
+                    **kwargs) -> tuple[ArrayLike, ArrayLike]:
     """Analyze the files in different folders and compare them. In particular, the gain and the
     energy resolution are calculated and plotted. The gain and the energy resolution are obtained
     with the script `analyze_folder`, using the model given to fit the emission line(s) in the
@@ -326,7 +323,7 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     g = np.zeros(shape=len(folder_names), dtype=object)
     # Analyze each folder and store the results
     for i, folder_name in enumerate(folder_names):
-        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], W, capacity, e_peak,
+        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], w, capacity, e_peak,
                                                   plot, save=save, **kwargs)
     # Plot the gain
     gain_fig = plt.figure("Gain comparison")
@@ -349,7 +346,7 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
             g[i][0] = np.append(g[i][0], np.min(g_350))
 
         plt.errorbar(voltage[i], unumpy.nominal_values(g[i][0]), unumpy.std_devs(g[i][0]), fmt="o",
-                    label=labels[folder_name])
+                    label=labels.get(folder_name, f"{str(folder_name)}"))
         # Fit the gain with an exponential function
         model = aptapy.models.Exponential()
         model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
@@ -379,9 +376,9 @@ def compare_folders(folder_names: Tuple[str], model: AbstractFitModel, W: float,
     # plt.legend()
 
 
-def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity: float,
+def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity: float,
                   e_peak, plot: bool = False, save: bool = False,
-                  **kwargs) -> Tuple[ArrayLike, ArrayLike]:
+                  **kwargs) -> tuple[ArrayLike, ArrayLike]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the given model. The gain and the
@@ -413,6 +410,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     g, res, time, drift_voltage : ArrayLike
         Returns arrays with the gain, the energy resolution, time and drift voltage.
     """
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
     # Start logging
     log = LogManager()
     if save:
@@ -424,37 +423,37 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
     # Open the folder and select the first calibration file, we need the fit parameters for the
     # analysis of the gain using the escape peak
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
-    pulse_data = PulsatorFile(Path(data_folder.pulse_files[0]))
+    pulse_data = data_folder.pulse_data[0]
     # Analyzing, without plotting and saving, that is done in analyze_folder. Also no need to log
-    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulse()
+    _, pulse_fig, line_fig = pulse_data.analyze_pulses()
     plt.close(pulse_fig)
     plt.close(line_fig)
     # Analyze the folder and take gain and resolution
-    _, res, g = analyze_folder(folder_name, [model], W, capacity, e_peak, plot, save, **kwargs)
+    _, res, g = analyze_folder(folder_name, [model], w, capacity, e_peak, plot, save, **kwargs)
     res = res[0]
     g = g[0]
     # Extracting real times and drift voltage
     logger.info("SOURCE FILES ANALYZED FOR THE ESCAPE PEAK:")
-    source_files = [SourceFile(_s) for _s in data_folder.source_files]
+    source_files = data_folder.source_data
     real_times = np.array([_source.real_time for _source in source_files])
     drift_voltage = np.array([_source.drift_voltage for _source in source_files])
     # Cumulating time for consecutive data
     time = real_times.cumsum()
     # Analyze the escape peak with a single gaussian to estimate the gain
-    results = [_source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
-                          num_sigma_right=1.5) for _source in source_files]
-    pars, _ = zip(*results)
-    pars = np.stack(pars)
-    line_adc = pars[:, 1]
-    g_esc = gain(W, capacity, line_adc, line_pars, 2.9)
+    # results = [_source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
+    #                       num_sigma_right=1.5) for _source in source_files]
+    # pars, _ = zip(*results)
+    # pars = np.stack(pars)
+    # line_adc = pars[:, 1]
+    # g_esc = gain(w, capacity, line_adc, line_pars, 2.9)
     # Plotting and saving
-    out_name = folder_name.split("/")[-1]
+    out_name = str(folder_name).rsplit('/', maxsplit=1)[-1]
     if plot or save:
         fig = plt.figure("Gain vs time")
         plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
                      label=r"K$\alpha$")
-        plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt=".",
-                     label="Esc. Peak")
+        # plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt=".",
+        #              label="Esc. Peak")
         plt.xlabel("Time [s]")
         plt.ylabel("Gain")
         plt.legend()
@@ -495,4 +494,4 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, W: float, capacity:
             plt.savefig(log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
-    return g, res, time, drift_voltage
+    return res, g, time, drift_voltage
