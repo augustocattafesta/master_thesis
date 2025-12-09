@@ -45,7 +45,7 @@ class LogYaml:
 
     @staticmethod
     def _clean_numpy_types(data):
-        """Converte ricorsivamente i tipi numerici NumPy (e simili) in float/int standard."""
+        """Recursively converts NumPy (and similar) numeric types to standard float/int."""
         if isinstance(data, dict):
             return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
         if isinstance(data, (list, tuple)):
