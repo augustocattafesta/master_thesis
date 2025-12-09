@@ -82,6 +82,7 @@ disable = [
   "too-many-instance-attributes",
   "too-many-locals",
   "use-dict-literal",
+  "duplicate-code",
   ]
 
 [tool.pylint.'BASIC']
