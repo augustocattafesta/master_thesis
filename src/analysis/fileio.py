@@ -222,4 +222,4 @@ def load_label(name: str):
             return None
 
     except FileNotFoundError:
-        pass
+        return None
