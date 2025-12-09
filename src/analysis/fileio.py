@@ -1,187 +1,158 @@
-"""FileIO
+"""Module to handle reading of different types of file and analyze specific type of signals.
 """
 
-import importlib
 import inspect
+import pathlib
 import re
-import sys
-from pathlib import Path
 
+import aptapy.modeling
 import numpy as np
 import uncertainties
+import yaml
 from aptapy.hist import Histogram1d
-from aptapy.modeling import AbstractFitModel
-from aptapy.models import Fe55Forest, Gaussian, GaussianForest, Line
+from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from .logging import logger
+from . import ANALYSIS_RESOURCES
 from .utils import find_peaks_iterative
 
 
-def load_class(class_path: str):
-    """
-    Load a class from a string.
-    Supports:
-      - "ClassName" (local or global)
-      - "module.ClassName"
-      - "package.module.ClassName"
-    """
-
-    # Case 1: "ClassName" – search locals, globals, and all loaded modules
-    if "." not in class_path:
-        frame = inspect.currentframe().f_back
-        # Search locals first
-        if class_path in frame.f_locals:
-            return frame.f_locals[class_path]
-        # Then globals
-        if class_path in frame.f_globals:
-            return frame.f_globals[class_path]
-        # Search through all loaded modules
-        for module in sys.modules.values():
-            if module and hasattr(module, class_path):
-                return getattr(module, class_path)
-        raise ImportError(f"Class '{class_path}' not found in locals, globals, or loaded modules.")
-    # Case 2: dotted path → module + class
-    module_name, class_name = class_path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
-    return getattr(module, class_name)
-
-
 class FileBase:
-    def __init__(self, file_path: Path):
+    """Load data from a file and define the path and the histogram.
+    """
+    def __init__(self, file_path: pathlib.Path):
         """Class constructor.
+
+        Arguments
+        ----------
+        file_path : pathlib.Path
+            Path of the file to open.
         """
         self.file_path = file_path
         self.hist = Histogram1d.from_amptek_file(file_path)
 
 
 class DataFolder:
-    def __init__(self, folder_path: Path):
+    """Load source files and calibration pulse files from a folder.
+    """
+    def __init__(self, folder_path: pathlib.Path):
+        """Class constructor.
+
+        Parameters
+        ----------
+        folder_path : pathlib.Path
+            Path of the folder to open.
+        """
         self.folder_path = folder_path
+        if not self.folder_path.exists():
+            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
+                                  Verify the path.")
         self.input_files = list(folder_path.iterdir())
+        self.pulse_data = [PulsatorFile(pulse_file_path) for pulse_file_path in self.pulse_files]
+        self.source_data = [SourceFile(source_file_path) for source_file_path in self.source_files]
 
     @property
     def source_files(self):
+        """Extract the source files from all the files of the directory and return a sorted list
+        of the files. If file names contain "trend{i}", the sorting is done numerically according
+        to the index {i}, otherwise it's done alphabetically.
+        """
         # Keep files containing _B<number>
         filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
 
-        # Sort by the last number in the filename
-        def numeric_sort_key(p: Path):
+        def numeric_sort_key(p: pathlib.Path):
+            """Sort the files with numerical order.
+            """
             numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
             return numbers[-1]  # sort by the last number
 
-        def custom_sort_key(p: Path):
+        def custom_sort_key(p: pathlib.Path):
+            """Define if the sorting is numerical or alphabetical.
+            """
             if "trend" in p.stem:
                 return numeric_sort_key(p)
             return p.name
 
         return sorted(filtered, key=custom_sort_key)
 
-
     @property
     def pulse_files(self):
+        """Extract the calibration pulse files from all the files of the directory.
+        """
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
                                                            _f.name,re.IGNORECASE) is not None]
 
 class SourceFile(FileBase):
-
+    """Class to analyze a source file and extract relevant quantities from the name of the file.
+    """
     @property
     def voltage(self) -> float:
+        """Back voltage of the detector extracted from the file name.
+        """
         match = re.search(r"B(\d+)", self.file_path.name)
         if match is not None:
             _voltage = float(match.group(1))
         else:
             raise ValueError("Incorrect file type or different name used.")
-
         return _voltage
 
     @property
     def drift_voltage(self) -> float:
+        """Drift voltage of the detector extracted from the file name.
+        """
         match = re.search(r"D(\d+)", self.file_path.name)
         if match is not None:
             _voltage = float(match.group(1))
         else:
             raise ValueError("Incorrect file type or different name used.")
-
         return _voltage
 
     @property
     def real_time(self):
+        """Real integration time of the histogram.
+        """
         with open(self.file_path, encoding="UTF-8") as input_file:
             real_time_str = input_file.readlines()[8]
         if real_time_str.split('-')[0].strip() == 'REAL_TIME':
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
 
-    def fit_line_forest(self, **kwargs):
-        if kwargs.get('xmin', float("-inf")) == float("-inf"):
-            mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
-            xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
-            xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
-        else:
-            xmin = kwargs["xmin"]
-            kwargs.pop("xmin")
-            xmax = kwargs["xmax"]
-            kwargs.pop("xmax")
-        model = Fe55Forest()
-        for _i in range(2):
-            fitstatus = model.fit(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
-            xmin = mu0 - kwargs.get("num_sigma_left", 2.) * model.sigma.value
-            xmax = mu0 + kwargs.get("num_sigma_right", 2.) * model.sigma.value
-        plt.figure(f"{self.voltage} Fe55Forest")
-        plt.title(f"{self.voltage} V Fe55Forest")
-        self.hist.plot()
-        # model.plot(fit_output=True)
-        label = f"Fe55Forest\nFWHM@5.9keV: {model.fwhm()}"
-        model.plot(label=label)
-        plt.xlim(model.default_plotting_range())
-        plt.legend()
-        corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
-        return corr_pars
+    def fit(self, model: aptapy.modeling.AbstractFitModel,
+            **kwargs) -> tuple[ArrayLike, aptapy.modeling.AbstractFitModel]:
+        """Fit the spectrum data.
 
-    def fit_line(self, **kwargs):
-        if kwargs.get('xmin') is None:
-            mu0 = self.hist.bin_centers()[self.hist.content.argmax()]
-            xmin = mu0 - kwargs.get('num_sigma_left', 2.) * np.sqrt(mu0)
-            xmax = mu0 + kwargs.get('num_sigma_right', 2.) * np.sqrt(mu0)
-        else:
-            xmin = kwargs["xmin"]
-            kwargs.pop("xmin")
-            xmax = kwargs["xmax"]
-            kwargs.pop("xmax")
-        model = Gaussian()
-        fitstatus = model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True,
-                                        **kwargs)
+        Parameters
+        ----------
+        model : aptapy.modeling.AbstractFitModel
+            Model class to fit the emission line(s). 
 
-        plt.figure(f"{self.voltage} Gaussian")
-        plt.title(f"{self.voltage} V Gaussian")
-        self.hist.plot()
-        model.plot(fit_output=True)
-        plt.xlim(model.default_plotting_range())
-        plt.legend()
-
-        corr_pars = uncertainties.correlated_values(model.parameter_values(), fitstatus.pcov)
-        return corr_pars
-
-    def fit(self, model, **kwargs):
-        if issubclass(model, Gaussian) or issubclass(model, GaussianForest):
+        Returns
+        -------
+        corr_pars, model_instance: tuple[ArrayLike, aptapy.modeling.AbstractFitModel]
+            Returns the fit parameters as correlated uncertainties.ufloat and the model instance
+            containing results of the fit.
+        """
+        if issubclass(model, Gaussian) or issubclass(model, GaussianForestBase):
             model_instance = model()
+            if issubclass(model, Fe55Forest):
+                model_instance.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
             fitstatus = model_instance.fit_iterative(self.hist, **kwargs)
         else:
-            raise TypeError("Choose between Gaussian or GaussianForest child class")
-
-        logger.info(self.file_path.name)
-        corr_pars = uncertainties.correlated_values(model_instance.parameter_values(),
+            raise TypeError("Choose between Gaussian or GaussianForestBase child class")
+        corr_pars = uncertainties.correlated_values(model_instance.free_parameter_values(),
                                                     fitstatus.pcov)
         return corr_pars, model_instance
 
 
 class PulsatorFile(FileBase):
-
+    """Class to analyze a calibration pulse file.
+    """
     @property
     def voltage(self) -> np.ndarray:
+        """Voltages of the pulses.
+        """
         match = re.search(r"ci([\d_-]+)(?=[^\d_-])", self.file_path.name, re.IGNORECASE)
         if match is not None:
             parts = [n for n in re.split(r"[-_]", match.group(1)) if n]  # <-- filter empty strings
@@ -193,39 +164,62 @@ class PulsatorFile(FileBase):
 
     @property
     def num_pulses(self) -> int:
+        """Number of pulses in the spectrum.
+        """
         return len(self.voltage)
 
-    def fit_pulse(self, xpeak: float, num_sigma: float = 2.) -> "AbstractFitModel":
-        xmin = xpeak - np.sqrt(xpeak)
-        xmax = xpeak + np.sqrt(xpeak)
-        model = Gaussian()
-        model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, num_sigma_left=num_sigma,
-                            num_sigma_right=num_sigma, absolute_sigma=True)
-        model.plot(fit_output=True)
+    def analyze_pulses(self) -> ArrayLike:
+        """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
+        Using the resulting position of the peaks, do a calibration fit with a Line model to
+        determine the calibration parameters of the spectrum.
 
-        return model
+        Returns
+        -------
+        line_pars, pulse_fig, line_fig : tuple[np.ndarray, Figure, Figure]
+            Returns fit parameters of the calibration fit and figures of the pulses and of the
+            calibration fit.
+        """
+        # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
 
-    def analyze_pulse(self, **kwargs) -> ArrayLike:
-        logger.info("PULSE FILE ANALYZED:")
-        logger.info(f"{self.file_path.name}\n")
-
-        fig = plt.figure(self.file_path.name)
+        pulse_fig = plt.figure(self.file_path.name)
         plt.title("Calibration pulses")
         self.hist.plot()
         xpeaks, _ = find_peaks_iterative(self.hist.bin_centers(),
                                                              self.hist.content, self.num_pulses)
-        models = [self.fit_pulse(xpeak, **kwargs) for xpeak in xpeaks]
-        mu = np.array([model.mu.ufloat() for model in models])
+        mu = np.zeros(shape=len(xpeaks), dtype=object)
+        for i, xpeak in enumerate(xpeaks):
+            peak_model = Gaussian()
+            xmin = xpeak - np.sqrt(xpeak)
+            xmax = xpeak + np.sqrt(xpeak)
+            peak_model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
+            mu[i] = peak_model.mu.ufloat()
+            peak_model.plot(fit_output=True)
         plt.legend()
 
-        line_fig = plt.figure("Calibration fit")
-        plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
         line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
         fitstatus = line_model.fit(self.voltage, unumpy.nominal_values(mu),
-                                   sigma=unumpy.std_devs(mu))
+                                   sigma=unumpy.std_devs(mu), absolute_sigma=True)
+        line_fig = plt.figure("Calibration fit")
+        plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
         line_model.plot(fit_output=True)
         plt.legend()
 
-        corr_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
+        line_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
+        return line_pars, pulse_fig, line_fig
 
-        return corr_pars, fig, line_fig
+
+def load_label(name: str):
+    yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
+    try:
+        with open(yaml_file_path, encoding="utf-8") as f:
+            yaml_file = yaml.safe_load(f)
+        functions = yaml_file["function"]
+        previous_frame = inspect.currentframe().f_back
+        label = functions.get(previous_frame.f_code.co_name, None)
+        try:
+            return label[name]
+        except (TypeError, KeyError):
+            return None
+
+    except FileNotFoundError:
+        return None

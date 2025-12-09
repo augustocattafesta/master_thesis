@@ -1,7 +1,6 @@
-"""Utils
+"""Module containing various methods to estimate physical quantities or find properties of a
+signal.
 """
-
-from typing import Tuple
 
 import numpy as np
 import scipy.signal
@@ -10,6 +9,7 @@ from aptapy.typing_ import ArrayLike
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 W_ARGON = 26.   # eV
+
 
 def weighted_energy(element: str, *lines: str) -> float:
     """Compute the intensity-weighted mean energy of specified X-ray lines of an element.
@@ -20,7 +20,6 @@ def weighted_energy(element: str, *lines: str) -> float:
     ----------
     element : str
         Atomic symbol of the element.
-
     lines : str
         Lines to consider in the weighted mean.
     
@@ -37,30 +36,26 @@ def weighted_energy(element: str, *lines: str) -> float:
 
 KALPHA = weighted_energy('Mn', 'Ka1', 'Ka2', 'Ka3') * 1e-3  # keV
 KBETA = weighted_energy('Mn', 'Kb1', 'Kb3', 'Kb5') * 1e-3   # keV
-
 AR_ESCAPE = weighted_energy("Ar", "Ka1", "Ka2", "Ka3", "Kb1", "Kb3") * 1e-3 # keV
 
 
 def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
-                            npeaks: int) -> Tuple[ArrayLike, ArrayLike]:
+                            npeaks: int) -> tuple[ArrayLike, ArrayLike]:
     """Find the position and height of a fixed number of peaks in a sample of data
 
     Arguments
     ---------
     xdata : ArrayLike,
         The x values of the sample.
-
     ydata : ArrayLike,
         The y values of the sample.
-
-    nlines : int,
+    npeaks : int,
         Maximum number of peaks to find in the sample.
 
     Returns
     -------
     xpeaks : ArrayLike
         The position of the peaks on the x axis.
-
     ypeaks : ArrayLike
         The height of the peaks.
     """
@@ -75,45 +70,39 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(W: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike,
+def gain(w: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike,
          energy: float) -> ArrayLike:
-    """_summary_
+    """Estimate the gain of the detector from the analysis of a spectral emission line, using the
+    calibration data from a calibration pulse file.
 
     Arguments
     ----------
-    W : float
-        _description_
+    w : float
+        W-value of the gas inside the detector.
     capacity : float
-        _description_
+        Value of the capacitance of the circuit.
     line_adc : ArrayLike
-        _description_
-    line_model : Line
-        _description_
-
-    Returns
-    -------
-    ArrayLike
-        _description_
+        Position of the peak of the emission line in ADC channels.
+    line_pars : ArrayLike
+        Results of the calibration fit. The elements should be ordered in [slope, intercept].
+    energy : float
+        Energy of the emission line (in keV).
     """
-    exp_electrons = energy / (W * 1e-3)
+    exp_electrons = energy / (w * 1e-3)
     slope = line_pars[0] * 1e3 / capacity * ELEMENTARY_CHARGE
     meas_electrons = (line_adc - line_pars[1]) / slope
     return meas_electrons / exp_electrons
 
 
 def energy_resolution(line_adc: ArrayLike, sigma: ArrayLike) -> ArrayLike:
-    """_summary_
+    """Estimate the energy resolution of the detector, using the position and the sigma of a
+    spectral emission line.
 
     Arguments
     ----------
     line_adc : ArrayLike
-        _description_
+        Position of the peak of the emission line in ADC channels.
     sigma : ArrayLike
-        _description_
-
-    Returns
-    -------
-    ArrayLike
-        _description_
+        Sigma of the emission line.
     """
     return sigma * 2 * np.sqrt(2 * np.log(2)) / line_adc * 100
