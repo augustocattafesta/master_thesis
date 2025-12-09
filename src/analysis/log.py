@@ -8,9 +8,13 @@ import re
 import sys
 from numbers import Real
 
+import aptapy.modeling
 import numpy as np
 import yaml
 from aptapy.typing_ import ArrayLike
+from uncertainties import ufloat
+
+
 
 from . import ANALYSIS_RESULTS
 
@@ -46,20 +50,20 @@ class LogYaml:
     _LOG_FOLDER = None
     _YAML_DICT = {}
 
-    @property
-    def log_folder(self) -> pathlib.Path:
+    @classmethod
+    def log_folder(cls) -> pathlib.Path:
         """Get the log folder path.
         """
-        return self._LOG_FOLDER
+        return cls._LOG_FOLDER
 
-    @property
-    def yaml_dict(self) -> dict:
+    @classmethod
+    def yaml_dict(cls) -> dict:
         """Get the YAML dictionary containing the logged information.
         """
-        return self._YAML_DICT
+        return cls._YAML_DICT
 
     @staticmethod
-    def _clean_numpy_types(data) -> object:
+    def _clean_numpy_types(data: object) -> object:
         """Recursively convert numpy types to native python types for YAML serialization.
         """
         if isinstance(data, dict):
@@ -98,20 +102,25 @@ class LogYaml:
         return None
 
     @classmethod
-    def add_pulse_results(cls, key: str, line_pars: ArrayLike):
+    def add_pulse_results(cls, key: str, line_pars: ArrayLike) -> None:
         """Add pulse calibration results to the YAML dictionary.
         """
         cls._YAML_DICT["calibration"] = {"file": key,
-                                        "results": {"m":{"val": line_pars[0].n,
-                                                         "err": line_pars[0].s},
-                                                    "q":{"val": line_pars[1].n,
-                                                         "err": line_pars[1].s}
+                                        "results": {"m": {"val": line_pars[0].n,
+                                                          "err": line_pars[0].s},
+                                                    "q": {"val": line_pars[1].n,
+                                                          "err": line_pars[1].s}
                                                     }
                                         }
 
     @staticmethod
-    def _fit_dict(fit_model):
+    def _fit_dict(fit_model: aptapy.modeling.AbstractFitModel) -> dict:
         """Create a dictionary from the fit model results.
+
+        Arguments
+        ---------
+        fit_model : aptapy.modeling.AbstractFitModel
+            Fit model containing the results to log.
         """
         pars_dictionary = {}
         for par in fit_model:
@@ -125,8 +134,15 @@ class LogYaml:
         return fit_dict
 
     @classmethod
-    def add_source_results(cls, key: str, fit_model):
+    def add_source_results(cls, key: str, fit_model: aptapy.modeling.AbstractFitModel) -> None:
         """Add spectra fit results to the YAML dictionary.
+
+        Arguments
+        ---------
+        key :  str
+            Key to identify the source file analyzed.
+        fit_model : aptapy.modeling.AbstractFitModel
+            Fit model containing the results to log.
         """
         # Ensure the analysis key exists
         if "analysis" not in cls._YAML_DICT:
@@ -134,8 +150,17 @@ class LogYaml:
         cls._YAML_DICT["analysis"][key] = cls._fit_dict(fit_model)
 
     @classmethod
-    def add_source_gain_res(cls, key:str, g, res):
+    def add_source_gain_res(cls, key: str, g: ufloat, res: ufloat) -> None:
         """Add gain and resolution results to the YAML dictionary.
+        
+        Arguments
+        ---------
+        key :  str
+            Key to identify the source file analyzed.
+        g :    ufloat
+            Gain value with uncertainty.
+        res :  ufloat
+            Resolution value with uncertainty.
         """
         # Ensure the analysis and source keys exist
         if "analysis" not in cls._YAML_DICT:
@@ -148,7 +173,7 @@ class LogYaml:
         cls._YAML_DICT["analysis"][key]["results"] = res_dict
 
     @classmethod
-    def save(cls):
+    def save(cls) -> None:
         """Save the YAML dictionary to a file.
         """
         with open(cls._YAML_PATH, 'w', encoding='utf-8') as f:

@@ -32,7 +32,7 @@ def test_get_command():
 # Use the decorator to tell python datetime is modified
 @patch("analysis.log.datetime")
 def test_start_logging(mock_datetime):
-    """Test start_logging
+    """Test start_logging method.
     """
     # Faking the time of the system to check the format
     mock_datetime.datetime.now.return_value = datetime.datetime(2000, 1, 1, 12, 30, 15, 230)
