@@ -6,9 +6,10 @@ import inspect
 import pathlib
 import re
 import sys
+from numbers import Real
 
-import loguru
-from loguru import logger
+import numpy as np
+import yaml
 
 from . import ANALYSIS_RESULTS
 
@@ -38,72 +39,99 @@ def get_command(cmd: str) -> str:
     return m.group(0) if m else cmd
 
 
-class LogManager:
-    """Class to handle the logging interface.
-    """
+class LogYaml:
     _LOG_FOLDER = None
-    _log_main = None
-    _log_fit = None
-    NULL_LOGGER = logger.bind()
+    _YAML_DICT = {}
+
+    @staticmethod
+    def _clean_numpy_types(data):
+        """Converte ricorsivamente i tipi numerici NumPy (e simili) in float/int standard."""
+        if isinstance(data, dict):
+            return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
+        if isinstance(data, (list, tuple)):
+            # Per le tuple, restituisci una lista o una tupla (qui usiamo una lista per semplicità)
+            return [LogYaml._clean_numpy_types(item) for item in data]
+        if isinstance(data, Real) and not isinstance(data, (int, float)):
+            # Se è un numero ma non un int/float standard Python (è probabilmente un tipo NumPy)
+            # numpy.int64 viene convertito in int, numpy.float64 in float.
+            return float(data) if isinstance(data, (np.floating, float)) else int(data)
+        return None
 
     @classmethod
-    def log_main(cls) -> None | loguru.Logger:
-        """Return the main logger to log info in the main log file.
-        """
-        return cls._log_main
-
-    @classmethod
-    def log_fit(cls) -> None | loguru.Logger:
-        """Return the fit logger to log info in the fit log file.
-        """
-        return cls._log_fit
-
-    @classmethod
-    def start_logging(cls) -> None:
-        """Create two loggers to save info during file and folder analysis. The first logger is for
-        info about the current analysis, the second is for the results of the source file fits. All
-        the data are saved in the system data folder created at the execution of the program.
-        """
+    def start_logging(cls):
         if cls._LOG_FOLDER is not None:
-            return cls._LOG_FOLDER
-        logger.remove()
+            return None
 
         date = datetime.datetime.now().strftime("%Y-%m-%d__%H:%M:%S")
         cmd = " ".join(sys.argv)
         log_folder_name = f"{date}_{get_subcommand(cmd)}"
-        log_file = f"{date}_{get_subcommand(cmd)}.log"
+        log_file = f"{date}_{get_subcommand(cmd)}.yaml"
         pathlib.Path.mkdir(ANALYSIS_RESULTS / log_folder_name)
         log_folder = ANALYSIS_RESULTS / log_folder_name
-        log_format = "{message}"
-        logger.add(log_folder / log_file, level="INFO", format=log_format,
-                filter=lambda r: r["extra"].get("tag") == "main")
-        logger.add(log_folder / "_fitresults.log", level="INFO", format=log_format,
-                filter=lambda r: r["extra"].get("tag") == "fit")
 
-        cls._log_main = logger.bind(tag="main")
-        cls._log_fit = logger.bind(tag="fit")
         cls._LOG_FOLDER = log_folder
 
-        cls._log_main.info("EXECUTION DATETIME:")
-        cls._log_main.info(f"{date}\n")
-        cls._log_main.info("COMMAND LINE (check path before executing)")
-        cls._log_main.info(f"{get_command(cmd)}\n")
-
-        return log_folder
-
-    @classmethod
-    def log_args(cls) -> None:
-        """Log all the arguments and the keyword arguments of the current method execution in the
-        main log file.
-        """
-        log = cls._log_main or cls.NULL_LOGGER
         frame = inspect.currentframe().f_back
         info = inspect.getargvalues(frame)
         args_dict = {name: info.locals[name] for name in info.args}
-        if info.varargs:
-            args_dict[info.varargs] = info.locals[info.varargs]
-        if info.keywords:
-            args_dict[info.keywords] = info.locals[info.keywords]
+        kwargs_dict = info.locals[info.keywords] if info.keywords else {}
+        cls._YAML_PATH = cls._LOG_FOLDER / log_file
+        cls._YAML_DICT["execution_datetime"] = date
+        cls._YAML_DICT["command_line"] = get_command(cmd)
+        cls._YAML_DICT["positional_arguments"] = cls._clean_numpy_types(args_dict)
+        cls._YAML_DICT["keyword_arguments"] = cls._clean_numpy_types(kwargs_dict)
 
-        log.info("FUNCTION ARGUMENTS:")
-        log.info(f"{args_dict}\n")
+        return None
+
+    @property
+    def log_folder(self):
+        return self._LOG_FOLDER
+
+    @property
+    def yaml_dict(self):
+        return self._YAML_DICT
+
+    @staticmethod
+    def save_par(par_ufloat):
+        par_dict = {"val": par_ufloat.n, "err": par_ufloat.s}
+
+        return par_dict
+
+    @classmethod
+    def add_pulse_results(cls, key, line_pars):
+        cls._YAML_DICT["calibration"] = {"file": key,
+                                        "results": {"m":cls.save_par(line_pars[0]),
+                                                    "q":cls.save_par(line_pars[1])}
+                                        }
+
+    @classmethod
+    def add_source_results(cls, key: str, fit_model):
+        if "analysis" not in cls._YAML_DICT:
+            cls._YAML_DICT["analysis"] = {}
+        cls._YAML_DICT["analysis"][key] = cls.fit_dict(fit_model)
+
+    @classmethod
+    def add_source_gain_res(cls, key:str, g, res):
+        if "analysis" not in cls._YAML_DICT:
+            cls._YAML_DICT["analysis"] = {}
+        res_dict = {"gain":{"val":g.n, "err":g.s},
+                    "resolution":{"val":res.n, "err":res.s}}
+        cls._YAML_DICT["analysis"][key]["results"] = res_dict
+
+    @staticmethod
+    def fit_dict(fit_model):
+        pars_dictionary = {}
+        for par in fit_model:
+            pars_dictionary[par.name] = {"val": par.value, "err": par.error}
+
+        fit_dict = {"model": fit_model.name(),
+                "chisquare": fit_model.status.chisquare,
+                "dof": fit_model.status.dof,
+                "fit_parameters" : pars_dictionary}
+
+        return fit_dict
+
+    @classmethod
+    def save(cls):
+        with open(cls._YAML_PATH, 'w', encoding='utf-8') as f:
+            yaml.dump(cls._YAML_DICT, f, sort_keys=False, default_flow_style=False)
