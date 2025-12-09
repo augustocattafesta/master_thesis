@@ -14,8 +14,6 @@ import yaml
 from aptapy.typing_ import ArrayLike
 from uncertainties import ufloat
 
-
-
 from . import ANALYSIS_RESULTS
 
 
@@ -50,17 +48,17 @@ class LogYaml:
     _LOG_FOLDER = None
     _YAML_DICT = {}
 
-    @classmethod
-    def log_folder(cls) -> pathlib.Path:
+    @property
+    def log_folder(self) -> pathlib.Path:
         """Get the log folder path.
         """
-        return cls._LOG_FOLDER
+        return self._LOG_FOLDER
 
-    @classmethod
-    def yaml_dict(cls) -> dict:
+    @property
+    def yaml_dict(self) -> dict:
         """Get the YAML dictionary containing the logged information.
         """
-        return cls._YAML_DICT
+        return self._YAML_DICT
 
     @staticmethod
     def _clean_numpy_types(data: object) -> object:
