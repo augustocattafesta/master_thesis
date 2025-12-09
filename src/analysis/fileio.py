@@ -18,6 +18,7 @@ from uncertainties import unumpy
 from . import ANALYSIS_RESOURCES
 from .utils import find_peaks_iterative
 
+
 class FileBase:
     """Load data from a file and define the path and the histogram.
     """
@@ -209,10 +210,13 @@ class PulsatorFile(FileBase):
 
 def load_label(name: str):
     yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
-    with open(yaml_file_path, 'r') as f:
+    with open(yaml_file_path, encoding="utf-8") as f:
         yaml_file = yaml.safe_load(f)
-    
+
     functions = yaml_file["function"]
     previous_frame = inspect.currentframe().f_back
     label = functions.get(previous_frame.f_code.co_name, None)
-    return label[name]
+    try:
+        return label[name]
+    except (TypeError, KeyError):
+        return None

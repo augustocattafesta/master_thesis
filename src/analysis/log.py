@@ -6,12 +6,10 @@ import inspect
 import pathlib
 import re
 import sys
-
-import loguru
-from loguru import logger
-import yaml
 from numbers import Real
+
 import numpy as np
+import yaml
 
 from . import ANALYSIS_RESULTS
 
@@ -50,15 +48,14 @@ class LogYaml:
         """Converte ricorsivamente i tipi numerici NumPy (e simili) in float/int standard."""
         if isinstance(data, dict):
             return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
-        elif isinstance(data, (list, tuple)):
+        if isinstance(data, (list, tuple)):
             # Per le tuple, restituisci una lista o una tupla (qui usiamo una lista per semplicità)
             return [LogYaml._clean_numpy_types(item) for item in data]
-        elif isinstance(data, Real) and not isinstance(data, (int, float)):
+        if isinstance(data, Real) and not isinstance(data, (int, float)):
             # Se è un numero ma non un int/float standard Python (è probabilmente un tipo NumPy)
             # numpy.int64 viene convertito in int, numpy.float64 in float.
             return float(data) if isinstance(data, (np.floating, float)) else int(data)
-        else:
-            return data
+        return None
 
     @classmethod
     def start_logging(cls):
@@ -84,9 +81,15 @@ class LogYaml:
         cls._YAML_DICT["positional_arguments"] = cls._clean_numpy_types(args_dict)
         cls._YAML_DICT["keyword_arguments"] = cls._clean_numpy_types(kwargs_dict)
 
+        return None
+
     @property
     def log_folder(self):
         return self._LOG_FOLDER
+
+    @property
+    def yaml_dict(self):
+        return self._YAML_DICT
 
     @staticmethod
     def save_par(par_ufloat):
@@ -114,7 +117,7 @@ class LogYaml:
         res_dict = {"gain":{"val":g.n, "err":g.s},
                     "resolution":{"val":res.n, "err":res.s}}
         cls._YAML_DICT["analysis"][key]["results"] = res_dict
-    
+
     @staticmethod
     def fit_dict(fit_model):
         pars_dictionary = {}
@@ -125,11 +128,10 @@ class LogYaml:
                 "chisquare": fit_model.status.chisquare,
                 "dof": fit_model.status.dof,
                 "fit_parameters" : pars_dictionary}
-        
+
         return fit_dict
 
     @classmethod
     def save(cls):
-        with open(cls._YAML_PATH, 'w') as f:
+        with open(cls._YAML_PATH, 'w', encoding='utf-8') as f:
             yaml.dump(cls._YAML_DICT, f, sort_keys=False, default_flow_style=False)
-    

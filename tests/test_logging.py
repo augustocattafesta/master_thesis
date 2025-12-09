@@ -4,7 +4,7 @@ import datetime
 import shutil
 from unittest.mock import patch
 
-from analysis.log import LogManager, get_command, get_subcommand
+from analysis.log import LogYaml, get_command, get_subcommand
 
 
 def test_get_subcommand():
@@ -30,19 +30,13 @@ def test_get_command():
 def test_start_logging(mock_datetime):
     """Test start_logging
     """
-    # pylint: disable=protected-access
-    log = LogManager()
-    assert log._LOG_FOLDER is None
-    assert log.log_main() is None
-    assert log.log_fit() is None
-
     # Faking the time of the system to check the format
     mock_datetime.datetime.now.return_value = datetime.datetime(2000, 1, 1, 12, 30, 15, 230)
-    log_folder = log.start_logging()
+    logyaml = LogYaml()
+    logyaml.start_logging()
 
-    assert log._LOG_FOLDER is not None
-    assert log_folder.name == "2000-01-01__12:30:15_None"
-    assert log.log_main() is not None
-    assert log.log_fit() is not None
+    assert logyaml.log_folder is not None
+    assert logyaml.log_folder.name == "2000-01-01__12:30:15_None"
+    assert logyaml.yaml_dict["execution_datetime"] == "2000-01-01__12:30:15"
     # Remove the folder created during the test
-    shutil.rmtree(log_folder)
+    shutil.rmtree(logyaml.log_folder)

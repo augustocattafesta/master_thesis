@@ -255,7 +255,8 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
             output = np.array([voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), \
                            unumpy.nominal_values(res[i]), unumpy.std_devs(res[i])]).T
             header = "voltage [v], gain, s_gain, resolution, s_resolution"
-            np.savetxt(logyaml.log_folder / f"results_{folder_name.split('/')[-1]}_{model.__name__}.txt",
+            np.savetxt(logyaml.log_folder / \
+                       f"results_{folder_name.split('/')[-1]}_{model.__name__}.txt",
                        output, delimiter=",", header=header)
         logyaml.save()
     return voltage, res, g
@@ -293,6 +294,7 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
     voltage, res, g : ArrayLike
         Returns arrays with the voltage, the energy resolution and the gain of each spectrum file.
     """
+    # pylint: disable=invalid-unary-operand-type
     # Start logging
     logyaml = LogYaml()
     if save:
