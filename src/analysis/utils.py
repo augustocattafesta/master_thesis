@@ -49,7 +49,7 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
         The x values of the sample.
     ydata : ArrayLike,
         The y values of the sample.
-    nlines : int,
+    npeaks : int,
         Maximum number of peaks to find in the sample.
 
     Returns
