@@ -63,7 +63,7 @@ def test_analyze_trend(datadir):
     args = Gaussian, 26., 1e-12, 5.9, False, False
     kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
-    gain, resolution, _, _ = analysis.analyze.analyze_trend(folder, *args, **kwargs)
+    resolution, gain, _, _ = analysis.analyze.analyze_trend(folder, *args, **kwargs)
 
     print(gain.shape)
     assert resolution.shape == gain.shape

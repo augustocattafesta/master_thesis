@@ -92,7 +92,7 @@ def add_source_options(parser: ArgumentParser) -> None:
 def add_detector_options(parser: ArgumentParser) -> None:
     group = parser.add_argument_group("detector", "Detector options")
     group.add_argument("--w", type=float, default=26.,
-                       help="W-value of the gas inside the detctor. Argon is 26 eV. Default is 26\
+                       help="W-value of the gas inside the detector. Argon is 26 eV. Default is 26\
                           eV.")
     group.add_argument("--capacity", type=float, default=1e-12,
                        help="Value of the capacitance of the circuit. Default is 1e-12 F.")

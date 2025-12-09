@@ -40,25 +40,26 @@ def get_command(cmd: str) -> str:
 
 
 class LogYaml:
+    """Handle logging of the analysis and save the results as a YAML file.
+    """
     _LOG_FOLDER = None
     _YAML_DICT = {}
 
     @staticmethod
     def _clean_numpy_types(data):
-        """Recursively converts NumPy (and similar) numeric types to standard float/int."""
+        """Recursively convert numpy types to native python types for YAML serialization.
+        """
         if isinstance(data, dict):
             return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
         if isinstance(data, (list, tuple)):
-            # Per le tuple, restituisci una lista o una tupla (qui usiamo una lista per semplicità)
             return [LogYaml._clean_numpy_types(item) for item in data]
         if isinstance(data, Real) and not isinstance(data, (int, float)):
-            # Se è un numero ma non un int/float standard Python (è probabilmente un tipo NumPy)
-            # numpy.int64 viene convertito in int, numpy.float64 in float.
             return float(data) if isinstance(data, (np.floating, float)) else int(data)
-        return None
+        return data
 
     @classmethod
     def start_logging(cls):
+        """Start logging by creating the log folder and preparing the YAML dictionary."""
         if cls._LOG_FOLDER is not None:
             return None
 
@@ -85,33 +86,43 @@ class LogYaml:
 
     @property
     def log_folder(self):
+        """Get the log folder path."""
         return self._LOG_FOLDER
 
     @property
     def yaml_dict(self):
+        """Get the YAML dictionary."""
         return self._YAML_DICT
 
     @staticmethod
-    def save_par(par_ufloat):
+    def _parameter_to_dict(par_ufloat):
+        """Save a parameter with its uncertainty as a dictionary.
+        """
         par_dict = {"val": par_ufloat.n, "err": par_ufloat.s}
 
         return par_dict
 
     @classmethod
     def add_pulse_results(cls, key, line_pars):
+        """Add calibration results to the YAML dictionary.
+        """
         cls._YAML_DICT["calibration"] = {"file": key,
-                                        "results": {"m":cls.save_par(line_pars[0]),
-                                                    "q":cls.save_par(line_pars[1])}
+                                        "results": {"m":cls._parameter_to_dict(line_pars[0]),
+                                                    "q":cls._parameter_to_dict(line_pars[1])}
                                         }
 
     @classmethod
     def add_source_results(cls, key: str, fit_model):
+        """Add source fit results to the YAML dictionary.
+        """
         if "analysis" not in cls._YAML_DICT:
             cls._YAML_DICT["analysis"] = {}
         cls._YAML_DICT["analysis"][key] = cls.fit_dict(fit_model)
 
     @classmethod
     def add_source_gain_res(cls, key:str, g, res):
+        """Add gain and resolution results to the YAML dictionary.
+        """
         if "analysis" not in cls._YAML_DICT:
             cls._YAML_DICT["analysis"] = {}
         res_dict = {"gain":{"val":g.n, "err":g.s},
@@ -120,6 +131,8 @@ class LogYaml:
 
     @staticmethod
     def fit_dict(fit_model):
+        """Create a dictionary from the fit model results.
+        """
         pars_dictionary = {}
         for par in fit_model:
             pars_dictionary[par.name] = {"val": par.value, "err": par.error}
@@ -133,5 +146,7 @@ class LogYaml:
 
     @classmethod
     def save(cls):
+        """Save the YAML dictionary to a file.
+        """
         with open(cls._YAML_PATH, 'w', encoding='utf-8') as f:
             yaml.dump(cls._YAML_DICT, f, sort_keys=False, default_flow_style=False)

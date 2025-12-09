@@ -56,7 +56,7 @@ class DataFolder:
     @property
     def source_files(self):
         """Extract the source files from all the files of the directory and return a sorted list
-        of the files. If file names contain "trend{i}", the sorting is done numerically accorting
+        of the files. If file names contain "trend{i}", the sorting is done numerically according
         to the index {i}, otherwise it's done alphabetically.
         """
         # Keep files containing _B<number>
@@ -125,12 +125,12 @@ class SourceFile(FileBase):
 
         Parameters
         ----------
-        model : aptapt.modeling.AbstractFitModel
+        model : aptapy.modeling.AbstractFitModel
             Model class to fit the emission line(s). 
 
         Returns
         -------
-        corr_pars, model_instance: Tuple[ArrayLike, aptapy.modeling.AbstractFitModel]
+        corr_pars, model_instance: tuple[ArrayLike, aptapy.modeling.AbstractFitModel]
             Returns the fit parameters as correlated uncertainties.ufloat and the model instance
             containing results of the fit.
         """
@@ -169,13 +169,13 @@ class PulsatorFile(FileBase):
         return len(self.voltage)
 
     def analyze_pulses(self) -> ArrayLike:
-        """Find pulses in the spectrum and indipendently fit each of them with a Gaussian model.
+        """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
         Using the resulting position of the peaks, do a calibration fit with a Line model to
         determine the calibration parameters of the spectrum.
 
         Returns
         -------
-        line_pars, pulse_fig, line_fig : Tuple[np.ndarray, Figure, Figure]
+        line_pars, pulse_fig, line_fig : tuple[np.ndarray, Figure, Figure]
             Returns fit parameters of the calibration fit and figures of the pulses and of the
             calibration fit.
         """

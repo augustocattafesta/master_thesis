@@ -386,8 +386,8 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
 
     Returns
     -------
-    g, res, time, drift_voltage : ArrayLike
-        Returns arrays with the gain, the energy resolution, time and drift voltage.
+    res, g, time, drift_voltage : ArrayLike
+        Returns arrays with the energy resolution, gain, time and drift voltage.
     """
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
