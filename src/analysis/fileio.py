@@ -1,23 +1,22 @@
 """Module to handle reading of different types of file and analyze specific type of signals.
 """
 
+import inspect
 import pathlib
 import re
 
 import aptapy.modeling
 import numpy as np
 import uncertainties
+import yaml
 from aptapy.hist import Histogram1d
 from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
 from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
-from .log import LogManager
+from . import ANALYSIS_RESOURCES
 from .utils import find_peaks_iterative
-
-LOGGER = LogManager()
-
 
 class FileBase:
     """Load data from a file and define the path and the histogram.
@@ -143,13 +142,6 @@ class SourceFile(FileBase):
             raise TypeError("Choose between Gaussian or GaussianForestBase child class")
         corr_pars = uncertainties.correlated_values(model_instance.free_parameter_values(),
                                                     fitstatus.pcov)
-        log = LOGGER.log_main() or LOGGER.NULL_LOGGER
-        log.info(self.file_path.name)
-
-        log = LOGGER.log_fit() or LOGGER.NULL_LOGGER
-        log.info(f"FILE: {self.file_path.name}")
-        log.info(f"{str(model_instance)}\n")
-
         return corr_pars, model_instance
 
 
@@ -186,13 +178,11 @@ class PulsatorFile(FileBase):
             Returns fit parameters of the calibration fit and figures of the pulses and of the
             calibration fit.
         """
-        log = LOGGER.log_main() or LOGGER.NULL_LOGGER
+        # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
 
         pulse_fig = plt.figure(self.file_path.name)
         plt.title("Calibration pulses")
         self.hist.plot()
-        log.info("PULSE FILE ANALYZED:")
-        log.info(f"{self.file_path.name}\n")
         xpeaks, _ = find_peaks_iterative(self.hist.bin_centers(),
                                                              self.hist.content, self.num_pulses)
         mu = np.zeros(shape=len(xpeaks), dtype=object)
@@ -214,9 +204,15 @@ class PulsatorFile(FileBase):
         plt.legend()
 
         line_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
-
-        log.info("PULSE CALIBRATION RESULTS:")
-        log.info(f"{'m:':<12} {line_pars[0]} ADC/mV")
-        log.info(f"{'q:':<12} {line_pars[1]} ADC\n")
-
         return line_pars, pulse_fig, line_fig
+
+
+def load_label(name: str):
+    yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
+    with open(yaml_file_path, 'r') as f:
+        yaml_file = yaml.safe_load(f)
+    
+    functions = yaml_file["function"]
+    previous_frame = inspect.currentframe().f_back
+    label = functions.get(previous_frame.f_code.co_name, None)
+    return label[name]

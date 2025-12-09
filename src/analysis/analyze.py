@@ -11,8 +11,8 @@ from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
 from . import ANALYSIS_DATA
-from .fileio import DataFolder, PulsatorFile, SourceFile
-from .log import LogManager, logger
+from .fileio import DataFolder, PulsatorFile, SourceFile, load_label
+from .log import LogYaml
 from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
 
 
@@ -59,76 +59,68 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
     # Start the logging
-    log = LogManager()
+    logyaml = LogYaml()
     if save:
-        logger.enable("analyze")
-        log_folder = log.start_logging()
-        log_main = log.log_main()
-        log_fit = log.log_fit()
-        log.log_args()
-    else:
-        logger.disable("analyze")
-        log_main = logger
-        log_fit = logger
-    # Pulse file analysis and plotting
-    pulse_data = PulsatorFile(Path(pulse_file))
-    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
-    if not plot:
-        plt.close(pulse_fig)
-        plt.close(line_fig)
-    if save:
-        pulse_fig.savefig(log_folder / "cal_pulses.pdf", format="pdf")
-        line_fig.savefig(log_folder / "cal_fit.pdf", format="pdf")
-    # Source file analysis
-    if source_file is not None:
-        log_main.info("SOURCE FILE(S) ANALYZED:")
-        source_data = SourceFile(Path(source_file))
-        # Create empty arrays for the results
-        g = np.zeros(shape=len(models), dtype=object)
-        res = np.zeros(shape=len(models), dtype=object)
-        # Caching the initial values of xmin and xmax
-        xmin_init = kwargs.get("xmin", float("-inf"))
-        xmax_init = kwargs.get("xmax", float("inf"))
-        for i, model in enumerate(models):
-            # Without a proper initialization of xmin and xmax the fit doesn't converge
-            x_peak = source_data.hist.bin_centers()[source_data.hist.content.argmax()]
-            if xmin_init == float("-inf"):
-                kwargs.update(xmin=x_peak - 0.5 * x_peak)
-            if xmax_init == float("inf"):
-                kwargs.update(xmax=x_peak + 0.5 * x_peak)
-            # Fit the spectrum in the given range and log
-            log_fit.info("FIT RESULTS:\n")
-            pars, fit_model = source_data.fit(model, **kwargs)
-            if issubclass(model, aptapy.models.Fe55Forest):
-                line_adc = fit_model.energies[0] / pars[1]
-                sigma = pars[2]
-            elif issubclass(model, aptapy.models.Gaussian):
-                line_adc = pars[1]
-                sigma = pars[2]
-            else:
-                raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-            g[i] = gain(w, capacity, line_adc, line_pars, e_peak)
-            res[i] = energy_resolution(line_adc, sigma)
-            # Results logging
-            log_main.info("\nSOURCE FILE RESULTS:")
-            log_main.info(f"{'model:':<12} {fit_model.name()}")
-            log_main.info(f"{'gain:':<12} {g[i]}")
-            log_main.info(f"{'resolution:':<12} {res[i]} %\n")
-            # Source file plotting and saving
-            if plot or save:
-                plt.figure(f"{source_data.file_path.name}")
-                plt.title(f"{int(source_data.voltage)} V {fit_model.name()}")
-                source_data.hist.plot()
-                label = f"{fit_model.name()}\nFWHM/E@{e_peak:.1f} keV: {res[i]} %"
-                fit_model.plot(label=label)
-                plt.xlim(fit_model.default_plotting_range())
-                plt.legend()
-                if save:
-                    plt.savefig(log_folder / source_data.file_path.name, format='pdf')
-                if not plot:
-                    plt.close("all")
-        return res, g
-    return line_pars
+        logyaml.start_logging()
+    try:
+        # Pulse file analysis and plotting
+        pulse_data = PulsatorFile(Path(pulse_file))
+        line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
+        logyaml.add_pulse_results(pulse_data.file_path.name, line_pars)
+        if not plot:
+            plt.close(pulse_fig)
+            plt.close(line_fig)
+        if save:
+            pulse_fig.savefig(logyaml.log_folder / "cal_pulses.pdf", format="pdf")
+            line_fig.savefig(logyaml.log_folder / "cal_fit.pdf", format="pdf")
+        # Source file analysis
+        if source_file is not None:
+            source_data = SourceFile(Path(source_file))
+            # Create empty arrays for the results
+            g = np.zeros(shape=len(models), dtype=object)
+            res = np.zeros(shape=len(models), dtype=object)
+            # Caching the initial values of xmin and xmax
+            xmin_init = kwargs.get("xmin", float("-inf"))
+            xmax_init = kwargs.get("xmax", float("inf"))
+            for i, model in enumerate(models):
+                # Without a proper initialization of xmin and xmax the fit doesn't converge
+                x_peak = source_data.hist.bin_centers()[source_data.hist.content.argmax()]
+                if xmin_init == float("-inf"):
+                    kwargs.update(xmin=x_peak - 0.5 * x_peak)
+                if xmax_init == float("inf"):
+                    kwargs.update(xmax=x_peak + 0.5 * x_peak)
+                # Fit the spectrum in the given range and log
+                pars, fit_model = source_data.fit(model, **kwargs)
+                if issubclass(model, aptapy.models.Fe55Forest):
+                    line_adc = fit_model.energies[0] / pars[1]
+                    sigma = pars[2]
+                elif issubclass(model, aptapy.models.Gaussian):
+                    line_adc = pars[1]
+                    sigma = pars[2]
+                else:
+                    raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
+                g[i] = gain(w, capacity, line_adc, line_pars, e_peak)
+                res[i] = energy_resolution(line_adc, sigma)
+                logyaml.add_source_results(source_data.file_path.name, fit_model)
+                logyaml.add_source_gain_res(source_data.file_path.name, g[i], res[i])
+                # Source file plotting and saving
+                if plot or save:
+                    plt.figure(f"{source_data.file_path.name}")
+                    plt.title(f"{int(source_data.voltage)} V {fit_model.name()}")
+                    source_data.hist.plot()
+                    label = f"{fit_model.name()}\nFWHM/E@{e_peak:.1f} keV: {res[i]} %"
+                    fit_model.plot(label=label)
+                    plt.xlim(fit_model.default_plotting_range())
+                    plt.legend()
+                    if save:
+                        plt.savefig(logyaml.log_folder / source_data.file_path.name, format='pdf')
+                    if not plot:
+                        plt.close("all")
+            return res, g
+        return line_pars
+    finally:
+        if save:
+            logyaml.save()
 
 
 def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, capacity: float,
@@ -168,30 +160,22 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
     # Start the logging
-    log = LogManager()
+    logyaml = LogYaml()
     if save:
-        logger.enable("analyze")
-        log_folder = log.start_logging()
-        log_main = log.log_main()
-        log_fit = log.log_fit()
-        log.log_args()
-    else:
-        logger.disable("analyze")
-        log_main = logger
-        log_fit = logger
+        logyaml.start_logging()
     # Open the folder and select the first calibration file
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = data_folder.pulse_data[0]
     # Analyzing, plotting and saving the calibration file
     line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
+    logyaml.add_pulse_results(pulse_data.file_path.name, line_pars)
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
     if save:
-        pulse_fig.savefig(log_folder / "cal_pulses.pdf", format="pdf")
-        line_fig.savefig(log_folder / "cal_fit.pdf", format="pdf")
+        pulse_fig.savefig(logyaml.log_folder / "cal_pulses.pdf", format="pdf")
+        line_fig.savefig(logyaml.log_folder / "cal_fit.pdf", format="pdf")
     # Source files analysis
-    log_main.info("SOURCE FILE(S) ANALYZED:")
     source_data = data_folder.source_data
     voltage = np.array([file.voltage for file in source_data])
     # Create empty arrays for the results
@@ -202,8 +186,6 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
     xmax_init = kwargs.get("xmax", float("inf"))
     # Iterating on the given models for the spectrum fit
     for i, model in enumerate(models):
-        # Log fit results in another log file
-        log_fit.info(f"FIT RESULTS FOLDER: {folder_name}\n")
         results = []
         for source in source_data:
             # Without a proper initialization of xmin and xmax the fit doesn't converge
@@ -214,7 +196,8 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
             # Fit the spectrum in the given range
             results.append(source.fit(model, **kwargs))
-        log_main.info("")
+            logyaml.add_source_results(source.file_path.name, results[-1][1])
+
         # Collect fit parameters and fit models from the results
         pars, fit_models = zip(*results, strict=True)
         pars = np.stack(pars)
@@ -242,7 +225,7 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
                 plt.xlim(fit_models[j].default_plotting_range())
                 plt.legend()
                 if save:
-                    plt.savefig(log_folder / _s.file_path.name, format='pdf')
+                    plt.savefig(logyaml.log_folder / _s.file_path.name, format='pdf')
                 if not plot:
                     plt.close(fig)
     # Plot gain and energy resolution for each if the different models given
@@ -265,15 +248,16 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
         plt.close(gain_fig)
         plt.close(res_fig)
     if save:
-        gain_fig.savefig(log_folder / "gain.pdf", format="pdf")
-        res_fig.savefig(log_folder / "energy_resolution.pdf", format="pdf")
+        gain_fig.savefig(logyaml.log_folder / "gain.pdf", format="pdf")
+        res_fig.savefig(logyaml.log_folder / "energy_resolution.pdf", format="pdf")
         # Save .txt files with the results of gain and energy resolution for each model given
         for i, model in enumerate(models):
             output = np.array([voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), \
                            unumpy.nominal_values(res[i]), unumpy.std_devs(res[i])]).T
             header = "voltage [v], gain, s_gain, resolution, s_resolution"
-            np.savetxt(log_folder / f"results_{folder_name.split("/")[-1]}_{model.__name__}.txt",
+            np.savetxt(logyaml.log_folder / f"results_{folder_name.split('/')[-1]}_{model.__name__}.txt",
                        output, delimiter=",", header=header)
+        logyaml.save()
     return voltage, res, g
 
 
@@ -310,13 +294,9 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
         Returns arrays with the voltage, the energy resolution and the gain of each spectrum file.
     """
     # Start logging
-    log = LogManager()
+    logyaml = LogYaml()
     if save:
-        logger.enable("analyze")
-        log_folder = log.start_logging()
-        log.log_args()
-    else:
-        logger.disable("analyze")
+        logyaml.start_logging()
     # Create empty arrays to store the results of the analysis of each folder
     voltage = np.zeros(shape=len(folder_names), dtype=object)
     res = np.zeros(shape=len(folder_names), dtype=object)
@@ -327,9 +307,6 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
                                                   plot, save=save, **kwargs)
     # Plot the gain
     gain_fig = plt.figure("Gain comparison")
-    # Add custom labels based on the folder analyzed
-    labels = {"251118":"W2b 86.6 top-right", "251127":"W8b 86.6 top-left high rate",
-              "251201/1000": "Drift 1000 V", "251201/1300": "Drift 1300 V"}
     # Add exceptions on the data points, based on the folder analyzed
     # This will be moved in a specific method, maybe with info reported in a file
     for i, folder_name in enumerate(folder_names):
@@ -346,7 +323,7 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
             g[i][0] = np.append(g[i][0], np.min(g_350))
 
         plt.errorbar(voltage[i], unumpy.nominal_values(g[i][0]), unumpy.std_devs(g[i][0]), fmt="o",
-                    label=labels.get(folder_name, f"{str(folder_name)}"))
+                    label=load_label(folder_name))
         # Fit the gain with an exponential function
         model = aptapy.models.Exponential()
         model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
@@ -359,7 +336,7 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
     if not plot:
         plt.close(gain_fig)
     if save:
-        gain_fig.savefig(log_folder / "gain_comparison.pdf", format="pdf")
+        gain_fig.savefig(logyaml.log_folder / "gain_comparison.pdf", format="pdf")
 
     # We need to re-add the removed points
 
@@ -413,13 +390,9 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
     # Start logging
-    log = LogManager()
+    logyaml = LogYaml()
     if save:
-        logger.enable("analyze")
-        log_folder = log.start_logging()
-        log.log_args()
-    else:
-        logger.disable("analyze")
+        logyaml.start_logging()
     # Open the folder and select the first calibration file, we need the fit parameters for the
     # analysis of the gain using the escape peak
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
@@ -433,7 +406,6 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
     res = res[0]
     g = g[0]
     # Extracting real times and drift voltage
-    logger.info("SOURCE FILES ANALYZED FOR THE ESCAPE PEAK:")
     source_files = data_folder.source_data
     real_times = np.array([_source.real_time for _source in source_files])
     drift_voltage = np.array([_source.drift_voltage for _source in source_files])
@@ -458,7 +430,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"gain_time_{out_name}.pdf", format="pdf")
+            plt.savefig(logyaml.log_folder / f"gain_time_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -469,7 +441,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
         plt.ylabel("FWHM/E")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"resolution_time_{out_name}.pdf", format="pdf")
+            plt.savefig(logyaml.log_folder / f"resolution_time_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -480,7 +452,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"gain_drift_{out_name}.pdf", format="pdf")
+            plt.savefig(logyaml.log_folder / f"gain_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
@@ -491,7 +463,7 @@ def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity:
         plt.ylabel("Gain")
         plt.legend()
         if save:
-            plt.savefig(log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")
+            plt.savefig(logyaml.log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
     return res, g, time, drift_voltage

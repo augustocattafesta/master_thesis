@@ -20,6 +20,7 @@ dependencies = [
   "scipy",
   "uncertainties",
   "xraydb",
+  "pyyaml",
   ]
 
 # Optional dependencies are listed here, grouped into logical sections.
