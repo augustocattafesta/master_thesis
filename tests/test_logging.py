@@ -4,7 +4,6 @@ import datetime
 import shutil
 from unittest.mock import patch
 
-import numpy as np
 from aptapy.models import Gaussian, Line
 from uncertainties import ufloat
 
@@ -58,9 +57,9 @@ def test_add_pulse_results():
     calibration = logyaml.yaml_dict["calibration"]
     assert calibration["calibration_file.txt"] is not None
     assert calibration["calibration_file.txt"]["fit_parameters"]["slope"]["val"] == 1.0
-    assert calibration["calibration_file.txt"]["fit_parameters"]["slope"]["err"] == None
+    assert calibration["calibration_file.txt"]["fit_parameters"]["slope"]["err"] is None
     assert calibration["calibration_file.txt"]["fit_parameters"]["intercept"]["val"] == 0.0
-    assert calibration["calibration_file.txt"]["fit_parameters"]["intercept"]["err"] == None
+    assert calibration["calibration_file.txt"]["fit_parameters"]["intercept"]["err"] is None
 
 
 def test_add_source_results():

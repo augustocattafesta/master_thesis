@@ -7,12 +7,10 @@ import re
 
 import aptapy.modeling
 import numpy as np
-import uncertainties
 import yaml
 from aptapy.hist import Histogram1d
 from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
-from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
@@ -22,7 +20,7 @@ from .utils import find_peaks_iterative
 class FileBase:
     """Load data from a file and define the path and the histogram.
     """
-    def __init__(self, file_path: pathlib.Path):
+    def __init__(self, file_path: pathlib.Path) -> None:
         """Class constructor.
 
         Arguments
@@ -37,7 +35,7 @@ class FileBase:
 class DataFolder:
     """Load source files and calibration pulse files from a folder.
     """
-    def __init__(self, folder_path: pathlib.Path):
+    def __init__(self, folder_path: pathlib.Path) -> None:
         """Class constructor.
 
         Parameters
@@ -54,7 +52,7 @@ class DataFolder:
         self.source_data = [SourceFile(source_file_path) for source_file_path in self.source_files]
 
     @property
-    def source_files(self):
+    def source_files(self) -> list[pathlib.Path]:
         """Extract the source files from all the files of the directory and return a sorted list
         of the files. If file names contain "trend{i}", the sorting is done numerically according
         to the index {i}, otherwise it's done alphabetically.
@@ -78,7 +76,7 @@ class DataFolder:
         return sorted(filtered, key=custom_sort_key)
 
     @property
-    def pulse_files(self):
+    def pulse_files(self) -> list[pathlib.Path]:
         """Extract the calibration pulse files from all the files of the directory.
         """
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
@@ -110,7 +108,7 @@ class SourceFile(FileBase):
         return _voltage
 
     @property
-    def real_time(self):
+    def real_time(self) -> float:
         """Real integration time of the histogram.
         """
         with open(self.file_path, encoding="UTF-8") as input_file:
@@ -204,7 +202,15 @@ class PulsatorFile(FileBase):
         return line_model, pulse_fig, line_fig
 
 
-def load_label(name: str):
+def load_label(key: str) -> str | None:
+    """Load a label from the analysis resources labels.yaml file based on the calling function
+    name and on the file name.
+
+    Arguments
+    ---------
+    key : str
+        Key of the label to load.
+    """
     yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
     try:
         with open(yaml_file_path, encoding="utf-8") as f:
@@ -213,9 +219,8 @@ def load_label(name: str):
         previous_frame = inspect.currentframe().f_back
         label = functions.get(previous_frame.f_code.co_name, None)
         try:
-            return label[name]
+            return label[key]
         except (TypeError, KeyError):
             return None
-
     except FileNotFoundError:
         return None

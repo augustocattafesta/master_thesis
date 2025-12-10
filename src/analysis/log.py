@@ -118,7 +118,7 @@ class LogYaml:
                 "fit_parameters" : pars_dictionary}
 
         return fit_dict
-    
+
     @classmethod
     def add_pulse_results(cls, key: str, line_model: ArrayLike) -> None:
         """Add pulse calibration results to the YAML dictionary.
