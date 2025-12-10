@@ -119,31 +119,28 @@ class SourceFile(FileBase):
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
 
-    def fit(self, model: aptapy.modeling.AbstractFitModel,
-            **kwargs) -> tuple[ArrayLike, aptapy.modeling.AbstractFitModel]:
+    def fit(self, model_class: aptapy.modeling.AbstractFitModel,
+            **kwargs) -> aptapy.modeling.AbstractFitModel:
         """Fit the spectrum data.
 
         Parameters
         ----------
-        model : aptapy.modeling.AbstractFitModel
+        model_class : aptapy.modeling.AbstractFitModel
             Model class to fit the emission line(s). 
 
         Returns
         -------
-        corr_pars, model_instance: tuple[ArrayLike, aptapy.modeling.AbstractFitModel]
-            Returns the fit parameters as correlated uncertainties.ufloat and the model instance
-            containing results of the fit.
+        model: aptapy.modeling.AbstractFitModel
+            Returns the model instance containing results of the fit.
         """
-        if issubclass(model, Gaussian) or issubclass(model, GaussianForestBase):
-            model_instance = model()
-            if issubclass(model, Fe55Forest):
-                model_instance.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
-            fitstatus = model_instance.fit_iterative(self.hist, **kwargs)
+        if issubclass(model_class, Gaussian) or issubclass(model_class, GaussianForestBase):
+            model = model_class()
+            if issubclass(model_class, Fe55Forest):
+                model.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
+            model.fit_iterative(self.hist, **kwargs)
         else:
             raise TypeError("Choose between Gaussian or GaussianForestBase child class")
-        corr_pars = uncertainties.correlated_values(model_instance.free_parameter_values(),
-                                                    fitstatus.pcov)
-        return corr_pars, model_instance
+        return model
 
 
 class PulsatorFile(FileBase):
@@ -168,15 +165,15 @@ class PulsatorFile(FileBase):
         """
         return len(self.voltage)
 
-    def analyze_pulses(self) -> ArrayLike:
+    def analyze_pulses(self) -> tuple[aptapy.modeling.AbstractFitModel, plt.Figure, plt.Figure]:
         """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
         Using the resulting position of the peaks, do a calibration fit with a Line model to
         determine the calibration parameters of the spectrum.
 
         Returns
         -------
-        line_pars, pulse_fig, line_fig : tuple[np.ndarray, Figure, Figure]
-            Returns fit parameters of the calibration fit and figures of the pulses and of the
+        line_model, pulse_fig, line_fig : tuple[aptapy.modeling.AbstractFitModel, Figure, Figure]
+            Returns fit model and figures of the pulses and of the
             calibration fit.
         """
         # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
@@ -197,15 +194,14 @@ class PulsatorFile(FileBase):
         plt.legend()
 
         line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
-        fitstatus = line_model.fit(self.voltage, unumpy.nominal_values(mu),
-                                   sigma=unumpy.std_devs(mu), absolute_sigma=True)
+        line_model.fit(self.voltage, unumpy.nominal_values(mu), sigma=unumpy.std_devs(mu),
+                       absolute_sigma=True)
         line_fig = plt.figure("Calibration fit")
         plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
         line_model.plot(fit_output=True)
         plt.legend()
 
-        line_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
-        return line_pars, pulse_fig, line_fig
+        return line_model, pulse_fig, line_fig
 
 
 def load_label(name: str):

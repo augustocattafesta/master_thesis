@@ -17,15 +17,16 @@ def test_analyze_file(datadir):
     # Test analysis of calibration pulses file
     line_pars_script = analysis.analyze.analyze_file(pulse_file, None, *args)
     pulse_data = PulsatorFile(pulse_file)
-    line_pars, _, _ = pulse_data.analyze_pulses()
+    line_model, _, _ = pulse_data.analyze_pulses()
     # Test analysis of source file
     resolution, gain = analysis.analyze.analyze_file(pulse_file, source_file, *args)
     # Test analysis with kwargs
     resolution_kwargs, gain_kwargs = analysis.analyze.analyze_file(pulse_file, source_file,
                                                                    *args, **kwargs)
 
-    assert np.allclose(nominal_values(line_pars_script), nominal_values(line_pars))
-    assert np.allclose(std_devs(line_pars_script), std_devs(line_pars))
+    assert np.allclose(nominal_values(line_pars_script),
+                       nominal_values(line_model.status.correlated_pars))
+    assert np.allclose(std_devs(line_pars_script), std_devs(line_model.status.correlated_pars))
     assert resolution.shape[0] == len(args[0])
     assert gain.shape[0] == len(args[0])
     assert resolution_kwargs.shape[0] == len(args[0])
