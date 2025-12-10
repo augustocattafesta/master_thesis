@@ -14,7 +14,7 @@ import yaml
 from uncertainties import ufloat
 
 from . import ANALYSIS_RESULTS
-
+from .fileio import SourceFile
 
 def get_subcommand(cmd: str) -> str | None:
     """Extract the subcommand from the entire terminal command line string.
@@ -64,9 +64,29 @@ class LogYaml:
     def _clean_numpy_types(data: Any) -> float | Any:
         """Recursively convert numpy types to native python types for YAML serialization.
         """
-        if isinstance(data, Real) and not isinstance(data, (int, float)):
+        if isinstance(data, dict):
+                # Chiama la funzione su ogni valore del dizionario
+            return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
+            
+        # --- 2. Gestione di Liste e Tuple ---
+        elif isinstance(data, (list, tuple)):
+            # Chiama la funzione su ogni elemento della sequenza
+            # (Nota: mantiene il tipo originale, list o tuple)
+            return type(data)(LogYaml._clean_numpy_types(item) for item in data)
+            
+        # --- 3. Gestione di Numeri (il tuo caso xmin/xmax) ---
+        # Controlla se è un tipo numerico (inclusi i tipi NumPy) ma NON è già un int o float standard
+        elif isinstance(data, Real) and not isinstance(data, (int, float)):
+            # Converte il tipo NumPy (come np.float64, che include inf/-inf) in float standard Python
             return float(data)
-        return data
+        
+        elif isinstance(data, type):
+            if issubclass(data, aptapy.modeling.AbstractFitModel):
+                return data.__name__
+        # --- 4. Caso Base ---
+        else:
+            # Restituisce stringhe, None, int/float standard, Path, ecc. inalterati
+            return data
 
     @classmethod
     def start_logging(cls) -> None:
@@ -127,7 +147,18 @@ class LogYaml:
         cls._YAML_DICT["calibration"][key] = cls._fit_dict(line_model)
 
     @classmethod
-    def add_source_results(cls, key: str, fit_model: aptapy.modeling.AbstractFitModel) -> None:
+    def add_source_voltages(cls, source: SourceFile) -> None:
+        if "analysis" not in cls._YAML_DICT:
+            cls._YAML_DICT["analysis"] = {}
+        voltage_dict = {
+            "back": source.voltage,
+            "drift": source.drift_voltage
+        }
+        key = source.file_path.name
+        cls._YAML_DICT["analysis"][key] = voltage_dict
+
+    @classmethod
+    def add_source_results(cls, source: SourceFile, fit_model: aptapy.modeling.AbstractFitModel) -> None:
         """Add spectra fit results to the YAML dictionary.
 
         Arguments
@@ -140,7 +171,13 @@ class LogYaml:
         # Ensure the analysis key exists
         if "analysis" not in cls._YAML_DICT:
             cls._YAML_DICT["analysis"] = {}
-        cls._YAML_DICT["analysis"][key] = cls._fit_dict(fit_model)
+        key = source.file_path.name
+        results = {
+            "back": source.voltage,
+            "drift": source.drift_voltage,
+            **cls._fit_dict(fit_model)
+            }
+        cls._YAML_DICT["analysis"][key] = results
 
     @classmethod
     def add_source_gain_res(cls, key: str, g: ufloat, res: ufloat) -> None:

@@ -102,7 +102,7 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                     raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
                 g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, e_peak)
                 res[i] = energy_resolution(line_adc, sigma)
-                logyaml.add_source_results(source_data.file_path.name, fit_model)
+                logyaml.add_source_results(source_data, fit_model)
                 logyaml.add_source_gain_res(source_data.file_path.name, g[i], res[i])
                 # Source file plotting and saving
                 if plot or save:
@@ -197,8 +197,7 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
             # Fit the spectrum in the given range
             fit_models.append(source.fit(model, **kwargs))
-            logyaml.add_source_results(source.file_path.name, fit_models[-1])
-
+            logyaml.add_source_results(source, fit_models[-1])
         # Collect fit parameters and fit models from the results
         correlated_pars = np.array([fit_model.status.correlated_pars for fit_model in fit_models])
         # Order and number of parameters differ based on the model
@@ -214,6 +213,8 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
         # Calculate gain and energy resolution and store them in the previously created arrays
         g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, KALPHA)
         res[i] = energy_resolution(line_adc, sigma)
+        for k, source in enumerate(source_data):
+            logyaml.add_source_gain_res(source.file_path.name, g[i][k], res[i][k])
         # Source files plotting and saving
         if plot or save:
             for j, _s in enumerate(source_data):

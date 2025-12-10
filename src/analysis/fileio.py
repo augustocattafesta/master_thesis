@@ -15,7 +15,7 @@ from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import find_peaks_iterative
+from .utils import find_peaks_iterative, gain
 
 
 class FileBase:
@@ -228,3 +228,74 @@ def load_label(key: str) -> str | None:
     except (FileNotFoundError, TypeError, KeyError):
         pass
     return label_value
+
+
+class LoadYamlLog:
+    """Open a .yaml log file and read information from the analysis.
+    """
+    def __init__(self, yaml_path: pathlib.Path) -> None:
+        """Class constructor.
+        """
+        self.yaml_path = yaml_path
+        try:
+            with open(self.yaml_path, encoding="utf-8") as f:
+                self.yaml_file = yaml.safe_load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"YAML file {str(self.yaml_path)} not found.")
+
+    @property
+    def command(self) -> str:
+        """The command exectuted to perform the analysis.
+        """
+        return self.yaml_file["command_line"]
+
+    @property
+    def source_files(self) -> list:
+        """The source file(s) analyzed in the analysis.
+        """
+        results: dict = self.yaml_file["analysis"]
+        return list(results.keys())
+
+    @property
+    def model(self) -> str:
+        """The model used to fit the spectra in the analysis.
+        """
+        return self.yaml_file["positional_arguments"]["model"]
+
+    @property
+    def back(self) -> np.ndarray:
+        """The back voltage of the detector.
+        """
+        results: dict = self.yaml_file["analysis"]
+        back = np.array([results[key]["back"] for key in self.source_files])
+        return back
+
+    @property
+    def drift(self) -> np.ndarray:
+        """The drift voltage of the detector.
+        """
+        results: dict = self.yaml_file["analysis"]
+        drift = np.array([results[key]["drift"] for key in self.source_files])
+        return drift
+
+    @property
+    def gain(self) -> np.ndarray:
+        """The gain estimated from the analysis.
+        """
+        results: dict = self.yaml_file["analysis"]
+        keys = list(results.keys())
+        val = np.array([results[key]["results"]["gain"]["val"] for key in keys])
+        err = np.array([results[key]["results"]["gain"]["err"] for key in keys])
+        gain = unumpy.uarray(val, err)
+        return gain
+
+    @property
+    def resolution(self) -> np.ndarray:
+        """The energy resolution estimated from the analysis.
+        """
+        results: dict = self.yaml_file["analysis"]
+        keys = list(results.keys())
+        val = np.array([results[key]["results"]["resolution"]["val"] for key in keys])
+        err = np.array([results[key]["results"]["resolution"]["err"] for key in keys])
+        resolution = unumpy.uarray(val, err)
+        return resolution

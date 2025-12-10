@@ -6,7 +6,7 @@ import numpy as np
 from aptapy.plotting import plt
 
 from analysis.app import load_class
-from analysis.fileio import PulsatorFile, SourceFile
+from analysis.fileio import PulsatorFile, SourceFile, LoadYamlLog
 
 
 def test_source_file(datadir):
@@ -43,3 +43,15 @@ def test_fit(datadir):
     source.hist.plot()
     model.plot(fit_output=True)
     plt.legend()
+
+
+def test_load_yaml(datadir):
+    file_path = datadir / "2025-12-09_13:50:23_compare.yaml"
+    log = LoadYamlLog(file_path)
+
+    assert log.yaml_file != {}
+    assert log.command == "analysis compare 251118 251127 --save"
+    assert log.gain is not None
+    assert log.resolution is not None
+    assert log.model == "Gaussian"
+    
