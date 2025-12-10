@@ -4,8 +4,7 @@ import datetime
 import shutil
 from unittest.mock import patch
 
-import numpy as np
-from aptapy.models import Gaussian
+from aptapy.models import Gaussian, Line
 from uncertainties import ufloat
 
 from analysis.log import LogYaml, get_command, get_subcommand
@@ -51,16 +50,16 @@ def test_add_pulse_results():
     """
     # Create a LogYaml instance
     logyaml = LogYaml()
-    line_pars = np.array([ufloat(1.0, 0.1), ufloat(2.0, 0.2)])
-    logyaml.add_pulse_results("calibration_file.txt", line_pars)
+    line_model = Line()
+    logyaml.add_pulse_results("calibration_file.txt", line_model)
 
     assert "calibration" in logyaml.yaml_dict
     calibration = logyaml.yaml_dict["calibration"]
-    assert calibration["file"] == "calibration_file.txt"
-    assert calibration["results"]["m"]["val"] == 1.0
-    assert calibration["results"]["m"]["err"] == 0.1
-    assert calibration["results"]["q"]["val"] == 2.0
-    assert calibration["results"]["q"]["err"] == 0.2
+    assert calibration["calibration_file.txt"] is not None
+    assert calibration["calibration_file.txt"]["fit_parameters"]["slope"]["val"] == 1.0
+    assert calibration["calibration_file.txt"]["fit_parameters"]["slope"]["err"] is None
+    assert calibration["calibration_file.txt"]["fit_parameters"]["intercept"]["val"] == 0.0
+    assert calibration["calibration_file.txt"]["fit_parameters"]["intercept"]["err"] is None
 
 
 def test_add_source_results():

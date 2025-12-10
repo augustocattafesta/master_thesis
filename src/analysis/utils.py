@@ -39,8 +39,8 @@ KBETA = weighted_energy('Mn', 'Kb1', 'Kb3', 'Kb5') * 1e-3   # keV
 AR_ESCAPE = weighted_energy("Ar", "Ka1", "Ka2", "Ka3", "Kb1", "Kb3") * 1e-3 # keV
 
 
-def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
-                            npeaks: int) -> tuple[ArrayLike, ArrayLike]:
+def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
+                            npeaks: int) -> tuple[np.ndarray, np.ndarray]:
     """Find the position and height of a fixed number of peaks in a sample of data
 
     Arguments
@@ -59,7 +59,7 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
     ypeaks : ArrayLike
         The height of the peaks.
     """
-    min_width, max_width = 0, len(ydata)
+    min_width, max_width = 0., len(ydata)
     peaks, properties = scipy.signal.find_peaks(ydata, width=(min_width, max_width))
     widths = properties['widths']
     while len(peaks) > npeaks:
@@ -70,8 +70,8 @@ def find_peaks_iterative(xdata: ArrayLike, ydata: ArrayLike,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(w: float, capacity: float, line_adc: ArrayLike, line_pars: ArrayLike,
-         energy: float) -> ArrayLike:
+def gain(w: float, capacity: float, line_adc: np.ndarray, line_pars: np.ndarray,
+         energy: float) -> np.ndarray:
     """Estimate the gain of the detector from the analysis of a spectral emission line, using the
     calibration data from a calibration pulse file.
 
