@@ -65,8 +65,8 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
     try:
         # Pulse file analysis and plotting
         pulse_data = PulsatorFile(Path(pulse_file))
-        line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
-        logyaml.add_pulse_results(pulse_data.file_path.name, line_pars)
+        line_model, pulse_fig, line_fig = pulse_data.analyze_pulses()
+        logyaml.add_pulse_results(pulse_data.file_path.name, line_model)
         if not plot:
             plt.close(pulse_fig)
             plt.close(line_fig)
@@ -90,16 +90,16 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                 if xmax_init == float("inf"):
                     kwargs.update(xmax=x_peak + 0.5 * x_peak)
                 # Fit the spectrum in the given range and log
-                pars, fit_model = source_data.fit(model, **kwargs)
+                fit_model = source_data.fit(model, **kwargs)
                 if issubclass(model, aptapy.models.Fe55Forest):
-                    line_adc = fit_model.energies[0] / pars[1]
-                    sigma = pars[2]
+                    line_adc = fit_model.energies[0] / fit_model.status.correlated_pars[1]
+                    sigma = fit_model.status.correlated_pars[2]
                 elif issubclass(model, aptapy.models.Gaussian):
-                    line_adc = pars[1]
-                    sigma = pars[2]
+                    line_adc = fit_model.status.correlated_pars[1]
+                    sigma = fit_model.status.correlated_pars[2]
                 else:
                     raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-                g[i] = gain(w, capacity, line_adc, line_pars, e_peak)
+                g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, e_peak)
                 res[i] = energy_resolution(line_adc, sigma)
                 logyaml.add_source_results(source_data.file_path.name, fit_model)
                 logyaml.add_source_gain_res(source_data.file_path.name, g[i], res[i])
@@ -117,7 +117,7 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                     if not plot:
                         plt.close("all")
             return res, g
-        return line_pars
+        return line_model.status.correlated_pars
     finally:
         if save:
             logyaml.save()
@@ -167,8 +167,8 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = data_folder.pulse_data[0]
     # Analyzing, plotting and saving the calibration file
-    line_pars, pulse_fig, line_fig = pulse_data.analyze_pulses()
-    logyaml.add_pulse_results(pulse_data.file_path.name, line_pars)
+    line_model, pulse_fig, line_fig = pulse_data.analyze_pulses()
+    logyaml.add_pulse_results(pulse_data.file_path.name, line_model)
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
@@ -186,7 +186,7 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
     xmax_init = kwargs.get("xmax", float("inf"))
     # Iterating on the given models for the spectrum fit
     for i, model in enumerate(models):
-        results = []
+        fit_models = []
         for source in source_data:
             # Without a proper initialization of xmin and xmax the fit doesn't converge
             x_peak = source.hist.bin_centers()[source.hist.content.argmax()]
@@ -195,24 +195,22 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
             if xmax_init == float("inf"):
                 kwargs.update(xmax=x_peak + 0.5 * x_peak)
             # Fit the spectrum in the given range
-            results.append(source.fit(model, **kwargs))
-            logyaml.add_source_results(source.file_path.name, results[-1][1])
+            fit_models.append(source.fit(model, **kwargs))
+            logyaml.add_source_results(source.file_path.name, fit_models[-1])
 
         # Collect fit parameters and fit models from the results
-        pars, fit_models = zip(*results, strict=True)
-        pars = np.stack(pars)
-        fit_models = list(fit_models)
+        correlated_pars = np.array([fit_model.status.correlated_pars for fit_model in fit_models])
         # Order and number of parameters differ based on the model
         if issubclass(model, aptapy.models.Fe55Forest):
-            line_adc = fit_models[0].energies[0] / pars[:, 1]
-            sigma = pars[:, 2]
+            line_adc = fit_models[0].energies[0] / correlated_pars[:, 1]
+            sigma = correlated_pars[:, 2]
         elif issubclass(model, aptapy.models.Gaussian):
-            line_adc = pars[:, 1]
-            sigma = pars[:, 2]
+            line_adc = correlated_pars[:, 1]
+            sigma = correlated_pars[:, 2]
         else:
             raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
         # Calculate gain and energy resolution and store them in the previously created arrays
-        g[i] = gain(w, capacity, line_adc, line_pars, KALPHA)
+        g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, KALPHA)
         res[i] = energy_resolution(line_adc, sigma)
         # Source files plotting and saving
         if plot or save:

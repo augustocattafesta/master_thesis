@@ -7,12 +7,10 @@ import re
 
 import aptapy.modeling
 import numpy as np
-import uncertainties
 import yaml
 from aptapy.hist import Histogram1d
 from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
-from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
@@ -22,7 +20,7 @@ from .utils import find_peaks_iterative
 class FileBase:
     """Load data from a file and define the path and the histogram.
     """
-    def __init__(self, file_path: pathlib.Path):
+    def __init__(self, file_path: pathlib.Path) -> None:
         """Class constructor.
 
         Arguments
@@ -37,7 +35,7 @@ class FileBase:
 class DataFolder:
     """Load source files and calibration pulse files from a folder.
     """
-    def __init__(self, folder_path: pathlib.Path):
+    def __init__(self, folder_path: pathlib.Path) -> None:
         """Class constructor.
 
         Parameters
@@ -54,7 +52,7 @@ class DataFolder:
         self.source_data = [SourceFile(source_file_path) for source_file_path in self.source_files]
 
     @property
-    def source_files(self):
+    def source_files(self) -> list[pathlib.Path]:
         """Extract the source files from all the files of the directory and return a sorted list
         of the files. If file names contain "trend{i}", the sorting is done numerically according
         to the index {i}, otherwise it's done alphabetically.
@@ -78,7 +76,7 @@ class DataFolder:
         return sorted(filtered, key=custom_sort_key)
 
     @property
-    def pulse_files(self):
+    def pulse_files(self) -> list[pathlib.Path]:
         """Extract the calibration pulse files from all the files of the directory.
         """
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
@@ -110,7 +108,7 @@ class SourceFile(FileBase):
         return _voltage
 
     @property
-    def real_time(self):
+    def real_time(self) -> float:
         """Real integration time of the histogram.
         """
         with open(self.file_path, encoding="UTF-8") as input_file:
@@ -119,31 +117,28 @@ class SourceFile(FileBase):
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
 
-    def fit(self, model: aptapy.modeling.AbstractFitModel,
-            **kwargs) -> tuple[ArrayLike, aptapy.modeling.AbstractFitModel]:
+    def fit(self, model_class: aptapy.modeling.AbstractFitModel,
+            **kwargs) -> aptapy.modeling.AbstractFitModel:
         """Fit the spectrum data.
 
         Parameters
         ----------
-        model : aptapy.modeling.AbstractFitModel
+        model_class : aptapy.modeling.AbstractFitModel
             Model class to fit the emission line(s). 
 
         Returns
         -------
-        corr_pars, model_instance: tuple[ArrayLike, aptapy.modeling.AbstractFitModel]
-            Returns the fit parameters as correlated uncertainties.ufloat and the model instance
-            containing results of the fit.
+        model: aptapy.modeling.AbstractFitModel
+            Returns the model instance containing results of the fit.
         """
-        if issubclass(model, Gaussian) or issubclass(model, GaussianForestBase):
-            model_instance = model()
-            if issubclass(model, Fe55Forest):
-                model_instance.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
-            fitstatus = model_instance.fit_iterative(self.hist, **kwargs)
+        if issubclass(model_class, Gaussian) or issubclass(model_class, GaussianForestBase):
+            model = model_class()
+            if issubclass(model_class, Fe55Forest):
+                model.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
+            model.fit_iterative(self.hist, **kwargs)
         else:
             raise TypeError("Choose between Gaussian or GaussianForestBase child class")
-        corr_pars = uncertainties.correlated_values(model_instance.free_parameter_values(),
-                                                    fitstatus.pcov)
-        return corr_pars, model_instance
+        return model
 
 
 class PulsatorFile(FileBase):
@@ -168,15 +163,15 @@ class PulsatorFile(FileBase):
         """
         return len(self.voltage)
 
-    def analyze_pulses(self) -> ArrayLike:
+    def analyze_pulses(self) -> tuple[aptapy.modeling.AbstractFitModel, plt.Figure, plt.Figure]:
         """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
         Using the resulting position of the peaks, do a calibration fit with a Line model to
         determine the calibration parameters of the spectrum.
 
         Returns
         -------
-        line_pars, pulse_fig, line_fig : tuple[np.ndarray, Figure, Figure]
-            Returns fit parameters of the calibration fit and figures of the pulses and of the
+        line_model, pulse_fig, line_fig : tuple[aptapy.modeling.AbstractFitModel, Figure, Figure]
+            Returns fit model and figures of the pulses and of the
             calibration fit.
         """
         # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
@@ -197,18 +192,25 @@ class PulsatorFile(FileBase):
         plt.legend()
 
         line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
-        fitstatus = line_model.fit(self.voltage, unumpy.nominal_values(mu),
-                                   sigma=unumpy.std_devs(mu), absolute_sigma=True)
+        line_model.fit(self.voltage, unumpy.nominal_values(mu), sigma=unumpy.std_devs(mu),
+                       absolute_sigma=True)
         line_fig = plt.figure("Calibration fit")
         plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
         line_model.plot(fit_output=True)
         plt.legend()
 
-        line_pars = uncertainties.correlated_values(line_model.parameter_values(), fitstatus.pcov)
-        return line_pars, pulse_fig, line_fig
+        return line_model, pulse_fig, line_fig
 
 
-def load_label(name: str):
+def load_label(key: str) -> str | None:
+    """Load a label from the analysis resources labels.yaml file based on the calling function
+    name and on the file name.
+
+    Arguments
+    ---------
+    key : str
+        Key of the label to load.
+    """
     yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
     try:
         with open(yaml_file_path, encoding="utf-8") as f:
@@ -217,9 +219,8 @@ def load_label(name: str):
         previous_frame = inspect.currentframe().f_back
         label = functions.get(previous_frame.f_code.co_name, None)
         try:
-            return label[name]
+            return label[key]
         except (TypeError, KeyError):
             return None
-
     except FileNotFoundError:
         return None
