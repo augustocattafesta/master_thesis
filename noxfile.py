@@ -104,5 +104,5 @@ def mypy(session: nox.Session) -> None:
     """
     session.install("mypy")
     session.install(".[dev]")
-    session.run("mypy --install-types")
+    session.run("mypy", "--install-types")
     session.run("mypy", *_TYPE_DIRS, *session.posargs)

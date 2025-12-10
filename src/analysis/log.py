@@ -47,12 +47,12 @@ def get_command(cmd: str) -> str:
 class LogYaml:
     """Handle logging of the analysis and save the results as a YAML file.
     """
-    _LOG_FOLDER: pathlib.Path | None = None
+    _LOG_FOLDER: pathlib.Path = ANALYSIS_RESULTS
     _YAML_PATH: pathlib.Path = ANALYSIS_RESULTS / "log.yaml"
     _YAML_DICT: dict = {}
 
     @property
-    def log_folder(self) -> pathlib.Path | None:
+    def log_folder(self) -> pathlib.Path:
         """Get the log folder path.
         """
         return self._LOG_FOLDER
@@ -126,7 +126,7 @@ class LogYaml:
         return fit_dict
 
     @classmethod
-    def add_pulse_results(cls, key: str, line_model: np.ndarray) -> None:
+    def add_pulse_results(cls, key: str, line_model: aptapy.modeling.AbstractFitModel) -> None:
         """Add pulse calibration results to the YAML dictionary.
         """
         if "calibration" not in cls._YAML_DICT:

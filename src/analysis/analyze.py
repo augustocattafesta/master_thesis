@@ -2,6 +2,7 @@
 """
 
 from pathlib import Path
+from typing import Sequence
 
 import aptapy.models
 import numpy as np
@@ -21,9 +22,9 @@ class ArEscape(aptapy.models.GaussianForestBase):
     pass
 
 def analyze_file(pulse_file: str | Path, source_file: str | Path,
-                 models: tuple[AbstractFitModel], w: float, capacity: float,
+                 models: Sequence[AbstractFitModel], w: float, capacity: float,
                  e_peak: float, plot: bool = False, save: bool = False,
-                 **kwargs) -> ArrayLike | tuple[float, float]:
+                 **kwargs) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Analyze a calibration pulses file to determine the calibration parameters of the readout
     circuit. If a source data file (spectrum) is given, the emission line(s) is fitted using the
     given model. If multiple models are given, the fit is done with each model. 
@@ -123,9 +124,9 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
             logyaml.save()
 
 
-def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, capacity: float,
+def analyze_folder(folder_name: str, models: Sequence[AbstractFitModel], w: float, capacity: float,
                    e_peak: float, plot: bool = False, save: bool = False,
-                   **kwargs) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+                   **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the model(s) specified. If multiple models
@@ -201,10 +202,10 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
         # Collect fit parameters and fit models from the results
         correlated_pars = np.array([fit_model.status.correlated_pars for fit_model in fit_models])
         # Order and number of parameters differ based on the model
-        if issubclass(model, aptapy.models.Fe55Forest):
+        if isinstance(model, aptapy.models.Fe55Forest):
             line_adc = fit_models[0].energies[0] / correlated_pars[:, 1]
             sigma = correlated_pars[:, 2]
-        elif issubclass(model, aptapy.models.Gaussian):
+        elif isinstance(model, aptapy.models.Gaussian):
             line_adc = correlated_pars[:, 1]
             sigma = correlated_pars[:, 2]
         else:
@@ -262,7 +263,7 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
 
 def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
                     capacity: float, e_peak: float, plot: bool = False, save: bool = False,
-                    **kwargs) -> tuple[ArrayLike, ArrayLike]:
+                    **kwargs) -> None:
     """Analyze the files in different folders and compare them. In particular, the gain and the
     energy resolution are calculated and plotted. The gain and the energy resolution are obtained
     with the script `analyze_folder`, using the model given to fit the emission line(s) in the
@@ -355,7 +356,7 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
 
 def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity: float,
                   e_peak, plot: bool = False, save: bool = False,
-                  **kwargs) -> tuple[ArrayLike, ArrayLike]:
+                  **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the given model. The gain and the

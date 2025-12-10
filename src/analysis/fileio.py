@@ -133,7 +133,7 @@ class SourceFile(FileBase):
         """
         if issubclass(model_class, Gaussian) or issubclass(model_class, GaussianForestBase):
             model = model_class()
-            if issubclass(model_class, Fe55Forest):
+            if issubclass(model, Fe55Forest):
                 model.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
             model.fit_iterative(self.hist, **kwargs)
         else:
