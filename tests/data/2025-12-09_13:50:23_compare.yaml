@@ -1,0 +1,364 @@
+execution_datetime: 2025-12-09_13:50:23
+command_line: analysis compare 251118 251127 --save
+positional_arguments:
+  folder_names:
+  - '251118'
+  - '251127'
+  model: Gaussian
+  w: 26.0
+  capacity: 1.0e-12
+  e_peak: 5.896500294312254
+  plot: false
+  save: true
+keyword_arguments:
+  num_sigma_left: 1.5
+  num_sigma_right: 1.5
+  xmin: -.inf
+  xmax: .inf
+  absolute_sigma: true
+calibration:
+  live_data_chip18112025_ci5-10-20.mca:
+    model: Line
+    chisquare: 0.01455542973221242
+    dof: 1
+    fit_parameters:
+      slope:
+        val: 17.57049917269655
+        err: 0.001756031418280316
+      intercept:
+        val: -9.684565267263952
+        err: 0.023242151878659068
+  live_data_chip27112025b_86p6_ci5-10-15mV.mca:
+    model: Line
+    chisquare: 64.43241739287144
+    dof: 1
+    fit_parameters:
+      slope:
+        val: 16.719671938738305
+        err: 0.0026824116978876583
+      intercept:
+        val: -9.341902502850283
+        err: 0.028071074232894386
+analysis:
+  live_data_chip18112025_D1000_B330.mca:
+    back: 330.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 3.485608598977107
+    dof: 5
+    fit_parameters:
+      amplitude:
+        val: 4056.819162395366
+        err: 99.97177508242325
+      mu:
+        val: 27.683075874460833
+        err: 0.07163218796769545
+      sigma:
+        val: 2.8860851750309697
+        err: 0.09954637401437934
+    results:
+      gain:
+        val: 58.282015631505494
+        err: 0.11599578884018238
+      resolution:
+        val: 24.550058138949307
+        err: 0.8392539313596349
+  live_data_chip18112025_D1000_B340.mca:
+    back: 340.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 7.793245957509661
+    dof: 7
+    fit_parameters:
+      amplitude:
+        val: 3253.220031415272
+        err: 81.60782983592605
+      mu:
+        val: 34.70764444448417
+        err: 0.09055995873460794
+      sigma:
+        val: 3.434733957574714
+        err: 0.11877539553930565
+    results:
+      gain:
+        val: 69.2381799141243
+        err: 0.1444523259401849
+      resolution:
+        val: 23.303743316786264
+        err: 0.7994694292151674
+  live_data_chip18112025_D1000_B350.mca:
+    back: 350.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 9.188858394605415
+    dof: 8
+    fit_parameters:
+      amplitude:
+        val: 9542.0632702403
+        err: 128.9492978295704
+      mu:
+        val: 42.37907070056073
+        err: 0.05282353584658026
+      sigma:
+        val: 3.576163923784684
+        err: 0.0647921034135674
+    results:
+      gain:
+        val: 81.2032430358999
+        err: 0.08743528353102292
+      resolution:
+        val: 19.871182526740213
+        err: 0.35622252448870595
+  live_data_chip18112025_D1000_B360.mca:
+    back: 360.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 19.66542539758336
+    dof: 10
+    fit_parameters:
+      amplitude:
+        val: 9656.803070830747
+        err: 132.05214156087902
+      mu:
+        val: 51.97798462904743
+        err: 0.06273852633915518
+      sigma:
+        val: 4.295779769557975
+        err: 0.08016273541186264
+    results:
+      gain:
+        val: 96.17459350203517
+        err: 0.10179566927574812
+      resolution:
+        val: 19.461678598328024
+        err: 0.36342513630101336
+  live_data_chip18112025_D1000_B370.mca:
+    back: 370.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 11.609835126766397
+    dof: 12
+    fit_parameters:
+      amplitude:
+        val: 2170.379698741842
+        err: 62.449060301492565
+      mu:
+        val: 63.066950574238845
+        err: 0.15248535521732445
+      sigma:
+        val: 4.948563803297026
+        err: 0.19397300242692722
+    results:
+      gain:
+        val: 113.46996636498082
+        err: 0.23932246836815907
+      resolution:
+        val: 18.47715345678749
+        err: 0.7229166704337109
+  live_data_chip18112025_D1000_B370_1.mca:
+    back: 370.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 11.781895647508843
+    dof: 12
+    fit_parameters:
+      amplitude:
+        val: 5701.058479134563
+        err: 103.73864537824153
+      mu:
+        val: 62.97803039784476
+        err: 0.0973922380445784
+      sigma:
+        val: 5.042272852303714
+        err: 0.1253723971909037
+    results:
+      gain:
+        val: 113.33127826607459
+        err: 0.15422971275675923
+      resolution:
+        val: 18.85363055991428
+        err: 0.46876911406903066
+  live_data_chip18112025_D1000_B370_2.mca:
+    back: 370.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 15.222685082323313
+    dof: 12
+    fit_parameters:
+      amplitude:
+        val: 10357.719295707158
+        err: 139.2481331705786
+      mu:
+        val: 62.87068588222129
+        err: 0.0718019102375312
+      sigma:
+        val: 5.026502720321386
+        err: 0.09226182522934906
+    results:
+      gain:
+        val: 113.16385387035758
+        err: 0.11512958897760667
+      resolution:
+        val: 18.826753988956483
+        err: 0.3465043584853429
+  live_data_chip27112025b_86p6_D1000_B320.mca:
+    back: 320.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 1346.3041576242088
+    dof: 23
+    fit_parameters:
+      amplitude:
+        val: 242236.5653994668
+        err: 658.6999551240808
+      mu:
+        val: 30.523503246353464
+        err: 0.025054903933994715
+      sigma:
+        val: 8.576751292235889
+        err: 0.03170028915967334
+    results:
+      gain:
+        val: 65.3418484803718
+        err: 0.054670202508391844
+      resolution:
+        val: 66.16771902358553
+        err: 0.2461166387740007
+  live_data_chip27112025b_86p6_D1000_B330.mca:
+    back: 330.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 953.9174137859894
+    dof: 23
+    fit_parameters:
+      amplitude:
+        val: 140263.94496759662
+        err: 520.0275370988396
+      mu:
+        val: 43.08378176146378
+        err: 0.034590625196395726
+      sigma:
+        val: 8.81322659355475
+        err: 0.04460161691696969
+    results:
+      gain:
+        val: 85.92891639506374
+        err: 0.06561795110687253
+      resolution:
+        val: 48.17024364018469
+        err: 0.24671470046786595
+  live_data_chip27112025b_86p6_D1000_B340.mca:
+    back: 340.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 661.3045318202517
+    dof: 25
+    fit_parameters:
+      amplitude:
+        val: 269849.04606066766
+        err: 684.4592598364047
+      mu:
+        val: 59.33670657797495
+        err: 0.02507592842089042
+      sigma:
+        val: 9.15797468682089
+        err: 0.03125267396452348
+    results:
+      gain:
+        val: 112.56845839306685
+        err: 0.050396021090470776
+      resolution:
+        val: 36.34408380261648
+        err: 0.12463268353832219
+  live_data_chip27112025b_86p6_D1000_B350.mca:
+    back: 350.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 255.04681948900316
+    dof: 24
+    fit_parameters:
+      amplitude:
+        val: 308817.35037650244
+        err: 764.4530057992022
+      mu:
+        val: 77.85680373531517
+        err: 0.02389401934526439
+      sigma:
+        val: 9.092529889201115
+        err: 0.03069724203012794
+    results:
+      gain:
+        val: 142.92403510310345
+        err: 0.046415708917134015
+      resolution:
+        val: 27.50083565711786
+        err: 0.09321214473695298
+  live_data_chip27112025b_86p6_D1000_B350_1.mca:
+    back: 350.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 82.031007744809
+    dof: 23
+    fit_parameters:
+      amplitude:
+        val: 100995.91968881454
+        err: 404.6578203723976
+      mu:
+        val: 80.42477740580426
+        err: 0.03617331504203241
+      sigma:
+        val: 8.278324854520285
+        err: 0.044127183694062065
+    results:
+      gain:
+        val: 147.13310166909557
+        err: 0.06409235007996279
+      resolution:
+        val: 24.238755686373096
+        err: 0.12954583985443383
+  live_data_chip27112025b_86p6_D1000_B360.mca:
+    back: 360.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 87.92683684259073
+    dof: 25
+    fit_parameters:
+      amplitude:
+        val: 139482.58609571037
+        err: 508.6209674420935
+      mu:
+        val: 99.43041412843063
+        err: 0.036343956765597325
+      sigma:
+        val: 9.358984910268651
+        err: 0.04650412164134752
+    results:
+      gain:
+        val: 178.28450754755312
+        err: 0.0629385750566685
+      resolution:
+        val: 22.164973827199578
+        err: 0.11034873895307322
+  live_data_chip27112025b_86p6_D1000_B370.mca:
+    back: 370.0
+    drift: 1000.0
+    model: Gaussian
+    chisquare: 164.39311889312518
+    dof: 30
+    fit_parameters:
+      amplitude:
+        val: 132784.81827718654
+        err: 480.86361712285793
+      mu:
+        val: 121.7145909862878
+        err: 0.04210964176927492
+      sigma:
+        val: 10.791069922844908
+        err: 0.05271890246965066
+    results:
+      gain:
+        val: 214.8096420693558
+        err: 0.07091741548735936
+      resolution:
+        val: 20.877552605429646
+        err: 0.10231716024966603

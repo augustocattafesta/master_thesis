@@ -45,7 +45,9 @@ def test_fit(datadir):
     plt.legend()
 
 
-def test_load_yaml(datadir):
+def test_load_yaml_log(datadir):
+    """Test for LoadYamlLog class
+    """
     file_path = datadir / "2025-12-09_13:50:23_compare.yaml"
     log = LoadYamlLog(file_path)
 
@@ -54,4 +56,4 @@ def test_load_yaml(datadir):
     assert log.gain is not None
     assert log.resolution is not None
     assert log.model == "Gaussian"
-    
+

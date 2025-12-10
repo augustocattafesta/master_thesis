@@ -15,7 +15,7 @@ from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import find_peaks_iterative, gain
+from .utils import find_peaks_iterative
 
 
 class FileBase:
@@ -241,7 +241,7 @@ class LoadYamlLog:
             with open(self.yaml_path, encoding="utf-8") as f:
                 self.yaml_file = yaml.safe_load(f)
         except FileNotFoundError:
-            raise FileNotFoundError(f"YAML file {str(self.yaml_path)} not found.")
+            print(f"YAML file {str(self.yaml_path)} not found.")
 
     @property
     def command(self) -> str:
