@@ -1,17 +1,18 @@
 """Testing for the analyze module.
 """
 import numpy as np
-from aptapy.models import Fe55Forest, Gaussian
+from aptapy.models import Gaussian
 from uncertainties.unumpy import nominal_values, std_devs
 
 import analysis.analyze
+from analysis.app import load_class
 from analysis.fileio import PulsatorFile
 
 
 def test_analyze_file(datadir):
     pulse_file = datadir / "folder0/live_data_chip18112025_ci5-10-15_hvon.mca"
     source_file = datadir / "folder0/live_data_chip18112025_D1000_B370.mca"
-    args = [Gaussian, Fe55Forest], 26., 1e-12, 5.9, False, False
+    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 1e-12, 5.9, False, False
     kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
     # Test analysis of calibration pulses file
@@ -35,7 +36,7 @@ def test_analyze_file(datadir):
 
 def test_analyze_folder(datadir):
     folder = datadir / "folder0"
-    args = [Gaussian, Fe55Forest], 26., 1e-12, 5.9, False, False
+    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 1e-12, 5.9, False, False
     kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
 

@@ -3,7 +3,6 @@
 
 import datetime
 import inspect
-import os
 import pathlib
 import re
 import sys
@@ -11,9 +10,7 @@ from numbers import Real
 from typing import Any
 
 import aptapy.modeling
-import numpy as np
 import yaml
-from aptapy.typing_ import ArrayLike
 from uncertainties import ufloat
 
 from . import ANALYSIS_RESULTS
@@ -64,21 +61,17 @@ class LogYaml:
         return self._YAML_DICT
 
     @staticmethod
-    def _clean_numpy_types(data: Any) -> Any:
+    def _clean_numpy_types(data: Any) -> float | Any:
         """Recursively convert numpy types to native python types for YAML serialization.
         """
-        if isinstance(data, dict):
-            return {k: LogYaml._clean_numpy_types(v) for k, v in data.items()}
-        if isinstance(data, (list, tuple)):
-            return [LogYaml._clean_numpy_types(item) for item in data]
         if isinstance(data, Real) and not isinstance(data, (int, float)):
-            return float(data) if isinstance(data, (np.floating, float)) else int(data)
+            return float(data)
         return data
 
     @classmethod
     def start_logging(cls) -> None:
         """Start logging by creating the log folder and preparing the YAML dictionary."""
-        if cls._LOG_FOLDER is not None:
+        if cls._LOG_FOLDER != ANALYSIS_RESULTS:
             return None
         # Create log folder
         date = datetime.datetime.now().strftime("%Y-%m-%d__%H:%M:%S")

@@ -9,6 +9,7 @@ import aptapy.modeling
 import numpy as np
 import yaml
 from aptapy.hist import Histogram1d
+from aptapy.modeling import FitParameter
 from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
 from aptapy.plotting import plt
 from uncertainties import unumpy
@@ -117,7 +118,7 @@ class SourceFile(FileBase):
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
 
-    def fit(self, model_class: aptapy.modeling.AbstractFitModel,
+    def fit(self, model_class: type[aptapy.modeling.AbstractFitModel],
             **kwargs) -> aptapy.modeling.AbstractFitModel:
         """Fit the spectrum data.
 
@@ -131,10 +132,11 @@ class SourceFile(FileBase):
         model: aptapy.modeling.AbstractFitModel
             Returns the model instance containing results of the fit.
         """
-        if issubclass(model_class, Gaussian) or issubclass(model_class, GaussianForestBase):
+        if issubclass(model_class, (Gaussian, GaussianForestBase)):
             model = model_class()
-            if issubclass(model, Fe55Forest):
-                model.intensity1.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
+            if isinstance(model, Fe55Forest):
+                intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
+                intensity_par.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
             model.fit_iterative(self.hist, **kwargs)
         else:
             raise TypeError("Choose between Gaussian or GaussianForestBase child class")
@@ -211,6 +213,7 @@ def load_label(key: str) -> str | None:
     key : str
         Key of the label to load.
     """
+    label_value = None
     yaml_file_path = ANALYSIS_RESOURCES / "labels.yaml"
     try:
         with open(yaml_file_path, encoding="utf-8") as f:
@@ -221,9 +224,7 @@ def load_label(key: str) -> str | None:
             previous_frame = current_frame.f_back
             if previous_frame is not None:
                 label = functions.get(previous_frame.f_code.co_name, None)
-        try:
-            return label[key]
-        except (TypeError, KeyError):
-            return None
-    except FileNotFoundError:
-        return None
+                label_value = label[key]
+    except (FileNotFoundError, TypeError, KeyError):
+        pass
+    return label_value

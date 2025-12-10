@@ -5,6 +5,7 @@ import aptapy.models
 import numpy as np
 from aptapy.plotting import plt
 
+from analysis.app import load_class
 from analysis.fileio import PulsatorFile, SourceFile
 
 
@@ -26,7 +27,7 @@ def test_fit(datadir):
     file_path = datadir / "folder0/live_data_chip18112025_D1000_B370.mca"
     source = SourceFile(file_path)
     plt.figure("Test Gaussian")
-    model = source.fit(aptapy.models.Gaussian, xmin=50, xmax=80)
+    model = source.fit(load_class("Gaussian"), xmin=50, xmax=80)
     source.hist.plot()
     model.plot(fit_output=True)
     plt.legend()

@@ -91,3 +91,6 @@ good-names = ["i", "j", "k", "x", "y", "z"]
 
 [tool.pylint.'FORMAT']
 max-line-length = 100
+
+[tool.mypy]
+ignore_missing_imports = true
