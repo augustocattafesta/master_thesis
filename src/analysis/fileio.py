@@ -214,8 +214,11 @@ def load_label(name: str):
         with open(yaml_file_path, encoding="utf-8") as f:
             yaml_file = yaml.safe_load(f)
         functions = yaml_file["function"]
-        previous_frame = inspect.currentframe().f_back
-        label = functions.get(previous_frame.f_code.co_name, None)
+        current_frame = inspect.currentframe()
+        if current_frame is not None:
+            previous_frame = current_frame.f_back
+            if previous_frame is not None:
+                label = functions.get(previous_frame.f_code.co_name, None)
         try:
             return label[name]
         except (TypeError, KeyError):

@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+from typing import Dict, Any
 
 from ._version import __version__ as __base_version__
 
@@ -11,7 +12,7 @@ def _git_suffix() -> str:
     This will return something along the lines of ``+gf0f18e6.dirty``.
     """
     # pylint: disable=broad-except
-    kwargs = dict(cwd=pathlib.Path(__file__).parent, stderr=subprocess.DEVNULL)
+    kwargs: Dict[str, Any] = dict(cwd=pathlib.Path(__file__).parent, stderr=subprocess.DEVNULL)
     try:
         # Retrieve the git short sha to be appended to the base version string.
         args = ["git", "rev-parse", "--short", "HEAD"]

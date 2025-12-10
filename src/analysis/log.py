@@ -3,10 +3,12 @@
 
 import datetime
 import inspect
+import os
 import pathlib
 import re
 import sys
 from numbers import Real
+from typing import Any
 
 import aptapy.modeling
 import numpy as np
@@ -17,7 +19,7 @@ from uncertainties import ufloat
 from . import ANALYSIS_RESULTS
 
 
-def get_subcommand(cmd: str) -> str:
+def get_subcommand(cmd: str) -> str | None:
     """Extract the subcommand from the entire terminal command line string.
 
     Arguments
@@ -45,11 +47,12 @@ def get_command(cmd: str) -> str:
 class LogYaml:
     """Handle logging of the analysis and save the results as a YAML file.
     """
-    _LOG_FOLDER = None
-    _YAML_DICT = {}
+    _LOG_FOLDER: pathlib.Path | None = None
+    _YAML_PATH: pathlib.Path = ANALYSIS_RESULTS / "log.yaml"
+    _YAML_DICT: dict = {}
 
     @property
-    def log_folder(self) -> pathlib.Path:
+    def log_folder(self) -> pathlib.Path | None:
         """Get the log folder path.
         """
         return self._LOG_FOLDER
@@ -61,7 +64,7 @@ class LogYaml:
         return self._YAML_DICT
 
     @staticmethod
-    def _clean_numpy_types(data: object) -> object:
+    def _clean_numpy_types(data: Any) -> Any:
         """Recursively convert numpy types to native python types for YAML serialization.
         """
         if isinstance(data, dict):
@@ -86,21 +89,24 @@ class LogYaml:
         log_folder = ANALYSIS_RESULTS / log_folder_name
         cls._LOG_FOLDER = log_folder
         # Get caller's frame to extract arguments
-        frame = inspect.currentframe().f_back
-        info = inspect.getargvalues(frame)
-        args_dict = {name: info.locals[name] for name in info.args}
-        kwargs_dict = info.locals[info.keywords] if info.keywords else {}
-        cls._YAML_PATH = cls._LOG_FOLDER / log_file
-        # Prepare YAML dictionary
-        cls._YAML_DICT["execution_datetime"] = date
-        cls._YAML_DICT["command_line"] = get_command(cmd)
-        cls._YAML_DICT["positional_arguments"] = cls._clean_numpy_types(args_dict)
-        cls._YAML_DICT["keyword_arguments"] = cls._clean_numpy_types(kwargs_dict)
+        current_frame = inspect.currentframe()
+        if current_frame is not None:
+            frame = current_frame.f_back
+            if frame is not None:
+                info = inspect.getargvalues(frame)
+                args_dict = {name: info.locals[name] for name in info.args}
+                kwargs_dict = info.locals[info.keywords] if info.keywords else {}
+                cls._YAML_PATH = cls._LOG_FOLDER / log_file
+                # Prepare YAML dictionary
+                cls._YAML_DICT["execution_datetime"] = date
+                cls._YAML_DICT["command_line"] = get_command(cmd)
+                cls._YAML_DICT["positional_arguments"] = cls._clean_numpy_types(args_dict)
+                cls._YAML_DICT["keyword_arguments"] = cls._clean_numpy_types(kwargs_dict)
 
         return None
 
     @classmethod
-    def add_pulse_results(cls, key: str, line_pars: ArrayLike) -> None:
+    def add_pulse_results(cls, key: str, line_pars: np.ndarray) -> None:
         """Add pulse calibration results to the YAML dictionary.
         """
         cls._YAML_DICT["calibration"] = {"file": key,
