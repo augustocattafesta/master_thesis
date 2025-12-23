@@ -99,18 +99,6 @@ class LogYaml:
 
         return None
 
-    @classmethod
-    def add_pulse_results(cls, key: str, line_pars: ArrayLike) -> None:
-        """Add pulse calibration results to the YAML dictionary.
-        """
-        cls._YAML_DICT["calibration"] = {"file": key,
-                                        "results": {"m": {"val": line_pars[0].n,
-                                                          "err": line_pars[0].s},
-                                                    "q": {"val": line_pars[1].n,
-                                                          "err": line_pars[1].s}
-                                                    }
-                                        }
-
     @staticmethod
     def _fit_dict(fit_model: aptapy.modeling.AbstractFitModel) -> dict:
         """Create a dictionary from the fit model results.
@@ -130,6 +118,14 @@ class LogYaml:
                 "fit_parameters" : pars_dictionary}
 
         return fit_dict
+
+    @classmethod
+    def add_pulse_results(cls, key: str, line_model: ArrayLike) -> None:
+        """Add pulse calibration results to the YAML dictionary.
+        """
+        if "calibration" not in cls._YAML_DICT:
+            cls._YAML_DICT["calibration"] = {}
+        cls._YAML_DICT["calibration"][key] = cls._fit_dict(line_model)
 
     @classmethod
     def add_source_results(cls, key: str, fit_model: aptapy.modeling.AbstractFitModel) -> None:
