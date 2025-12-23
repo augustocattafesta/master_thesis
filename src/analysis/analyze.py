@@ -1,13 +1,13 @@
 """Module to analyze data
 """
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import aptapy.models
 import numpy as np
 from aptapy.modeling import AbstractFitModel, line_forest
 from aptapy.plotting import last_line_color, plt
-from aptapy.typing_ import ArrayLike
 from uncertainties import unumpy
 
 from . import ANALYSIS_DATA
@@ -21,9 +21,9 @@ class ArEscape(aptapy.models.GaussianForestBase):
     pass
 
 def analyze_file(pulse_file: str | Path, source_file: str | Path,
-                 models: tuple[AbstractFitModel], w: float, capacity: float,
+                 models: Sequence[type[AbstractFitModel]], w: float, capacity: float,
                  e_peak: float, plot: bool = False, save: bool = False,
-                 **kwargs) -> ArrayLike | tuple[float, float]:
+                 **kwargs) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Analyze a calibration pulses file to determine the calibration parameters of the readout
     circuit. If a source data file (spectrum) is given, the emission line(s) is fitted using the
     given model. If multiple models are given, the fit is done with each model. 
@@ -91,10 +91,11 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                     kwargs.update(xmax=x_peak + 0.5 * x_peak)
                 # Fit the spectrum in the given range and log
                 fit_model = source_data.fit(model, **kwargs)
-                if issubclass(model, aptapy.models.Fe55Forest):
-                    line_adc = fit_model.energies[0] / fit_model.status.correlated_pars[1]
+                if isinstance(fit_model, aptapy.models.Fe55Forest):
+                    reference_energy: float = fit_model.energies[0]   # type: ignore [attr-defined]
+                    line_adc = reference_energy / fit_model.status.correlated_pars[1]
                     sigma = fit_model.status.correlated_pars[2]
-                elif issubclass(model, aptapy.models.Gaussian):
+                elif isinstance(fit_model, aptapy.models.Gaussian):
                     line_adc = fit_model.status.correlated_pars[1]
                     sigma = fit_model.status.correlated_pars[2]
                 else:
@@ -123,9 +124,9 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
             logyaml.save()
 
 
-def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, capacity: float,
-                   e_peak: float, plot: bool = False, save: bool = False,
-                   **kwargs) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w: float,
+                   capacity: float, e_peak: float, plot: bool = False, save: bool = False,
+                   **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the model(s) specified. If multiple models
@@ -201,10 +202,11 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
         # Collect fit parameters and fit models from the results
         correlated_pars = np.array([fit_model.status.correlated_pars for fit_model in fit_models])
         # Order and number of parameters differ based on the model
-        if issubclass(model, aptapy.models.Fe55Forest):
-            line_adc = fit_models[0].energies[0] / correlated_pars[:, 1]
+        if isinstance(fit_models[0], aptapy.models.Fe55Forest):
+            reference_energy: float = fit_models[0].energies[0]   # type: ignore [attr-defined]
+            line_adc = reference_energy / correlated_pars[:, 1]
             sigma = correlated_pars[:, 2]
-        elif issubclass(model, aptapy.models.Gaussian):
+        elif isinstance(fit_models[0], aptapy.models.Gaussian):
             line_adc = correlated_pars[:, 1]
             sigma = correlated_pars[:, 2]
         else:
@@ -218,7 +220,8 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
                 fig = plt.figure(f"{_s.file_path.name}")
                 plt.title(f"{int(voltage[j])} V {fit_models[j].name()}")
                 _s.hist.plot()
-                label = f"{fit_models[j].name()}\nFWHM@{e_peak:.1f} keV: {fit_models[j].fwhm()} ADC"
+                label = f"{fit_models[j].name()}\nFWHM@{e_peak:.1f} keV: \
+                    {fit_models[j].fwhm()} ADC" # type: ignore [attr-defined]
                 fit_models[j].plot(label=label)
                 plt.xlim(fit_models[j].default_plotting_range())
                 plt.legend()
@@ -260,9 +263,9 @@ def analyze_folder(folder_name: str, models: tuple[AbstractFitModel], w: float, 
     return voltage, res, g
 
 
-def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
+def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: float,
                     capacity: float, e_peak: float, plot: bool = False, save: bool = False,
-                    **kwargs) -> tuple[ArrayLike, ArrayLike]:
+                    **kwargs) -> None:
     """Analyze the files in different folders and compare them. In particular, the gain and the
     energy resolution are calculated and plotted. The gain and the energy resolution are obtained
     with the script `analyze_folder`, using the model given to fit the emission line(s) in the
@@ -325,10 +328,10 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
         plt.errorbar(voltage[i], unumpy.nominal_values(g[i][0]), unumpy.std_devs(g[i][0]), fmt="o",
                     label=load_label(folder_name))
         # Fit the gain with an exponential function
-        model = aptapy.models.Exponential()
-        model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
-                  absolute_sigma=True)
-        model.plot(label=f"scale: {-model.scale.ufloat()} V", color=last_line_color())
+        exp_model = aptapy.models.Exponential()
+        exp_model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
+                      absolute_sigma=True)
+        exp_model.plot(label=f"scale: {-exp_model.scale.ufloat()} V", color=last_line_color())
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.legend()
@@ -353,9 +356,9 @@ def compare_folders(folder_names: tuple[str], model: AbstractFitModel, w: float,
     # plt.legend()
 
 
-def analyze_trend(folder_name: str, model: AbstractFitModel, w: float, capacity: float,
+def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, capacity: float,
                   e_peak, plot: bool = False, save: bool = False,
-                  **kwargs) -> tuple[ArrayLike, ArrayLike]:
+                  **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
     spectrum a fit of the emission line(s) is done using the given model. The gain and the
