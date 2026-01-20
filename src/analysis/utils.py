@@ -8,6 +8,7 @@ import xraydb
 from aptapy.typing_ import ArrayLike
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
+ELECTRONS_IN_1FC = 1e-15 / ELEMENTARY_CHARGE  # Number of electrons in 1 fC
 W_ARGON = 26.   # eV
 
 
@@ -70,39 +71,63 @@ def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(w: float, capacity: float, line_adc: np.ndarray, line_pars: np.ndarray,
-         energy: float) -> np.ndarray:
-    """Estimate the gain of the detector from the analysis of a spectral emission line, using the
-    calibration data from a calibration pulse file.
+def gain(w: float, line_val: np.ndarray, energy: float) -> np.ndarray:
+    """Estimate the gain of the detector from the analysis of a spectral emission line.
 
     Arguments
     ----------
     w : float
         W-value of the gas inside the detector.
-    capacity : float
-        Value of the capacitance of the circuit.
-    line_adc : ArrayLike
-        Position of the peak of the emission line in ADC channels.
-    line_pars : ArrayLike
-        Results of the calibration fit. The elements should be ordered in [slope, intercept].
+    line_val : ArrayLike
+        Position of the peak of the emission line in charge (fC).
     energy : float
         Energy of the emission line (in keV).
     """
     exp_electrons = energy / (w * 1e-3)
-    slope = line_pars[0] * 1e3 / capacity * ELEMENTARY_CHARGE
-    meas_electrons = (line_adc - line_pars[1]) / slope
+    meas_electrons = line_val * ELECTRONS_IN_1FC
     return meas_electrons / exp_electrons
 
 
-def energy_resolution(line_adc: ArrayLike, sigma: ArrayLike) -> ArrayLike:
+def energy_resolution(line_val: np.ndarray, sigma: np.ndarray) -> np.ndarray:
     """Estimate the energy resolution of the detector, using the position and the sigma of a
     spectral emission line.
 
     Arguments
     ----------
-    line_adc : ArrayLike
-        Position of the peak of the emission line in ADC channels.
-    sigma : ArrayLike
+    line_val : np.ndarray
+        Position of the peak of the emission line in charge (fC).
+    sigma : np.ndarray
         Sigma of the emission line.
     """
-    return sigma * 2 * np.sqrt(2 * np.log(2)) / line_adc * 100
+    return sigma * 2 * np.sqrt(2 * np.log(2)) / line_val * 100
+
+
+def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> np.ndarray:
+    """Compute the accumulated acquisition time for Amptek MCA data, taking into account the
+    start times of each acquisition and integration times.
+
+    Arguments
+    ---------
+    start_times : np.ndarray
+        Array of datetime objects representing the start time of each acquisition.
+    real_times : np.ndarray
+        Array of real (integration) times for each acquisition.
+    
+    Returns 
+    -------
+    accumulated_times : np.ndarray
+        Array of accumulated acquisition times.
+    """
+    t = np.zeros(len(start_times))
+    t[0] = real_times[0]
+    t_acc = 0.0
+    for i in range(1, len(start_times)):
+        if start_times[i] == start_times[i-1]:
+            t_acc += real_times[i]
+        else:
+            dt_gap = (start_times[i] - start_times[0]).total_seconds()
+            t_acc = dt_gap + real_times[i]
+        
+        t[i] = t_acc
+    
+    return t - real_times / 2
