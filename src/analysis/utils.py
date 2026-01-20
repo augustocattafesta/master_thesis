@@ -2,9 +2,11 @@
 signal.
 """
 
+import aptapy
 import numpy as np
 import scipy.signal
 import xraydb
+from aptapy.modeling import line_forest
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 ELECTRONS_IN_1FC = 1e-15 / ELEMENTARY_CHARGE  # Number of electrons in 1 fC
@@ -37,6 +39,11 @@ def weighted_energy(element: str, *lines: str) -> float:
 KALPHA = weighted_energy('Mn', 'Ka1', 'Ka2', 'Ka3') * 1e-3  # keV
 KBETA = weighted_energy('Mn', 'Kb1', 'Kb3', 'Kb5') * 1e-3   # keV
 AR_ESCAPE = weighted_energy("Ar", "Ka1", "Ka2", "Ka3", "Kb1", "Kb3") * 1e-3 # keV
+
+
+@line_forest(KALPHA - AR_ESCAPE, KBETA - AR_ESCAPE)
+class ArEscape(aptapy.models.GaussianForestBase):
+    pass
 
 
 def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
@@ -103,7 +110,7 @@ def energy_resolution(line_val: np.ndarray, sigma: np.ndarray) -> np.ndarray:
 
 def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> np.ndarray:
     """Compute the accumulated acquisition time for Amptek MCA data, taking into account the
-    start times of each acquisition and integration times.
+    start times of each acquisition and integration times. The times are expressed in hours.
 
     Arguments
     ---------
@@ -128,4 +135,5 @@ def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> n
             t_acc = dt_gap + real_times[i]
         t[i] = t_acc
 
-    return t - real_times / 2
+    t -= real_times / 2
+    return t / 3600  # Convert to hours

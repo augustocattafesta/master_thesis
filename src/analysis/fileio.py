@@ -1,6 +1,7 @@
 """Module to handle reading of different types of file and analyze specific type of signals.
 """
 
+import datetime
 import inspect
 import pathlib
 import re
@@ -15,8 +16,7 @@ from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import find_peaks_iterative
-
+from .utils import find_peaks_iterative, ArEscape
 
 class FileBase:
     """Load data from a file and define the path and the histogram.
@@ -50,7 +50,10 @@ class DataFolder:
                                   Verify the path.")
         self.input_files = list(folder_path.iterdir())
         self.pulse_data = [PulsatorFile(pulse_file_path) for pulse_file_path in self.pulse_files]
-        self.source_data = [SourceFile(source_file_path) for source_file_path in self.source_files]
+        # Get charge conversion parameters from the first calibration pulse file in the folder
+        charge_conv_model, _, _ = self.pulse_data[0].analyze_pulses(fit_charge=True)
+        self.source_data = [SourceFile(source_file_path, charge_conv_model)
+                            for source_file_path in self.source_files]
 
     @property
     def source_files(self) -> list[pathlib.Path]:
@@ -67,14 +70,7 @@ class DataFolder:
             numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
             return numbers[-1]  # sort by the last number
 
-        def custom_sort_key(p: pathlib.Path):
-            """Define if the sorting is numerical or alphabetical.
-            """
-            if "trend" in p.stem:
-                return numeric_sort_key(p)
-            return p.name
-
-        return sorted(filtered, key=custom_sort_key)
+        return sorted(filtered, key=numeric_sort_key)
 
     @property
     def pulse_files(self) -> list[pathlib.Path]:
@@ -86,6 +82,18 @@ class DataFolder:
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.
     """
+    def __init__(self, file_path: pathlib.Path,
+                 charge_conv_model: aptapy.modeling.AbstractFitModel) -> None:
+        super().__init__(file_path)
+        content = self.hist.content
+        old_edges = self.hist.bin_edges()
+        slope, offset = charge_conv_model.parameter_values()
+        # Converting the binning from ADC channels to charge (fC) using the calibration pulse file
+        # This feature could become optional in the future
+        new_edges = unumpy.nominal_values(old_edges * slope + offset)
+        self.hist = Histogram1d(new_edges, xlabel="Charge [fC]")
+        self.hist.set_content(content)
+
     @property
     def voltage(self) -> float:
         """Back voltage of the detector extracted from the file name.
@@ -110,13 +118,24 @@ class SourceFile(FileBase):
 
     @property
     def real_time(self) -> float:
-        """Real integration time of the histogram.
+        """Real integration time of the histogram extracted from the amptek file..
         """
         with open(self.file_path, encoding="UTF-8") as input_file:
             real_time_str = input_file.readlines()[8]
-        if real_time_str.split('-')[0].strip() == 'REAL_TIME':
+        if real_time_str.split('-')[0].strip() == "REAL_TIME":
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
+
+    @property
+    def start_time(self) -> datetime.datetime:
+        """Start time of the acquisition extracted from the amptek file.
+        """
+        with open(self.file_path, encoding="UTF-8") as input_file:
+            start_time_str = input_file.readlines()[9]
+        if start_time_str.split('-')[0].strip() == "START_TIME":
+            start = datetime.datetime.strptime(start_time_str, "START_TIME - %m/%d/%Y %H:%M:%S\n")
+            return start
+        raise ValueError("Not reading START_TIME")
 
     def fit(self, model_class: type[aptapy.modeling.AbstractFitModel],
             **kwargs) -> aptapy.modeling.AbstractFitModel:
@@ -137,6 +156,9 @@ class SourceFile(FileBase):
             if isinstance(model, Fe55Forest):
                 intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
                 intensity_par.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
+            if isinstance(model, ArEscape): 
+                intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
+                intensity_par.freeze(0.16)  # Freeze Ar escape / K-alpha ratio
             model.fit_iterative(self.hist, **kwargs)
         else:
             raise TypeError("Choose between Gaussian or GaussianForestBase child class")
@@ -165,7 +187,8 @@ class PulsatorFile(FileBase):
         """
         return len(self.voltage)
 
-    def analyze_pulses(self) -> tuple[aptapy.modeling.AbstractFitModel, plt.Figure, plt.Figure]:
+    def analyze_pulses(self,fit_charge: bool = True) -> tuple[aptapy.modeling.AbstractFitModel,
+                                                              plt.Figure, plt.Figure]:
         """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
         Using the resulting position of the peaks, do a calibration fit with a Line model to
         determine the calibration parameters of the spectrum.
@@ -176,8 +199,6 @@ class PulsatorFile(FileBase):
             Returns fit model and figures of the pulses and of the
             calibration fit.
         """
-        # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
-
         pulse_fig = plt.figure(self.file_path.name)
         plt.title("Calibration pulses")
         self.hist.plot()
@@ -193,11 +214,12 @@ class PulsatorFile(FileBase):
             peak_model.plot(fit_output=True)
         plt.legend()
 
-        line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
-        line_model.fit(self.voltage, unumpy.nominal_values(mu), sigma=unumpy.std_devs(mu),
-                       absolute_sigma=True)
+        ylabel = "Charge [fC]" if fit_charge else "Voltage [mV]"
+        ydata = self.voltage
+        line_model = Line("Calibration fit", "ADC Channel", ylabel)
+        line_model.fit(unumpy.nominal_values(mu), ydata)
         line_fig = plt.figure("Calibration fit")
-        plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
+        plt.errorbar(unumpy.nominal_values(mu), ydata, fmt='.k', label="Data")
         line_model.plot(fit_output=True)
         plt.legend()
 

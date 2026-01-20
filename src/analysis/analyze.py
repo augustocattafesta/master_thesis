@@ -6,19 +6,15 @@ from pathlib import Path
 
 import aptapy.models
 import numpy as np
-from aptapy.modeling import AbstractFitModel, line_forest
+from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_DATA
 from .fileio import DataFolder, PulsatorFile, SourceFile, load_label
 from .log import LogYaml
-from .utils import AR_ESCAPE, KALPHA, KBETA, energy_resolution, gain
+from .utils import KALPHA, amptek_accumulate_time, energy_resolution, gain
 
-
-@line_forest(KALPHA - AR_ESCAPE, KBETA - AR_ESCAPE)
-class ArEscape(aptapy.models.GaussianForestBase):
-    pass
 
 def analyze_file(pulse_file: str | Path, source_file: str | Path,
                  models: Sequence[type[AbstractFitModel]], w: float, capacity: float,
@@ -65,8 +61,9 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
     try:
         # Pulse file analysis and plotting
         pulse_data = PulsatorFile(Path(pulse_file))
-        line_model, pulse_fig, line_fig = pulse_data.analyze_pulses()
-        logyaml.add_pulse_results(pulse_data.file_path.name, line_model)
+        _, pulse_fig, line_fig = pulse_data.analyze_pulses(fit_charge=False)
+        charge_conversion_model, _, _ = pulse_data.analyze_pulses(fit_charge=True)
+        logyaml.add_pulse_results(pulse_data.file_path.name, charge_conversion_model)
         if not plot:
             plt.close(pulse_fig)
             plt.close(line_fig)
@@ -75,7 +72,7 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
             line_fig.savefig(logyaml.log_folder / "cal_fit.pdf", format="pdf")
         # Source file analysis
         if source_file is not None:
-            source_data = SourceFile(Path(source_file))
+            source_data = SourceFile(Path(source_file), charge_conversion_model)
             # Create empty arrays for the results
             g = np.zeros(shape=len(models), dtype=object)
             res = np.zeros(shape=len(models), dtype=object)
@@ -95,12 +92,19 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                     reference_energy: float = fit_model.energies[0]   # type: ignore [attr-defined]
                     line_adc = reference_energy / fit_model.status.correlated_pars[1]
                     sigma = fit_model.status.correlated_pars[2]
+                    # These lines were used to check the consistency of different methods to estimate
+                    # the resolution
+                    # if fit_escape:
+                    #     kwargs.update(xmin=1., xmax=1.3, num_sigma_left=1.5, num_sigma_right=1.5)
+                    #     escape_model = source_data.fit(aptapy.models.Gaussian, **kwargs)
+                    #     resolution = 2.355*sigma * (KALPHA*1e3 - 2970) / (line_adc - escape_model.mu.value) / (KALPHA*1e3) * 100
+                    #     print(resolution)
                 elif isinstance(fit_model, aptapy.models.Gaussian):
                     line_adc = fit_model.status.correlated_pars[1]
                     sigma = fit_model.status.correlated_pars[2]
                 else:
                     raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-                g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, e_peak)
+                g[i] = gain(w, line_adc, e_peak)
                 res[i] = energy_resolution(line_adc, sigma)
                 logyaml.add_source_results(source_data.file_path.name, fit_model)
                 logyaml.add_source_gain_res(source_data.file_path.name, g[i], res[i])
@@ -109,16 +113,19 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
                     plt.figure(f"{source_data.file_path.name}")
                     plt.title(f"{int(source_data.voltage)} V {fit_model.name()}")
                     source_data.hist.plot()
-                    label = f"{fit_model.name()}\nFWHM/E@{e_peak:.1f} keV: {res[i]} %"
+                    fwhm = sigma * 2 * np.sqrt(2 * np.log(2))
+                    label = fr"$\Delta$E/E@{e_peak:.1f} keV: {res[i]} %" + f"\nFWHM@{e_peak:.1f} keV: {fwhm} fC"
                     fit_model.plot(label=label)
-                    plt.xlim(fit_model.default_plotting_range())
+                    # escape_model.plot(fit_output=True)
+                    xmin, xmax = fit_model.default_plotting_range()
+                    plt.xlim(0.5 * xmin, xmax)
                     plt.legend()
                     if save:
                         plt.savefig(logyaml.log_folder / source_data.file_path.name, format='pdf')
                     if not plot:
                         plt.close("all")
             return res, g
-        return line_model.status.correlated_pars
+        return charge_conversion_model.status.correlated_pars
     finally:
         if save:
             logyaml.save()
@@ -168,11 +175,13 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
     data_folder = DataFolder(ANALYSIS_DATA / folder_name)
     pulse_data = data_folder.pulse_data[0]
     # Analyzing, plotting and saving the calibration file
-    line_model, pulse_fig, line_fig = pulse_data.analyze_pulses()
+    line_model, pulse_fig, line_fig = pulse_data.analyze_pulses(fit_charge=False)
     logyaml.add_pulse_results(pulse_data.file_path.name, line_model)
+    _, charge_fig, _ = pulse_data.analyze_pulses(fit_charge=True)
     if not plot:
         plt.close(pulse_fig)
         plt.close(line_fig)
+        plt.close(charge_fig)
     if save:
         pulse_fig.savefig(logyaml.log_folder / "cal_pulses.pdf", format="pdf")
         line_fig.savefig(logyaml.log_folder / "cal_fit.pdf", format="pdf")
@@ -212,7 +221,7 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
         else:
             raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
         # Calculate gain and energy resolution and store them in the previously created arrays
-        g[i] = gain(w, capacity, line_adc, line_model.status.correlated_pars, KALPHA)
+        g[i] = gain(w, line_adc, KALPHA)
         res[i] = energy_resolution(line_adc, sigma)
         # Source files plotting and saving
         if plot or save:
@@ -220,31 +229,42 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
                 fig = plt.figure(f"{_s.file_path.name}")
                 plt.title(f"{int(voltage[j])} V {fit_models[j].name()}")
                 _s.hist.plot()
-                label = f"{fit_models[j].name()}\nFWHM@{e_peak:.1f} keV: \
-                    {fit_models[j].fwhm()} ADC" # type: ignore [attr-defined]
+                label = f"FWHM@{e_peak:.1f} keV: {fit_models[j].fwhm()} fC" # type: ignore [attr-defined]
                 fit_models[j].plot(label=label)
-                plt.xlim(fit_models[j].default_plotting_range())
+                plt.xlim(fit_models[j].default_plotting_range()[0] / 2,
+                         fit_models[j].default_plotting_range()[1])
                 plt.legend()
                 if save:
                     plt.savefig(logyaml.log_folder / _s.file_path.name, format='pdf')
                 if not plot:
                     plt.close(fig)
-    # Plot gain and energy resolution for each if the different models given
+    # Plot gain and fit with an exponential
     gain_fig = plt.figure("Gain")
-    for i, model in enumerate(models):
-        plt.errorbar(voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), fmt="o",
-                         label=f"{model.__name__}")
+    for i in range(len(models)):
+        gain_model = aptapy.models.Exponential()
+        gain_model.fit(voltage, unumpy.nominal_values(g[i]), sigma=unumpy.std_devs(g[i]),
+                       absolute_sigma=True)
+        plt.errorbar(voltage, unumpy.nominal_values(g[i]), unumpy.std_devs(g[i]), fmt=".",
+                         label=load_label(folder_name))
+        gain_model.plot(label=f"scale: {-gain_model.scale.ufloat()} V")
+    plt.yscale("log")
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.legend()
-
+    # Plot energy resolution
     res_fig = plt.figure("Energy resolution")
-    for i, model in enumerate(models):
+    for i in range(len(models)):
         plt.errorbar(voltage, unumpy.nominal_values(res[i]), unumpy.std_devs(res[i]), fmt="o",
-                         label=f"{model.__name__}")
+                         label=load_label(folder_name))
+        min_idx = unumpy.nominal_values(res[i]).argmin()
+        # Annotate the value of the minimum energy resolution
+        plt.annotate(f"{unumpy.nominal_values(res[i])[min_idx]:.2f}",
+             xy=(voltage[min_idx], unumpy.nominal_values(res[i])[min_idx]),
+             xytext=(0, 30), textcoords='offset points', ha='center', va='top', fontsize=12)
     plt.xlabel("Voltage [V]")
     plt.ylabel("FWHM / E")
     plt.legend()
+
     if not plot:
         plt.close(gain_fig)
         plt.close(res_fig)
@@ -332,28 +352,30 @@ def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: 
         exp_model.fit(voltage[i], unumpy.nominal_values(g[i][0]), sigma=unumpy.std_devs(g[i][0]),
                       absolute_sigma=True)
         exp_model.plot(label=f"scale: {-exp_model.scale.ufloat()} V", color=last_line_color())
+    plt.yscale("log")
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.legend()
 
+    # Plot the energy resolution
+    resolution_fig = plt.figure("Energy resolution comparison")
+    for i, folder_name in enumerate(folder_names):
+        if folder_name == "251118":
+            voltage[i] = voltage[i][:-3]
+        elif folder_name == "251127":
+            voltage[i] = np.append(voltage[i], 350.)
+        plt.errorbar(voltage[i], unumpy.nominal_values(res[i][0]), unumpy.std_devs(res[i][0]),
+                     fmt="o", label=load_label(folder_name))
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("FWHM / E")
+    plt.legend()
+        
     if not plot:
         plt.close(gain_fig)
+        plt.close(resolution_fig)
     if save:
         gain_fig.savefig(logyaml.log_folder / "gain_comparison.pdf", format="pdf")
-
-    # We need to re-add the removed points
-
-    # plt.figure("Energy resolution")
-    # for i, folder_name in enumerate(folder_names):
-    #     if folder_name == "251118":
-    #         voltage[i] = voltage[i][:-3]
-    #     elif folder_name == "251127":
-    #         voltage[i] = np.append(voltage[i], 350.)
-    #     plt.errorbar(voltage[i], unumpy.nominal_values(res[i][0]), unumpy.std_devs(res[i][0]),
-    #                  fmt="o", label=f"")
-    # plt.xlabel("Voltage [V]")
-    # plt.ylabel("FWHM / E")
-    # plt.legend()
+        resolution_fig.savefig(logyaml.log_folder / "resolution_comparison.pdf", format="pdf")
 
 
 def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, capacity: float,
@@ -405,15 +427,17 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
     plt.close(pulse_fig)
     plt.close(line_fig)
     # Analyze the folder and take gain and resolution
-    _, res, g = analyze_folder(folder_name, [model], w, capacity, e_peak, plot, save, **kwargs)
+    _, res, g = analyze_folder(folder_name, [model], w, capacity, e_peak, False, save, **kwargs)
     res = res[0]
     g = g[0]
     # Extracting real times and drift voltage
     source_files = data_folder.source_data
+    start_times = np.array([_source.start_time for _source in source_files])
     real_times = np.array([_source.real_time for _source in source_files])
     drift_voltage = np.array([_source.drift_voltage for _source in source_files])
-    # Cumulating time for consecutive data
-    time = real_times.cumsum()
+    # Calculating the time 
+    time_array = amptek_accumulate_time(start_times, real_times)
+
     # Analyze the escape peak with a single gaussian to estimate the gain
     # results = [_source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
     #                       num_sigma_right=1.5) for _source in source_files]
@@ -422,25 +446,67 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
     # line_adc = pars[:, 1]
     # g_esc = gain(w, capacity, line_adc, line_pars, 2.9)
     # Plotting and saving
+
+    constant0 = aptapy.models.Constant()
+    constant0.set_parameters(40.)
+    stretched_exp = aptapy.models.StretchedExponential() + constant0
+    stretched_exp.set_parameters(25, 2500/3600, 0.6)
+    stretched_exp.fit(time_array, unumpy.nominal_values(g), sigma=unumpy.std_devs(g),
+                      absolute_sigma=True, xmax=12000/3600)
+
+    def stretched_exp_derivative(x, prefactor, scale, stretch):
+        d_prefactor = - prefactor * stretch / scale**stretch
+        # /60 to express the derivative in minutes
+        return d_prefactor * x**(stretch - 1) * np.exp(-(x / scale)**stretch) / 60
+
+    # constant1 = aptapy.models.Constant()
+    # constant1.value.freeze(40.)
+    # discharge_exp = aptapy.models.StretchedExponentialComplement(location=11500)
+    # discharge_exp.set_parameters(25., 10000., 0.5)
+    # discharge_exp = discharge_exp + constant1
+    # discharge_exp.set_plotting_range(11500, 100000)
+    # discharge_exp.fit(time_array, unumpy.nominal_values(g), sigma=unumpy.std_devs(g),
+    #                   absolute_sigma=True, xmin=11776)
+
     out_name = str(folder_name).rsplit('/', maxsplit=1)[-1]
     if plot or save:
         fig = plt.figure("Gain vs time")
-        plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
-                     label=r"K$\alpha$")
+        plt.errorbar(time_array, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
+                     label=load_label(folder_name))
+        stretched_exp.plot(label=f"Charging:\nscale: {stretched_exp.status.correlated_pars[1]} s",
+                           plot_components=False)
+        # discharge_exp.plot(
+        #     label=f"Discharging:\nscale: {discharge_exp.status.correlated_pars[1]} s",
+        #     plot_components=False)
         # plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt=".",
         #              label="Esc. Peak")
-        plt.xlabel("Time [s]")
+        plt.xlabel("Time [h]")
         plt.ylabel("Gain")
         plt.legend()
+
+        derivative_fig = plt.figure("1/G dG/dt")
+        tt = np.linspace(*stretched_exp.plotting_range(), 1000)
+        yy = stretched_exp_derivative(tt, *stretched_exp.parameter_values()[:3]) / stretched_exp(tt)
+        gg = stretched_exp(tt)
+        gg /= max(gg)
+
+        plt.plot(gg, yy, label=load_label(folder_name))
+        plt.xlabel("Normalized gain")
+        plt.ylabel("1/G dG/dt [1/min]")
+        plt.tight_layout()
+        plt.legend()
+
         if save:
-            plt.savefig(logyaml.log_folder / f"gain_time_{out_name}.pdf", format="pdf")
+            fig.savefig(logyaml.log_folder / f"gain_time_{out_name}.pdf", format="pdf")
+            derivative_fig.savefig(logyaml.log_folder / f"derivative_gain_{out_name}.pdf",
+                                   format="pdf")
         if not plot:
             plt.close(fig)
     if plot or save:
         fig = plt.figure("Resolution vs time")
-        plt.errorbar(time, unumpy.nominal_values(res), unumpy.std_devs(res), fmt=".",
-                     label=r"K$\alpha$")
-        plt.xlabel("Time [s]")
+        plt.errorbar(time_array, unumpy.nominal_values(res), unumpy.std_devs(res), fmt=".",
+                     label=load_label(folder_name))
+        plt.xlabel("Time [h]")
         plt.ylabel("FWHM/E")
         plt.legend()
         if save:
@@ -469,4 +535,4 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
             plt.savefig(logyaml.log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")
         if not plot:
             plt.close(fig)
-    return res, g, time, drift_voltage
+    return res, g, time_array, drift_voltage
