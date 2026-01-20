@@ -27,7 +27,6 @@ def run(args):
         args.foldername,
         load_class(args.model),
         args.w,
-        args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed
         num_sigma_left=args.numsigmaleft,

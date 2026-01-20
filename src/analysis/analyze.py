@@ -17,7 +17,7 @@ from .utils import KALPHA, amptek_accumulate_time, energy_resolution, gain
 
 
 def analyze_file(pulse_file: str | Path, source_file: str | Path,
-                 models: Sequence[type[AbstractFitModel]], w: float, capacity: float,
+                 models: Sequence[type[AbstractFitModel]], w: float,
                  e_peak: float, plot: bool = False, save: bool = False,
                  **kwargs) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Analyze a calibration pulses file to determine the calibration parameters of the readout
@@ -34,8 +34,6 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
         Model(s) to fit the source emission line.
     W : float
         W-value of the detector gas.
-    capacity : float
-        Capacity of the capacitance of the readout circuit of the detector.
     e_peak : float
         Energy of the main emission line of the source (in keV).
     plot : bool, optional
@@ -132,7 +130,7 @@ def analyze_file(pulse_file: str | Path, source_file: str | Path,
 
 
 def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w: float,
-                   capacity: float, e_peak: float, plot: bool = False, save: bool = False,
+                   e_peak: float, plot: bool = False, save: bool = False,
                    **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
@@ -149,8 +147,6 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
         Model(s) to fit the source emission line.
     W : float
         W-value of the detector gas.
-    capacity : float
-        Capacity of the capacitance of the readout circuit of the detector.
     e_peak : float
         Energy of the main emission line of the source (in keV).
     plot : bool, optional
@@ -284,7 +280,7 @@ def analyze_folder(folder_name: str, models: Sequence[type[AbstractFitModel]], w
 
 
 def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: float,
-                    capacity: float, e_peak: float, plot: bool = False, save: bool = False,
+                    e_peak: float, plot: bool = False, save: bool = False,
                     **kwargs) -> None:
     """Analyze the files in different folders and compare them. In particular, the gain and the
     energy resolution are calculated and plotted. The gain and the energy resolution are obtained
@@ -299,8 +295,6 @@ def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: 
         Model to fit the source emission line.
     W : float
         W-value of the detector gas.
-    capacity : float
-        Capacity of the capacitance of the readout circuit of the detector.
     e_peak : float
         Energy of the main emission line of the source (in keV).
     plot : bool, optional
@@ -326,8 +320,8 @@ def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: 
     g = np.zeros(shape=len(folder_names), dtype=object)
     # Analyze each folder and store the results
     for i, folder_name in enumerate(folder_names):
-        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], w, capacity, e_peak,
-                                                  plot, save=save, **kwargs)
+        voltage[i], res[i], g[i] = analyze_folder(folder_name, [model], w, e_peak, plot, save=save,
+                                                   **kwargs)
     # Plot the gain
     gain_fig = plt.figure("Gain comparison")
     # Add exceptions on the data points, based on the folder analyzed
@@ -378,7 +372,7 @@ def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: 
         resolution_fig.savefig(logyaml.log_folder / "resolution_comparison.pdf", format="pdf")
 
 
-def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, capacity: float,
+def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float,
                   e_peak, plot: bool = False, save: bool = False,
                   **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
@@ -396,8 +390,6 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
         Model to fit the source emission line.
     W : float
         W-value of the detector gas.
-    capacity : float
-        Capacity of the capacitance of the readout circuit of the detector.
     e_peak : float
         Energy of the main emission line of the source (in keV).
     plot : bool, optional
@@ -427,7 +419,7 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
     plt.close(pulse_fig)
     plt.close(line_fig)
     # Analyze the folder and take gain and resolution
-    _, res, g = analyze_folder(folder_name, [model], w, capacity, e_peak, False, save, **kwargs)
+    _, res, g = analyze_folder(folder_name, [model], w, e_peak, False, save, **kwargs)
     res = res[0]
     g = g[0]
     # Extracting real times and drift voltage
@@ -444,7 +436,7 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
     # pars, _ = zip(*results)
     # pars = np.stack(pars)
     # line_adc = pars[:, 1]
-    # g_esc = gain(w, capacity, line_adc, line_pars, 2.9)
+    # g_esc = gain(w, line_adc, line_pars, 2.9)
     # Plotting and saving
 
     constant0 = aptapy.models.Constant()

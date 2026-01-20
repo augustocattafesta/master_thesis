@@ -12,8 +12,8 @@ from analysis.fileio import PulsatorFile
 def test_analyze_file(datadir):
     pulse_file = datadir / "folder0/live_data_chip18112025_ci5-10-15_hvon.mca"
     source_file = datadir / "folder0/live_data_chip18112025_D1000_B370.mca"
-    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 1e-12, 5.9, False, False
-    kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
+    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 5.9, False, False
+    kwargs = {"xmin":3., "xmax":5., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
     # Test analysis of calibration pulses file
     line_pars_script = analysis.analyze.analyze_file(pulse_file, None, *args)
@@ -36,8 +36,8 @@ def test_analyze_file(datadir):
 
 def test_analyze_folder(datadir):
     folder = datadir / "folder0"
-    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 1e-12, 5.9, False, False
-    kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
+    args = [load_class("Gaussian"), load_class("Fe55Forest")], 26., 5.9, False, False
+    kwargs = {"xmin":0., "xmax":10., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
 
     # Test analysis without kwargs
@@ -54,18 +54,17 @@ def test_analyze_folder(datadir):
 def test_compare_folders(datadir):
     folder0 = datadir / "folder0"
     folder1 = datadir / "folder1"
-    args = Gaussian, 26., 1e-12, 5.9, False, False
-    kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
+    args = Gaussian, 26., 5.9, False, False
+    kwargs = {"xmin":0., "xmax":10., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
     analysis.analyze.compare_folders([folder0, folder1], *args, **kwargs)
 
 
 def test_analyze_trend(datadir):
     folder = datadir / "folder0"
-    args = Gaussian, 26., 1e-12, 5.9, False, False
-    kwargs = {"xmin":30., "xmax":60., "num_sigma_left":1., "num_sigma_right":1.,
+    args = Gaussian, 26., 5.9, False, False
+    kwargs = {"xmin":0., "xmax":10., "num_sigma_left":1., "num_sigma_right":1.,
               "absolute_sigma":False}
     resolution, gain, _, _ = analysis.analyze.analyze_trend(folder, *args, **kwargs)
 
-    print(gain.shape)
     assert resolution.shape == gain.shape

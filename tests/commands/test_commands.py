@@ -6,7 +6,6 @@ from unittest.mock import patch
 from analysis.cli.main import main
 
 COMMON_ARGS = ["--w", "30",
-               "--capacity", "2e-12",
                "--e_peak", "5.9"]
 
 def _test_cli_command(subcommand: str, function_name: str, args: list[str]):

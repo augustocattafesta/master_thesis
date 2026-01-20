@@ -35,7 +35,6 @@ def run(args):
         args.foldername,
         models,
         args.w,
-        args.capacity,
         args.e_peak,
         # pass additional kwargs here if needed
         num_sigma_left=args.numsigmaleft,

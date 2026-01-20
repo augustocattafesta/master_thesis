@@ -31,7 +31,6 @@ def run(args):
         args.sourcefile,
         models,
         args.w,
-        args.capacity,
         args.e_peak,
         num_sigma_left=args.numsigmaleft,
         num_sigma_right=args.numsigmaright,
