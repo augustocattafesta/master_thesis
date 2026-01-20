@@ -5,7 +5,6 @@ signal.
 import numpy as np
 import scipy.signal
 import xraydb
-from aptapy.typing_ import ArrayLike
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 ELECTRONS_IN_1FC = 1e-15 / ELEMENTARY_CHARGE  # Number of electrons in 1 fC
@@ -127,7 +126,6 @@ def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> n
         else:
             dt_gap = (start_times[i] - start_times[0]).total_seconds()
             t_acc = dt_gap + real_times[i]
-        
         t[i] = t_acc
-    
+
     return t - real_times / 2
