@@ -3,6 +3,7 @@ signal.
 """
 
 import aptapy
+import aptapy.models
 import numpy as np
 import scipy.signal
 import xraydb

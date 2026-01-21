@@ -79,6 +79,50 @@ class DataFolder:
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
                                                            _f.name,re.IGNORECASE) is not None]
 
+
+class Folder:
+    def __init__(self, folder_path: pathlib.Path) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        folder_path : pathlib.Path
+            Path of the folder to open.
+        """
+        self.folder_path = folder_path
+        if not self.folder_path.exists():
+            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
+                                  Verify the path.")
+        self.input_files = list(folder_path.iterdir())
+
+    @property
+    def source_files(self) -> list[pathlib.Path]:
+        """Extract the source files from all the files of the directory and return a sorted list
+        of the files. If file names contain "trend{i}", the sorting is done numerically according
+        to the index {i}, otherwise it's done alphabetically.
+        """
+        # Keep files containing _B<number>
+        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
+
+        def numeric_sort_key(p: pathlib.Path):
+            """Sort the files with numerical order.
+            """
+            numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
+            return numbers[-1]  # sort by the last number
+
+        return sorted(filtered, key=numeric_sort_key)
+
+    @property
+    def pulse_file(self) -> list[pathlib.Path]:
+        """Extract the calibration pulse files from all the files of the directory.
+        """
+        return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
+                                                           _f.name,re.IGNORECASE) is not None][0]
+
+        
+
+
+
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.
     """
