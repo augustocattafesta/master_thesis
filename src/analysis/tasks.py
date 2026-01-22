@@ -71,9 +71,9 @@ def calibration(
         plt.close(pulse_fig)
         plt.close(cal_fig)
     # Update the context with the calibration results
-    context["results"]["calibration"] = dict(model=model,
-                                             pulse_figure=pulse_fig,
-                                             calibration_figure=cal_fig)
+    context["calibration"] = dict(model=model,
+                                  pulse_figure=pulse_fig,
+                                  calibration_figure=cal_fig)
     return context
 
 
@@ -147,9 +147,11 @@ def fit_peak(
         raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
     # Return the results as a dictionary
     subtask_results = dict(line_val=line_val, sigma=sigma, voltage=source.voltage, model=model)
-    if subtask is None:
-        subtask = source.file_path.stem
-    context["results"][subtask] = subtask_results
+    file_name = source.file_path.stem
+    if file_name not in context["results"]:
+        context["results"][file_name] = {}
+    context["results"][file_name]["source"] = source
+    context["results"][file_name][subtask] = subtask_results
     return context
 
 
@@ -181,11 +183,12 @@ def gain_single(
     """
     task = "gain"
     results = context.get("results", {})
+    file_name, = results.keys()
     # Check if the target fitting subtask exists in the results and get the line position and
     # back voltage
-    if target not in results:
+    if target not in results[file_name]:
         return context
-    target_context = results[target]
+    target_context = results[file_name][target]
     line_val = target_context["line_val"]
     voltage = target_context["voltage"]
     # Calculate the gain and update the context
@@ -193,7 +196,7 @@ def gain_single(
     target_context[task] = gain_val
     # Create a label for the gain value to show if task is plotted
     target_context[f"{task}_label"] = f"Gain@{voltage:.0f} V: {gain_val}"
-    context["results"][target] = target_context
+    context["results"][file_name][target] = target_context
     return context
 
 
@@ -221,11 +224,12 @@ def resolution_single(
     """
     task = "resolution"
     results = context.get("results", {})
+    file_name, = results.keys()
     # Check if the target fitting subtask exists in the results and get the line position and sigma
     # of the target spectral line
-    if target not in results:
+    if target not in results[file_name]:
         return context
-    target_context = results[target]
+    target_context = results[file_name][target]
     line_vals = target_context["line_val"]
     sigma = target_context["sigma"]
     # Calculate the energy resolution and update the context
@@ -237,7 +241,7 @@ def resolution_single(
     energy = context["config"].source.e_peak
     task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val}"
     target_context[f"{task}_label"] = task_label
-    context["results"][target] = target_context
+    context["results"][file_name][target] = target_context
     return context
 
 
@@ -269,20 +273,21 @@ def resolution_escape(
     """
     task = "resolution_escape"
     results = context.get("results", {})
+    file_name, = results.keys()
     # Check if the main peak and escape peak fitting substasks exist in the results and get the
     # line positions and sigma of the main peak
-    if target_main not in results or target_escape not in results:
+    if target_main not in results[file_name] or target_escape not in results[file_name]:
         return context
-    target_context = results[target_main]
+    target_context = results[file_name][target_main]
     line_main = target_context["line_val"]
     sigma_main = target_context["sigma"]
-    line_escape = results[target_escape]["line_val"]
+    line_escape = results[file_name][target_escape]["line_val"]
     # Calculate the energy resolution using the escape peak and update the context
     res_val = energy_resolution_escape(line_main, line_escape, sigma_main)
     target_context[task] = res_val
     # Create a label for the resolution value to show if task is plotted
     target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val}"
-    context["results"][target_main] = target_context
+    context["results"][file_name][target_main] = target_context
     return context
 
 
@@ -385,15 +390,16 @@ def plot_spec(
     # Access the source data and results from the context
     source = context.get("source")
     results = context.get("results", {})
+    file_name, = results.keys()
     # Create the plot figure and plot the spectrum
-    plt.figure(f"{source.file_path.name}_{targets} ")
+    plt.figure(f"{source.file_path.stem}_{targets} ")
     source.hist.plot(label=label)
     # Plot the fitted models for the specified targets and get labels
     models = []
     if targets is not None:
         for target in targets:
-            if target in results:
-                target_context = results[target]
+            if target in results[file_name]:
+                target_context = results[file_name][target]
                 model = target_context["model"]
                 label = _get_label(task_labels, target_context)
                 # Save the model for automatic xrange calculation

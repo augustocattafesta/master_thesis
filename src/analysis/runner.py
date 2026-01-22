@@ -48,7 +48,7 @@ def run_single(source_file_path: str | Path,
     # Run spectrum fitting tasks
     spec_fit_config = config.spectrum_fitting
     if spec_fit_config is not None:
-        calibration_model = context["results"]["calibration"]["model"]
+        calibration_model = context["calibration"]["model"]
         source = SourceFile(Path(source_file_path), calibration_model)
         context["source"] = source
         # Execute all fitting subtasks defined in the configuration file
@@ -100,7 +100,7 @@ def run_folder(folder_path: str | Path,
     # Run all fitting subtasks defined in the configuration file for each source file
     spec_fit_config = config.spectrum_fitting
     if spec_fit_config is not None:
-        calibration_model = context["results"]["calibration"]["model"]
+        calibration_model = context["calibration"]["model"]
         for source_file in data_folder.source_files:
             tmp_source = SourceFile(Path(source_file), calibration_model)
             context["source"] = tmp_source
@@ -109,11 +109,13 @@ def run_folder(folder_path: str | Path,
                 fit_pars = subtask.fit_pars.model_dump()
                 context = fit_peak(
                     context=context,
-                    subtask=None,
+                    subtask=subtask.subtask,
                     model_class=load_class(subtask.model),
                     **fit_pars
                 )
-    print(context)
+    # Now we run all the tasks defined in the configuration file. The pipeline is sorted
+    # so that the plotting task is always executed at the end (to compute resolution or gain).
+    pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)    
             
 
 
