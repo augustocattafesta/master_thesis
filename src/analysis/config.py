@@ -30,11 +30,11 @@ class CalibrationConfig(BaseModel):
 
 
 class FitSpecPars(BaseModel):
-    xmin: float = float("-inf")
-    xmax: float = float("inf")
-    num_sigma_left: float = 1.5
-    num_sigma_right: float = 1.5
-    absolute_sigma: bool = True
+    xmin: Optional[float] = float("-inf")
+    xmax: Optional[float] = float("inf")
+    num_sigma_left: Optional[float] = 1.5
+    num_sigma_right: Optional[float] = 1.5
+    absolute_sigma: Optional[bool] = True
 
 
 class SpectrumSubtask(BaseModel):
@@ -60,12 +60,21 @@ class GainConfig(BaseModel):
     plot: bool = True
     label: Optional[str] = None
     yscale: Literal["linear", "log"] = "log"
+    target: Optional[str] = None
 
 
 class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     label: str = ""
     plot: bool = True
+    target: Optional[str] = None
+
+
+class ResolutionEscapeConfig(BaseModel):
+    task: Literal["resolution_escape"]
+    target_main: Optional[str] = None
+    target_escape: Optional[str] = None
+
 
 class GainTrendConfig(BaseModel):
     task: Literal["gain_trend"]
@@ -73,7 +82,24 @@ class GainTrendConfig(BaseModel):
     subtasks: List[SpectrumSubtask]
 
 
-TaskType = Union[CalibrationConfig, SpectrumFittingConfig, GainConfig, ResolutionConfig, GainTrendConfig]
+class PlotConfig(BaseModel):
+    task: Literal["plot"]
+    plot: Optional[bool] = True
+    targets: Optional[list[str]] = None
+    label: Optional[str] = ""
+    xrange: Optional[List[float]] = None
+    task_labels: Optional[list[str]] = None
+
+
+TaskType = Union[
+    CalibrationConfig,
+    SpectrumFittingConfig,
+    GainConfig,
+    ResolutionConfig,
+    ResolutionEscapeConfig,
+    GainTrendConfig,
+    PlotConfig
+]
 
 class AppConfig(BaseModel):
     acquisition: Acquisition
@@ -94,3 +120,6 @@ class AppConfig(BaseModel):
     def spectrum_fitting(self) -> Optional[SpectrumFittingConfig]:
         return next((t for t in self.pipeline if isinstance(t, SpectrumFittingConfig)), None)
     
+    @property
+    def plot(self) -> Optional[PlotConfig]:
+        return next((t for t in self.pipeline if isinstance(t, PlotConfig)), None)

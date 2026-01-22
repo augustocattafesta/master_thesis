@@ -8,12 +8,22 @@ from .fileio import PulsatorFile, SourceFile, Folder
 from .tasks import (
     calibration,
     fit_peak,
-    gain_analysis,
+    gain_single,
+    resolution_single,
+    resolution_escape,
+    plot_spec
 )
 
 
-TASK_REGISTRY = {
-    "gain": gain_analysis
+SINGLE_TASK_REGISTRY = {
+    "gain": gain_single,
+    "resolution": resolution_single,
+    "resolution_escape": resolution_escape,
+    "plot": plot_spec
+}
+
+FOLDER_TASK_REGISTRY = {
+    "gain": ""
 }
 
 
@@ -36,11 +46,12 @@ def run_single(source_file_path: str | Path,
         raise RuntimeError("No calibration task found in configuration.")
     # Run spectrum fitting tasks
     spec_fit_config = config.spectrum_fitting
-    context = dict(config=config, line_vals=[], voltage=[])
+    context = dict(config=config)
     if spec_fit_config is not None:
         source = SourceFile(Path(source_file_path), cal_results["model"])
-        # Execute all fitting subtasks defined in the configuration
+        context["source"] = source
         results = dict()
+        # Execute all fitting subtasks defined in the configuration
         for subtask in spec_fit_config.subtasks:
             fit_pars = subtask.fit_pars
             fit_results = fit_peak(
@@ -57,15 +68,31 @@ def run_single(source_file_path: str | Path,
     # Now we run all the tasks defined in the configuration file
     for task in config.pipeline:
         # Skip tasks already executed and those marked to be skipped
-        if task.task in ["calibration", "spectrum_fitting"] or getattr(task, "skip", False):
+        # We skip plot here because we want all the results to be in the context
+        task_exceptions = ["calibration", "spectrum_fitting", "plot"]
+        if task.task in task_exceptions or getattr(task, "skip", False):
             continue
-        func = TASK_REGISTRY.get(task.task)
+        func = SINGLE_TASK_REGISTRY.get(task.task)
         if func:
-            # Remove the name of the task from the arguments
+            # Remove the name of the task from the keyword arguments
             kwargs = task.model_dump(exclude={"task"})
-            _ = func(context, **kwargs)
+            context = func(context, **kwargs)
+    plot_config = config.plot
+    if plot_config is not None:
+        func = SINGLE_TASK_REGISTRY.get(plot_config.task)
+        if func:
+            kwargs = plot_config.model_dump(exclude={"task"})
+            func(context, **kwargs)
 
     plt.show()
+
+
+
+
+
+
+
+
 
 
 def run_folder(folder_path: str | Path,

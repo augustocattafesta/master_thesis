@@ -13,6 +13,8 @@ ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 ELECTRONS_IN_1FC = 1e-15 / ELEMENTARY_CHARGE  # Number of electrons in 1 fC
 W_ARGON = 26.   # eV
 
+SIGMA_TO_FWHM = 2 * np.sqrt(2 * np.log(2))
+
 
 def weighted_energy(element: str, *lines: str) -> float:
     """Compute the intensity-weighted mean energy of specified X-ray lines of an element.
@@ -108,6 +110,21 @@ def energy_resolution(line_val: np.ndarray, sigma: np.ndarray) -> np.ndarray:
     """
     return sigma * 2 * np.sqrt(2 * np.log(2)) / line_val * 100
 
+
+def energy_resolution_escape(line_val_main: np.ndarray, line_val_escape: np.ndarray,
+                             sigma_main: np.ndarray) -> np.ndarray:
+    """Estimate the energy resolution of the detector using the main line and the escape peak.
+
+    Arguments
+    ----------
+    line_val_main : np.ndarray
+        Position of the peak of the main emission line.
+    line_val_escape : np.ndarray
+        Position of the peak of the escape line.
+    sigma_main : np.ndarray
+        Sigma of the main emission line.
+    """
+    return sigma_main * SIGMA_TO_FWHM * (KALPHA - AR_ESCAPE) / (line_val_main - line_val_escape) / KALPHA * 100
 
 def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> np.ndarray:
     """Compute the accumulated acquisition time for Amptek MCA data, taking into account the

@@ -33,9 +33,11 @@ pipeline:
           num_sigma_right: 1.5
           absolute_sigma: true
 
-   #   - subtask: "escape_peak"
-        # skip: true
-    #    model: Gaussian
+      - subtask: "escape_peak"
+        model: Gaussian
+        fit_pars:
+          xmin: 1.
+          xmax: 3.
 
   - task: "gain"
     target: "main_peak"
@@ -45,17 +47,21 @@ pipeline:
   
   - task: "resolution"
     target: "main_peak"
-    plot: true
   
-  - task: "resolution"
-    target: "escape_peak"
-
-  - task: "esc_resolution"
+  - task: "resolution_escape"
     target_main: "main_peak"
-    target_esc: "escape_peak"
+    target_escape: "escape_peak"
 
   - task: "plot"
-    target: "main_peak"
-    label:
-    range: optional
+    plot: true
+    targets:
+      - "main_peak"
+      - "escape_peak"
+    xrange: [2, 4, 1]
+    label: "chip"
+    task_labels:
+      - "gain"
+      - "resolution"
+      - "resolution_escape"
+
 

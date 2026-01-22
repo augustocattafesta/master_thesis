@@ -6,8 +6,16 @@ from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
-from .fileio import PulsatorFile, SourceFile, load_label
-from .utils import find_peaks_iterative, gain, energy_resolution, KALPHA
+from .fileio import PulsatorFile, SourceFile
+from .utils import (
+    KALPHA,
+    SIGMA_TO_FWHM,
+    find_peaks_iterative,
+    gain,
+    energy_resolution,
+    energy_resolution_escape
+)
+
 
 
 @dataclass(frozen=True)
@@ -105,9 +113,6 @@ def fit_peak(
         sigma = model.status.correlated_pars[2]
     else:
         raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-    # Plot the fit results
-    model.plot(fit_output=True, color=last_line_color())
-    plt.legend()
     # Return the results as a dictionary
     return dict(line_val=line_val, sigma=sigma, voltage=source.voltage, model=model)
 
@@ -122,91 +127,173 @@ class GainDefaults:
     yscale: str = "log"
 
 
-def gain_analysis(
+def gain_single(
         context: dict,
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
-        fit: bool = GainDefaults.fit,
-        plot: bool = GainDefaults.plot,
-        label: str = GainDefaults.label,
-        yscale: str = GainDefaults.yscale,
         target: str | None = None,
         ):
     """
     """
+    task = "gain"
     results = context.get("results", {})
-    if not results:
-        return None
     if target not in results:
-        line_vals = np.array([results[key]["line_val"] for key in results.keys()])
-        voltage = np.array([results[key]["voltage"] for key in results.keys()])
+        return context
     else:
-        line_vals = results[target]["line_val"]
-        voltage = results[target]["voltage"]
-        fit, plot = False, False  # No fitting or plotting for single values
-    gain_vals = gain(w, line_vals, energy)
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    fig = plt.figure("Gain vs voltage")
-    if fit:
-        model = aptapy.models.Exponential()
-        model.fit(voltage, y, sigma=yerr, absolute_sigma=True)
-        fit_label = f"Scale: {-model.scale.ufloat()} V"
-        model.plot(label=fit_label, color=last_line_color())
-    if label is None:
-        folder_name = None
-        label = load_label(folder_name)
-    plt.errorbar(voltage, y, yerr=yerr, fmt=".k", label=label)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel("Gain")
-    plt.yscale(yscale)
-    plt.legend()
-    if not plot:
-        plt.close(fig)
+        target_context = results[target]
+        line_vals = target_context["line_val"]
+        voltage = target_context["voltage"]
+        # fit, plot = False, False  # No fitting or plotting for single values
+    gain_val = gain(w, line_vals, energy)
+    target_context[task] = gain_val
+    target_context[f"{task}_label"] = f"Gain@{voltage:.0f} V: {gain_val}"
+    context["results"][target] = target_context
+    # y = unumpy.nominal_values(gain_vals)
+    # yerr = unumpy.std_devs(gain_vals)
+    # fig = plt.figure("Gain vs voltage")
+    # if fit:
+    #     model = aptapy.models.Exponential()
+    #     model.fit(voltage, y, sigma=yerr, absolute_sigma=True)
+    #     fit_label = f"Scale: {-model.scale.ufloat()} V"
+    #     model.plot(label=fit_label, color=last_line_color())
+    # if label is None:
+    #     folder_name = None
+    #     label = load_label(folder_name)
+    # plt.errorbar(voltage, y, yerr=yerr, fmt=".k", label=label)
+    # plt.xlabel("Voltage [V]")
+    # plt.ylabel("Gain")
+    # plt.yscale(yscale)
+    # plt.legend()
+    # if not plot:
+    #     plt.close(fig)
     
-    results = dict(gain_vals=gain_vals, voltage=voltage)
-    if plot:
-        results["figure"] = fig
-    if fit:
-        results["model"] = model
+    # results = dict(gain_vals=gain_vals, voltage=voltage)
+    # if plot:
+    #     results["figure"] = fig
+    # if fit:
+    #     results["model"] = model
     
-    return results
+    return context
 
 
-def resolution_simple(
+def resolution_single(
         context: dict,
-        label: str = "",
-        plot: bool = True,
         target: str | None = None
+        ) -> dict:
+    """
+    """
+    task = "resolution"
+    results = context.get("results", {})
+    if target not in results:
+        return context
+    else:
+        target_context = results[target]
+        line_vals = target_context["line_val"]
+        sigma = target_context["sigma"]
+        # voltage = target_context["voltage"]
+        # plot = False  # No plotting for single values
+    energy = context["config"].source.e_peak
+    res_val = energy_resolution(line_vals, sigma)
+    fwhm = SIGMA_TO_FWHM * sigma
+    target_context[task] = res_val
+    task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val}"
+    target_context[f"{task}_label"] = task_label
+    # y = unumpy.nominal_values(res_vals)
+    # yerr = unumpy.std_devs(res_vals)
+    # fig = plt.figure("Energy Resolution vs Line Value")
+    # plt.errorbar(voltage, y, yerr=yerr, fmt=".k", label=label)
+    # plt.xlabel("Voltage [V]")
+    # plt.ylabel(r"$\Delta$E / E")
+    # plt.legend()
+    # if not plot:
+    #     plt.close(fig)
+
+    context["results"][target] = target_context
+    # results = dict(resolution_vals=res_vals, line_vals=line_vals)
+    # if plot:
+    #     results["figure"] = fig
+
+
+    return context
+
+
+def resolution_escape(
+        context: dict,
+        target_main: str | None = None,
+        target_escape: str | None = None
         ):
     """
     """
+    task = "resolution_escape"
     results = context.get("results", {})
-    if not results:
-        return None
-    if target not in results:
-        line_vals = np.array([results[key]["line_val"] for key in results.keys()])
-        sigma = np.array([results[key]["sigma"] for key in results.keys()])
-        voltage = np.array([results[key]["voltage"] for key in results.keys()])
+    if target_main not in results or target_escape not in results:
+        return context
     else:
-        line_vals = results[target]["line_val"]
-        sigma = results[target]["sigma"]
-        voltage = results[target]["voltage"]
-        plot = False  # No plotting for single values
-    res_vals = energy_resolution(line_vals, sigma)
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    fig = plt.figure("Energy Resolution vs Line Value")
-    plt.errorbar(line_vals, y, yerr=yerr, fmt=".k", label=label)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E / E")
+        target_context = results[target_main]
+        line_main = target_context["line_val"]
+        sigma_main = target_context["sigma"]
+        line_escape = results[target_escape]["line_val"]
+    res_val = energy_resolution_escape(line_main, line_escape, sigma_main)
+    target_context[task] = res_val
+    target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val}"
+    context["results"][target_main] = target_context
+    return context
+
+
+def plot_spec(
+        context: dict,
+        plot: bool = True,
+        targets: str | None = None,
+        label: str | None = None,
+        xrange: list[float] | None = None,
+        task_labels: list[str] | None = None
+        ) -> None:
+    """
+    """
+    source = context.get("source", None)
+    results = context.get("results", {})
+    fig = plt.figure(source.file_path.name)
+    source.hist.plot(label=label)
+    content = np.insert(source.hist.content, -1, 0)
+    edges = source.hist.bin_edges()[content > 0]
+    xmin, xmax = edges[0], edges[-1]
+    if targets is not None:
+        for target in targets:
+            if target in results:
+                target_context = results[target]
+                model = target_context["model"]
+                if task_labels is not None:
+                    label = ""
+                    for task in task_labels:
+                        if task in target_context:
+                            task_label = target_context[f"{task}_label"]
+                            label += f"{task_label}\n"
+                model.plot(label=label)
+                model_xmin, model_xmax = model.default_plotting_range()
+                if xmin == edges[0]:
+                    xmin = model_xmin
+                else:
+                    xmin = min(xmin, model_xmin)
+                if xmax == edges[-1]:
+                    xmax = model_xmax
+                else:    
+                    xmax = max(xmax, model_xmax)
+    if xmin < edges[0]:
+        xmin = edges[0]
+    if xmax > edges[-1]:
+        xmax = edges[-1]
+    if xrange is None:
+        xrange = [xmin, xmax]
+    try:
+        plt.xlim(xrange)
+    except ValueError:
+        print("warning: xrange must be a list of two floats.")
+        xrange = [xmin, xmax]
+        plt.xlim(xrange)
+
     plt.legend()
+    
     if not plot:
         plt.close(fig)
-
-    results = dict(resolution_vals=res_vals, line_vals=line_vals)
-    if plot:
-        results["figure"] = fig
-    return results
 
 
