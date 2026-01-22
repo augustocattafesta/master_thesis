@@ -7,6 +7,7 @@ from .config import AppConfig
 from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
+    drift_rate,
     fit_peak,
     gain_folder,
     gain_single,
@@ -26,6 +27,7 @@ SINGLE_TASK_REGISTRY = {
 FOLDER_TASK_REGISTRY = {
     "gain": gain_folder,
     "resolution": resolution_folder,
+    "rate": drift_rate
 }
 
 
@@ -47,7 +49,7 @@ def run(
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context = dict(config=config, results={})
+    context = dict(config=config, fit={}, results={}, figures={})
     # If only one path is given, we assume it is a folder containing source files and a pulse file.
     # Otherwise, the last path is the pulse file and all preceding ones are source files.
     if len(paths) == 1:
@@ -75,7 +77,7 @@ def run(
         calibration_model = context["calibration"]["model"]
         for source_file_path in source_file_paths:
             tmp_source = SourceFile(Path(source_file_path), calibration_model)
-            context["source"] = tmp_source
+            context["tmp_source"] = tmp_source
             # Execute all fitting subtasks defined in the configuration file
             for subtask in spec_fit_config.subtasks:
                 fit_pars = subtask.fit_pars.model_dump()

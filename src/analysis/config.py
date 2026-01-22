@@ -76,32 +76,47 @@ class GainDefaults:
     energy: float = KALPHA
     fit: bool = True
     plot: bool = True
-    label: str = ""
+    label: str | None = None
     yscale: str = "log"
 
 
 class GainConfig(BaseModel):
     task: Literal["gain"]
+    target: str | None = None
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
-    target: str | None = None
     fit: bool = GainDefaults.fit
     plot: bool = GainDefaults.plot
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
 
+@dataclass(frozen=True)
+class ResolutionDefaults:
+    plot: bool = True
+    label: str | None = None
+
+
 class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
-    label: str = ""
-    plot: bool = True
     target: str | None = None
+    plot: bool = ResolutionDefaults.plot
+    label: str = ResolutionDefaults.label
 
 
 class ResolutionEscapeConfig(BaseModel):
     task: Literal["resolution_escape"]
     target_main: str | None = None
     target_escape: str | None = None
+
+
+class DriftRateConfig(BaseModel):
+    task: Literal["rate"]
+    target: str | None = None
+    energy: float = KALPHA
+    threshold: float = 0.1
+    plot: bool = True
+    label: str | None = None
 
 
 class GainTrendConfig(BaseModel):
@@ -127,7 +142,7 @@ class PlotConfig(BaseModel):
 
 
 TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \
-    ResolutionEscapeConfig | GainTrendConfig | PlotConfig
+    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftRateConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition

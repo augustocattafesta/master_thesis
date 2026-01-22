@@ -6,7 +6,12 @@ from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
-from .config import CalibrationDefaults, FitPeakDefaults, GainDefaults, PlotDefaults
+from .config import (
+    CalibrationDefaults,
+    FitPeakDefaults,
+    GainDefaults,
+    PlotDefaults,
+    ResolutionDefaults)
 from .fileio import SourceFile
 from .utils import (
     SIGMA_TO_FWHM,
@@ -92,8 +97,8 @@ def fit_peak(
     Arguments
     ---------
     context : dict
-        The context dictionary containing the source data in `context["source"]` as an instance of
-        the class SourceFile.
+        The context dictionary containing the source data in `context["tmp_source"]` as an instance
+        of the class SourceFile.
     subtask: str
         The name of the fitting subtask.
     model_class : AbstractFitModel, optional
@@ -115,7 +120,7 @@ def fit_peak(
         The updated context dictionary containing the fit results in `context["results"]`.
     """
     # Access the source data from the context and get the histogram
-    source = context["source"]
+    source = context["tmp_source"]
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
     x_peak = hist.bin_centers()[np.argmax(hist.content)]
@@ -145,13 +150,13 @@ def fit_peak(
         sigma = model.status.correlated_pars[2]
     else:
         raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
-    # Return the results as a dictionary
+    # Update the context with the fit results
     subtask_results = dict(line_val=line_val, sigma=sigma, voltage=source.voltage, model=model)
     file_name = source.file_path.stem
-    if file_name not in context["results"]:
-        context["results"][file_name] = {}
-    context["results"][file_name]["source"] = source
-    context["results"][file_name][subtask] = subtask_results
+    if file_name not in context["fit"]:
+        context["fit"][file_name] = {}
+    context["fit"][file_name]["source"] = source
+    context["fit"][file_name][subtask] = subtask_results
     return context
 
 
@@ -167,7 +172,7 @@ def gain_single(
     Arguments
     ---------
     context : dict
-        The context dictionary containing the fit results in `context["results"]`.
+        The context dictionary containing the fit results in `context["fit"]`.
     w : float, optional
         The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
     energy : float, optional
@@ -182,13 +187,13 @@ def gain_single(
         The updated context dictionary containing the gain results in `context["results"]`.
     """
     task = "gain"
-    results = context.get("results", {})
-    file_name, = results.keys()
+    fit_results = context.get("fit", {})
+    file_name, = fit_results.keys()
     # Check if the target fitting subtask exists in the results and get the line position and
     # back voltage
-    if target not in results[file_name]:
+    if target not in fit_results[file_name]:
         return context
-    target_context = results[file_name][target]
+    target_context = fit_results[file_name][target]
     line_val = target_context["line_val"]
     voltage = target_context["voltage"]
     # Calculate the gain and update the context
@@ -196,30 +201,82 @@ def gain_single(
     target_context[task] = gain_val
     # Create a label for the gain value to show if task is plotted
     target_context[f"{task}_label"] = f"Gain@{voltage:.0f} V: {gain_val}"
+    if file_name not in context["results"]:
+        context["results"][file_name] = {}
     context["results"][file_name][target] = target_context
     return context
 
 
-def gain_folder(context: dict, w: float = GainDefaults.w,
+def gain_folder(
+        context: dict,
+        target: str | None = None,
+        w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
-        target: str | None = None, fit = False, plot =  True, label = "", yscale = "log"):
-    task = "gain"
-    results = context.get("results", {})
-    gain_vals = []
-    x = []
-    for file_name in results.keys():
-        target_context = results[file_name][target]
-        print(target_context)
-        line_val = target_context["line_val"]
-        x.append(target_context["voltage"])
-        gain_vals.append(gain(w, line_val, energy))
+        fit: bool = GainDefaults.fit,
+        plot: bool =  GainDefaults.plot,
+        label: str | None = GainDefaults.label,
+        yscale: str = GainDefaults.yscale
+        ) -> dict:
+    """Calculate the gain of the detector using the fit results obtained from the source data of
+    multiple files.
+
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the fit results in `context["fit"]`.
+    target : str, optional
+        The name of the fitting subtask to use for gain calculation. If None, no calculation is
+        performed. Default is None.
+    w : float, optional
+        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
+    energy : float, optional
+        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
+    fit : bool, optional
+        Whether to fit the gain trend with an exponential model. Default is True.
+    plot : bool, optional
+        Whether to show the plots of the gain trend. Default is True.
+    label : str, optional
+        The label for the gain trend plot. Default is None.
+    yscale : str, optional
+        The y-axis scale for the gain trend plot. Can be "linear" or "log". Default is "log".
     
-    gain_vals = np.array(gain_vals)
+    Returns
+    -------
+    context : dict
+        The updated context dictionary containing the gain results in `context["results"]`.
+    """
+    task = "gain"
+    fit_results = context.get("fit", {})
+    # Get the different file names and create arrays to store gain values and voltages
+    file_names = list(fit_results.keys())
+    gain_vals = np.zeros(len(file_names), dtype=object)
+    voltages = np.zeros(len(file_names))
+    # Iterate over all files and calculate the gain values
+    for i, file_name in enumerate(file_names):
+        target_context = fit_results[file_name][target]
+        line_val = target_context["line_val"]
+        gain_vals[i] = gain(w, line_val, energy)
+        voltages[i] = target_context["voltage"]
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
-    x = np.array(x)
-    plt.figure("Gain vs Voltage")
-    plt.errorbar(x, y, yerr=yerr, fmt=".k", label="Data")
+    # Create the figure for the gain trend
+    fig = plt.figure("Gain vs Voltage")
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label=label)
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("Gain")
+    plt.yscale(yscale)
+    # If fit is requested, fit the gain trend with an exponential model
+    if fit:
+        model = aptapy.models.Exponential()
+        model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
+        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+    plt.legend()
+    if not plot:
+        plt.close(fig)
+    # Update the context with the gain trend results and fit model
+    context["results"][task] = dict(voltages=voltages, gain_vals=gain_vals)
+    if fit:
+        context["results"][task]["model"] = model
     return context
         
 
@@ -235,7 +292,7 @@ def resolution_single(
     Arguments
     ---------
     context : dict
-        The context dictionary containing the fit results in `context["results"]`.
+        The context dictionary containing the fit results in `context["fit"]`.
     target : str, optional
         The name of the fitting subtask to use for resolution calculation. If None, no calculation
         is performed. Default is None.
@@ -246,13 +303,13 @@ def resolution_single(
         The updated context dictionary containing the resolution results in `context["results"]`.
     """
     task = "resolution"
-    results = context.get("results", {})
-    file_name, = results.keys()
+    fit_results = context.get("fit", {})
+    file_name, = fit_results.keys()
     # Check if the target fitting subtask exists in the results and get the line position and sigma
     # of the target spectral line
-    if target not in results[file_name]:
+    if target not in fit_results[file_name]:
         return context
-    target_context = results[file_name][target]
+    target_context = fit_results[file_name][target]
     line_vals = target_context["line_val"]
     sigma = target_context["sigma"]
     # Calculate the energy resolution and update the context
@@ -262,7 +319,7 @@ def resolution_single(
     # Get the energy of the emission line from the source configuration to create a label to show
     # if task is plotted
     energy = context["config"].source.e_peak
-    task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val}"
+    task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val} %"
     target_context[f"{task}_label"] = task_label
     context["results"][file_name][target] = target_context
     return context
@@ -281,7 +338,7 @@ def resolution_escape(
     Arguments
     ---------
     context : dict
-        The context dictionary containing the fit results in `context["results"]`.
+        The context dictionary containing the fit results in `context["fit"]`.
     target_main : str, optional
         The name of the fitting subtask corresponding to the main spectral line. If None, no
         calculation is performed. Default is None.
@@ -295,45 +352,119 @@ def resolution_escape(
         The updated context dictionary containing the resolution results in `context["results"]`.
     """
     task = "resolution_escape"
-    results = context.get("results", {})
-    file_name, = results.keys()
+    fit_results = context.get("fit", {})
+    file_name, = fit_results.keys()
     # Check if the main peak and escape peak fitting substasks exist in the results and get the
     # line positions and sigma of the main peak
-    if target_main not in results[file_name] or target_escape not in results[file_name]:
+    if target_main not in fit_results[file_name] or target_escape not in fit_results[file_name]:
         return context
-    target_context = results[file_name][target_main]
+    target_context = fit_results[file_name][target_main]
     line_main = target_context["line_val"]
     sigma_main = target_context["sigma"]
-    line_escape = results[file_name][target_escape]["line_val"]
+    line_escape = fit_results[file_name][target_escape]["line_val"]
     # Calculate the energy resolution using the escape peak and update the context
     res_val = energy_resolution_escape(line_main, line_escape, sigma_main)
     target_context[task] = res_val
     # Create a label for the resolution value to show if task is plotted
-    target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val}"
+    target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val} %"
     context["results"][file_name][target_main] = target_context
     return context
 
 
-def resolution_folder(context: dict, target: str | None = None, label: str = "", plot: bool = True):
+def resolution_folder(
+        context: dict,
+        target: str | None = None,
+        plot: bool = ResolutionDefaults.plot,
+        label: str | None = ResolutionDefaults.label
+        ) -> dict:
+    """Calculate the energy resolution of the detector using the fit results obtained from the source
+    data of multiple files.
+
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the fit results in `context["fit"]`.
+    target : str, optional
+        The name of the fitting subtask to use for resolution calculation. If None, no calculation is
+        performed. Default is None.
+    plot : bool, optional
+        Whether to show the plots of the resolution trend. Default is True.
+    label : str, optional
+        The label for the resolution trend plot. Default is None.
+    
+    Returns
+    -------
+    context : dict
+        The updated context dictionary containing the resolution results in `context["results"]`.
+    """
     task = "resolution"
-    results = context.get("results", {})
-    res_vals = []
-    x = []
-    for file_name in results.keys():
-        target_context = results[file_name][target]
+    fit_results = context.get("fit", {})
+    # Get the different file names and create arrays to store resolution values and voltages
+    file_names = list(fit_results.keys())
+    res_vals = np.zeros(len(file_names), dtype=object)
+    voltages = np.zeros(len(file_names))
+    # Iterate over all files and calculate the resolution values
+    for i, file_name in enumerate(file_names):
+        target_context = fit_results[file_name][target]
         sigma = target_context["sigma"]
         line_val = target_context["line_val"]
-        energy = context["config"].source.e_peak
-        res_vals.append(energy_resolution(line_val, sigma))
-        x.append(target_context["voltage"])
-    
-    res_vals = np.array(res_vals)
+        res_vals[i] = energy_resolution(line_val, sigma)
+        voltages[i] = target_context["voltage"]
     y = unumpy.nominal_values(res_vals)
     yerr = unumpy.std_devs(res_vals)
-    x = np.array(x)
-    plt.figure("Resolution vs Voltage")
-    plt.plot(x, y, ".k", label="Data")
+    min_idx = np.argmin(y)
+    # Create the figure for the resolution trend
+    fig = plt.figure("Resolution vs Voltage")
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
+    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
+                 textcoords="offset points", ha="center", va="top", fontsize=12)
+    plt.xlabel("Voltage [V]")
+    plt.ylabel(r"$\Delta$E/E")
+    if not plot:
+        plt.close(fig)
+    # Update the context with the resolution trend results
+    context["results"][task] = dict(voltages=voltages, res_vals=res_vals)
+    # I have to find a way to save the label for each file
     return context
+
+
+def drift_rate(
+        context: dict,
+        target: str | None = None,
+        energy: float = 5.9,
+        threshold: float = 1.5,
+        plot: bool = True,
+        label: str | None = None,
+        **kwargs
+        ) -> dict:
+    task = "rate"
+    fit_results = context.get("fit", {})
+    file_names = fit_results.keys()
+    rates = np.zeros(len(fit_results), dtype=object)
+    drift_voltages = np.zeros(len(fit_results))
+    for i, file_name in enumerate(file_names):
+        source = fit_results[file_name]["source"]
+        target_context = fit_results[file_name][target]
+        line_val = target_context["line_val"]
+        integration_time = source.real_time
+        drift_voltages[i] = source.drift_voltage
+        charge_thr = (threshold / energy) * line_val
+        hist = source.hist
+        area = hist.content * hist.bin_widths()
+        counts = area[hist.bin_centers() > charge_thr.n].sum()
+        rates[i] = counts / integration_time
+    y = unumpy.nominal_values(rates)
+    yerr = unumpy.std_devs(rates)
+    fig = plt.figure("Rate vs Drift Voltage")
+    plt.errorbar(drift_voltages, y, yerr=yerr, fmt=".", label=label)
+    plt.xlabel("Drift Voltage [V]")
+    plt.ylabel("Rate [counts/s]")
+
+    return context
+
+
+
+        
 
 
 def _get_label(
@@ -433,7 +564,7 @@ def plot_spec(
         The unchanged context dictionary.
     """
     # Access the source data and results from the context
-    source = context.get("source")
+    source = context.get("tmp_source")
     results = context.get("results", {})
     file_name, = results.keys()
     # Create the plot figure and plot the spectrum

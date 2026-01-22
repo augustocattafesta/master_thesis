@@ -42,7 +42,7 @@ pipeline:
   - task: "gain"
     target: "main_peak"
     fit: true
-    plot: false
+    plot: true
     label: "test"
   
   - task: "resolution"
@@ -71,6 +71,10 @@ pipeline:
       - "gain"
       - "resolution"
       - "resolution_escape"
-    
+
+  - task: "rate"
+    target: "main_peak"
+    threshold: 1.5
+
   - task: "plot"
     label: "test label"
