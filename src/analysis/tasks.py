@@ -200,6 +200,29 @@ def gain_single(
     return context
 
 
+def gain_folder(context: dict, w: float = GainDefaults.w,
+        energy: float = GainDefaults.energy,
+        target: str | None = None, fit = False, plot =  True, label = "", yscale = "log"):
+    task = "gain"
+    results = context.get("results", {})
+    gain_vals = []
+    x = []
+    for file_name in results.keys():
+        target_context = results[file_name][target]
+        print(target_context)
+        line_val = target_context["line_val"]
+        x.append(target_context["voltage"])
+        gain_vals.append(gain(w, line_val, energy))
+    
+    gain_vals = np.array(gain_vals)
+    y = unumpy.nominal_values(gain_vals)
+    yerr = unumpy.std_devs(gain_vals)
+    x = np.array(x)
+    plt.figure("Gain vs Voltage")
+    plt.errorbar(x, y, yerr=yerr, fmt=".k", label="Data")
+    return context
+        
+
 def resolution_single(
         context: dict,
         target: str | None = None,
@@ -288,6 +311,28 @@ def resolution_escape(
     # Create a label for the resolution value to show if task is plotted
     target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val}"
     context["results"][file_name][target_main] = target_context
+    return context
+
+
+def resolution_folder(context: dict, target: str | None = None, label: str = "", plot: bool = True):
+    task = "resolution"
+    results = context.get("results", {})
+    res_vals = []
+    x = []
+    for file_name in results.keys():
+        target_context = results[file_name][target]
+        sigma = target_context["sigma"]
+        line_val = target_context["line_val"]
+        energy = context["config"].source.e_peak
+        res_vals.append(energy_resolution(line_val, sigma))
+        x.append(target_context["voltage"])
+    
+    res_vals = np.array(res_vals)
+    y = unumpy.nominal_values(res_vals)
+    yerr = unumpy.std_devs(res_vals)
+    x = np.array(x)
+    plt.figure("Resolution vs Voltage")
+    plt.plot(x, y, ".k", label="Data")
     return context
 
 

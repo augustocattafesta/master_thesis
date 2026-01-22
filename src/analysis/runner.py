@@ -8,9 +8,11 @@ from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
     fit_peak,
+    gain_folder,
     gain_single,
     plot_spec,
     resolution_escape,
+    resolution_folder,
     resolution_single,
 )
 
@@ -22,7 +24,8 @@ SINGLE_TASK_REGISTRY = {
 }
 
 FOLDER_TASK_REGISTRY = {
-    "gain": ""
+    "gain": gain_folder,
+    "resolution": resolution_folder,
 }
 
 
