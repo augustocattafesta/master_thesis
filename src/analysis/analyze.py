@@ -532,6 +532,7 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float,
 
 from .config import AppConfig
 
+
 def run_analysis(config_path: str):
     config = AppConfig.from_yaml(config_path)
     

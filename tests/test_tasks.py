@@ -1,7 +1,7 @@
-from aptapy.plotting import plt
 
 from analysis.fileio import PulsatorFile, SourceFile
 from analysis.tasks import calibration, fit_peak
+
 
 def test_calibration(datadir):
     file_path = datadir / "folder0/live_data_chip18112025_ci5-10-15_hvon.mca"

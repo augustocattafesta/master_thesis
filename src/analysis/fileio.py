@@ -16,7 +16,8 @@ from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import find_peaks_iterative, ArEscape
+from .utils import ArEscape, find_peaks_iterative
+
 
 class FileBase:
     """Load data from a file and define the path and the histogram.

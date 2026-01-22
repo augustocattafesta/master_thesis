@@ -1,4 +1,4 @@
-from analysis.runner import run_single, run_folder
+from analysis.runner import run_single
 
 pulse_path ="/home/augusto/Thesis/master_thesis/tests/data/folder0/live_data_chip18112025_ci5-10-15_hvon.mca"
 source_path = "/home/augusto/Thesis/master_thesis/tests/data/folder0/live_data_chip18112025_D1000_B370.mca"

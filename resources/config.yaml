@@ -53,15 +53,27 @@ pipeline:
     target_escape: "escape_peak"
 
   - task: "plot"
-    plot: true
     targets:
       - "main_peak"
       - "escape_peak"
-    xrange: [2, 4, 1]
+    xrange: [2, 4]
     label: "chip"
     task_labels:
       - "gain"
       - "resolution"
       - "resolution_escape"
+
+  - task: "plot"
+    targets:
+      - "escape_peak"
+    label: "chip"
+    task_labels:
+      - "gain"
+      - "resolution"
+      - "resolution_escape"
+    
+  - task: "plot"
+    label: "test label"
+    
 
 

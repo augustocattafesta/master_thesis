@@ -1,9 +1,14 @@
-from typing import List, Union, Literal, Optional
+"""Configuration models for the analysis application."""
+from dataclasses import dataclass
+from typing import Literal
 
+import aptapy.models
 import yaml
+from aptapy.modeling import AbstractFitModel
 from pydantic import BaseModel, Field
 
 from .utils import KALPHA
+
 
 class Acquisition(BaseModel):
     date: str
@@ -23,18 +28,34 @@ class Source(BaseModel):
     e_peak: float = KALPHA
 
 
-class CalibrationConfig(BaseModel):
-    task: Literal["calibration"]
+@dataclass(frozen=True)
+class CalibrationDefaults:
     charge_conversion: bool = True
     plot: bool = True
 
 
+class CalibrationConfig(BaseModel):
+    task: Literal["calibration"]
+    charge_conversion: bool = CalibrationDefaults.charge_conversion
+    plot: bool = CalibrationDefaults.plot
+
+
+@dataclass(frozen=True)
+class FitPeakDefaults:
+    model_class: AbstractFitModel = aptapy.models.Gaussian
+    xmin: float = float("-inf")
+    xmax: float = float("inf")
+    num_sigma_left: float = 1.5
+    num_sigma_right: float = 1.5
+    absolute_sigma: bool = True
+
+
 class FitSpecPars(BaseModel):
-    xmin: Optional[float] = float("-inf")
-    xmax: Optional[float] = float("inf")
-    num_sigma_left: Optional[float] = 1.5
-    num_sigma_right: Optional[float] = 1.5
-    absolute_sigma: Optional[bool] = True
+    xmin: float | None = FitPeakDefaults.xmin
+    xmax: float | None = FitPeakDefaults.xmax
+    num_sigma_left: float | None = FitPeakDefaults.num_sigma_left
+    num_sigma_right: float | None = FitPeakDefaults.num_sigma_right
+    absolute_sigma: bool | None = FitPeakDefaults.absolute_sigma
 
 
 class SpectrumSubtask(BaseModel):
@@ -46,80 +67,87 @@ class SpectrumSubtask(BaseModel):
 
 class SpectrumFittingConfig(BaseModel):
     task: Literal["spectrum_fitting"]
-    subtasks: List[SpectrumSubtask]
-    # plot: bool = True
-    # plot_range: List[float] = [0.0, 10.0]
+    subtasks: list[SpectrumSubtask]
+
+
+@dataclass(frozen=True)
+class GainDefaults:
+    w: float = 26.0
+    energy: float = KALPHA
+    fit: bool = True
+    plot: bool = True
+    label: str = ""
+    yscale: str = "log"
 
 
 class GainConfig(BaseModel):
     task: Literal["gain"]
-    w: float = 26.0
-    energy: float = KALPHA
-    target: Optional[str] = None
-    fit: bool = True
-    plot: bool = True
-    label: Optional[str] = None
-    yscale: Literal["linear", "log"] = "log"
-    target: Optional[str] = None
+    w: float = GainDefaults.w
+    energy: float = GainDefaults.energy
+    target: str | None = None
+    fit: bool = GainDefaults.fit
+    plot: bool = GainDefaults.plot
+    label: str | None = GainDefaults.label
+    yscale: Literal["linear", "log"] = GainDefaults.yscale
 
 
 class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     label: str = ""
     plot: bool = True
-    target: Optional[str] = None
+    target: str | None = None
 
 
 class ResolutionEscapeConfig(BaseModel):
     task: Literal["resolution_escape"]
-    target_main: Optional[str] = None
-    target_escape: Optional[str] = None
+    target_main: str | None = None
+    target_escape: str | None = None
 
 
 class GainTrendConfig(BaseModel):
     task: Literal["gain_trend"]
     time_unit: Literal["s", "m", "h"] = "h"
-    subtasks: List[SpectrumSubtask]
+    subtasks: list[SpectrumSubtask]
+
+
+@dataclass(frozen=True)
+class PlotDefaults:
+    plot: bool = True
+    label: str = ""
+    xrange: list[float] | None = Field(None, min_length=2, max_length=2)
+    task_labels: list[str] | None = None
 
 
 class PlotConfig(BaseModel):
     task: Literal["plot"]
-    plot: Optional[bool] = True
-    targets: Optional[list[str]] = None
-    label: Optional[str] = ""
-    xrange: Optional[List[float]] = None
-    task_labels: Optional[list[str]] = None
+    targets: list[str] | None = None
+    label: str | None = PlotDefaults.label
+    xrange: list[float] | None = PlotDefaults.xrange
+    task_labels: list[str] | None = PlotDefaults.task_labels
 
 
-TaskType = Union[
-    CalibrationConfig,
-    SpectrumFittingConfig,
-    GainConfig,
-    ResolutionConfig,
-    ResolutionEscapeConfig,
-    GainTrendConfig,
-    PlotConfig
-]
+TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \
+    ResolutionEscapeConfig | GainTrendConfig | PlotConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition
     detector: Detector
     source: Source
-    pipeline: List[TaskType]
+    pipeline: list[TaskType]
 
     @classmethod
     def from_yaml(cls, path: str) -> "AppConfig":
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return cls(**yaml.safe_load(f))
         
     @property
-    def calibration(self) -> Optional[CalibrationConfig]:
+    def calibration(self) -> CalibrationConfig | None:
         return next((t for t in self.pipeline if isinstance(t, CalibrationConfig)), None)
     
     @property
-    def spectrum_fitting(self) -> Optional[SpectrumFittingConfig]:
+    def spectrum_fitting(self) -> SpectrumFittingConfig | None:
         return next((t for t in self.pipeline if isinstance(t, SpectrumFittingConfig)), None)
     
     @property
-    def plot(self) -> Optional[PlotConfig]:
+    def plot(self) -> PlotConfig | None:
         return next((t for t in self.pipeline if isinstance(t, PlotConfig)), None)

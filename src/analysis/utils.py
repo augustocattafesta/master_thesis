@@ -124,7 +124,9 @@ def energy_resolution_escape(line_val_main: np.ndarray, line_val_escape: np.ndar
     sigma_main : np.ndarray
         Sigma of the main emission line.
     """
-    return sigma_main * SIGMA_TO_FWHM * (KALPHA - AR_ESCAPE) / (line_val_main - line_val_escape) / KALPHA * 100
+    fwhm = sigma_main * SIGMA_TO_FWHM
+    return fwhm * (KALPHA - AR_ESCAPE) / (line_val_main - line_val_escape) / KALPHA * 100
+
 
 def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> np.ndarray:
     """Compute the accumulated acquisition time for Amptek MCA data, taking into account the
