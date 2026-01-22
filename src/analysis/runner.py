@@ -51,7 +51,7 @@ def run_single(source_file_path: str | Path,
         calibration_model = context["results"]["calibration"]["model"]
         source = SourceFile(Path(source_file_path), calibration_model)
         context["source"] = source
-        # Execute all fitting subtasks defined in the configuration
+        # Execute all fitting subtasks defined in the configuration file
         for subtask in spec_fit_config.subtasks:
             fit_pars = subtask.fit_pars.model_dump()
             context = fit_peak(
@@ -77,47 +77,43 @@ def run_single(source_file_path: str | Path,
     plt.show()
 
 
-
-
-
-
-
-
-
-
 def run_folder(folder_path: str | Path,
                config_file_path: str | Path
                ) -> None:
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
+    context = dict(config=config, results={})
     # Load data folder
     data_folder = Folder(Path(folder_path))
-    # Iterate over all source files in the folder
+    # Run calibration task
     cal_config = config.calibration
     if cal_config is not None:
         pulse = PulsatorFile(Path(data_folder.pulse_file))
-        cal_results = calibration(
-            pulse=pulse,
+        context["pulse"] = pulse
+        context = calibration(
+            context=context,
             charge_conversion=cal_config.charge_conversion,
             plot=cal_config.plot
         )
     else:
         raise RuntimeError("No calibration task found in configuration.")
-    # Run spectrum fitting task for all source files
+    # Run all fitting subtasks defined in the configuration file for each source file
     spec_fit_config = config.spectrum_fitting
     if spec_fit_config is not None:
-        for source_path in data_folder.source_files:
-            source = SourceFile(Path(source_path), cal_results["model"])
+        calibration_model = context["results"]["calibration"]["model"]
+        for source_file in data_folder.source_files:
+            tmp_source = SourceFile(Path(source_file), calibration_model)
+            context["source"] = tmp_source
+            # Execute all fitting subtasks defined in the configuration file
             for subtask in spec_fit_config.subtasks:
-                fit_pars = subtask.fit_pars
-                fit_results = fit_peak(
-                    source=source,
+                fit_pars = subtask.fit_pars.model_dump()
+                context = fit_peak(
+                    context=context,
+                    subtask=None,
                     model_class=load_class(subtask.model),
-                    xmin=fit_pars.xmin,
-                    xmax=fit_pars.xmax,
-                    num_sigma_left=fit_pars.num_sigma_left,
-                    num_sigma_right=fit_pars.num_sigma_right,
-                    absolute_sigma=fit_pars.absolute_sigma
+                    **fit_pars
                 )
+    print(context)
+            
 
 

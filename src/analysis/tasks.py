@@ -404,5 +404,4 @@ def plot_spec(
         xrange = _get_xrange(source, models)
     plt.xlim(xrange)
     plt.legend()
-
     return context

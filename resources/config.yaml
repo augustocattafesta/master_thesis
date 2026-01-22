@@ -74,6 +74,3 @@ pipeline:
     
   - task: "plot"
     label: "test label"
-    
-
-
