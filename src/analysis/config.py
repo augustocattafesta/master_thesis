@@ -110,13 +110,25 @@ class ResolutionEscapeConfig(BaseModel):
     target_escape: str | None = None
 
 
-class DriftRateConfig(BaseModel):
-    task: Literal["rate"]
-    target: str | None = None
-    energy: float = KALPHA
-    threshold: float = 0.1
+@dataclass(frozen=True)
+class DriftDefaults:
+    rate: bool = False
+    threshold: float = 1.5
     plot: bool = True
     label: str | None = None
+    yscale: str = "linear"
+
+
+class DriftConfig(BaseModel):
+    task: Literal["drift"]
+    target: str | None = None
+    rate: bool = DriftDefaults.rate
+    w: float = GainDefaults.w
+    energy: float = GainDefaults.energy
+    threshold: float = DriftDefaults.threshold
+    plot: bool = DriftDefaults.plot
+    label: str | None = DriftDefaults.label
+    yscale: Literal["linear", "log"] = DriftDefaults.yscale
 
 
 class GainTrendConfig(BaseModel):
@@ -142,7 +154,7 @@ class PlotConfig(BaseModel):
 
 
 TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \
-    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftRateConfig
+    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition

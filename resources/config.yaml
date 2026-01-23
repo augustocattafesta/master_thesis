@@ -47,6 +47,7 @@ pipeline:
   
   - task: "resolution"
     target: "main_peak"
+    plot: false
   
   # - task: "resolution_escape"
   #   target_main: "main_peak"
@@ -72,9 +73,12 @@ pipeline:
       - "resolution"
       - "resolution_escape"
 
-  - task: "rate"
+  - task: "drift"
     target: "main_peak"
+    plot: true
+    rate: true
     threshold: 1.5
+    label: "W1a 86.6um, B320"
 
   - task: "plot"
     label: "test label"

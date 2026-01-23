@@ -1,4 +1,4 @@
-from analysis.runner import run
+from analysis.runner import run, run_folders
 
 pulse_path ="/home/augusto/Thesis/master_thesis/tests/data/folder0/live_data_chip18112025_ci5-10-15_hvon.mca"
 source_path = "/home/augusto/Thesis/master_thesis/tests/data/folder0/live_data_chip18112025_D1000_B370.mca"
@@ -9,4 +9,5 @@ folder = "/home/augusto/Thesis/master_thesis/data/260122/Dscan"
 
 
 # run(config_path, source_path, pulse_path)
-run(config_path, folder)
+# run(config_path, folder)
+run_folders(config_path, folder)

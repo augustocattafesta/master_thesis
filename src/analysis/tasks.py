@@ -8,11 +8,12 @@ from uncertainties import unumpy
 
 from .config import (
     CalibrationDefaults,
+    DriftDefaults,
     FitPeakDefaults,
     GainDefaults,
     PlotDefaults,
     ResolutionDefaults)
-from .fileio import SourceFile
+from .plotting import get_label, get_xrange, write_legend
 from .utils import (
     SIGMA_TO_FWHM,
     energy_resolution,
@@ -217,8 +218,8 @@ def gain_folder(
         label: str | None = GainDefaults.label,
         yscale: str = GainDefaults.yscale
         ) -> dict:
-    """Calculate the gain of the detector using the fit results obtained from the source data of
-    multiple files.
+    """Calculate the gain of the detector vs the back voltage using the fit results obtained from
+    the source data of multiple files.
 
     Arguments
     ---------
@@ -261,7 +262,7 @@ def gain_folder(
     yerr = unumpy.std_devs(gain_vals)
     # Create the figure for the gain trend
     fig = plt.figure("Gain vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label=label)
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Gain")
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.yscale(yscale)
@@ -270,7 +271,7 @@ def gain_folder(
         model = aptapy.models.Exponential()
         model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
         model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
-    plt.legend()
+    write_legend(label)
     if not plot:
         plt.close(fig)
     # Update the context with the gain trend results and fit model
@@ -420,116 +421,104 @@ def resolution_folder(
                  textcoords="offset points", ha="center", va="top", fontsize=12)
     plt.xlabel("Voltage [V]")
     plt.ylabel(r"$\Delta$E/E")
+    write_legend(label)
     if not plot:
         plt.close(fig)
     # Update the context with the resolution trend results
     context["results"][task] = dict(voltages=voltages, res_vals=res_vals)
-    # I have to find a way to save the label for each file
     return context
 
 
-def drift_rate(
+def drift(
         context: dict,
         target: str | None = None,
-        energy: float = 5.9,
-        threshold: float = 1.5,
-        plot: bool = True,
-        label: str | None = None,
+        w: float = GainDefaults.w,
+        energy: float = GainDefaults.energy,
+        threshold: float = DriftDefaults.threshold,
+        plot: bool = DriftDefaults.plot,
+        rate: bool = DriftDefaults.rate,
+        label: str | None = DriftDefaults.label,
+        yscale: str | None = DriftDefaults.yscale,
         **kwargs
         ) -> dict:
-    task = "rate"
+    """Calculate the gain and rate of the detector vs the drift voltage using the fit results
+    obtained from the source data of multiple files.
+
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the fit results in `context["fit"]`.
+    target : str, optional
+        The name of the fitting subtask to use for gain calculation. If None, no calculation is
+        performed. Default is None.
+    w : float, optional
+        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
+    energy : float, optional
+        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
+    threshold : float, optional
+        The energy threshold (in keV) above which to calculate the rate. Default is 1.5 keV.
+    plot : bool, optional
+        Whether to show the plots of the gain vs drift voltage. Default is True.
+    rate : bool, optional
+        Whether to plot the rate on a secondary y-axis. Default is False.
+    label : str, optional
+        The label for the gain trend plot. Default is None.
+    yscale : str, optional
+        The y-axis scale for the gain trend plot. Can be "linear" or "log". Default is "linear".
+    
+    Returns
+    -------
+    context : dict
+        The updated context dictionary containing the drift results in `context["results"]`.
+    """
+    task = "drift"
+    # Get the different file names and create arrays to store rate values and drift voltages
     fit_results = context.get("fit", {})
     file_names = fit_results.keys()
     rates = np.zeros(len(fit_results), dtype=object)
     drift_voltages = np.zeros(len(fit_results))
+    gain_vals = np.zeros(len(fit_results), dtype=object)
+    # Iterate over all files and calculate the rate values
     for i, file_name in enumerate(file_names):
         source = fit_results[file_name]["source"]
         target_context = fit_results[file_name][target]
         line_val = target_context["line_val"]
         integration_time = source.real_time
+        gain_vals[i] = gain(w, line_val, energy)
         drift_voltages[i] = source.drift_voltage
+        # Calculate the threshold in charge and calculate the rate
         charge_thr = (threshold / energy) * line_val
         hist = source.hist
-        area = hist.content * hist.bin_widths()
-        counts = area[hist.bin_centers() > charge_thr.n].sum()
+        counts = hist.content[hist.bin_centers() > charge_thr.n].sum()
         rates[i] = counts / integration_time
-    y = unumpy.nominal_values(rates)
-    yerr = unumpy.std_devs(rates)
-    fig = plt.figure("Rate vs Drift Voltage")
-    plt.errorbar(drift_voltages, y, yerr=yerr, fmt=".", label=label)
-    plt.xlabel("Drift Voltage [V]")
-    plt.ylabel("Rate [counts/s]")
-
+    # Prepare the quantities for plotting
+    y = unumpy.nominal_values(gain_vals)
+    yerr = unumpy.std_devs(gain_vals)
+    y_rate = unumpy.nominal_values(rates)
+    yerr_rate = unumpy.std_devs(rates)
+    # Plot the gain vs drift voltage
+    fig, ax1 = plt.subplots(num="drift_voltage")
+    ax1.errorbar(drift_voltages, y, yerr=yerr, fmt=".k", label="Gain")
+    ax1.set_xlabel("Drift Voltage [V]")
+    ax1.set_ylabel("Gain", color=last_line_color())
+    ax1.tick_params(axis="y", labelcolor=last_line_color())
+    ax1.set_yscale(yscale)
+    # Plot the rate on a secondary y-axis if requested
+    if rate:
+        color = "red"
+        ax2 = ax1.twinx()
+        ax2.errorbar(drift_voltages, y_rate, yerr=yerr_rate, fmt=".", color=color, label="Rate")
+        ax2.set_ylabel("Rate [counts/s]", color=color)
+        ax2.tick_params(axis="y",labelcolor=color)
+    axs = (ax1, ax2) if rate else (ax1, )
+    write_legend(label, *axs, loc="lower right")
+    if not plot:
+        plt.close(fig)
+    # Update the context with the drift results
+    context["results"][task] = dict(drift_voltages=drift_voltages,
+                                    gain_vals=gain_vals,
+                                    rates=rates)
     return context
-
-
-
-        
-
-
-def _get_label(
-        task_labels: list[str],
-        target_context: dict
-        ) -> str | None:
-    """Generate a label for the plot based on the specified task labels and the target context.
-
-    Arguments
-    ---------
-    task_labels : list[str]
-        The list of task names whose labels should be included in the plot legend.
-    target_context : dict
-        The context dictionary containing the labels for each task.
-
-    Returns
-    -------
-    label : str | None
-        The generated label for the plot, or None if no task labels are provided.
-    """
-    # Check if task_labels is provided
-    if task_labels is None:
-        return None
-    label = ""
-    # Iterate over the task labels and append the corresponding labels from the target context
-    for task in task_labels:
-        if task in target_context:
-            task_label = target_context[f"{task}_label"]
-            label += f"{task_label}\n"
-    # Remove the trailing newline character
-    label = label[:-1]
-    return label
-
-
-def _get_xrange(source: SourceFile, models: list[AbstractFitModel]) -> list[float]:
-    """Determine the x-axis range for plotting the source spectrum and fitted models.
-    
-    Arguments
-    ---------
-    source : SourceFile
-        The source data file containing the histogram to plot.
-    models : list[AbstractFitModel]
-        The list of fitted models to consider for determining the x-axis range.
-    Returns
-    -------
-    xrange : list[float]
-        The x-axis range `[xmin, xmax]` for plotting.
-    """
-    # Get the histogram range with counts > 0 and get the range
-    content = np.insert(source.hist.content, -1, 0)
-    edges = source.hist.bin_edges()[content > 0]
-    xmin, xmax = edges[0], edges[-1]
-    m_mins = []
-    m_maxs = []
-    # Get the plotting range of all models, if any
-    for model in models:
-        low, high = model.default_plotting_range()
-        m_mins.append(low)
-        m_maxs.append(high)
-    # Determine the final xrange including all models. If no model is given, use the
-    # histogram range
-    if len(models) > 0:
-        xmin = max(xmin, min(m_mins))
-        xmax = min(xmax, max(m_maxs))
-    return [xmin, xmax]
 
 
 def plot_spec(
@@ -577,13 +566,13 @@ def plot_spec(
             if target in results[file_name]:
                 target_context = results[file_name][target]
                 model = target_context["model"]
-                label = _get_label(task_labels, target_context)
+                label = get_label(task_labels, target_context)
                 # Save the model for automatic xrange calculation
                 models.append(model)
                 model.plot(label=label)
     # Set the x-axis range
     if xrange is None:
-        xrange = _get_xrange(source, models)
+        xrange = get_xrange(source, models)
     plt.xlim(xrange)
     plt.legend()
     return context

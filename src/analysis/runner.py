@@ -7,7 +7,7 @@ from .config import AppConfig
 from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
-    drift_rate,
+    drift,
     fit_peak,
     gain_folder,
     gain_single,
@@ -17,6 +17,7 @@ from .tasks import (
     resolution_single,
 )
 
+
 SINGLE_TASK_REGISTRY = {
     "gain": gain_single,
     "resolution": resolution_single,
@@ -24,17 +25,23 @@ SINGLE_TASK_REGISTRY = {
     "plot": plot_spec
 }
 
+
 FOLDER_TASK_REGISTRY = {
     "gain": gain_folder,
     "resolution": resolution_folder,
-    "rate": drift_rate
+    "drift": drift
+}
+
+
+FOLDERS_TASK_REGISTRY = {
+    "compare": ""
 }
 
 
 def run(
         config_file_path: str | Path,
         *paths: str | Path
-        ) -> None:
+        ) -> dict:
     """Run the analysis pipeline defined in the configuration file on the given data files or
     folder.
     
@@ -46,6 +53,11 @@ def run(
         Paths to the data files or folder. If only one path is given, it is assumed to be a folder
         containing source files and at least a pulse file. Otherwise, the last path is assumed to
         be the pulse file and all preceding ones are source files.
+
+    Returns
+    -------
+    context : dict
+        Dictionary containing all the info and results of the analysis pipeline.
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
@@ -89,7 +101,7 @@ def run(
                 )
     # Now we run all the tasks defined in the configuration file. The pipeline is sorted
     # so that the plotting task is always executed at the end (to compute resolution or gain).
-    pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)    
+    pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)
     for task in pipeline:
         # Skip tasks already executed and those marked to be skipped
         # We skip plot here because we want all the results to be in the context
@@ -106,4 +118,43 @@ def run(
             # Remove the name of the task from the keyword arguments
             kwargs = task.model_dump(exclude={"task"})
             context = func(context, **kwargs)
+    plt.tight_layout()
+    return context
+
+
+def run_folders(
+        config_file_path: str | Path,
+        *folder_paths: str | Path
+        ) -> dict:
+    """Run the analysis pipeline defined in the configuration file on multiple data folders.
+
+    Arguments
+    ---------
+    config_file_path : str | Path
+        Path to the configuration file.
+    *folder_paths : str | Path
+        Paths to the data folders.
+    """
+    # Load configuration file
+    config = AppConfig.from_yaml(config_file_path)
+    context = dict(config=config, folders={})
+    # Execute the analysis pipeline for each folder
+    for folder_path in folder_paths:
+        folder_context = run(
+            config_file_path,
+            folder_path
+        )
+        context["folders"][folder_path] = folder_context
+    # After that all the folders have been analyzed, we can run the folder-level tasks
+    pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)
+    for task in pipeline:
+        if task.task not in FOLDERS_TASK_REGISTRY:
+            continue
+        func = FOLDERS_TASK_REGISTRY.get(task.task)
+        if func:
+            # Remove the name of the task from the keyword arguments
+            kwargs = task.model_dump(exclude={"task"})
+            context = func(context, **kwargs)
+    plt.tight_layout()
     plt.show()
+    return context
