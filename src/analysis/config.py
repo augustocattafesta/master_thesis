@@ -152,17 +152,20 @@ class DriftConfig(BaseModel):
 @dataclass(frozen=True)
 class PlotDefaults:
     plot: bool = True
-    label: str = ""
     xrange: list[float] | None = Field(None, min_length=2, max_length=2)
+    label: str = ""
     task_labels: list[str] | None = None
+    loc: str = "best"
 
 
 class PlotConfig(BaseModel):
     task: Literal["plot"]
     targets: list[str] | None = None
-    label: str | None = PlotDefaults.label
     xrange: list[float] | None = PlotDefaults.xrange
+    label: str | None = PlotDefaults.label
     task_labels: list[str] | None = PlotDefaults.task_labels
+    loc: str = PlotDefaults.loc
+
 
 
 TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \

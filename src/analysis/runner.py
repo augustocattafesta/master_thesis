@@ -11,8 +11,7 @@ from .tasks import (
     gain_folder,
     gain_single,
     gain_trend,
-    plot_spectrum_folder,
-    plot_spectrum_single,
+    plot_spectrum,
     resolution_escape,
     resolution_folder,
     resolution_single,
@@ -23,7 +22,7 @@ SINGLE_TASK_REGISTRY = {
     "gain": gain_single,
     "resolution": resolution_single,
     "resolution_escape": resolution_escape,
-    "plot": plot_spectrum_single
+    "plot": plot_spectrum
 }
 
 
@@ -32,7 +31,7 @@ FOLDER_TASK_REGISTRY = {
     "gain_trend": gain_trend,
     "resolution": resolution_folder,
     "drift": drift,
-    "plot": plot_spectrum_folder
+    "plot": plot_spectrum
 }
 
 
@@ -64,7 +63,7 @@ def run(
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context = dict(config=config, fit={}, results={}, figures={})
+    context = dict(config=config, sources={}, fit={}, results={}, figures={})
     # If only one path is given, we assume it is a folder containing source files and a pulse file.
     # Otherwise, the last path is the pulse file and all preceding ones are source files.
     if len(paths) == 1:
@@ -86,13 +85,15 @@ def run(
         )
     else:
         raise RuntimeError("No calibration task found in configuration.")
+    # Load source files with the calculated calibration model
+    calibration_model = context["calibration"]["model"]
+    sources = [SourceFile(Path(p), calibration_model) for p in source_file_paths]
+    context["sources"] = {str(s.file_path.stem): s for s in sources}
     # Run all fitting subtasks defined in the configuration file for each source file
     spec_fit_config = config.spectrum_fitting
     if spec_fit_config is not None:
-        calibration_model = context["calibration"]["model"]
-        for source_file_path in source_file_paths:
-            tmp_source = SourceFile(Path(source_file_path), calibration_model)
-            context["tmp_source"] = tmp_source
+        for source in sources:
+            context["tmp_source"] = source  # Think how to avoid this
             # Execute all fitting subtasks defined in the configuration file
             for subtask in spec_fit_config.subtasks:
                 fit_pars = subtask.fit_pars.model_dump()
@@ -113,7 +114,7 @@ def run(
             continue
         # Determine if we are running a single-file or folder task and select the appropriate
         # function
-        if len(source_file_paths) == 1:
+        if len(sources) == 1:
             func = SINGLE_TASK_REGISTRY.get(task.task)
         else:
             func = FOLDER_TASK_REGISTRY.get(task.task)

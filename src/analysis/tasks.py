@@ -266,6 +266,8 @@ def gain_folder(
         line_val = target_context["line_val"]
         gain_vals[i] = gain(w, line_val, energy)
         voltages[i] = target_context["voltage"]
+        task_label = f"Gain@{voltages[i]:.0f} V: {gain_vals[i]}"
+        target_context[f"{task}_label"] = task_label
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
     # Create the figure for the gain trend
@@ -510,6 +512,10 @@ def resolution_folder(
         line_val = target_context["line_val"]
         res_vals[i] = energy_resolution(line_val, sigma)
         voltages[i] = target_context["voltage"]
+        energy = context["config"].source.e_peak
+        fwhm = SIGMA_TO_FWHM * sigma
+        task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_vals[i]} %"
+        target_context[f"{task}_label"] = task_label
     y = unumpy.nominal_values(res_vals)
     yerr = unumpy.std_devs(res_vals)
     min_idx = np.argmin(y)
@@ -620,93 +626,39 @@ def drift(
     return context
 
 
-def plot_spectrum_single(
-        context: dict,
-        targets: str | None = None,
-        label: str | None = PlotDefaults.label,
-        xrange: list[float] | None = PlotDefaults.xrange,
-        task_labels: list[str] | None = PlotDefaults.task_labels
-        ) -> None:
-    """Plot the source spectrum along with the fitted models for the specified targets.
-
-    Arguments
-    ---------
-    context : dict
-        The context dictionary containing the source data in `context["source"]` and the fit
-        results in `context["results"]`.
-    targets : list[str], optional
-        The list of fitting subtask names to plot. If None, the spectrum histogram is plotted with
-        no fitted models. Default is None.
-    label : str, optional
-        The label for the source histogram. Default is "".
-    xrange : list[float], optional
-        The x-axis range for the plot. If None, the range is determined automatically to include
-        all the target fitted models. Default is None.
-    task_labels : list[str], optional
-        The list of task names whose labels should be included in the plot legend. If None, no
-        labels are included. Default is None.
-
-    Returns
-    -------
-    context : dict
-        The unchanged context dictionary.
-    """
-    # Access the source data and results from the context
-    source = context.get("tmp_source")
-    results = context.get("results", {})
-    file_name, = results.keys()
-    # Create the plot figure and plot the spectrum
-    plt.figure(f"{source.file_path.stem}_{targets}")
-    source.hist.plot(label=label)
-    # Plot the fitted models for the specified targets and get labels
-    models = []
-    if targets is not None:
-        for target in targets:
-            if target in results[file_name]:
-                target_context = results[file_name][target]
-                model = target_context["model"]
-                label = get_label(task_labels, target_context)
-                # Save the model for automatic xrange calculation
-                models.append(model)
-                model.plot(label=label)
-    # Set the x-axis range
-    if xrange is None:
-        xrange = get_xrange(source, models)
-    plt.xlim(xrange)
-    plt.legend()
-    return context
-
-
-def plot_spectrum_folder(
+def plot_spectrum(
         context: dict,
         targets: list[str] | None = None,
-        label: str | None = PlotDefaults.label,
         xrange: list[float] | None = PlotDefaults.xrange,
-        task_labels: list[str] | None = PlotDefaults.task_labels
+        label: str | None = PlotDefaults.label,
+        task_labels: list[str] | None = PlotDefaults.task_labels,
+        loc: str = PlotDefaults.loc
         ) -> dict:
     # Access the folder fit results from the context
-    fit_results = context.get("fit", {})
-    file_names = fit_results.keys()
+    sources = context.get("sources", {})
+    file_names = sources.keys()
     for file_name in file_names:
-        source = fit_results[file_name]["source"]
+        source = sources[file_name]
         # Create the plot figure and plot the spectrum
         plt.figure(f"{source.file_path.stem}_{targets}")
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
+        fit_results = context.get("fit", {})
         models = []
-        if targets is not None:
-            for target in targets:
-                if target in fit_results[file_name]:
-                    target_context = fit_results[file_name][target]
-                    model = target_context["model"]
-                    # label = get_label(task_labels, target_context)
-                    # Save the model for automatic xrange calculation
-                    models.append(model)
-                    model.plot(label=label)
+        if fit_results:
+            if targets is not None:
+                for target in targets:
+                    if target in fit_results[file_name]:
+                        target_context = fit_results[file_name][target]
+                        model = target_context["model"]
+                        fit_label = get_label(task_labels, target_context)
+                        # Save the model for automatic xrange calculation
+                        models.append(model)
+                        model.plot(label=fit_label)
         # Set the x-axis range
-        if xrange is None:
-            xrange = get_xrange(source, models)
         plt.xlim(xrange)
-        write_legend(label)
+        if xrange is None:
+            plt.xlim(get_xrange(source, models))
+        write_legend(label, loc=loc)
     return context
 

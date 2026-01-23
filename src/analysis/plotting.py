@@ -76,7 +76,8 @@ def get_label(task_labels: list[str], target_context: dict) -> str | None:
     label = ""
     # Iterate over the task labels and append the corresponding labels from the target context
     for task in task_labels:
-        if task in target_context:
+        key_label = f"{task}_label"
+        if key_label in target_context:
             task_label = target_context[f"{task}_label"]
             label += f"{task_label}\n"
     # Remove the trailing newline character
