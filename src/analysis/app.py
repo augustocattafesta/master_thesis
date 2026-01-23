@@ -1,7 +1,5 @@
 
 import importlib
-import inspect
-import sys
 from argparse import ArgumentParser
 
 import aptapy.modeling

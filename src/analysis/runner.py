@@ -11,7 +11,8 @@ from .tasks import (
     gain_folder,
     gain_single,
     gain_trend,
-    plot_spec,
+    plot_spectrum_folder,
+    plot_spectrum_single,
     resolution_escape,
     resolution_folder,
     resolution_single,
@@ -22,7 +23,7 @@ SINGLE_TASK_REGISTRY = {
     "gain": gain_single,
     "resolution": resolution_single,
     "resolution_escape": resolution_escape,
-    "plot": plot_spec
+    "plot": plot_spectrum_single
 }
 
 
@@ -30,7 +31,8 @@ FOLDER_TASK_REGISTRY = {
     "gain": gain_folder,
     "gain_trend": gain_trend,
     "resolution": resolution_folder,
-    "drift": drift
+    "drift": drift,
+    "plot": plot_spectrum_folder
 }
 
 

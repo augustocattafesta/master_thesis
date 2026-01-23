@@ -6,6 +6,7 @@ from aptapy.plotting import plt
 from analysis import ANALYSIS_DATA
 from analysis.runner import run, run_folders
 
+
 def main():
     parser = argparse.ArgumentParser(prog="analysis")
 
@@ -38,7 +39,7 @@ def main():
     if not Path(config_file_path).exists():
         # Should check if is a .yaml file too
         raise FileNotFoundError(f"Config file {config_file_path} does not exist.")
-    
+
     if all(is_file):
         run(config_file_path, *file_paths)
     elif all(is_folder):

@@ -620,7 +620,7 @@ def drift(
     return context
 
 
-def plot_spec(
+def plot_spectrum_single(
         context: dict,
         targets: str | None = None,
         label: str | None = PlotDefaults.label,
@@ -656,7 +656,7 @@ def plot_spec(
     results = context.get("results", {})
     file_name, = results.keys()
     # Create the plot figure and plot the spectrum
-    plt.figure(f"{source.file_path.stem}_{targets} ")
+    plt.figure(f"{source.file_path.stem}_{targets}")
     source.hist.plot(label=label)
     # Plot the fitted models for the specified targets and get labels
     models = []
@@ -675,3 +675,38 @@ def plot_spec(
     plt.xlim(xrange)
     plt.legend()
     return context
+
+
+def plot_spectrum_folder(
+        context: dict,
+        targets: list[str] | None = None,
+        label: str | None = PlotDefaults.label,
+        xrange: list[float] | None = PlotDefaults.xrange,
+        task_labels: list[str] | None = PlotDefaults.task_labels
+        ) -> dict:
+    # Access the folder fit results from the context
+    fit_results = context.get("fit", {})
+    file_names = fit_results.keys()
+    for file_name in file_names:
+        source = fit_results[file_name]["source"]
+        # Create the plot figure and plot the spectrum
+        plt.figure(f"{source.file_path.stem}_{targets}")
+        source.hist.plot(label="Data")
+        # Plot the fitted models for the specified targets and get labels
+        models = []
+        if targets is not None:
+            for target in targets:
+                if target in fit_results[file_name]:
+                    target_context = fit_results[file_name][target]
+                    model = target_context["model"]
+                    # label = get_label(task_labels, target_context)
+                    # Save the model for automatic xrange calculation
+                    models.append(model)
+                    model.plot(label=label)
+        # Set the x-axis range
+        if xrange is None:
+            xrange = get_xrange(source, models)
+        plt.xlim(xrange)
+        write_legend(label)
+    return context
+
