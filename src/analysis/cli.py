@@ -31,8 +31,10 @@ def main():
                 raise FileNotFoundError(f"Data path {path} does not exist.")
         if file_path.is_file():
             is_file.append(True)
+            is_folder.append(False)
         elif file_path.is_dir():
             is_folder.append(True)
+            is_file.append(False)
         file_paths.append(file_path)
 
     config_file_path = args.config
