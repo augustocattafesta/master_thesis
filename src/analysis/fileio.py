@@ -10,13 +10,9 @@ import aptapy.modeling
 import numpy as np
 import yaml
 from aptapy.hist import Histogram1d
-from aptapy.modeling import FitParameter
-from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
-from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import ArEscape, find_peaks_iterative
 
 
 class FileBase:
@@ -119,9 +115,6 @@ class Folder:
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
                                                            _f.name,re.IGNORECASE) is not None][0]
 
-        
-
-
 
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.
@@ -181,33 +174,6 @@ class SourceFile(FileBase):
             return start
         raise ValueError("Not reading START_TIME")
 
-    def fit(self, model_class: type[aptapy.modeling.AbstractFitModel],
-            **kwargs) -> aptapy.modeling.AbstractFitModel:
-        """Fit the spectrum data.
-
-        Parameters
-        ----------
-        model_class : aptapy.modeling.AbstractFitModel
-            Model class to fit the emission line(s). 
-
-        Returns
-        -------
-        model: aptapy.modeling.AbstractFitModel
-            Returns the model instance containing results of the fit.
-        """
-        if issubclass(model_class, (Gaussian, GaussianForestBase)):
-            model = model_class()
-            if isinstance(model, Fe55Forest):
-                intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
-                intensity_par.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
-            if isinstance(model, ArEscape): 
-                intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
-                intensity_par.freeze(0.16)  # Freeze Ar escape / K-alpha ratio
-            model.fit_iterative(self.hist, **kwargs)
-        else:
-            raise TypeError("Choose between Gaussian or GaussianForestBase child class")
-        return model
-
 
 class PulsatorFile(FileBase):
     """Class to analyze a calibration pulse file.
@@ -230,44 +196,6 @@ class PulsatorFile(FileBase):
         """Number of pulses in the spectrum.
         """
         return len(self.voltage)
-
-    def analyze_pulses(self,fit_charge: bool = True) -> tuple[aptapy.modeling.AbstractFitModel,
-                                                              plt.Figure, plt.Figure]:
-        """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
-        Using the resulting position of the peaks, do a calibration fit with a Line model to
-        determine the calibration parameters of the spectrum.
-
-        Returns
-        -------
-        line_model, pulse_fig, line_fig : tuple[aptapy.modeling.AbstractFitModel, Figure, Figure]
-            Returns fit model and figures of the pulses and of the
-            calibration fit.
-        """
-        pulse_fig = plt.figure(self.file_path.name)
-        plt.title("Calibration pulses")
-        self.hist.plot()
-        xpeaks, _ = find_peaks_iterative(self.hist.bin_centers(),
-                                                             self.hist.content, self.num_pulses)
-        mu = np.zeros(shape=len(xpeaks), dtype=object)
-        for i, xpeak in enumerate(xpeaks):
-            peak_model = Gaussian()
-            xmin = xpeak - np.sqrt(xpeak)
-            xmax = xpeak + np.sqrt(xpeak)
-            peak_model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
-            mu[i] = peak_model.mu.ufloat()
-            peak_model.plot(fit_output=True)
-        plt.legend()
-
-        ylabel = "Charge [fC]" if fit_charge else "Voltage [mV]"
-        ydata = self.voltage
-        line_model = Line("Calibration fit", "ADC Channel", ylabel)
-        line_model.fit(unumpy.nominal_values(mu), ydata)
-        line_fig = plt.figure("Calibration fit")
-        plt.errorbar(unumpy.nominal_values(mu), ydata, fmt='.k', label="Data")
-        line_model.plot(fit_output=True)
-        plt.legend()
-
-        return line_model, pulse_fig, line_fig
 
 
 def load_label(key: str) -> str | None:
