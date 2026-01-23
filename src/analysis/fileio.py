@@ -29,6 +29,7 @@ class FileBase:
         self.file_path = file_path
         self.hist = Histogram1d.from_amptek_file(file_path)
 
+
 class DataFolder:
     """Load source files and calibration pulse files from a folder.
     """
