@@ -1,11 +1,14 @@
 """Analysis tasks.
 """
+from pathlib import Path
+
 import aptapy.models
 import numpy as np
 from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
+from .app import load_class
 from .config import (
     CalibrationDefaults,
     DriftDefaults,
@@ -16,6 +19,7 @@ from .config import (
 from .plotting import get_label, get_xrange, write_legend
 from .utils import (
     SIGMA_TO_FWHM,
+    amptek_accumulate_time,
     energy_resolution,
     energy_resolution_escape,
     find_peaks_iterative,
@@ -92,6 +96,7 @@ def fit_peak(
           num_sigma_left: float = FitPeakDefaults.num_sigma_left,
           num_sigma_right: float = FitPeakDefaults.num_sigma_right,
           absolute_sigma: bool = FitPeakDefaults.absolute_sigma,
+          p0: list[float] | None = FitPeakDefaults.p0
       ) -> dict:
     """Perform the fitting of a spectral emission line in the source data.
 
@@ -135,9 +140,12 @@ def fit_peak(
          xmax=xmax,
          num_sigma_left=num_sigma_left,
          num_sigma_right=num_sigma_right,
-         absolute_sigma=absolute_sigma)
-    # Initialize the model and fit the data
-    model = model_class()
+         absolute_sigma=absolute_sigma,
+         p0=p0)
+    # Initialize the model and fit the data.
+    # model_class is given as a list of models, even if it contains only one model, but so far
+    # we only support fitting a single model at a time in this context.
+    model = model_class[0]()
     if isinstance(model, aptapy.models.Fe55Forest):
         model.intensity1.freeze(0.16)
     model.fit_iterative(hist, **kwargs)
@@ -279,7 +287,98 @@ def gain_folder(
     if fit:
         context["results"][task]["model"] = model
     return context
-        
+
+
+def gain_trend(
+        context: dict,
+        target: str | None = None,
+        w: float = GainDefaults.w,
+        energy: float = GainDefaults.energy,
+        subtasks: list[str] | None = None,
+
+    ) -> dict:
+    task = "gain_trend"
+    fit_results = context.get("fit", {})
+    # Get the different file names and create arrays to store gain values and times
+    file_names = list(fit_results.keys())
+    gain_vals = np.zeros(len(file_names), dtype=object)
+    start_times = np.zeros(len(file_names), dtype=object)
+    real_times = np.zeros(len(file_names))
+    # Iterate over all files and calculate the gain values
+    for i, file_name in enumerate(file_names):
+        target_context = fit_results[file_name][target]
+        source = fit_results[file_name]["source"]
+        line_val = target_context["line_val"]
+        gain_vals[i] =  gain(w, line_val, energy)
+        start_times[i] = source.start_time
+        real_times[i] = source.real_time
+    times = amptek_accumulate_time(start_times, real_times) / 3600
+    y = unumpy.nominal_values(gain_vals)
+    yerr = unumpy.std_devs(gain_vals)
+    plt.figure()
+    plt.errorbar(times, y, yerr=yerr, fmt=".", label="Gain")
+    if subtasks is not None:
+        for subtask in subtasks:
+            # Think how to refactor this part
+            model_list = load_class(subtask["model"])
+            model = model_list[0]()
+            for m in model_list[1:]:
+                model += m()
+            fit_pars = subtask.get("fit_pars", {})
+            kwargs = dict(
+                xmin=fit_pars["xmin"],
+                xmax=fit_pars["xmax"],
+                absolute_sigma=fit_pars["absolute_sigma"],
+                p0=fit_pars["p0"]
+            )
+            model.fit(times, y, sigma=yerr, **kwargs)
+            model.plot(fit_output=True, plot_components=False)
+    plt.legend()
+    plt.show()
+    return context
+    
+
+def compare_gain(
+        context: dict,
+        aggregate: bool = False,
+        label: str | None = None,
+        yscale: str = "log"
+        ) -> dict:
+    task = "compare_gain"
+    folders = context.get("folders", {})
+    fig = plt.figure("gain_comparison")
+    y = []
+    yerr = []
+    x = []
+    for folder_path, folder_context in folders.items():
+        folder_results = folder_context.get("results", {})
+        folder_gain = folder_results.get("gain", {})
+        g_val = unumpy.nominal_values(folder_gain.get("gain_vals", []))
+        g_err = unumpy.std_devs(folder_gain.get("gain_vals", []))
+        voltages = folder_gain.get("voltages", [])
+        if not aggregate:
+            model = folder_gain.get("model", None)
+            plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=Path(folder_path).stem)
+            model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+        else:
+            y.append(g_val)
+            yerr.append(g_err)
+            x.append(voltages)
+    if aggregate:
+        y = np.array(y).flatten()
+        yerr = np.array(yerr).flatten()
+        x = np.array(x).flatten()
+        model = aptapy.models.Exponential()
+        model.fit(x, y, sigma=yerr, absolute_sigma=True)
+        plt.errorbar(x, y, yerr=yerr, fmt=".")
+        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("Gain")
+    plt.yscale(yscale)
+    write_legend(label)
+    return context
+
 
 def resolution_single(
         context: dict,

@@ -1,16 +1,16 @@
 from pathlib import Path
 
-from aptapy.plotting import plt
-
 from .app import load_class
 from .config import AppConfig
 from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
+    compare_gain,
     drift,
     fit_peak,
     gain_folder,
     gain_single,
+    gain_trend,
     plot_spec,
     resolution_escape,
     resolution_folder,
@@ -28,13 +28,14 @@ SINGLE_TASK_REGISTRY = {
 
 FOLDER_TASK_REGISTRY = {
     "gain": gain_folder,
+    "gain_trend": gain_trend,
     "resolution": resolution_folder,
     "drift": drift
 }
 
 
 FOLDERS_TASK_REGISTRY = {
-    "compare": ""
+    "compare_gain": compare_gain
 }
 
 
@@ -118,7 +119,6 @@ def run(
             # Remove the name of the task from the keyword arguments
             kwargs = task.model_dump(exclude={"task"})
             context = func(context, **kwargs)
-    plt.tight_layout()
     return context
 
 
@@ -137,7 +137,7 @@ def run_folders(
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context = dict(config=config, folders={})
+    context = dict(config=config, folders={}, results={})
     # Execute the analysis pipeline for each folder
     for folder_path in folder_paths:
         folder_context = run(
@@ -155,6 +155,4 @@ def run_folders(
             # Remove the name of the task from the keyword arguments
             kwargs = task.model_dump(exclude={"task"})
             context = func(context, **kwargs)
-    plt.tight_layout()
-    plt.show()
     return context

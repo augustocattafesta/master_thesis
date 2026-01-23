@@ -10,7 +10,7 @@ from . import ANALYSIS_DATA, ANALYSIS_RESULTS
 from .utils import KALPHA
 
 
-def load_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
+def _load_single_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
     """
     Load a class from a string.
     Supports:
@@ -18,29 +18,22 @@ def load_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
       - "module.ClassName"
       - "package.module.ClassName"
     """
-
-    # Case 1: "ClassName" – search locals, globals, and all loaded modules
+    cls = None
     if "." not in class_path:
-        current_frame = inspect.currentframe()
-        if current_frame is not None:
-            frame = current_frame.f_back
-            if frame is not None:
-                # Search locals first
-                if class_path in frame.f_locals:
-                    return frame.f_locals[class_path]
-                # Then globals
-                if class_path in frame.f_globals:
-                    return frame.f_globals[class_path]
-                # Search through all loaded modules
-                for module in sys.modules.values():
-                    if module and hasattr(module, class_path):
-                        return getattr(module, class_path)
-                raise ImportError(f"Class '{class_path}' not found in locals, globals,\
-                                  or loaded modules.")
-    # Case 2: dotted path → module + class
-    module_name, class_name = class_path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
-    return getattr(module, class_name)
+        if hasattr(aptapy.models, class_path):
+            cls = getattr(aptapy.models, class_path)
+        else:
+            raise ImportError(f"Class '{class_path}' not found in aptapy.modeling.")
+    else:
+        module_name, class_name = class_path.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+        cls = getattr(module, class_name)
+    return cls
+
+
+def load_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
+    class_paths = [p.strip() for p in class_path.split("+")]
+    return [_load_single_class(p) for p in class_paths]
 
 
 def add_pulsefile(parser: ArgumentParser) -> None:

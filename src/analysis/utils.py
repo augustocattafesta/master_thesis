@@ -130,7 +130,7 @@ def energy_resolution_escape(line_val_main: np.ndarray, line_val_escape: np.ndar
 
 def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> np.ndarray:
     """Compute the accumulated acquisition time for Amptek MCA data, taking into account the
-    start times of each acquisition and integration times. The times are expressed in hours.
+    start times of each acquisition and integration times. The times are expressed in seconds.
 
     Arguments
     ---------
@@ -156,4 +156,4 @@ def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> n
         t[i] = t_acc
 
     t -= real_times / 2
-    return t / 3600  # Convert to hours
+    return t

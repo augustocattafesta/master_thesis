@@ -41,8 +41,8 @@ pipeline:
 
   - task: "gain"
     target: "main_peak"
-    fit: true
-    plot: true
+    fit: false
+    plot: false
     label: "test"
   
   - task: "resolution"
@@ -75,10 +75,28 @@ pipeline:
 
   - task: "drift"
     target: "main_peak"
-    plot: true
+    plot: false
     rate: true
     threshold: 1.5
     label: "W1a 86.6um, B320"
 
   - task: "plot"
     label: "test label"
+
+  # - task: "compare_gain"
+  #   label: "Test compare"
+  #   aggregate: false
+  
+  - task: "gain_trend"
+    target: "main_peak"
+    fit: true
+    subtasks:
+      - subtask: "charging"
+        model: StretchedExponential + Constant
+        fit_pars:
+          xmin: 0
+          xmax: 1
+          absolute_sigma:
+          p0: [25, 2500, 0.6, 40.]
+
+    

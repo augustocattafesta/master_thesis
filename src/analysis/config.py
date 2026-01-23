@@ -48,26 +48,28 @@ class FitPeakDefaults:
     num_sigma_left: float = 1.5
     num_sigma_right: float = 1.5
     absolute_sigma: bool = True
+    p0: list[float] | None = None
 
 
-class FitSpecPars(BaseModel):
+class FitPars(BaseModel):
     xmin: float | None = FitPeakDefaults.xmin
     xmax: float | None = FitPeakDefaults.xmax
     num_sigma_left: float | None = FitPeakDefaults.num_sigma_left
     num_sigma_right: float | None = FitPeakDefaults.num_sigma_right
     absolute_sigma: bool | None = FitPeakDefaults.absolute_sigma
+    p0: list[float] | None = FitPeakDefaults.p0
 
 
-class SpectrumSubtask(BaseModel):
+class FitSubtask(BaseModel):
     subtask: str
     skip: bool = False
     model: str
-    fit_pars: FitSpecPars = Field(default_factory=FitSpecPars)
+    fit_pars: FitPars = Field(default_factory=FitPars)
 
 
 class SpectrumFittingConfig(BaseModel):
     task: Literal["spectrum_fitting"]
-    subtasks: list[SpectrumSubtask]
+    subtasks: list[FitSubtask]
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,22 @@ class GainConfig(BaseModel):
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
     plot: bool = GainDefaults.plot
+    label: str | None = GainDefaults.label
+    yscale: Literal["linear", "log"] = GainDefaults.yscale
+
+
+class GainTrendConfig(BaseModel):
+    task: Literal["gain_trend"]
+    w: float = GainDefaults.w
+    energy: float = GainDefaults.energy
+    target: str | None = None
+    # time_unit: Literal["s", "m", "h"] = "h"
+    subtasks: list[FitSubtask] | None = Field(default=None)
+
+
+class GainCompareConfig(BaseModel):
+    task: Literal["compare_gain"]
+    aggregate: bool = False
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
@@ -131,12 +149,6 @@ class DriftConfig(BaseModel):
     yscale: Literal["linear", "log"] = DriftDefaults.yscale
 
 
-class GainTrendConfig(BaseModel):
-    task: Literal["gain_trend"]
-    time_unit: Literal["s", "m", "h"] = "h"
-    subtasks: list[SpectrumSubtask]
-
-
 @dataclass(frozen=True)
 class PlotDefaults:
     plot: bool = True
@@ -154,7 +166,7 @@ class PlotConfig(BaseModel):
 
 
 TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \
-    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig
+    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition

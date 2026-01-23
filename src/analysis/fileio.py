@@ -31,6 +31,7 @@ class FileBase:
 
 
 class DataFolder:
+    # Superseded by Folder class in runner.py
     """Load source files and calibration pulse files from a folder.
     """
     def __init__(self, folder_path: pathlib.Path) -> None:

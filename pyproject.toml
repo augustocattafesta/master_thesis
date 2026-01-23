@@ -44,7 +44,7 @@ Homepage = ""
 Issues = ""
 
 [project.scripts]
-analysis = "analysis.cli.main:main"
+analysis = "analysis.cli:main"
 
 [tool.hatch.version]
 path = "src/analysis/_version.py"
