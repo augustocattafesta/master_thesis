@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from .app import load_class
 from .config import AppConfig
 from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
@@ -16,6 +15,7 @@ from .tasks import (
     resolution_folder,
     resolution_single,
 )
+from .utils import load_class
 
 
 SINGLE_TASK_REGISTRY = {

@@ -2,6 +2,8 @@
 signal.
 """
 
+import importlib
+
 import aptapy
 import aptapy.models
 import numpy as np
@@ -157,3 +159,29 @@ def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> n
 
     t -= real_times / 2
     return t
+
+
+def _load_single_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
+    """
+    Load a class from a string.
+    Supports:
+      - "ClassName" (local or global)
+      - "module.ClassName"
+      - "package.module.ClassName"
+    """
+    cls = None
+    if "." not in class_path:
+        if hasattr(aptapy.models, class_path):
+            cls = getattr(aptapy.models, class_path)
+        else:
+            raise ImportError(f"Class '{class_path}' not found in aptapy.modeling.")
+    else:
+        module_name, class_name = class_path.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+        cls = getattr(module, class_name)
+    return cls
+
+
+def load_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
+    class_paths = [p.strip() for p in class_path.split("+")]
+    return [_load_single_class(p) for p in class_paths]

@@ -8,7 +8,6 @@ from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
-from .app import load_class
 from .config import (
     CalibrationDefaults,
     DriftDefaults,
@@ -24,6 +23,7 @@ from .utils import (
     energy_resolution_escape,
     find_peaks_iterative,
     gain,
+    load_class
 )
 
 
