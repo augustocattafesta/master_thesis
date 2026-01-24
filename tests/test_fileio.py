@@ -3,9 +3,9 @@
 
 import aptapy.models
 import numpy as np
+from analysis.app import load_class
 from aptapy.plotting import plt
 
-from analysis.app import load_class
 from analysis.fileio import PulsatorFile, SourceFile
 
 

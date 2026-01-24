@@ -21,6 +21,7 @@ dependencies = [
   "uncertainties",
   "xraydb",
   "pyyaml",
+  "pydantic",
   ]
 
 # Optional dependencies are listed here, grouped into logical sections.

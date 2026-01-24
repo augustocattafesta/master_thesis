@@ -17,7 +17,6 @@ from .tasks import (
 )
 from .utils import load_class
 
-
 SINGLE_TASK_REGISTRY = {
     "gain": gain_single,
     "resolution": resolution_single,
@@ -90,7 +89,7 @@ def run(
     sources = [SourceFile(Path(p), calibration_model) for p in source_file_paths]
     context["sources"] = {str(s.file_path.stem): s for s in sources}
     # Run all fitting subtasks defined in the configuration file for each source file
-    spec_fit_config = config.spectrum_fitting
+    spec_fit_config = config.fit_spec
     if spec_fit_config is not None:
         for source in sources:
             context["tmp_source"] = source  # Think how to avoid this

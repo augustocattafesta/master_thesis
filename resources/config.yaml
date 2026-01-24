@@ -22,7 +22,7 @@ pipeline:
     charge_conversion: true
     plot: false
   
-  - task: "spectrum_fitting"
+  - task: "fit_spec"
     subtasks:
       - subtask: "main_peak"
         model: Fe55Forest

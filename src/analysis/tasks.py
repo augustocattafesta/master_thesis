@@ -14,7 +14,8 @@ from .config import (
     FitPeakDefaults,
     GainDefaults,
     PlotDefaults,
-    ResolutionDefaults)
+    ResolutionDefaults,
+)
 from .plotting import get_label, get_xrange, write_legend
 from .utils import (
     SIGMA_TO_FWHM,
@@ -23,7 +24,7 @@ from .utils import (
     energy_resolution_escape,
     find_peaks_iterative,
     gain,
-    load_class
+    load_class,
 )
 
 
@@ -338,7 +339,7 @@ def gain_trend(
     plt.legend()
     plt.show()
     return context
-    
+
 
 def compare_gain(
         context: dict,
@@ -479,16 +480,16 @@ def resolution_folder(
         plot: bool = ResolutionDefaults.plot,
         label: str | None = ResolutionDefaults.label
         ) -> dict:
-    """Calculate the energy resolution of the detector using the fit results obtained from the source
-    data of multiple files.
+    """Calculate the energy resolution of the detector using the fit results obtained from the
+    source data of multiple files.
 
     Arguments
     ---------
     context : dict
         The context dictionary containing the fit results in `context["fit"]`.
     target : str, optional
-        The name of the fitting subtask to use for resolution calculation. If None, no calculation is
-        performed. Default is None.
+        The name of the fitting subtask to use for resolution calculation. If None, no calculation
+        is performed. Default is None.
     plot : bool, optional
         Whether to show the plots of the resolution trend. Default is True.
     label : str, optional
@@ -645,20 +646,18 @@ def plot_spectrum(
         # Plot the fitted models for the specified targets and get labels
         fit_results = context.get("fit", {})
         models = []
-        if fit_results:
-            if targets is not None:
-                for target in targets:
-                    if target in fit_results[file_name]:
-                        target_context = fit_results[file_name][target]
-                        model = target_context["model"]
-                        fit_label = get_label(task_labels, target_context)
-                        # Save the model for automatic xrange calculation
-                        models.append(model)
-                        model.plot(label=fit_label)
+        if fit_results and targets is not None:
+            for target in targets:
+                if target in fit_results[file_name]:
+                    target_context = fit_results[file_name][target]
+                    model = target_context["model"]
+                    fit_label = get_label(task_labels, target_context)
+                    # Save the model for automatic xrange calculation
+                    models.append(model)
+                    model.plot(label=fit_label)
         # Set the x-axis range
         plt.xlim(xrange)
         if xrange is None:
             plt.xlim(get_xrange(source, models))
         write_legend(label, loc=loc)
     return context
-

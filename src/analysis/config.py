@@ -14,8 +14,6 @@ class Acquisition(BaseModel):
     date: str
     chip: str
     structure: str
-    drift: str | float
-    back: str | float
 
 
 class Detector(BaseModel):
@@ -67,8 +65,8 @@ class FitSubtask(BaseModel):
     fit_pars: FitPars = Field(default_factory=FitPars)
 
 
-class SpectrumFittingConfig(BaseModel):
-    task: Literal["spectrum_fitting"]
+class FitSpecConfig(BaseModel):
+    task: Literal["fit_spec"]
     subtasks: list[FitSubtask]
 
 
@@ -168,7 +166,7 @@ class PlotConfig(BaseModel):
 
 
 
-TaskType = CalibrationConfig | SpectrumFittingConfig | GainConfig | ResolutionConfig | \
+TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
     ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig
 
 class AppConfig(BaseModel):
@@ -181,15 +179,15 @@ class AppConfig(BaseModel):
     def from_yaml(cls, path: str) -> "AppConfig":
         with open(path, encoding="utf-8") as f:
             return cls(**yaml.safe_load(f))
-        
+
     @property
     def calibration(self) -> CalibrationConfig | None:
         return next((t for t in self.pipeline if isinstance(t, CalibrationConfig)), None)
-    
+
     @property
-    def spectrum_fitting(self) -> SpectrumFittingConfig | None:
-        return next((t for t in self.pipeline if isinstance(t, SpectrumFittingConfig)), None)
-    
+    def fit_spec(self) -> FitSpecConfig | None:
+        return next((t for t in self.pipeline if isinstance(t, FitSpecConfig)), None)
+
     @property
     def plot(self) -> PlotConfig | None:
         return next((t for t in self.pipeline if isinstance(t, PlotConfig)), None)

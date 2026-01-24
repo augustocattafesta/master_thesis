@@ -14,7 +14,7 @@ def main():
         "paths",
         nargs="+",
         help="Paths to data files or folders.")
-    
+
     parser.add_argument(
         "config",
         help="Config path")

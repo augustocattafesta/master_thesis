@@ -8,17 +8,17 @@ from .fileio import SourceFile
 def write_legend(label: str | None, *axs: plt.Axes | None, loc: str = "best" ) -> None:
     if not axs:
         axs = (plt.gca(), )
-    h_tot, l_tot, zorders = [], [], []
+    headers, labels, zorders = [], [], []
     for ax in axs:
-        h, l = ax.get_legend_handles_labels()
-        h_tot.extend(h)
-        l_tot.extend(l)
+        header, _label = ax.get_legend_handles_labels()
+        headers.extend(header)
+        labels.extend(_label)
         zorders.append(ax.get_zorder())
     if len(axs) > 1:
         axs[0].set_zorder(max(zorders) + 1)
         axs[0].set_frame_on(False)
     if label is not None:
-        leg = axs[0].legend(h_tot, l_tot, loc=loc, title=label, title_fontsize=11)
+        leg = axs[0].legend(headers, labels, loc=loc, title=label, title_fontsize=11)
         leg._legend_box.align = "bottom"
 
 
