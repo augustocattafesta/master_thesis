@@ -69,12 +69,12 @@ def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
     ypeaks : ArrayLike
         The height of the peaks.
     """
-    min_width, max_width = 0., len(ydata)
+    min_width, max_width = 1., len(ydata)
     peaks, properties = scipy.signal.find_peaks(ydata, width=(min_width, max_width))
     widths = properties['widths']
     while len(peaks) > npeaks:
         min_width = min(widths)*1.1
-        peaks, properties = scipy.signal.find_peaks(ydata, width=(min_width, max_width))
+        peaks, properties = scipy.signal.find_peaks(ydata, width=(min_width, max_width), distance=5)
         widths = properties['widths']
 
     return xdata[peaks], ydata[peaks]

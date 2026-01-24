@@ -142,7 +142,6 @@ class PulsatorFile(FileBase):
             _voltage = np.array([int(n) for n in parts])
         else:
             raise ValueError("Incorrect file type or different name used.")
-
         return _voltage
 
     @property

@@ -423,7 +423,7 @@ def resolution_single(
     energy = context["config"].source.e_peak
     task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val} %"
     target_context[f"{task}_label"] = task_label
-    context["results"][file_name][target] = target_context
+    context["fit"][file_name][target] = target_context
     return context
 
 
