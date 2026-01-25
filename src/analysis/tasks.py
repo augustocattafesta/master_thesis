@@ -38,8 +38,8 @@ def calibration(
     Arguments
     ---------
     context : dict
-        The context dictionary containing the pulse data in `context["pulse"]` as an instance of
-        the class PulsatorFile.
+        The context dictionary containing the pulse data in `context["calibration"]` as an instance
+        of the class PulsatorFile.
     charge_conversion : bool, optional
         Whether to convert the calibration to charge (fC) or leave it in voltage (mV).
         Default is True.
@@ -49,10 +49,11 @@ def calibration(
     Returns
     -------
     context : dict
-        The updated context dictionary containing the calibration results in `context["results"]`.
+        The updated context dictionary containing the calibration results in
+        `context["calibration"]`.
     """
     # Get the histogram of the data and plot it
-    pulse = context["pulse"]
+    pulse = context["calibration"]["pulse"]
     hist = pulse.hist
     pulse_fig = plt.figure(pulse.file_path.name)
     hist.plot()
@@ -81,10 +82,8 @@ def calibration(
     if not plot:
         plt.close(pulse_fig)
         plt.close(cal_fig)
-    # Update the context with the calibration results
-    context["calibration"] = dict(model=model,
-                                  pulse_figure=pulse_fig,
-                                  calibration_figure=cal_fig)
+    # Update the context with the calibration model
+    context["calibration"]["model"] = model
     return context
 
 
@@ -298,8 +297,31 @@ def gain_trend(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         subtasks: list[str] | None = None,
-
     ) -> dict:
+    """Calculate the gain of the detector vs time using the fit results obtained from the source
+    data.
+    
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the fit results in `context["fit"]`.
+    target : str, optional
+        The name of the fitting subtask to use for gain calculation. If None, no calculation is
+        performed. Default is None.
+    w : float, optional
+        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
+    energy : float, optional
+        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
+    subtasks : list[str], optional
+        The list of fitting subtasks to fit the gain trend. If None, no fitting is performed.
+        Default is None.
+    
+    Returns
+    -------
+    context : dict
+        The updated context dictionary containing the gain trend and fit results in
+        `context["results"]`.
+    """
     task = "gain_trend"
     fit_results = context.get("fit", {})
     # Get the different file names and create arrays to store gain values and times
@@ -318,8 +340,11 @@ def gain_trend(
     times = amptek_accumulate_time(start_times, real_times) / 3600
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
+    # Save the gain trend values
+    context["results"][task][target] = dict(times=times, gain_vals=gain_vals)
     plt.figure()
     plt.errorbar(times, y, yerr=yerr, fmt=".", label="Gain")
+    # If fitting subtasks are provided, fit the gain trend with the specified models
     if subtasks is not None:
         for subtask in subtasks:
             # Think how to refactor this part
@@ -336,6 +361,8 @@ def gain_trend(
             )
             model.fit(times, y, sigma=yerr, **kwargs)
             model.plot(fit_output=True, plot_components=False)
+            # Update the context with the fit results
+            context["results"][task][target][subtask["subtask"]] = dict(model=model)
     plt.legend()
     plt.show()
     return context
@@ -347,9 +374,30 @@ def compare_gain(
         label: str | None = None,
         yscale: str = "log"
         ) -> dict:
+    """Compare the gain of multiple folders vs voltage using the fit results obtained from the
+    source data.
+
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the fit results in `context["fit"]`.
+    aggregate : bool, optional
+        Whether to aggregate all gain data from different folders and fit them together. Default is
+        False.
+    label : str, optional
+        The label for the gain comparison plot. Default is None.
+    yscale : str, optional
+        The y-axis scale for the gain comparison plot. Can be "linear" or "log". Default is "log".
+    
+    Returns
+    -------
+    context : dict
+        The updated context dictionary containing the gain comparison results in
+        `context["results"]`.
+    """
     task = "compare_gain"
     folders = context.get("folders", {})
-    fig = plt.figure("gain_comparison")
+    plt.figure("gain_comparison")
     y = []
     yerr = []
     x = []
@@ -375,7 +423,7 @@ def compare_gain(
         model.fit(x, y, sigma=yerr, absolute_sigma=True)
         plt.errorbar(x, y, yerr=yerr, fmt=".")
         model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
-
+        context["results"][task] = dict(model=model)
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.yscale(yscale)
@@ -635,6 +683,33 @@ def plot_spectrum(
         task_labels: list[str] | None = PlotDefaults.task_labels,
         loc: str = PlotDefaults.loc
         ) -> dict:
+    """Plot the spectra from the source data and overlay the fitted models for the specified
+    targets.
+    
+    Arguments
+    ---------
+    context : dict
+        The context dictionary containing the source data in `context["sources"]` and the fit
+        results in `context["fit"]`.
+    targets : list[str], optional
+        The list of fitting subtask names to plot the fitted models for. If None, no models are
+        plotted. Default is None.
+    xrange : list[float], optional
+        The x-axis range for the plot. If None, the range is automatically calculated based on
+        the data and fitted models. Default is None.
+    label : str, optional
+        The label for the plot legend. Default is None.
+    task_labels : list[str], optional
+        The list of task names to use for generating the labels of the fitted models. If None,
+        no labels are generated. Default is None.
+    loc : str, optional
+        The location of the legend in the plot. Default is "best".
+    
+    Returns
+    -------
+    context : dict
+        The context dictionary (in future it will be updated with the figures).
+    """
     # Access the folder fit results from the context
     sources = context.get("sources", {})
     file_names = sources.keys()
