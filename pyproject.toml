@@ -21,6 +21,7 @@ dependencies = [
   "uncertainties",
   "xraydb",
   "pyyaml",
+  "pydantic",
   ]
 
 # Optional dependencies are listed here, grouped into logical sections.
@@ -33,6 +34,7 @@ dev = [
     "pytest",
     "ruff",
     "mypy",
+    "types-PyYAML",
   ]
 docs = [
     "sphinx",
@@ -44,7 +46,7 @@ Homepage = ""
 Issues = ""
 
 [project.scripts]
-analysis = "analysis.cli.main:main"
+analysis = "analysis.cli:main"
 
 [tool.hatch.version]
 path = "src/analysis/_version.py"

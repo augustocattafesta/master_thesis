@@ -1,0 +1,89 @@
+# Information about the data acquisition. Currently this info are not being used, think of using
+# them or removing.
+acquisition:
+  date: "2026-01-01"
+  chip: chip
+  structure: structure
+
+
+# Properties of the detector and of the source. Also these info are currently not being used.
+detector:
+  gas: Ar
+  w: 26.
+source:
+  element: 55Fe
+  e_peak: 5.9
+
+
+# This is the main part of the configuration file, where the analysis pipeline is defined.
+# The pipeline is structured as a list of tasks. Each task is a dictionary which contains the info
+# to execute that specific task. The order is not relevant, as the calibration task is always the
+# first task to be executed, then there is the spectrum fit and all the others. The calibration
+# must always be present, otherwise an error is raised.
+# Some tasks may require that another task has been previously executed.
+pipeline:
+  # Some tasks don't need any additional argument
+  - task: calibration
+    # charge_conversion: true     # These arguments are optional. For the defaults see the docs.
+    # plot: false
+
+  # This task is a bit more complex, but allows to do multiple fits on each file. Each fit is a
+  # subtask, where the name of the subtask and the model to use for the fit must me specified.
+  - task: fit_spec
+    subtasks:
+      # Fit the main peak with a double Gaussian model (models from aptapy).
+      - subtask: main_peak
+        model: Fe55Forest
+
+      # Fit the escape peak with a single Gaussian model.
+      - subtask: escape_peak
+        model: Gaussian
+        # If the fit is hard to perform, or if there are different emission lines, the fit
+        # parameters can be specified.
+        fit_pars:
+          # These are all the parameters and all of them are optional, so even a single parameter
+          # can be specified.
+          xmin: 2.0
+          xmax: 4.
+          num_sigma_left: 1.
+          num_sigma_right: 1.
+          absoulute_sigma: true
+          p0: [1, 1., 1.]
+  
+
+  # Now we can write the tasks to estimate the quantities of interest, such as gain and resolution.
+  # For the complete list see the docs.
+  - task: gain
+    # Specify which of the previous fit subtasks to use for the current task.
+    target: main_peak
+    # For the gain, we have other options in the case we are analyzing a folder instead of a single
+    # file. Note that even if we are analyzing a single file, if any of these options are on, no
+    # error is raised and they are simply not executed, so don't worry.
+    fit: true     # This fit is performed using an exponential model
+    plot: true
+    label: Gain exponential fit
+
+
+  # Another task as an example. Estimate the energy resolution using the position of the escape
+  # peak.
+  - task: resolution_escape
+    # We need to specify the main_peak target and the escape_peak target, as we need both of them
+    # for this estimate of the energy resolution.
+    target_main: main_peak
+    target_escape: escape_peak
+  
+
+  # Plot the results. Note that multiple plot tasks can be written, and each of them would be
+  # executed separately.
+  - task: plot
+    # Here we choose which of the fits to show, specifyng a list of targets. Pay attention to the
+    # syntax of a list in YAML. Here we plot both the main and escape peak in the same plot.
+    targets:
+      - main_peak
+      - escape_peak
+    label: Testing plot task
+    # xrange: [0., 3.]    Define the x-axis range to show on the plot.
+    # List of previous tasks' results to show in the legend. It is optional.
+    task_labels:
+      - gain
+      - resolution_escape

@@ -1,6 +1,13 @@
 function:
+  analyze_folder:
+    "260120": W1a 43.3um, 100 Hz, D1000
+    "260119": W1a 43.3um, 100 Hz, D1000
   compare_folders:
     "251118": W2b 86.6 top-right
     "251127": W8b 86.6 top-left high rate
     "251201/1000": Drift 1000 V
     "251201/1300": Drift 1300 V
+    "260119": W1a 43.3um, 100 Hz, D1000, 2026/01/19
+    "260120": W1a 43.3um, 100 Hz, D1000, 2026/01/20
+  analyze_trend:
+    "260119_trend": W1a 43.3um, 100 Hz, D1000 B380

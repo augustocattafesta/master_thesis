@@ -1,0 +1,41 @@
+acquisition:
+  date: "2026-01-22"
+  chip: W1a
+  structure: 86.6 um
+  drift: fixed
+  back: fixed
+
+
+# Properties of detector and source
+detector:
+  gas: argon
+  w: 26.        # W-value of the gas in use (default is Ar)
+
+source:
+  element: 55Fe
+  e_peak: 5.9   # Energy of the main emission line (K-alpha for 55Fe)
+
+
+pipeline:
+  - task: calibration
+    plot: false
+
+  - task: spectrum_fitting
+    subtasks:
+      - subtask: main_peak
+        model: Gaussian
+  
+  - task: resolution
+    target: main_peak
+
+  - task: gain
+    target: main_peak
+    fit: true
+
+  - task: plot
+    targets:
+      - main_peak
+    label: w1a
+    task_labels:
+      - resolution
+      - gain

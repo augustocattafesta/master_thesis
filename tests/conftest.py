@@ -12,11 +12,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+# pylint: disable=redefined-outer-name
 import pathlib
 
 import matplotlib.pyplot as plt
 import pytest
+
+from analysis.config import AppConfig
 
 
 def pytest_addoption(parser):
@@ -42,6 +44,18 @@ def pytest_sessionfinish(session):
     if session.config.getoption("--interactive"):
         # Show any open figures *once* at the end of the session
         plt.show()
+
+
+@pytest.fixture
+def context(datadir):
+    """Create a default context dictionary for testing."""
+    config = AppConfig.from_yaml(datadir / "config_default.yaml")
+    return dict(config=config,
+                calibration={},
+                sources={},
+                fit={},
+                results={},
+                figures={})
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 """Module to handle reading of different types of file and analyze specific type of signals.
 """
 
+import datetime
 import inspect
 import pathlib
 import re
@@ -9,13 +10,9 @@ import aptapy.modeling
 import numpy as np
 import yaml
 from aptapy.hist import Histogram1d
-from aptapy.modeling import FitParameter
-from aptapy.models import Fe55Forest, Gaussian, GaussianForestBase, Line
-from aptapy.plotting import plt
 from uncertainties import unumpy
 
 from . import ANALYSIS_RESOURCES
-from .utils import find_peaks_iterative
 
 
 class FileBase:
@@ -33,59 +30,27 @@ class FileBase:
         self.hist = Histogram1d.from_amptek_file(file_path)
 
 
-class DataFolder:
-    """Load source files and calibration pulse files from a folder.
-    """
-    def __init__(self, folder_path: pathlib.Path) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        folder_path : pathlib.Path
-            Path of the folder to open.
-        """
-        self.folder_path = folder_path
-        if not self.folder_path.exists():
-            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
-                                  Verify the path.")
-        self.input_files = list(folder_path.iterdir())
-        self.pulse_data = [PulsatorFile(pulse_file_path) for pulse_file_path in self.pulse_files]
-        self.source_data = [SourceFile(source_file_path) for source_file_path in self.source_files]
-
-    @property
-    def source_files(self) -> list[pathlib.Path]:
-        """Extract the source files from all the files of the directory and return a sorted list
-        of the files. If file names contain "trend{i}", the sorting is done numerically according
-        to the index {i}, otherwise it's done alphabetically.
-        """
-        # Keep files containing _B<number>
-        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
-
-        def numeric_sort_key(p: pathlib.Path):
-            """Sort the files with numerical order.
-            """
-            numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
-            return numbers[-1]  # sort by the last number
-
-        def custom_sort_key(p: pathlib.Path):
-            """Define if the sorting is numerical or alphabetical.
-            """
-            if "trend" in p.stem:
-                return numeric_sort_key(p)
-            return p.name
-
-        return sorted(filtered, key=custom_sort_key)
-
-    @property
-    def pulse_files(self) -> list[pathlib.Path]:
-        """Extract the calibration pulse files from all the files of the directory.
-        """
-        return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
-                                                           _f.name,re.IGNORECASE) is not None]
-
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.
     """
+    def __init__(self, file_path: pathlib.Path,
+                 charge_conv_model: aptapy.modeling.AbstractFitModel | None = None) -> None:
+        super().__init__(file_path)
+        if charge_conv_model is not None:
+            content = self.hist.content
+            # Apply charge conversion to the bin edges
+            old_edges = self.hist.bin_edges()
+            model_pars = charge_conv_model.parameter_values()
+            # Check if the model has the correct number of parameters
+            if len(model_pars) != 2:
+                raise ValueError("Charge conversion model must have two parameters.")
+            slope = model_pars[0]
+            offset = model_pars[1]
+            new_edges = unumpy.nominal_values(old_edges * slope + offset)
+            # Update the histogram with the new edges and same content
+            self.hist = Histogram1d(new_edges, xlabel="Charge [fC]")
+            self.hist.set_content(content)
+
     @property
     def voltage(self) -> float:
         """Back voltage of the detector extracted from the file name.
@@ -110,37 +75,24 @@ class SourceFile(FileBase):
 
     @property
     def real_time(self) -> float:
-        """Real integration time of the histogram.
+        """Real integration time of the histogram extracted from the amptek file..
         """
         with open(self.file_path, encoding="UTF-8") as input_file:
             real_time_str = input_file.readlines()[8]
-        if real_time_str.split('-')[0].strip() == 'REAL_TIME':
+        if real_time_str.split('-')[0].strip() == "REAL_TIME":
             return float(real_time_str.split('-')[1].strip())
         raise ValueError("Not reading REAL_TIME")
 
-    def fit(self, model_class: type[aptapy.modeling.AbstractFitModel],
-            **kwargs) -> aptapy.modeling.AbstractFitModel:
-        """Fit the spectrum data.
-
-        Parameters
-        ----------
-        model_class : aptapy.modeling.AbstractFitModel
-            Model class to fit the emission line(s). 
-
-        Returns
-        -------
-        model: aptapy.modeling.AbstractFitModel
-            Returns the model instance containing results of the fit.
+    @property
+    def start_time(self) -> datetime.datetime:
+        """Start time of the acquisition extracted from the amptek file.
         """
-        if issubclass(model_class, (Gaussian, GaussianForestBase)):
-            model = model_class()
-            if isinstance(model, Fe55Forest):
-                intensity_par: FitParameter = model.intensity1  # type: ignore [attr-defined]
-                intensity_par.freeze(0.16)  # Freeze Mn K-beta / K-alpha ratio
-            model.fit_iterative(self.hist, **kwargs)
-        else:
-            raise TypeError("Choose between Gaussian or GaussianForestBase child class")
-        return model
+        with open(self.file_path, encoding="UTF-8") as input_file:
+            start_time_str = input_file.readlines()[9]
+        if start_time_str.split('-')[0].strip() == "START_TIME":
+            start = datetime.datetime.strptime(start_time_str, "START_TIME - %m/%d/%Y %H:%M:%S\n")
+            return start
+        raise ValueError("Not reading START_TIME")
 
 
 class PulsatorFile(FileBase):
@@ -156,7 +108,6 @@ class PulsatorFile(FileBase):
             _voltage = np.array([int(n) for n in parts])
         else:
             raise ValueError("Incorrect file type or different name used.")
-
         return _voltage
 
     @property
@@ -165,43 +116,46 @@ class PulsatorFile(FileBase):
         """
         return len(self.voltage)
 
-    def analyze_pulses(self) -> tuple[aptapy.modeling.AbstractFitModel, plt.Figure, plt.Figure]:
-        """Find pulses in the spectrum and independently fit each of them with a Gaussian model.
-        Using the resulting position of the peaks, do a calibration fit with a Line model to
-        determine the calibration parameters of the spectrum.
 
-        Returns
-        -------
-        line_model, pulse_fig, line_fig : tuple[aptapy.modeling.AbstractFitModel, Figure, Figure]
-            Returns fit model and figures of the pulses and of the
-            calibration fit.
+class Folder:
+    def __init__(self, folder_path: pathlib.Path) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        folder_path : pathlib.Path
+            Path of the folder to open.
         """
-        # log = LOGGER.log_main() or LOGGER.NULL_LOGGER
+        self.folder_path = folder_path
+        if not self.folder_path.exists():
+            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
+                                  Verify the path.")
+        self.input_files = list(folder_path.iterdir())
 
-        pulse_fig = plt.figure(self.file_path.name)
-        plt.title("Calibration pulses")
-        self.hist.plot()
-        xpeaks, _ = find_peaks_iterative(self.hist.bin_centers(),
-                                                             self.hist.content, self.num_pulses)
-        mu = np.zeros(shape=len(xpeaks), dtype=object)
-        for i, xpeak in enumerate(xpeaks):
-            peak_model = Gaussian()
-            xmin = xpeak - np.sqrt(xpeak)
-            xmax = xpeak + np.sqrt(xpeak)
-            peak_model.fit_iterative(self.hist, xmin=xmin, xmax=xmax, absolute_sigma=True)
-            mu[i] = peak_model.mu.ufloat()
-            peak_model.plot(fit_output=True)
-        plt.legend()
+    @property
+    def source_files(self) -> list[pathlib.Path]:
+        """Extract the source files from all the files of the directory and return a sorted list
+        of the files. If file names contain "trend{i}", the sorting is done numerically according
+        to the index {i}, otherwise it's done alphabetically.
+        """
+        # Keep files containing _B<number>
+        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
 
-        line_model = Line("Calibration fit", "Voltage [mV]", "ADC Channel")
-        line_model.fit(self.voltage, unumpy.nominal_values(mu), sigma=unumpy.std_devs(mu),
-                       absolute_sigma=True)
-        line_fig = plt.figure("Calibration fit")
-        plt.errorbar(self.voltage, unumpy.nominal_values(mu), unumpy.std_devs(mu), fmt='o')
-        line_model.plot(fit_output=True)
-        plt.legend()
+        def numeric_sort_key(p: pathlib.Path):
+            """Sort the files with numerical order.
+            """
+            numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
+            return numbers[-1]  # sort by the last number
 
-        return line_model, pulse_fig, line_fig
+        return sorted(filtered, key=numeric_sort_key)
+
+    @property
+    def pulse_file(self) -> pathlib.Path:
+        """Extract the calibration pulse files from all the files of the directory and return
+        the path of the first file in the list.
+        """
+        return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
+                                                           _f.name,re.IGNORECASE) is not None][0]
 
 
 def load_label(key: str) -> str | None:
