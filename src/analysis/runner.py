@@ -7,20 +7,17 @@ from .tasks import (
     compare_gain,
     drift,
     fit_peak,
-    gain_folder,
-    gain_single,
     gain_task,
     gain_trend,
     plot_spectrum,
     resolution_escape,
-    resolution_folder,
-    resolution_single,
+    resolution_task
 )
 from .utils import load_class
 
 SINGLE_TASK_REGISTRY = {
     "gain": gain_task,
-    "resolution": resolution_single,
+    "resolution": resolution_task,
     "resolution_escape": resolution_escape,
     "plot": plot_spectrum
 }
@@ -29,7 +26,7 @@ SINGLE_TASK_REGISTRY = {
 FOLDER_TASK_REGISTRY = {
     "gain": gain_task,
     "gain_trend": gain_trend,
-    "resolution": resolution_folder,
+    "resolution": resolution_task,
     "drift": drift,
     "plot": plot_spectrum
 }

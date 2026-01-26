@@ -169,60 +169,13 @@ def fit_peak(
     return context
 
 
-def gain_single(
+def gain_task(
         context: dict,
-        w: float = GainDefaults.w,
-        energy: float = GainDefaults.energy,
-        target: str | None = None,
-        **kwargs
-        ):
-    """Calculate the gain of the detector using the fit results obtained from the source data.
-
-    Arguments
-    ---------
-    context : dict
-        The context dictionary containing the fit results in `context["fit"]`.
-    w : float, optional
-        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
-    energy : float, optional
-        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
-    target : str, optional
-        The name of the fitting subtask to use for gain calculation. If None, no calculation is
-        performed. Default is None.
-    
-    Returns
-    -------
-    context : dict
-        The updated context dictionary containing the gain results in `context["results"]`.
-    """
-    task = "gain"
-    fit_results = context.get("fit", {})
-    file_name, = fit_results.keys()
-    # Check if the target fitting subtask exists in the results and get the line position and
-    # back voltage
-    if target not in fit_results[file_name]:
-        return context
-    target_context = fit_results[file_name][target]
-    line_val = target_context["line_val"]
-    voltage = target_context["voltage"]
-    # Calculate the gain and update the context
-    gain_val = gain(w, line_val, energy)
-    target_context[task] = gain_val
-    # Create a label for the gain value to show if task is plotted
-    target_context[f"{task}_label"] = f"Gain@{voltage:.0f} V: {gain_val}"
-    if file_name not in context["results"]:
-        context["results"][file_name] = {}
-    context["results"][file_name][target] = target_context
-    return context
-
-
-def gain_folder(
-        context: dict,
-        target: str | None = None,
+        target: str,
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         fit: bool = GainDefaults.fit,
-        plot: bool =  GainDefaults.plot,
+        plot: bool = GainDefaults.plot,
         label: str | None = GainDefaults.label,
         yscale: str = GainDefaults.yscale
         ) -> dict:
@@ -233,9 +186,8 @@ def gain_folder(
     ---------
     context : dict
         The context dictionary containing the fit results in `context["fit"]`.
-    target : str, optional
-        The name of the fitting subtask to use for gain calculation. If None, no calculation is
-        performed. Default is None.
+    target : str
+        The name of the fitting subtask to use for gain calculation.
     w : float, optional
         The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
     energy : float, optional
@@ -254,53 +206,6 @@ def gain_folder(
     context : dict
         The updated context dictionary containing the gain results in `context["results"]`.
     """
-    task = "gain"
-    fit_results = context.get("fit", {})
-    # Get the different file names and create arrays to store gain values and voltages
-    file_names = list(fit_results.keys())
-    gain_vals = np.zeros(len(file_names), dtype=object)
-    voltages = np.zeros(len(file_names))
-    # Iterate over all files and calculate the gain values
-    for i, file_name in enumerate(file_names):
-        target_context = fit_results[file_name][target]
-        line_val = target_context["line_val"]
-        gain_vals[i] = gain(w, line_val, energy)
-        voltages[i] = target_context["voltage"]
-        task_label = f"Gain@{voltages[i]:.0f} V: {gain_vals[i]}"
-        target_context[f"{task}_label"] = task_label
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    # Create the figure for the gain trend
-    fig = plt.figure("Gain vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Gain")
-    plt.xlabel("Voltage [V]")
-    plt.ylabel("Gain")
-    plt.yscale(yscale)
-    # If fit is requested, fit the gain trend with an exponential model
-    if fit:
-        model = aptapy.models.Exponential()
-        model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
-        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
-    write_legend(label)
-    if not plot:
-        plt.close(fig)
-    # Update the context with the gain trend results and fit model
-    context["results"][task] = dict(voltages=voltages, gain_vals=gain_vals)
-    if fit:
-        context["results"][task]["model"] = model
-    return context
-
-
-def gain_task(
-        context: dict,
-        target: str,
-        w: float = GainDefaults.w,
-        energy: float = GainDefaults.energy,
-        fit: bool = GainDefaults.fit,
-        plot: bool = GainDefaults.plot,
-        label: str | None = GainDefaults.label,
-        yscale: str = GainDefaults.yscale
-        ) -> dict:
     task = "gain"
     fit_ctx = context.get("fit")
     # Get the file names from the fit context keys
@@ -340,13 +245,11 @@ def gain_task(
         model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
         # Add the fit model to the context
         context["results"][task]["model"] = model
+    # Write the legend and show or close the plot
     write_legend(label)
     if not plot:
         plt.close(fig)
     return context
-    
-
-
 
 
 def gain_trend(
@@ -489,13 +392,14 @@ def compare_gain(
     return context
 
 
-def resolution_single(
+def resolution_task(
         context: dict,
-        target: str | None = None,
-        **kwargs
+        target: str,
+        plot: bool = ResolutionDefaults.plot,
+        label: str | None = ResolutionDefaults.label
         ) -> dict:
     """Calculate the energy resolution of the detector using the fit results obtained from the
-    source data. This calculation is based on the position and the width of the target spectral
+    source data. This estimate is based on the position and the width of the target spectral
     line.
 
     Arguments
@@ -505,32 +409,59 @@ def resolution_single(
     target : str, optional
         The name of the fitting subtask to use for resolution calculation. If None, no calculation
         is performed. Default is None.
-
+    plot : bool, optional
+        Whether to show the plots of the resolution trend. Default is True.
+    label : str, optional
+        The label for the resolution trend plot. Default is None.
+    
     Returns
     -------
     context : dict
         The updated context dictionary containing the resolution results in `context["results"]`.
     """
     task = "resolution"
-    fit_results = context.get("fit", {})
-    file_name, = fit_results.keys()
-    # Check if the target fitting subtask exists in the results and get the line position and sigma
-    # of the target spectral line
-    if target not in fit_results[file_name]:
+    fit_ctx = context.get("fit")
+    # Get the file names from the fit context keys
+    file_names = list(fit_ctx.keys())
+    # Create empty arrays to store resolution values and voltages
+    res_vals = np.zeros(len(file_names), dtype=object)
+    voltages = np.zeros(len(file_names))
+    # Iterate over all files and calculate the gain
+    for i, file_name in enumerate(file_names):
+        # If the target subtask is not found, raise an error
+        if target not in fit_ctx[file_name]:
+            raise KeyError(f"Target subtask '{target}' not found in fit results")
+        # Access the target context and extract line value, sigma and voltage
+        target_ctx = fit_ctx[file_name][target]
+        line_val = target_ctx["line_val"]
+        sigma = target_ctx["sigma"]
+        voltages[i] = target_ctx["voltage"]
+        res_vals[i] = energy_resolution(line_val, sigma)
+        # Create the label and store it in the target context
+        energy = context["config"].source.e_peak
+        fwhm = SIGMA_TO_FWHM * sigma
+        task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_vals[i]} %"
+        target_ctx[f"{task}_label"] = task_label
+    # Save the results in the context
+    context["results"][task] = dict(voltages=voltages, res_vals=res_vals)
+    # If only a single file is analyzed, return the context without plotting
+    if len(file_names) == 1:
         return context
-    target_context = fit_results[file_name][target]
-    line_vals = target_context["line_val"]
-    sigma = target_context["sigma"]
-    # Calculate the energy resolution and update the context
-    res_val = energy_resolution(line_vals, sigma)
-    fwhm = SIGMA_TO_FWHM * sigma
-    target_context[task] = res_val
-    # Get the energy of the emission line from the source configuration to create a label to show
-    # if task is plotted
-    energy = context["config"].source.e_peak
-    task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_val} %"
-    target_context[f"{task}_label"] = task_label
-    context["fit"][file_name][target] = target_context
+    y = unumpy.nominal_values(res_vals)
+    yerr = unumpy.std_devs(res_vals)
+    min_idx = np.argmin(y)
+    # Create the figure for the resolution trend
+    fig = plt.figure("Resolution vs Voltage")
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
+    # Write the minimum resolution value on the plot
+    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
+                 textcoords="offset points", ha="center", va="top", fontsize=12)
+    plt.xlabel("Voltage [V]")
+    plt.ylabel(r"$\Delta$E/E")
+    # Write the legend and show or close the plot
+    write_legend(label)
+    if not plot:
+        plt.close(fig)
     return context
 
 
@@ -577,67 +508,6 @@ def resolution_escape(
     # Create a label for the resolution value to show if task is plotted
     target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val} %"
     context["results"][file_name][target_main] = target_context
-    return context
-
-
-def resolution_folder(
-        context: dict,
-        target: str | None = None,
-        plot: bool = ResolutionDefaults.plot,
-        label: str | None = ResolutionDefaults.label
-        ) -> dict:
-    """Calculate the energy resolution of the detector using the fit results obtained from the
-    source data of multiple files.
-
-    Arguments
-    ---------
-    context : dict
-        The context dictionary containing the fit results in `context["fit"]`.
-    target : str, optional
-        The name of the fitting subtask to use for resolution calculation. If None, no calculation
-        is performed. Default is None.
-    plot : bool, optional
-        Whether to show the plots of the resolution trend. Default is True.
-    label : str, optional
-        The label for the resolution trend plot. Default is None.
-    
-    Returns
-    -------
-    context : dict
-        The updated context dictionary containing the resolution results in `context["results"]`.
-    """
-    task = "resolution"
-    fit_results = context.get("fit", {})
-    # Get the different file names and create arrays to store resolution values and voltages
-    file_names = list(fit_results.keys())
-    res_vals = np.zeros(len(file_names), dtype=object)
-    voltages = np.zeros(len(file_names))
-    # Iterate over all files and calculate the resolution values
-    for i, file_name in enumerate(file_names):
-        target_context = fit_results[file_name][target]
-        sigma = target_context["sigma"]
-        line_val = target_context["line_val"]
-        res_vals[i] = energy_resolution(line_val, sigma)
-        voltages[i] = target_context["voltage"]
-        energy = context["config"].source.e_peak
-        fwhm = SIGMA_TO_FWHM * sigma
-        task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_vals[i]} %"
-        target_context[f"{task}_label"] = task_label
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    min_idx = np.argmin(y)
-    # Create the figure for the resolution trend
-    fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
-    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
-                 textcoords="offset points", ha="center", va="top", fontsize=12)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E/E")
-    write_legend(label)
-    if not plot:
-        plt.close(fig)
-    # Update the context with the resolution trend results
-    context["results"][task] = dict(voltages=voltages, res_vals=res_vals)
     return context
 
 
