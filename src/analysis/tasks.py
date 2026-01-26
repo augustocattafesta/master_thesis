@@ -1,7 +1,7 @@
 """Analysis tasks.
 """
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import aptapy.models
 import numpy as np
@@ -13,7 +13,6 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
-    GainCompareConfig,
     GainDefaults,
     PlotDefaults,
     ResolutionDefaults,
@@ -150,7 +149,7 @@ def fit_peak(
     model = model_class[0]()
     if isinstance(model, aptapy.models.Fe55Forest):
         model.intensity1.freeze(0.16)   # type: ignore[attr-defined]
-    model.fit_iterative(hist, **kwargs)
+    model.fit_iterative(hist, **kwargs) # type: ignore[attr-defined]
     # Extract the line value and sigma from the fit results
     if isinstance(model, aptapy.models.Gaussian):
         line_val = model.status.correlated_pars[1]
@@ -159,6 +158,8 @@ def fit_peak(
         reference_energy: float = model.energies[0]   # type: ignore [attr-defined]
         line_val = reference_energy / model.status.correlated_pars[1]
         sigma = model.status.correlated_pars[2]
+    else:
+        raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
     # Update the context with the fit results
     subtask_results = dict(line_val=line_val, sigma=sigma, voltage=source.voltage, model=model)
     file_name = source.file_path.stem
@@ -259,7 +260,7 @@ def gain_trend(
         target: str | None = None,
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
-        subtasks: list[str] | None = None,
+        subtasks: list[dict[str, Any]] | None = None,
     ) -> dict:
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
@@ -345,7 +346,7 @@ def compare_gain(
         context: dict,
         aggregate: bool = False,
         label: str | None = None,
-        yscale: Literal["linear", "log"] = GainCompareConfig.yscale
+        yscale: Literal["linear", "log"] = "linear"
         ) -> dict:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
