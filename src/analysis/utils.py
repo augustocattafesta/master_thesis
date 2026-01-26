@@ -162,12 +162,17 @@ def amptek_accumulate_time(start_times: np.ndarray, real_times: np.ndarray) -> n
 
 
 def _load_single_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
-    """
-    Load a class from a string.
-    Supports:
-      - "ClassName" (local or global)
-      - "module.ClassName"
-      - "package.module.ClassName"
+    """Load a single class from a given class path.
+
+    Arguments
+    ---------
+    class_path : str
+        The class path to load.
+    
+    Returns
+    -------
+    cls : type[aptapy.modeling.AbstractFitModel]
+        The loaded class.
     """
     cls = None
     if "." not in class_path:
@@ -182,6 +187,18 @@ def _load_single_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel
     return cls
 
 
-def load_class(class_path: str) -> type[aptapy.modeling.AbstractFitModel]:
+def load_class(class_path: str) -> list[type[aptapy.modeling.AbstractFitModel]]:
+    """Load one or more classes from a given class path or multiple class paths separated by '+'.
+    
+    Arguments
+    ---------
+    class_path : str
+        The class path(s) to load. Multiple class paths can be separated by '+'.
+    
+    Returns
+    -------
+    classes : list[type[aptapy.modeling.AbstractFitModel]]
+        The list of loaded classes.
+    """
     class_paths = [p.strip() for p in class_path.split("+")]
     return [_load_single_class(p) for p in class_paths]

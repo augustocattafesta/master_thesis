@@ -1,6 +1,7 @@
 """Analysis tasks.
 """
 from pathlib import Path
+from typing import Literal
 
 import aptapy.models
 import numpy as np
@@ -12,6 +13,7 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
+    GainCompareConfig,
     GainDefaults,
     PlotDefaults,
     ResolutionDefaults,
@@ -89,8 +91,8 @@ def calibration(
 
 def fit_peak(
           context: dict,
-          subtask: str | None = None,
-          model_class: AbstractFitModel = FitPeakDefaults.model_class,
+          subtask: str | None,
+          model_class: list[type[AbstractFitModel]],
           xmin: float = FitPeakDefaults.xmin,
           xmax: float = FitPeakDefaults.xmax,
           num_sigma_left: float = FitPeakDefaults.num_sigma_left,
@@ -147,7 +149,7 @@ def fit_peak(
     # we only support fitting a single model at a time in this context.
     model = model_class[0]()
     if isinstance(model, aptapy.models.Fe55Forest):
-        model.intensity1.freeze(0.16)
+        model.intensity1.freeze(0.16)   # type: ignore[attr-defined]
     model.fit_iterative(hist, **kwargs)
     # Extract the line value and sigma from the fit results
     if isinstance(model, aptapy.models.Gaussian):
@@ -157,8 +159,6 @@ def fit_peak(
         reference_energy: float = model.energies[0]   # type: ignore [attr-defined]
         line_val = reference_energy / model.status.correlated_pars[1]
         sigma = model.status.correlated_pars[2]
-    else:
-        raise ValueError("Model not valid. Choose between Gaussian and Fe55Forest")
     # Update the context with the fit results
     subtask_results = dict(line_val=line_val, sigma=sigma, voltage=source.voltage, model=model)
     file_name = source.file_path.stem
@@ -206,8 +206,10 @@ def gain_task(
     context : dict
         The updated context dictionary containing the gain results in `context["results"]`.
     """
+    # pylint: disable=invalid-unary-operand-type
     task = "gain"
-    fit_ctx = context.get("fit")
+    context["results"][task] = {}
+    fit_ctx = context.get("fit", {})
     # Get the file names from the fit context keys
     file_names = list(fit_ctx.keys())
     # Create empty arrays to store gain values and voltages
@@ -225,8 +227,8 @@ def gain_task(
         gain_vals[i] = gain(w, line_val, energy)
         # Create the label and store it in the target context
         target_ctx[f"{task}_label"] = f"Gain@{voltages[i]:.0f} V: {gain_vals[i]}"
-    # Save the results in the context
-    context["results"][task] = dict(voltages=voltages, gain_vals=gain_vals)
+    # Save the results in the context under the task name and target subtask
+    context["results"][task][target] = dict(voltages=voltages, gain_vals=gain_vals)
     # If only a single file is analyzed, return the context without plotting or fitting
     if len(file_names) == 1:
         return context
@@ -284,29 +286,38 @@ def gain_trend(
         `context["results"]`.
     """
     task = "gain_trend"
-    fit_results = context.get("fit", {})
-    # Get the different file names and create arrays to store gain values and times
-    file_names = list(fit_results.keys())
+    context["results"][task] = {}
+    fit_ctx = context.get("fit", {})
+    # Get the different file names
+    file_names = list(fit_ctx.keys())
+    # Create empty arrays to store gain values and start times
     gain_vals = np.zeros(len(file_names), dtype=object)
     start_times = np.zeros(len(file_names), dtype=object)
     real_times = np.zeros(len(file_names))
     # Iterate over all files and calculate the gain values
     for i, file_name in enumerate(file_names):
-        target_context = fit_results[file_name][target]
-        source = fit_results[file_name]["source"]
-        line_val = target_context["line_val"]
-        gain_vals[i] =  gain(w, line_val, energy)
+        # If the target subtask is not found, raise an error
+        if target not in fit_ctx[file_name]:
+            raise KeyError(f"Target subtask '{target}' not found in fit results")
+        # Access the source data to extract the times
+        source = fit_ctx[file_name]["source"]
         start_times[i] = source.start_time
         real_times[i] = source.real_time
+        # Access the target context and extract line value and voltage
+        target_ctx = fit_ctx[file_name][target]
+        line_val = target_ctx["line_val"]
+        gain_vals[i] =  gain(w, line_val, energy)
+    # Calculate the accumulated time in hours
     times = amptek_accumulate_time(start_times, real_times) / 3600
+    # Save the results in the context under the task name and target subtask
+    context["results"][task][target] = dict(times=times, gain_vals=gain_vals)
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
-    # Save the gain trend values
-    context["results"][task][target] = dict(times=times, gain_vals=gain_vals)
-    plt.figure()
-    plt.errorbar(times, y, yerr=yerr, fmt=".", label="Gain")
+    # Create the figure for the gain trend
+    plt.figure("gain_vs_time")
+    plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
     # If fitting subtasks are provided, fit the gain trend with the specified models
-    if subtasks is not None:
+    if subtasks:
         for subtask in subtasks:
             # Think how to refactor this part
             model_list = load_class(subtask["model"])
@@ -323,7 +334,8 @@ def gain_trend(
             model.fit(times, y, sigma=yerr, **kwargs)
             model.plot(fit_output=True, plot_components=False)
             # Update the context with the fit results
-            context["results"][task][target][subtask["subtask"]] = dict(model=model)
+            name = subtask["subtask"]
+            context["results"][task][target][name] = dict(model=model)
     plt.legend()
     plt.show()
     return context
@@ -333,7 +345,7 @@ def compare_gain(
         context: dict,
         aggregate: bool = False,
         label: str | None = None,
-        yscale: str = "log"
+        yscale: Literal["linear", "log"] = GainCompareConfig.yscale
         ) -> dict:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
@@ -356,13 +368,14 @@ def compare_gain(
         The updated context dictionary containing the gain comparison results in
         `context["results"]`.
     """
+    # pylint: disable=invalid-unary-operand-type
     task = "compare_gain"
     folders = context.get("folders", {})
     plt.figure("gain_comparison")
-    y = []
-    yerr = []
-    x = []
-    for folder_path, folder_context in folders.items():
+    y = np.zeros(len(folders), dtype=object)
+    yerr = np.zeros(len(folders), dtype=object)
+    x = np.zeros(len(folders), dtype=object)
+    for i, (folder_path, folder_context) in enumerate(folders.items()):
         folder_results = folder_context.get("results", {})
         folder_gain = folder_results.get("gain", {})
         g_val = unumpy.nominal_values(folder_gain.get("gain_vals", []))
@@ -373,13 +386,13 @@ def compare_gain(
             plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=Path(folder_path).stem)
             model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
         else:
-            y.append(g_val)
-            yerr.append(g_err)
-            x.append(voltages)
+            y[i] = g_val
+            yerr[i] = g_err
+            x[i] = voltages
     if aggregate:
-        y = np.array(y).flatten()
-        yerr = np.array(yerr).flatten()
-        x = np.array(x).flatten()
+        y = np.concatenate(y)
+        yerr = np.concatenate(yerr)
+        x = np.concatenate(x)
         model = aptapy.models.Exponential()
         model.fit(x, y, sigma=yerr, absolute_sigma=True)
         plt.errorbar(x, y, yerr=yerr, fmt=".")
@@ -420,7 +433,8 @@ def resolution_task(
         The updated context dictionary containing the resolution results in `context["results"]`.
     """
     task = "resolution"
-    fit_ctx = context.get("fit")
+    context["results"][task] = {}
+    fit_ctx = context.get("fit", {})
     # Get the file names from the fit context keys
     file_names = list(fit_ctx.keys())
     # Create empty arrays to store resolution values and voltages
@@ -442,8 +456,8 @@ def resolution_task(
         fwhm = SIGMA_TO_FWHM * sigma
         task_label = f"FWHM@{energy:.1f} keV: {fwhm}\n" + fr"$\Delta$E/E: {res_vals[i]} %"
         target_ctx[f"{task}_label"] = task_label
-    # Save the results in the context
-    context["results"][task] = dict(voltages=voltages, res_vals=res_vals)
+    # Save the results in the context under the task name and target subtask
+    context["results"][task][target] = dict(voltages=voltages, res_vals=res_vals)
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
@@ -469,7 +483,8 @@ def resolution_escape(
         context: dict,
         target_main: str | None = None,
         target_escape: str | None = None,
-        **kwargs
+        label: str | None = ResolutionDefaults.label,
+        plot: bool = ResolutionDefaults.plot
         ):
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This calculation is based on the position and width of the main spectral line and
@@ -492,22 +507,48 @@ def resolution_escape(
         The updated context dictionary containing the resolution results in `context["results"]`.
     """
     task = "resolution_escape"
-    fit_results = context.get("fit", {})
-    file_name, = fit_results.keys()
-    # Check if the main peak and escape peak fitting substasks exist in the results and get the
-    # line positions and sigma of the main peak
-    if target_main not in fit_results[file_name] or target_escape not in fit_results[file_name]:
+    context["results"][task] = {}
+    fit_ctx = context.get("fit", {})
+    # Get the single file names from the fit context keys
+    file_names = list(fit_ctx.keys())
+    # Create empty arrays to store resolution values and voltages
+    res_vals = np.zeros(len(file_names), dtype=object)
+    voltages = np.zeros(len(file_names))
+    for i, file_name in enumerate(file_names):
+        # Check if the main peak and escape peak fitting substasks exist in the results
+        if target_main not in fit_ctx[file_name] or target_escape not in fit_ctx[file_name]:
+            raise KeyError(f"Target subtasks '{target_main}' or '{target_escape}' not found in "
+                           f"fit results")
+        # Access the target contexts and extract line values and sigma
+        target_ctx = fit_ctx[file_name][target_main]
+        line_val_main = target_ctx["line_val"]
+        sigma_main = target_ctx["sigma"]
+        voltages[i] = target_ctx["voltage"]
+        line_val_esc = fit_ctx[file_name][target_escape]["line_val"]
+        # Calculate the energy resolution using the escape peak and update the context
+        res_vals[i] = energy_resolution_escape(line_val_main, line_val_esc, sigma_main)
+        # Create the label and store it in the target context
+        target_ctx[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_vals[i]} %"
+    # Save the results in the context under the task name and target subtask
+    context["results"][task][target_main] = dict(voltages=voltages, res_vals=res_vals)
+    # If only a single file is analyzed, return the context without plotting
+    if len(file_names) == 1:
         return context
-    target_context = fit_results[file_name][target_main]
-    line_main = target_context["line_val"]
-    sigma_main = target_context["sigma"]
-    line_escape = fit_results[file_name][target_escape]["line_val"]
-    # Calculate the energy resolution using the escape peak and update the context
-    res_val = energy_resolution_escape(line_main, line_escape, sigma_main)
-    target_context[task] = res_val
-    # Create a label for the resolution value to show if task is plotted
-    target_context[f"{task}_label"] = fr"$\Delta$E/E(esc.): {res_val} %"
-    context["results"][file_name][target_main] = target_context
+    y = unumpy.nominal_values(res_vals)
+    yerr = unumpy.std_devs(res_vals)
+    min_idx = np.argmin(y)
+    # Create the figure for the resolution trend
+    fig = plt.figure("Resolution vs Voltage")
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
+    # Write the minimum resolution value on the plot
+    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
+                 textcoords="offset points", ha="center", va="top", fontsize=12)
+    plt.xlabel("Voltage [V]")
+    plt.ylabel(r"$\Delta$E/E")
+    # Write the legend and show or close the plot
+    write_legend(label)
+    if not plot:
+        plt.close(fig)
     return context
 
 
@@ -520,8 +561,7 @@ def drift(
         plot: bool = DriftDefaults.plot,
         rate: bool = DriftDefaults.rate,
         label: str | None = DriftDefaults.label,
-        yscale: str | None = DriftDefaults.yscale,
-        **kwargs
+        yscale: str = DriftDefaults.yscale,
         ) -> dict:
     """Calculate the gain and rate of the detector vs the drift voltage using the fit results
     obtained from the source data of multiple files.
@@ -638,26 +678,28 @@ def plot_spectrum(
     context : dict
         The context dictionary (in future it will be updated with the figures).
     """
-    # Access the folder fit results from the context
+    # Access the sources from the context
     sources = context.get("sources", {})
-    file_names = sources.keys()
+    # Get the file names from the sources keys
+    file_names = list(sources.keys())
+    # Iterate over all files and plot the spectra with fitted models, if desired
     for file_name in file_names:
-        source = sources[file_name]
         # Create the plot figure and plot the spectrum
+        source = sources[file_name]
         plt.figure(f"{source.file_path.stem}_{targets}")
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
-        fit_results = context.get("fit", {})
+        fit_ctx = context.get("fit", {})
         models = []
-        if fit_results and targets is not None:
+        if fit_ctx and targets is not None:
             for target in targets:
-                if target in fit_results[file_name]:
-                    target_context = fit_results[file_name][target]
-                    model = target_context["model"]
-                    fit_label = get_label(task_labels, target_context)
+                if target in fit_ctx[file_name]:
+                    target_ctx = fit_ctx[file_name][target]
+                    model = target_ctx["model"]
+                    model_label = get_label(task_labels, target_ctx)
                     # Save the model for automatic xrange calculation
                     models.append(model)
-                    model.plot(label=fit_label)
+                    model.plot(label=model_label)
         # Set the x-axis range
         plt.xlim(xrange)
         if xrange is None:

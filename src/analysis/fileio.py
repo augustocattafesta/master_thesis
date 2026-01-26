@@ -30,60 +30,26 @@ class FileBase:
         self.hist = Histogram1d.from_amptek_file(file_path)
 
 
-class Folder:
-    def __init__(self, folder_path: pathlib.Path) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        folder_path : pathlib.Path
-            Path of the folder to open.
-        """
-        self.folder_path = folder_path
-        if not self.folder_path.exists():
-            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
-                                  Verify the path.")
-        self.input_files = list(folder_path.iterdir())
-
-    @property
-    def source_files(self) -> list[pathlib.Path]:
-        """Extract the source files from all the files of the directory and return a sorted list
-        of the files. If file names contain "trend{i}", the sorting is done numerically according
-        to the index {i}, otherwise it's done alphabetically.
-        """
-        # Keep files containing _B<number>
-        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
-
-        def numeric_sort_key(p: pathlib.Path):
-            """Sort the files with numerical order.
-            """
-            numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
-            return numbers[-1]  # sort by the last number
-
-        return sorted(filtered, key=numeric_sort_key)
-
-    @property
-    def pulse_file(self) -> list[pathlib.Path]:
-        """Extract the calibration pulse files from all the files of the directory.
-        """
-        return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
-                                                           _f.name,re.IGNORECASE) is not None][0]
-
-
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.
     """
     def __init__(self, file_path: pathlib.Path,
-                 charge_conv_model: aptapy.modeling.AbstractFitModel) -> None:
+                 charge_conv_model: aptapy.modeling.AbstractFitModel | None = None) -> None:
         super().__init__(file_path)
-        content = self.hist.content
-        old_edges = self.hist.bin_edges()
-        slope, offset = charge_conv_model.parameter_values()
-        # Converting the binning from ADC channels to charge (fC) using the calibration pulse file
-        # This feature could become optional in the future
-        new_edges = unumpy.nominal_values(old_edges * slope + offset)
-        self.hist = Histogram1d(new_edges, xlabel="Charge [fC]")
-        self.hist.set_content(content)
+        if charge_conv_model is not None:
+            content = self.hist.content
+            # Apply charge conversion to the bin edges
+            old_edges = self.hist.bin_edges()
+            model_pars = charge_conv_model.parameter_values()
+            # Check if the model has the correct number of parameters
+            if len(model_pars) != 2:
+                raise ValueError("Charge conversion model must have two parameters.")
+            slope = model_pars[0]
+            offset = model_pars[1]
+            new_edges = unumpy.nominal_values(old_edges * slope + offset)
+            # Update the histogram with the new edges and same content
+            self.hist = Histogram1d(new_edges, xlabel="Charge [fC]")
+            self.hist.set_content(content)
 
     @property
     def voltage(self) -> float:
@@ -149,6 +115,47 @@ class PulsatorFile(FileBase):
         """Number of pulses in the spectrum.
         """
         return len(self.voltage)
+
+
+class Folder:
+    def __init__(self, folder_path: pathlib.Path) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        folder_path : pathlib.Path
+            Path of the folder to open.
+        """
+        self.folder_path = folder_path
+        if not self.folder_path.exists():
+            raise FileExistsError(f"Folder {str(self.folder_path)} does not exist.\
+                                  Verify the path.")
+        self.input_files = list(folder_path.iterdir())
+
+    @property
+    def source_files(self) -> list[pathlib.Path]:
+        """Extract the source files from all the files of the directory and return a sorted list
+        of the files. If file names contain "trend{i}", the sorting is done numerically according
+        to the index {i}, otherwise it's done alphabetically.
+        """
+        # Keep files containing _B<number>
+        filtered = [_f for _f in self.input_files if re.search(r"B\d+", _f.name)]
+
+        def numeric_sort_key(p: pathlib.Path):
+            """Sort the files with numerical order.
+            """
+            numbers = [int(x) for x in re.findall(r"\d+", p.stem)]
+            return numbers[-1]  # sort by the last number
+
+        return sorted(filtered, key=numeric_sort_key)
+
+    @property
+    def pulse_file(self) -> pathlib.Path:
+        """Extract the calibration pulse files from all the files of the directory and return
+        the path of the first file in the list.
+        """
+        return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
+                                                           _f.name,re.IGNORECASE) is not None][0]
 
 
 def load_label(key: str) -> str | None:

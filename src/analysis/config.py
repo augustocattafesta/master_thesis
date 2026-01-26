@@ -1,10 +1,9 @@
 """Configuration models for the analysis application."""
+import pathlib
 from dataclasses import dataclass
 from typing import Literal
 
-import aptapy.models
 import yaml
-from aptapy.modeling import AbstractFitModel
 from pydantic import BaseModel, Field
 
 from .utils import KALPHA
@@ -40,7 +39,6 @@ class CalibrationConfig(BaseModel):
 
 @dataclass(frozen=True)
 class FitPeakDefaults:
-    model_class: AbstractFitModel = aptapy.models.Gaussian
     xmin: float = float("-inf")
     xmax: float = float("inf")
     num_sigma_left: float = 1.5
@@ -77,12 +75,12 @@ class GainDefaults:
     fit: bool = True
     plot: bool = True
     label: str | None = None
-    yscale: str = "log"
+    yscale: Literal["linear", "log"] = "log"
 
 
 class GainConfig(BaseModel):
     task: Literal["gain"]
-    target: str | None = None
+    target: str
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
@@ -93,9 +91,9 @@ class GainConfig(BaseModel):
 
 class GainTrendConfig(BaseModel):
     task: Literal["gain_trend"]
+    target: str | None
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
-    target: str | None = None
     # time_unit: Literal["s", "m", "h"] = "h"
     subtasks: list[FitSubtask] | None = Field(default=None)
 
@@ -115,15 +113,15 @@ class ResolutionDefaults:
 
 class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
-    target: str | None = None
+    target: str
     plot: bool = ResolutionDefaults.plot
-    label: str = ResolutionDefaults.label
+    label: str | None = ResolutionDefaults.label
 
 
 class ResolutionEscapeConfig(BaseModel):
     task: Literal["resolution_escape"]
-    target_main: str | None = None
-    target_escape: str | None = None
+    target_main: str
+    target_escape: str
 
 
 @dataclass(frozen=True)
@@ -132,7 +130,7 @@ class DriftDefaults:
     threshold: float = 1.5
     plot: bool = True
     label: str | None = None
-    yscale: str = "linear"
+    yscale: Literal["linear", "log"] = "linear"
 
 
 class DriftConfig(BaseModel):
@@ -176,7 +174,7 @@ class AppConfig(BaseModel):
     pipeline: list[TaskType]
 
     @classmethod
-    def from_yaml(cls, path: str) -> "AppConfig":
+    def from_yaml(cls, path: str | pathlib.Path) -> "AppConfig":
         with open(path, encoding="utf-8") as f:
             return cls(**yaml.safe_load(f))
 

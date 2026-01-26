@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import plt
@@ -6,20 +8,25 @@ from .fileio import SourceFile
 
 
 def write_legend(label: str | None, *axs: plt.Axes | None, loc: str = "best" ) -> None:
-    if not axs:
-        axs = (plt.gca(), )
-    headers, labels, zorders = [], [], []
-    for ax in axs:
-        header, _label = ax.get_legend_handles_labels()
-        headers.extend(header)
+    # pylint: disable=protected-access
+    valid_axs: list[plt.Axes] = [ax for ax in axs if ax is not None]
+    if not valid_axs:
+        valid_axs = [plt.gca()]
+    headers: list[Any] = []
+    labels: list[str] = []
+    zorders: list[float] = []
+    for ax in valid_axs:
+        _header, _label = ax.get_legend_handles_labels()
+        headers.extend(_header)
         labels.extend(_label)
+        zorders.append(int(ax.get_zorder()))
         zorders.append(ax.get_zorder())
-    if len(axs) > 1:
-        axs[0].set_zorder(max(zorders) + 1)
-        axs[0].set_frame_on(False)
+    if len(valid_axs) > 1:
+        valid_axs[0].set_zorder(max(zorders) + 1)
+        valid_axs[0].set_frame_on(False)
     if label is not None:
-        leg = axs[0].legend(headers, labels, loc=loc, title=label, title_fontsize=11)
-        leg._legend_box.align = "bottom"
+        leg = valid_axs[0].legend(headers, labels, loc=loc, title=label, title_fontsize=11)
+        leg._legend_box.align = "bottom"    # type: ignore[attr-defined]
 
 
 def get_xrange(source: SourceFile, models: list[AbstractFitModel]) -> list[float]:
@@ -55,7 +62,7 @@ def get_xrange(source: SourceFile, models: list[AbstractFitModel]) -> list[float
     return [xmin, xmax]
 
 
-def get_label(task_labels: list[str], target_context: dict) -> str | None:
+def get_label(task_labels: list[str] | None, target_context: dict) -> str | None:
     """Generate a label for the plot based on the specified task labels and the target context.
 
     Arguments

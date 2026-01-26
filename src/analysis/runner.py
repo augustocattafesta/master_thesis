@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from .config import AppConfig
 from .fileio import Folder, PulsatorFile, SourceFile
@@ -11,28 +13,23 @@ from .tasks import (
     gain_trend,
     plot_spectrum,
     resolution_escape,
-    resolution_task
+    resolution_task,
 )
 from .utils import load_class
 
-SINGLE_TASK_REGISTRY = {
-    "gain": gain_task,
-    "resolution": resolution_task,
-    "resolution_escape": resolution_escape,
-    "plot": plot_spectrum
-}
+TaskFunction = Callable[..., dict[str, Any]]
 
-
-FOLDER_TASK_REGISTRY = {
+TASK_REGISTRY: dict[str, TaskFunction] = {
     "gain": gain_task,
     "gain_trend": gain_trend,
     "resolution": resolution_task,
+    "resolution_escape": resolution_escape,
     "drift": drift,
-    "plot": plot_spectrum
+    "plot": plot_spectrum,
 }
 
 
-FOLDERS_TASK_REGISTRY = {
+FOLDERS_TASK_REGISTRY: dict[str, TaskFunction] = {
     "compare_gain": compare_gain
 }
 
@@ -60,12 +57,12 @@ def run(
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context = dict(config=config,
-                   calibration={},
-                   sources={},
-                   fit={},
-                   results={},
-                   figures={})
+    context: dict[str, Any] = dict(config=config,
+                                   calibration={},
+                                   sources={},
+                                   fit={},
+                                   results={},
+                                   figures={})
     # If only one path is given, we assume it is a folder containing source files and a pulse file.
     # Otherwise, the last path is the pulse file and all preceding ones are source files.
     if len(paths) == 1:
@@ -73,12 +70,12 @@ def run(
         source_file_paths = data_folder.source_files
         pulse_file_path = data_folder.pulse_file
     else:
-        source_file_paths = paths[:-1]
-        pulse_file_path = paths[-1]
+        source_file_paths = [Path(p) for p in paths[:-1]]
+        pulse_file_path = Path(paths[-1])
     # Run calibration task on the pulse file
     cal_config = config.calibration
     if cal_config is not None:
-        pulse = PulsatorFile(Path(pulse_file_path))
+        pulse = PulsatorFile(pulse_file_path)
         context["calibration"]["pulse"] = pulse
         context = calibration(
             context=context,
@@ -114,12 +111,8 @@ def run(
         core_tasks = ["calibration", "spectrum_fitting"]
         if task.task in core_tasks or getattr(task, "skip", False):
             continue
-        # Determine if we are running a single-file or folder task and select the appropriate
-        # function
-        if len(sources) == 1:
-            func = SINGLE_TASK_REGISTRY.get(task.task)
-        else:
-            func = FOLDER_TASK_REGISTRY.get(task.task)
+        # Select the appropriate task function from the registry
+        func = TASK_REGISTRY.get(task.task)
         if func:
             # Remove the name of the task from the keyword arguments
             kwargs = task.model_dump(exclude={"task"})
@@ -142,7 +135,9 @@ def run_folders(
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context = dict(config=config, folders={}, results={})
+    context: dict[str, Any] = dict(config=config,
+                                   folders={},
+                                   results={})
     # Execute the analysis pipeline for each folder
     for folder_path in folder_paths:
         folder_context = run(
