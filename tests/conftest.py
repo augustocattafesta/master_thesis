@@ -45,5 +45,18 @@ def pytest_sessionfinish(session):
 
 
 @pytest.fixture
+def context():
+    """Create a default context dictionary for testing."""
+    return {
+        "config": {},
+        "calibration": {},
+        "sources": {},
+        "fit": {},
+        "results": {},
+        "figures": {}
+    }
+
+
+@pytest.fixture
 def datadir():
     return pathlib.Path(__file__).parent / "data"

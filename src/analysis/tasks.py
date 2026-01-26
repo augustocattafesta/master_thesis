@@ -291,6 +291,64 @@ def gain_folder(
     return context
 
 
+def gain_task(
+        context: dict,
+        target: str,
+        w: float = GainDefaults.w,
+        energy: float = GainDefaults.energy,
+        fit: bool = GainDefaults.fit,
+        plot: bool = GainDefaults.plot,
+        label: str | None = GainDefaults.label,
+        yscale: str = GainDefaults.yscale
+        ) -> dict:
+    task = "gain"
+    fit_ctx = context.get("fit")
+    # Get the file names from the fit context keys
+    file_names = list(fit_ctx.keys())
+    # Create empty arrays to store gain values and voltages
+    gain_vals = np.zeros(len(file_names), dtype=object)
+    voltages = np.zeros(len(file_names))
+    # Iterate over all files and calculate the gain
+    for i, file_name in enumerate(file_names):
+        # If the target subtask is not found, raise an error
+        if target not in fit_ctx[file_name]:
+            raise KeyError(f"Target subtask '{target}' not found in fit results")
+        # Access the target context and extract line value and voltage
+        target_ctx = fit_ctx[file_name][target]
+        line_val = target_ctx["line_val"]
+        voltages[i] = target_ctx["voltage"]
+        gain_vals[i] = gain(w, line_val, energy)
+        # Create the label and store it in the target context
+        target_ctx[f"{task}_label"] = f"Gain@{voltages[i]:.0f} V: {gain_vals[i]}"
+    # Save the results in the context
+    context["results"][task] = dict(voltages=voltages, gain_vals=gain_vals)
+    # If only a single file is analyzed, return the context without plotting or fitting
+    if len(file_names) == 1:
+        return context
+    y = unumpy.nominal_values(gain_vals)
+    yerr = unumpy.std_devs(gain_vals)
+    # Create the figure for the gain trend
+    fig = plt.figure("gain_vs_voltage")
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
+    plt.xlabel("Voltage [V]")
+    plt.ylabel("Gain")
+    plt.yscale(yscale)
+    # If fit is requested, fit the gain trend with an exponential model
+    if fit:
+        model = aptapy.models.Exponential()
+        model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
+        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+        # Add the fit model to the context
+        context["results"][task]["model"] = model
+    write_legend(label)
+    if not plot:
+        plt.close(fig)
+    return context
+    
+
+
+
+
 def gain_trend(
         context: dict,
         target: str | None = None,
