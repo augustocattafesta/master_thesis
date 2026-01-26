@@ -81,7 +81,7 @@ class DataFolder:
         """Extract the calibration pulse files from all the files of the directory.
         """
         return [_f for _f in self.input_files if re.search(r"ci([\d\-_]+)",
-                                                           _f.name,re.IGNORECASE) is not None]
+                                                           _f.name, re.IGNORECASE) is not None]
 
 class SourceFile(FileBase):
     """Class to analyze a source file and extract relevant quantities from the name of the file.

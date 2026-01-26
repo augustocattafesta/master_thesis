@@ -341,23 +341,9 @@ def compare_folders(folder_names: tuple[str], model: type[AbstractFitModel], w: 
     if save:
         gain_fig.savefig(logyaml.log_folder / "gain_comparison.pdf", format="pdf")
 
-    # We need to re-add the removed points
-
-    # plt.figure("Energy resolution")
-    # for i, folder_name in enumerate(folder_names):
-    #     if folder_name == "251118":
-    #         voltage[i] = voltage[i][:-3]
-    #     elif folder_name == "251127":
-    #         voltage[i] = np.append(voltage[i], 350.)
-    #     plt.errorbar(voltage[i], unumpy.nominal_values(res[i][0]), unumpy.std_devs(res[i][0]),
-    #                  fmt="o", label=f"")
-    # plt.xlabel("Voltage [V]")
-    # plt.ylabel("FWHM / E")
-    # plt.legend()
-
 
 def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, capacity: float,
-                  e_peak, plot: bool = False, save: bool = False,
+                  e_peak: float, plot: bool = False, save: bool = False,
                   **kwargs) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Analyze a folder containing calibration pulse files and source data (spectrum) files. If
     multiple calibration files are present, the first in alphabetical order is taken. For each
@@ -414,21 +400,12 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
     drift_voltage = np.array([_source.drift_voltage for _source in source_files])
     # Cumulating time for consecutive data
     time = real_times.cumsum()
-    # Analyze the escape peak with a single gaussian to estimate the gain
-    # results = [_source.fit(aptapy.models.Gaussian, xmin=25, xmax=53, num_sigma_left=1.5,
-    #                       num_sigma_right=1.5) for _source in source_files]
-    # pars, _ = zip(*results)
-    # pars = np.stack(pars)
-    # line_adc = pars[:, 1]
-    # g_esc = gain(w, capacity, line_adc, line_pars, 2.9)
     # Plotting and saving
     out_name = str(folder_name).rsplit('/', maxsplit=1)[-1]
     if plot or save:
         fig = plt.figure("Gain vs time")
         plt.errorbar(time, unumpy.nominal_values(g), unumpy.std_devs(g), fmt=".",
                      label=r"K$\alpha$")
-        # plt.errorbar(time, unumpy.nominal_values(g_esc), unumpy.std_devs(g_esc), fmt=".",
-        #              label="Esc. Peak")
         plt.xlabel("Time [s]")
         plt.ylabel("Gain")
         plt.legend()
@@ -463,7 +440,7 @@ def analyze_trend(folder_name: str, model: type[AbstractFitModel], w: float, cap
         plt.errorbar(drift_voltage, unumpy.nominal_values(res), unumpy.std_devs(res), fmt=".",
                      label=r"K$\alpha$")
         plt.xlabel("Drift voltage [v]")
-        plt.ylabel("Gain")
+        plt.ylabel("FWHM/E")
         plt.legend()
         if save:
             plt.savefig(logyaml.log_folder / f"resolution_drift_{out_name}.pdf", format="pdf")

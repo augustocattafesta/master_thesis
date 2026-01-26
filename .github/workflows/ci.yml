@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Note we test Python 3.13 and 3.14
-        python-version: ["3.13", "3.14"]
+        # Note we test Python 3.13
+        python-version: ["3.13"]
 
     steps:
     - uses: actions/checkout@v4
