@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 from analysis.config import AppConfig
+from analysis.context import Context
 
 
 def pytest_addoption(parser):
@@ -48,14 +49,9 @@ def pytest_sessionfinish(session):
 
 @pytest.fixture
 def context(datadir):
-    """Create a default context dictionary for testing."""
+    """Create a default context for testing."""
     config = AppConfig.from_yaml(datadir / "config_default.yaml")
-    return dict(config=config,
-                calibration={},
-                sources={},
-                fit={},
-                results={},
-                figures={})
+    return Context(config)
 
 
 @pytest.fixture

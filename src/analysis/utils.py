@@ -10,6 +10,7 @@ import numpy as np
 import scipy.signal
 import xraydb
 from aptapy.modeling import line_forest
+from uncertainties import UFloat
 
 ELEMENTARY_CHARGE = 1.609e-19   # Coulomb
 ELECTRONS_IN_1FC = 1e-15 / ELEMENTARY_CHARGE  # Number of electrons in 1 fC
@@ -82,14 +83,14 @@ def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
     return xdata[peaks], ydata[peaks]
 
 
-def gain(w: float, line_val: np.ndarray, energy: float) -> np.ndarray:
+def gain(w: float, line_val: np.ndarray | UFloat, energy: float) -> np.ndarray:
     """Estimate the gain of the detector from the analysis of a spectral emission line.
 
     Arguments
     ----------
     w : float
         W-value of the gas inside the detector.
-    line_val : ArrayLike
+    line_val : np.ndarray | UFloat
         Position of the peak of the emission line in charge (fC).
     energy : float
         Energy of the emission line (in keV).
@@ -99,15 +100,16 @@ def gain(w: float, line_val: np.ndarray, energy: float) -> np.ndarray:
     return meas_electrons / exp_electrons
 
 
-def energy_resolution(line_val: np.ndarray, sigma: np.ndarray) -> np.ndarray:
+def energy_resolution(line_val: np.ndarray | UFloat, sigma: np.ndarray | UFloat
+                      ) -> np.ndarray | UFloat:
     """Estimate the energy resolution of the detector, using the position and the sigma of a
     spectral emission line.
 
     Arguments
     ----------
-    line_val : np.ndarray
+    line_val : np.ndarray | UFloat
         Position of the peak of the emission line in charge (fC).
-    sigma : np.ndarray
+    sigma : np.ndarray | UFloat
         Sigma of the emission line.
     """
     return sigma * 2 * np.sqrt(2 * np.log(2)) / line_val * 100
