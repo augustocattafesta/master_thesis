@@ -1,4 +1,4 @@
-# Analysis Tasks Documentation
+# **Analysis Tasks Documentation**
 
 In this documentation there is a full explanation of all the tasks and their parameters that can be executed through the pipeline in the YAML configuration file.
 
