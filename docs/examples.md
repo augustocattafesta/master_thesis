@@ -39,3 +39,6 @@ Setting the `plot` key to `true` for the `gain` and `resolution` tasks, the outp
 ![Fit](figures/folder_resolution.png)
 
 ## Analysis of gain trend with time
+
+
+## Comparison of folders
