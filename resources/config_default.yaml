@@ -4,13 +4,8 @@ acquisition:
   date: "2026-01-01"
   chip: chip
   structure: structure
-
-
-# Properties of the detector and of the source. Also these info are currently not being used.
-detector:
   gas: Ar
   w: 26.
-source:
   element: 55Fe
   e_peak: 5.9
 

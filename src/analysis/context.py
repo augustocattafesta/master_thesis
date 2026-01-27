@@ -74,7 +74,7 @@ class TargetContext:
         self._res_val = value
         fwhm = SIGMA_TO_FWHM * self.sigma
         # Set the resolution label for the spectral plot
-        self._res_label = f"FWHM@{self._energy:.1f} keV: {fwhm}\n"
+        self._res_label = f"FWHM@{self._energy:.1f} keV: {fwhm} fC\n"
         self._res_label += fr"$\Delta$E/E: {self.res_val} %"
 
     @property

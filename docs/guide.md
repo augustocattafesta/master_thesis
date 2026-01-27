@@ -1,4 +1,4 @@
-# Anlaysis and configuration guide
+# **Analysis and configuration guide**
 
 ## Run the analysis
 
@@ -107,6 +107,15 @@ If the analysis is performed on a single file, there are no other keys to specif
     label: Example label # Optional, label of the plot
 ```
 
+#### Gain trend with time
+
+
+#### Gain compare between folders
+
+
+#### Drift varying
+
+
 #### Resolution estimate
 
 This task performs the estimate of the resolution of the detector using the spectral fitting results of a given `target`, previously specified during the *fit_spec* task. This estimate is made using only the fitted FWHM of the line and the calibrated charge of the line center:
@@ -139,6 +148,9 @@ The `plot` and `fit` keys can be specified if working on multiple files.
     target_main: main_peak
     target_escape: escape_peak
 ```
+
+#### Resolution compare between folders
+
 
 #### Plot the spectrum
 

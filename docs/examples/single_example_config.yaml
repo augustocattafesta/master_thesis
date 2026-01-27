@@ -1,0 +1,39 @@
+acquisition:
+  date: "2026-01-01"
+  chip: W1a
+  structure: 86.6um
+  gas: Ar
+  w: 26.
+  element: Fe55
+  e_peak: 5.9
+
+
+pipeline:
+  # Execute the calibration
+  - task: calibration
+    plot: false
+
+  - task: fit_spec
+    subtasks:
+      # Fit the main line of the spectrum with a double Gaussian.
+      - target: main
+        model: Fe55Forest
+        # For well-behaved spectra no optional parameters should be needed
+
+    # Estimate the gain from the main line  
+  - task: gain
+    target: main
+
+    # Estimate the resolution from the main line 
+  - task: resolution
+    target: main
+
+  - task: plot
+    # Plot the spectrum in the region around the main line
+    targets:
+      - main
+    # Show the gain and resolution results in the legend.
+    task_labels:
+      - gain
+      - resolution
+    label: Example label for chip W1a 86.6 um

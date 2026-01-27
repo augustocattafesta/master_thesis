@@ -1,0 +1,43 @@
+site_name: μGap Analysis Tool
+docs_dir: docs
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: blue
+  features:
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: home.md
+  - Analysis and Configuration Guide: guide.md
+  - Examples: examples.md
+  - Tasks: tasks.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            # heading_level: 3
+            show_source: true
+            show_root_heading: false
+            show_root_toc_entry: false
+            show_signature_annotations: false
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.snippets:
+      base_path: ["."]
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

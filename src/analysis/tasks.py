@@ -451,7 +451,7 @@ def resolution_task(
     min_idx = np.argmin(y)
     # Create the figure for the resolution trend
     fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
     # Write the minimum resolution value on the plot
     plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
                  textcoords="offset points", ha="center", va="top", fontsize=12)
