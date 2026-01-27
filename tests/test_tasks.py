@@ -59,7 +59,7 @@ def test_gain(datadir, context: Context):
 
     gain_ctx = context.task_results("gain", target)
     assert gain_ctx is not None
-    assert gain_ctx["voltages"] == np.array([370.0])
+    assert np.array_equal(gain_ctx["voltages"], np.array([370.0]))
     assert "gain_vals" in gain_ctx
 
 

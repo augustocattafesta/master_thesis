@@ -35,20 +35,20 @@ class TargetContext:
     model: modeling.AbstractFitModel
 
     # Internal attributes for storing computed values and labels
-    _gain_val: object = field(default=None, init=False, repr=False)
+    _gain_val: UFloat | None = field(default=None, init=False, repr=False)
     _gain_label: str = field(default="", init=False, repr=False)
 
-    _res_val: object = field(default=None, init=False, repr=False)
+    _res_val: UFloat | None = field(default=None, init=False, repr=False)
     _res_label: str = field(default="", init=False, repr=False)
 
-    _res_escape_val: object = field(default=None, init=False, repr=False)
+    _res_escape_val: UFloat | None = field(default=None, init=False, repr=False)
     _res_escape_label: str | None = field(default=None, init=False, repr=False)
 
-    # Default energy for resolution labels. Should think how to set this properly.
-    _energy = 5.9
+    # Default energy for resolution labels
+    _energy: float = field(default=5.9, init=False, repr=False)
 
     @property
-    def gain_val(self) -> object:
+    def gain_val(self) -> UFloat:
         """The gain value computed in the gain analysis task.
         """
         if self._gain_val is None:
@@ -56,13 +56,13 @@ class TargetContext:
         return self._gain_val
 
     @gain_val.setter
-    def gain_val(self, value: object):
+    def gain_val(self, value: UFloat):
         self._gain_val = value
         # Set the gain label for the spectral plot
         self._gain_label = f"Gain@{self.voltage:.0f} V: {self.gain_val}"
 
     @property
-    def res_val(self) -> object:
+    def res_val(self) -> UFloat:
         """The resolution value computed in the resolution analysis task.
         """
         if self._res_val is None:
@@ -70,7 +70,7 @@ class TargetContext:
         return self._res_val
 
     @res_val.setter
-    def res_val(self, value: object):
+    def res_val(self, value: UFloat):
         self._res_val = value
         fwhm = SIGMA_TO_FWHM * self.sigma
         # Set the resolution label for the spectral plot
@@ -78,7 +78,7 @@ class TargetContext:
         self._res_label += fr"$\Delta$E/E: {self.res_val} %"
 
     @property
-    def res_escape_val(self) -> object:
+    def res_escape_val(self) -> UFloat:
         """The resolution (escape) value computed in the resolution analysis task.
         """
         if self._res_escape_val is None:
@@ -86,10 +86,20 @@ class TargetContext:
         return self._res_escape_val
 
     @res_escape_val.setter
-    def res_escape_val(self, value: object):
+    def res_escape_val(self, value: UFloat):
         self._res_escape_val = value
         # Set the resolution (escape) label for the spectral plot
         self._res_escape_label = fr"$\Delta$E/E(esc.): {self.res_escape_val} %"
+
+    @property
+    def energy(self) -> float:
+        """The energy value used for resolution labels.
+        """
+        return self._energy
+
+    @energy.setter
+    def energy(self, value: float):
+        self._energy = value
 
     def task_label(self, task: str) -> str | None:
         """Retrieve the label string for the specified analysis task.
@@ -165,8 +175,10 @@ class Context:
             raise TypeError("Conversion model must be an instance of aptapy.models.Line")
         self._calibration["model"] = value
 
-    def add_source(self, source: SourceFile):
+    def add_source(self, source: SourceFile) -> None:
         """Add a source file to the private `sources` dictionary."""
+        if not isinstance(source, SourceFile):
+            raise TypeError("Source must be an instance of SourceFile")
         file_name = source.file_path.stem
         self._sources[file_name] = source
 
@@ -184,22 +196,18 @@ class Context:
         return list(self._sources.values())[-1]
 
     @property
-    def file_names(self) -> list:
+    def file_names(self) -> list[str]:
         """List of source file names stored in the context."""
         if not self._sources:
             raise AttributeError("No source files have been set in the context.")
         return list(self._sources.keys())
 
-    def add_fit_peak(self, source: SourceFile, subtask: str, fit_result: dict):
-        """Add fit results for a specific subtask and source file to the private `fit`
-        dictionary."""
-        file_name = source.file_path.stem
-        if file_name not in self._fit:
-            self._fit[file_name] = {}
-        self._fit[file_name][subtask] = fit_result
-
-    def add_target_ctx(self, source: SourceFile, target_ctx: TargetContext):
+    def add_target_ctx(self, source: SourceFile, target_ctx: TargetContext) -> None:
         """Add a target context for a specific source file to the private `fit` dictionary."""
+        if not isinstance(target_ctx, TargetContext):
+            raise TypeError("Target context must be an instance of TargetContext")
+        if not isinstance(source, SourceFile):
+            raise TypeError("Source must be an instance of SourceFile")
         file_name = source.file_path.stem
         if file_name not in self._fit:
             self._fit[file_name] = {}
@@ -208,13 +216,13 @@ class Context:
     def target_ctx(self, file_name: str, target: str) -> TargetContext:
         """Retrieve a target context for a specific source file and target from the private `fit`
         dictionary."""
-        if not self._fit[file_name]:
+        if file_name not in self._fit:
             raise KeyError(f"File '{file_name}' not found in fit results")
         if target not in self._fit[file_name]:
             raise KeyError(f"Target subtask '{target}' not found in fit results")
         return self._fit[file_name][target]
 
-    def add_task_results(self, task: str, target: str, results: dict):
+    def add_task_results(self, task: str, target: str, results: dict) -> None:
         """Add results for a specific task and target to the private `results` dictionary."""
         if task not in self._results:
             self._results[task] = {}
@@ -222,7 +230,7 @@ class Context:
             raise ValueError("Results dictionary cannot be None")
         self._results[task][target] = results
 
-    def add_task_fit_model(self, task: str, target: str, model: modeling.AbstractFitModel):
+    def add_task_fit_model(self, task: str, target: str, model: modeling.AbstractFitModel) -> None:
         """Add the fit model used in a specific task and target to the private `results`
         dictionary."""
         if task not in self._results:
@@ -230,6 +238,18 @@ class Context:
         if target not in self._results[task]:
             self._results[task][target] = {}
         self._results[task][target]["model"] = model
+
+    def add_subtask_fit_model(self, task: str, target: str, subtask: str,
+                              model: modeling.AbstractFitModel) -> None:
+        """Add the fit model used in a specific subtask of a task and target to the private
+        `results` dictionary."""
+        if task not in self._results:
+            self._results[task] = {}
+        if target not in self._results[task]:
+            self._results[task][target] = {}
+        if subtask not in self._results[task][target]:
+            self._results[task][target][subtask] = {}
+        self._results[task][target][subtask]["model"] = model
 
     def task_results(self, task: str, target: str) -> dict:
         """Retrieve results for a specific task and target from the private `results`
@@ -257,14 +277,16 @@ class FoldersContext:
     _results: dict = field(default_factory=dict, init=False, repr=False)
 
     @property
-    def folder_names(self) -> list:
+    def folder_names(self) -> list[str]:
         """List of folder names stored in the context."""
         if not self._folders:
             raise AttributeError("No folders have been set in the context.")
         return list(self._folders.keys())
 
-    def add_folder(self, folder_path: Path, folder_ctx: Context):
+    def add_folder(self, folder_path: Path, folder_ctx: Context) -> None:
         """Add a folder context to the private `folders` dictionary."""
+        if not isinstance(folder_ctx, Context):
+            raise TypeError("Folder context must be an instance of Context")
         folder_name = folder_path.stem
         self._folders[folder_name] = folder_ctx
 
@@ -274,7 +296,7 @@ class FoldersContext:
             raise KeyError(f"Folder '{folder_name}' not found in context.")
         return self._folders[folder_name]
 
-    def add_task_results(self, task: str, target: str, results: dict):
+    def add_task_results(self, task: str, target: str, results: dict) -> None:
         """Add results for a specific task and target to the private `results` dictionary."""
         if task not in self._results:
             self._results[task] = {}

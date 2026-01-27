@@ -85,7 +85,8 @@ def get_label(task_labels: list[str] | None, target_ctx: TargetContext) -> str |
     # Iterate over the task labels and append the corresponding labels from the target context
     for task in task_labels:
         task_label = target_ctx.task_label(task)
-        label += f"{task_label}\n"
+        if task_label is not None:
+            label += f"{task_label}\n"
     # Remove the trailing newline character
     label = label[:-1]
     return label

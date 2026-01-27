@@ -123,7 +123,7 @@ def fit_peak(
     Returns
     -------
     context : Context
-        The updated context object containing the fit results in `context["fit"]`.
+        The updated context object containing the fit results.
     """
     # Access the last source data added to the context and get the histogram
     source = context.last_source
@@ -161,6 +161,7 @@ def fit_peak(
         raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
     # Update the context with the fit results
     target_ctx = TargetContext(subtask, line_val, sigma, source.voltage, model)
+    target_ctx.energy = context.config.source.e_peak
     context.add_target_ctx(source, target_ctx)
     return context
 
@@ -200,7 +201,7 @@ def gain_task(
     Returns
     -------
     context : Context
-        The updated context object containing the gain results in `context["results"]`.
+        The updated context object containing the gain results.
     """
     # pylint: disable=invalid-unary-operand-type
     task = "gain"
@@ -257,7 +258,7 @@ def gain_trend(
     ---------
     context : Context
         The context object containing the fit results.
-    target : str, optional
+    target : str
         The name of the fitting subtask to use for gain calculation. If None, no calculation is
         performed. Default is None.
     w : float, optional
@@ -317,8 +318,7 @@ def gain_trend(
             model.fit(times, y, sigma=yerr, **kwargs)
             model.plot(fit_output=True, plot_components=False)
             # Update the context with the fit results
-            context.add_task_fit_model(task, target, model)
-            # name = subtask["subtask"]
+            context.add_subtask_fit_model(task, target, subtask["subtask"], model)
             # context["results"][task][target][name] = dict(model=model)
     plt.legend()
     plt.show()
@@ -550,7 +550,7 @@ def drift(
     ---------
     context : Context
         The context object containing the fit results.
-    target : str, optional
+    target : str
         The name of the fitting subtask to use for gain calculation. If None, no calculation is
         performed. Default is None.
     w : float, optional
