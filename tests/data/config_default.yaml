@@ -4,13 +4,8 @@ acquisition:
   date: "2026-01-01"
   chip: chip
   structure: structure
-
-
-# Properties of the detector and of the source. Also these info are currently not being used.
-detector:
   gas: Ar
   w: 26.
-source:
   element: 55Fe
   e_peak: 5.9
 
@@ -32,11 +27,11 @@ pipeline:
   - task: fit_spec
     subtasks:
       # Fit the main peak with a double Gaussian model (models from aptapy).
-      - subtask: main_peak
+      - target: main_peak
         model: Fe55Forest
 
       # Fit the escape peak with a single Gaussian model.
-      - subtask: escape_peak
+      - target: escape_peak
         model: Gaussian
         # If the fit is hard to perform, or if there are different emission lines, the fit
         # parameters can be specified.
