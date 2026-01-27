@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
 from .config import AppConfig
+from .context import Context, FoldersContext
 from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
@@ -17,7 +17,8 @@ from .tasks import (
 )
 from .utils import load_class
 
-TaskFunction = Callable[..., dict[str, Any]]
+TaskFunction = Callable[..., Context]
+TaskFunctionFolders = Callable[..., FoldersContext]
 
 TASK_REGISTRY: dict[str, TaskFunction] = {
     "gain": gain_task,
@@ -29,7 +30,7 @@ TASK_REGISTRY: dict[str, TaskFunction] = {
 }
 
 
-FOLDERS_TASK_REGISTRY: dict[str, TaskFunction] = {
+FOLDERS_TASK_REGISTRY: dict[str, TaskFunctionFolders] = {
     "compare_gain": compare_gain
 }
 
@@ -37,7 +38,7 @@ FOLDERS_TASK_REGISTRY: dict[str, TaskFunction] = {
 def run(
         config_file_path: str | Path,
         *paths: str | Path
-        ) -> dict:
+        ) -> Context:
     """Run the analysis pipeline defined in the configuration file on the given data files or
     folder.
     
@@ -52,17 +53,12 @@ def run(
 
     Returns
     -------
-    context : dict
-        Dictionary containing all the info and results of the analysis pipeline.
+    context : Context
+        Context object containing all the info and results of the analysis pipeline.
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context: dict[str, Any] = dict(config=config,
-                                   calibration={},
-                                   sources={},
-                                   fit={},
-                                   results={},
-                                   figures={})
+    context = Context(config)
     # If only one path is given, we assume it is a folder containing source files and a pulse file.
     # Otherwise, the last path is the pulse file and all preceding ones are source files.
     if len(paths) == 1:
@@ -76,7 +72,7 @@ def run(
     cal_config = config.calibration
     if cal_config is not None:
         pulse = PulsatorFile(pulse_file_path)
-        context["calibration"]["pulse"] = pulse
+        context.pulse = pulse
         context = calibration(
             context=context,
             charge_conversion=cal_config.charge_conversion,
@@ -85,14 +81,13 @@ def run(
     else:
         raise RuntimeError("No calibration task found in configuration.")
     # Load source files with the calculated calibration model
-    calibration_model = context["calibration"]["model"]
+    calibration_model = context.conversion_model
     sources = [SourceFile(Path(p), calibration_model) for p in source_file_paths]
-    context["sources"] = {str(s.file_path.stem): s for s in sources}
     # Run all fitting subtasks defined in the configuration file for each source file
     spec_fit_config = config.fit_spec
-    if spec_fit_config is not None:
-        for source in sources:
-            context["tmp_source"] = source  # Think how to avoid this
+    for source in sources:
+        context.add_source(source)
+        if spec_fit_config is not None:
             # Execute all fitting subtasks defined in the configuration file
             for subtask in spec_fit_config.subtasks:
                 fit_pars = subtask.fit_pars.model_dump()
@@ -121,30 +116,34 @@ def run(
 
 
 def run_folders(
-        config_file_path: str | Path,
-        *folder_paths: str | Path
-        ) -> dict:
+        config_file_path: Path,
+        *folder_paths: Path
+        ) -> FoldersContext:
     """Run the analysis pipeline defined in the configuration file on multiple data folders.
 
     Arguments
     ---------
-    config_file_path : str | Path
+    config_file_path : Path
         Path to the configuration file.
-    *folder_paths : str | Path
+    *folder_paths: Path
         Paths to the data folders.
+    
+    Returns
+    -------
+    context : FoldersContext
+        FoldersContext object containing all the info and results of the analysis pipeline for
+        each folder.
     """
     # Load configuration file
     config = AppConfig.from_yaml(config_file_path)
-    context: dict[str, Any] = dict(config=config,
-                                   folders={},
-                                   results={})
+    context = FoldersContext(config)
     # Execute the analysis pipeline for each folder
     for folder_path in folder_paths:
-        folder_context = run(
+        folder_ctx = run(
             config_file_path,
             folder_path
         )
-        context["folders"][folder_path] = folder_context
+        context.add_folder(folder_path, folder_ctx)
     # After that all the folders have been analyzed, we can run the folder-level tasks
     pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)
     for task in pipeline:

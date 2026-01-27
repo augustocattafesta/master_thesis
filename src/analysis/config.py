@@ -91,7 +91,7 @@ class GainConfig(BaseModel):
 
 class GainTrendConfig(BaseModel):
     task: Literal["gain_trend"]
-    target: str | None
+    target: str
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
     # time_unit: Literal["s", "m", "h"] = "h"
@@ -100,6 +100,7 @@ class GainTrendConfig(BaseModel):
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
+    target: str
     aggregate: bool = False
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
@@ -135,7 +136,7 @@ class DriftDefaults:
 
 class DriftConfig(BaseModel):
     task: Literal["drift"]
-    target: str | None = None
+    target: str
     rate: bool = DriftDefaults.rate
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy

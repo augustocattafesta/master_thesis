@@ -4,6 +4,7 @@ import numpy as np
 from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import plt
 
+from .context import TargetContext
 from .fileio import SourceFile
 
 
@@ -62,7 +63,7 @@ def get_xrange(source: SourceFile, models: list[AbstractFitModel]) -> list[float
     return [xmin, xmax]
 
 
-def get_label(task_labels: list[str] | None, target_context: dict) -> str | None:
+def get_label(task_labels: list[str] | None, target_ctx: TargetContext) -> str | None:
     """Generate a label for the plot based on the specified task labels and the target context.
 
     Arguments
@@ -83,10 +84,8 @@ def get_label(task_labels: list[str] | None, target_context: dict) -> str | None
     label = ""
     # Iterate over the task labels and append the corresponding labels from the target context
     for task in task_labels:
-        key_label = f"{task}_label"
-        if key_label in target_context:
-            task_label = target_context[f"{task}_label"]
-            label += f"{task_label}\n"
+        task_label = target_ctx.task_label(task)
+        label += f"{task_label}\n"
     # Remove the trailing newline character
     label = label[:-1]
     return label
