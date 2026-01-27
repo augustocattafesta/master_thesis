@@ -13,14 +13,8 @@ class Acquisition(BaseModel):
     date: str
     chip: str
     structure: str
-
-
-class Detector(BaseModel):
     gas: str
     w: float = 26.0
-
-
-class Source(BaseModel):
     element: str
     e_peak: float = KALPHA
 
@@ -57,7 +51,7 @@ class FitPars(BaseModel):
 
 
 class FitSubtask(BaseModel):
-    subtask: str
+    target: str
     skip: bool = False
     model: str
     fit_pars: FitPars = Field(default_factory=FitPars)
@@ -170,8 +164,6 @@ TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
 
 class AppConfig(BaseModel):
     acquisition: Acquisition
-    detector: Detector
-    source: Source
     pipeline: list[TaskType]
 
     @classmethod

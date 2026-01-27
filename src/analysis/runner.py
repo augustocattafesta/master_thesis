@@ -93,7 +93,7 @@ def run(
                 fit_pars = subtask.fit_pars.model_dump()
                 context = fit_peak(
                     context=context,
-                    subtask=subtask.subtask,
+                    target=subtask.target,
                     model_class=load_class(subtask.model),
                     **fit_pars
                 )

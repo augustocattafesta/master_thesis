@@ -35,7 +35,7 @@ def calibration(
       ) -> Context:
     """Perform the calibration of the detector using pulse data at fixed voltages.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the pulse data in `context.pulse` as an instance
@@ -89,7 +89,7 @@ def calibration(
 
 def fit_peak(
           context: Context,
-          subtask: str,
+          target: str,
           model_class: list[type[AbstractFitModel]],
           xmin: float = FitPeakDefaults.xmin,
           xmax: float = FitPeakDefaults.xmax,
@@ -100,13 +100,13 @@ def fit_peak(
       ) -> Context:
     """Perform the fitting of a spectral emission line in the source data.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the source data in `context.last_source` as an instance
         of the class SourceFile.
-    subtask: str
-        The name of the fitting subtask.
+    target: str
+        The name of the fitting target.
     model_class : AbstractFitModel, optional
         The class of the model to use for fitting the spectral line. Default is Gaussian.
     xmin : float, optional
@@ -160,8 +160,8 @@ def fit_peak(
     else:
         raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
     # Update the context with the fit results
-    target_ctx = TargetContext(subtask, line_val, sigma, source.voltage, model)
-    target_ctx.energy = context.config.source.e_peak
+    target_ctx = TargetContext(target, line_val, sigma, source.voltage, model)
+    target_ctx.energy = context.config.acquisition.e_peak
     context.add_target_ctx(source, target_ctx)
     return context
 
@@ -179,7 +179,7 @@ def gain_task(
     """Calculate the gain of the detector vs the back voltage using the fit results obtained from
     the source data of multiple files.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -254,7 +254,7 @@ def gain_trend(
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
     
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -335,7 +335,7 @@ def compare_gain(
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
 
-    Arguments
+    Parameters
     ---------
     context : FoldersContext
         The context object containing the fit results.
@@ -409,7 +409,7 @@ def resolution_task(
     source data. This estimate is based on the position and the width of the target spectral
     line.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -475,7 +475,7 @@ def resolution_escape(
     source data. This calculation is based on the position and width of the main spectral line and
     the position of the escape peak.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -546,7 +546,7 @@ def drift(
     """Calculate the gain and rate of the detector vs the drift voltage using the fit results
     obtained from the source data of multiple files.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -633,7 +633,7 @@ def plot_spectrum(
     """Plot the spectra from the source data and overlay the fitted models for the specified
     targets.
     
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the source data the fit results.
