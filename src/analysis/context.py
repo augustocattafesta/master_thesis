@@ -131,6 +131,7 @@ class TargetContext:
 @dataclass
 class ContextBase:
     config: AppConfig
+    paths: list[Path] = field(default_factory=list, init=False, repr=True)
 
     # Internal attributes for storing results and figures
     _results: dict = field(default_factory=dict, init=False, repr=False)
@@ -318,11 +319,33 @@ class Context(ContextBase):
             raise KeyError(f"Target '{target}' not found in results for task '{task}'.")
         return self._results[task][target]
 
+    @property
+    def results_dir(self) -> Path:
+        """The results directory path based on the analysis paths."""
+        for p in self.paths:
+            parts = p.parts
+            if "data" in parts:
+                idx = parts.index("data") +1
+                directory = "/".join(parts[idx:-1])
+            else:
+                directory = p.parent.name
+        return Path(directory)
+
     def save(self, output_dir: Path, fig_format: str) -> None:
+        """Save the folders context configuration, figures, and results to the specified output
+        directory.
+
+        Parameters
+        ----------
+        output_dir : Path
+            The directory where to save the context data.
+        fig_format : str
+            The format to save figures (e.g., 'png', 'pdf').
+        """
         # Create a unique directory for this run based on timestamp
         time_stamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
         dir_name = f"{time_stamp}_files"
-        folder_dir = output_dir / dir_name
+        folder_dir = output_dir / self.results_dir / dir_name
         # Check if directory exists, if not create it
         if not folder_dir.exists():
             folder_dir.mkdir(parents=True, exist_ok=True)
@@ -339,6 +362,7 @@ class Context(ContextBase):
         with open(results_path, "w", encoding="utf-8") as f:
             yaml_results = self.data_to_yaml(self._results)
             yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)
+
 
 @dataclass
 class FoldersContext(ContextBase):
@@ -381,6 +405,24 @@ class FoldersContext(ContextBase):
             raise ValueError("Results dictionary cannot be None")
         self._results[task][target] = results
 
+    @property
+    def results_dir(self) -> Path:
+        """The results directory path based on the analysis paths."""
+        time_stamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+        if len(self.paths) == 1:
+            parts = self.paths[0].parts
+            if "data" in parts:
+                idx = parts.index("data") + 1
+                directory = Path("/".join(parts[idx:]))
+                directory = directory / f"{time_stamp}_FullFolderAnalysis"
+            else:
+                directory = self.paths[0].parent / f"{time_stamp}_FullFolderAnalysis"
+        else:
+            folders_name = "_".join([Path(p).stem for p in self.paths])
+            directory = Path(f"{time_stamp}_Folders_{folders_name}")
+            directory = Path("MultiFolders") / directory
+        return Path(directory)
+
     def save(self, output_dir: Path, fig_format: str) -> None:
         """Save the folders context configuration, figures, and results to the specified output
         directory.
@@ -394,9 +436,7 @@ class FoldersContext(ContextBase):
         """
         # pylint: disable=protected-access
         # Create a unique directory for this run based on folder names and timestamp
-        time_stamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-        dir_name = f"{time_stamp}_" + "_".join(self.folder_names)
-        folder_dir = output_dir / dir_name
+        folder_dir = output_dir / self.results_dir
         # Check if directory exists, if not create it
         if not folder_dir.exists():
             folder_dir.mkdir(parents=True, exist_ok=True)
@@ -406,7 +446,9 @@ class FoldersContext(ContextBase):
         # Save all figures from each folder context
         for folder_name in self.folder_names:
             folder_ctx = self.folder_ctx(folder_name)
-            subfolder_dir = folder_dir / folder_name
+            subfolder_dir = folder_dir
+            if len(self.folder_names) > 1:
+                subfolder_dir = folder_dir / folder_name
             if not subfolder_dir.exists():
                 subfolder_dir.mkdir(parents=True, exist_ok=True)
             for fig_name, fig in folder_ctx._figures.items():
@@ -425,6 +467,7 @@ class FoldersContext(ContextBase):
                 fig.savefig(fig_path, format=fig_format)
         # Save the folders-wide results dictionary as a YAML file
         results_path = folder_dir / "folders_results.yaml"
-        with open(results_path, "w", encoding="utf-8") as f:
-            yaml_results = self.data_to_yaml(self._results)
-            yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)
+        yaml_results = self.data_to_yaml(self._results)
+        if yaml_results:
+            with open(results_path, "w", encoding="utf-8") as f:
+                yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)
