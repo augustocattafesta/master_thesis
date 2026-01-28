@@ -5,7 +5,7 @@ from typing import Any
 
 import numpy as np
 import yaml
-from aptapy import modeling, models
+from aptapy import modeling, models, plotting
 from uncertainties import UFloat
 
 from .config import AppConfig
@@ -332,7 +332,8 @@ class Context(ContextBase):
         # Save all the figures
         for fig_name, fig in self._figures.items():
             fig_path = folder_dir / f"{fig_name}.{fig_format}"
-            fig.savefig(fig_path, format=fig_format)
+            if isinstance(fig, plotting.plt.Figure):
+                fig.savefig(fig_path, format=fig_format)
         # Save the results dictionary as a YAML file
         results_path = folder_dir / "results.yaml"
         with open(results_path, "w", encoding="utf-8") as f:
@@ -410,7 +411,8 @@ class FoldersContext(ContextBase):
                 subfolder_dir.mkdir(parents=True, exist_ok=True)
             for fig_name, fig in folder_ctx._figures.items():
                 fig_path = subfolder_dir / f"{fig_name}.{fig_format}"
-                fig.savefig(fig_path, format=fig_format)
+                if isinstance(fig, plotting.plt.Figure):
+                    fig.savefig(fig_path, format=fig_format)
             # Save the subfolder results dictionary as a YAML file
             results_path = subfolder_dir / f"{folder_name}_results.yaml"
             with open(results_path, "w", encoding="utf-8") as f:
@@ -419,7 +421,8 @@ class FoldersContext(ContextBase):
         # Save the folders-wide figures
         for fig_name, fig in self._figures.items():
             fig_path = folder_dir / f"{fig_name}.{fig_format}"
-            fig.savefig(fig_path, format=fig_format)
+            if isinstance(fig, plotting.plt.Figure):
+                fig.savefig(fig_path, format=fig_format)
         # Save the folders-wide results dictionary as a YAML file
         results_path = folder_dir / "folders_results.yaml"
         with open(results_path, "w", encoding="utf-8") as f:
