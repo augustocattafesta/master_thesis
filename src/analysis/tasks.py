@@ -84,6 +84,9 @@ def calibration(
         plt.close(cal_fig)
     # Update the context with the calibration model
     context.conversion_model = model
+    # Update the context with the figures
+    context.add_figure("pulse", pulse_fig)
+    context.add_figure("calibration", cal_fig)
     return context
 
 
@@ -241,6 +244,8 @@ def gain_task(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -298,7 +303,7 @@ def gain_trend(
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
     # Create the figure for the gain trend
-    plt.figure("gain_vs_time")
+    fig = plt.figure("gain_vs_time")
     plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
     # If fitting subtasks are provided, fit the gain trend with the specified models
     if subtasks:
@@ -321,7 +326,7 @@ def gain_trend(
             context.add_subtask_fit_model(task, target, subtask["subtask"], model)
             # context["results"][task][target][name] = dict(model=model)
     plt.legend()
-    plt.show()
+    context.add_figure(task, fig)
     return context
 
 
@@ -361,7 +366,7 @@ def compare_gain(
     yerr = np.zeros(len(folder_names), dtype=object)
     x = np.zeros(len(folder_names), dtype=object)
     # Create the figure for the gain comparison
-    plt.figure("gain_comparison")
+    fig = plt.figure("gain_comparison")
     # Iterate over all folders and plot the gain values
     for i, folder_name in enumerate(folder_names):
         folder_ctx = context.folder_ctx(folder_name)
@@ -396,6 +401,8 @@ def compare_gain(
     plt.yscale(yscale)
     # Write the legend and show the plot
     write_legend(label)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -461,6 +468,8 @@ def resolution_task(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -529,6 +538,8 @@ def resolution_escape(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -618,7 +629,8 @@ def drift(
     write_legend(label, *axs, loc="lower right")
     if not plot:
         plt.close(fig)
-    # Update the context with the drift results
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -662,7 +674,7 @@ def plot_spectrum(
     for file_name in file_names:
         # Create the plot figure and plot the spectrum
         source = context.source(file_name)
-        plt.figure(f"{source.file_path.stem}_{targets}")
+        fig = plt.figure(f"{source.file_path.stem}_{targets}")
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
         models = []
@@ -679,4 +691,5 @@ def plot_spectrum(
         if xrange is None:
             plt.xlim(get_xrange(source, models))
         write_legend(label, loc=loc)
+        context.add_figure(file_name, fig)
     return context

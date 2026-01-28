@@ -1,7 +1,10 @@
+import datetime
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import yaml
 from aptapy import modeling, models
 from uncertainties import UFloat
 
@@ -126,7 +129,66 @@ class TargetContext:
 
 
 @dataclass
-class Context:
+class ContextBase:
+    config: AppConfig
+
+    # Internal attributes for storing results and figures
+    _results: dict = field(default_factory=dict, init=False, repr=False)
+    _figures: dict = field(default_factory=dict, init=False, repr=False)
+
+    def data_to_yaml(self, data: Any) -> Any:
+        """Convert the results dictionary to a YAML-serializable format.
+
+        Parameters
+        ----------
+        data : Any
+            The data to convert.
+        """
+        # If it is a dictionary, process each key/value pair
+        if isinstance(data, dict):
+            return {k: self.data_to_yaml(v) for k, v in data.items()}
+        # If it is a numpy array, convert to list and process elements
+        if isinstance(data, np.ndarray):
+            return [self.data_to_yaml(x) for x in data.tolist()]
+        # If it is a ufloat (has nominal_value attribute), extract value and uncertainty
+        if hasattr(data, "nominal_value"):
+            return {
+            "val": float(data.nominal_value),
+            "err": float(data.std_dev)}
+        # If it is a fit model, extract relevant information
+        if isinstance(data, modeling.AbstractFitModel):
+            # Extract parameters and their values/errors
+            pars_dict = {}
+            for par in data:
+                pars_dict[par.name] = {"val": par.value, "err": par.error}
+            # Return the fit model information (name, chisquare, dof, parameters)
+            return {
+                "name": data.name(),
+                "chisq": float(data.status.chisquare),
+                "dof": int(data.status.dof),
+                "pars": pars_dict}
+        # If it is a standard number or string, return as is
+        return data
+
+    def add_figure(self, figure_name: str, figure: Any) -> None:
+        """Add a figure to the private `figures` dictionary."""
+        self._figures[figure_name] = figure
+
+    def save(self, output_dir: Path, fig_format: str) -> None:
+        """Save the context configuration, figures, and results to the specified output
+        directory.
+        
+        Parameters
+        ----------
+        output_dir : Path
+            The directory where to save the context data.
+        fig_format : str
+            The format to save figures (e.g., 'png', 'pdf').
+        """
+
+
+@dataclass
+class Context(ContextBase):
     """Container class for analysis context information. This class holds the analysis
     configuration and all the data generated during the analysis pipeline. This class gets
     continually updated during the analysis.
@@ -136,14 +198,10 @@ class Context:
     config : AppConfig
         The application configuration object.
     """
-    config: AppConfig
-
     # Internal attributes for storing calibration, source files, fit results, and figures
     _calibration: dict[str, Any] = field(default_factory=dict, init=False, repr=False)
     _sources: dict[str, SourceFile] = field(default_factory=dict, init=False, repr=False)
     _fit: dict = field(default_factory=dict, init=False, repr=False)
-    _results: dict = field(default_factory=dict, init=False, repr=False)
-    _figures: dict = field(default_factory=dict, init=False, repr=False)
 
     @property
     def pulse(self) -> PulsatorFile:
@@ -260,8 +318,29 @@ class Context:
             raise KeyError(f"Target '{target}' not found in results for task '{task}'.")
         return self._results[task][target]
 
+    def save(self, output_dir: Path, fig_format: str) -> None:
+        # Create a unique directory for this run based on timestamp
+        time_stamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+        dir_name = f"{time_stamp}_files"
+        folder_dir = output_dir / dir_name
+        # Check if directory exists, if not create it
+        if not folder_dir.exists():
+            folder_dir.mkdir(parents=True, exist_ok=True)
+        # Save configuration file
+        config_path = folder_dir / "config.yaml"
+        self.config.to_yaml(config_path)
+        # Save all the figures
+        for fig_name, fig in self._figures.items():
+            fig_path = folder_dir / f"{fig_name}.{fig_format}"
+            fig.savefig(fig_path, format=fig_format)
+        # Save the results dictionary as a YAML file
+        results_path = folder_dir / "results.yaml"
+        with open(results_path, "w", encoding="utf-8") as f:
+            yaml_results = self.data_to_yaml(self._results)
+            yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)
+
 @dataclass
-class FoldersContext:
+class FoldersContext(ContextBase):
     """Container class for folders-specific analysis context information. This class holds the
     analysis configuration and the results from multiple folders tasks.
     
@@ -270,11 +349,8 @@ class FoldersContext:
     config : AppConfig
         The application configuration object.
     """
-    config: AppConfig
-
     # Internal attributes for storing folder contexts and results
     _folders: dict[str, Any] = field(default_factory=dict, init=False, repr=False)
-    _results: dict = field(default_factory=dict, init=False, repr=False)
 
     @property
     def folder_names(self) -> list[str]:
@@ -303,3 +379,49 @@ class FoldersContext:
         if results is None:
             raise ValueError("Results dictionary cannot be None")
         self._results[task][target] = results
+
+    def save(self, output_dir: Path, fig_format: str) -> None:
+        """Save the folders context configuration, figures, and results to the specified output
+        directory.
+
+        Parameters
+        ----------
+        output_dir : Path
+            The directory where to save the context data.
+        fig_format : str
+            The format to save figures (e.g., 'png', 'pdf').
+        """
+        # pylint: disable=protected-access
+        # Create a unique directory for this run based on folder names and timestamp
+        time_stamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+        dir_name = f"{time_stamp}_" + "_".join(self.folder_names)
+        folder_dir = output_dir / dir_name
+        # Check if directory exists, if not create it
+        if not folder_dir.exists():
+            folder_dir.mkdir(parents=True, exist_ok=True)
+        # Save configuration file
+        config_path = folder_dir / "config.yaml"
+        self.config.to_yaml(config_path)
+        # Save all figures from each folder context
+        for folder_name in self.folder_names:
+            folder_ctx = self.folder_ctx(folder_name)
+            subfolder_dir = folder_dir / folder_name
+            if not subfolder_dir.exists():
+                subfolder_dir.mkdir(parents=True, exist_ok=True)
+            for fig_name, fig in folder_ctx._figures.items():
+                fig_path = subfolder_dir / f"{fig_name}.{fig_format}"
+                fig.savefig(fig_path, format=fig_format)
+            # Save the subfolder results dictionary as a YAML file
+            results_path = subfolder_dir / f"{folder_name}_results.yaml"
+            with open(results_path, "w", encoding="utf-8") as f:
+                yaml_results = self.data_to_yaml(folder_ctx._results)
+                yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)
+        # Save the folders-wide figures
+        for fig_name, fig in self._figures.items():
+            fig_path = folder_dir / f"{fig_name}.{fig_format}"
+            fig.savefig(fig_path, format=fig_format)
+        # Save the folders-wide results dictionary as a YAML file
+        results_path = folder_dir / "folders_results.yaml"
+        with open(results_path, "w", encoding="utf-8") as f:
+            yaml_results = self.data_to_yaml(self._results)
+            yaml.safe_dump(yaml_results, f, sort_keys=False, default_flow_style=False)

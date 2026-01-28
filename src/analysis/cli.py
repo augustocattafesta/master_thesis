@@ -3,7 +3,7 @@ from pathlib import Path
 
 from aptapy.plotting import plt
 
-from analysis import ANALYSIS_DATA
+from analysis import ANALYSIS_DATA, ANALYSIS_RESULTS
 from analysis.runner import run, run_folders
 
 
@@ -18,6 +18,19 @@ def main():
     parser.add_argument(
         "config",
         help="Config path")
+
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help=f"Save figures and results to the analysis results folder {ANALYSIS_RESULTS}."
+    )
+
+    parser.add_argument(
+        "-f", "--format",
+        default="png",
+        help="Format to save figures (default: png)."
+    )
+
     args = parser.parse_args()
     # Think of a good path read logic
     is_file = []
@@ -43,12 +56,14 @@ def main():
         raise FileNotFoundError(f"Config file {config_file_path} does not exist.")
 
     if all(is_file):
-        run(config_file_path, *file_paths)
+        context = run(config_file_path, *file_paths)
     elif all(is_folder):
-        run_folders(config_file_path, *file_paths)
+        context = run_folders(config_file_path, *file_paths)
     else:
         raise ValueError("All paths must be either files or folders.")
     plt.tight_layout()
+    if args.save:
+        context.save(ANALYSIS_RESULTS, fig_format=args.format)
     plt.show()
 
 

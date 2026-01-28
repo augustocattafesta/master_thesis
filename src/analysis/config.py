@@ -171,6 +171,11 @@ class AppConfig(BaseModel):
         with open(path, encoding="utf-8") as f:
             return cls(**yaml.safe_load(f))
 
+    def to_yaml(self, path: str | pathlib.Path) -> None:
+        data = self.model_dump()
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(data, f, sort_keys=False, default_flow_style=False)
+
     @property
     def calibration(self) -> CalibrationConfig | None:
         return next((t for t in self.pipeline if isinstance(t, CalibrationConfig)), None)
