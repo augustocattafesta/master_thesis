@@ -53,7 +53,7 @@ The pipeline is structured as a sequence of tasks. Each task is a mapping, with 
 
 The order of the tasks is not relevant, as the priority is given to the `calibration` task (the only mandatory task) and to the `fit_spec` task.
 
-Excluding the `calibration` and `fit_spec` tasks, all of the tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each line specifying the target used in the `fit_spec` substaks.
+Excluding the `calibration` and `fit_spec` tasks, all of the tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each line specifying the target used in the `fit_spec` subtasks.
 
 #### Calibration
 
@@ -130,12 +130,12 @@ As for the gain task, the `plot` and `label` keys works only if the analysis is 
   - task: resolution
     target: main_peak
     plot: true            # Optional, plot resolution vs back voltage
-    labek: Example label  # Optional, label of the plot
+    label: Example label  # Optional, label of the plot
 ```
 
 #### Resolution estimate with escape peak
 
-This task performs the estimate of the resolution of the detector using the spectral fitting results of a main line emission and the correspondent escape peak. The two emission lines are specfied by the `target_main` and `target_escape` keys. The resolution is estimated as:
+This task performs the estimate of the resolution of the detector using the spectral fitting results of a main line emission and the correspondent escape peak. The two emission lines are specified by the `target_main` and `target_escape` keys. The resolution is estimated as:
 $$
 \frac{\Delta E}{E} = \frac{\text{FWHM}}{E_{main}} \frac{E_{main} - E_{peak}}{x_{main} - x_{peak}},
 $$

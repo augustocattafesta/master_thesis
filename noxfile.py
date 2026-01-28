@@ -56,19 +56,15 @@ def cleanall(session: nox.Session) -> None:
         _rm(_ROOT_DIR_PATH / folder_name, session)
 
 
-@nox.session(venv_backend="none")
-def doc(session: nox.Session) -> None:
+@nox.session
+def docs(session: nox.Session) -> None:
     """Build the HTML docs.
-
-    Note this is a nox session with no virtual environment, based on the assumption
-    that it is not very interesting to build the documentation with different
-    versions of Python or the associated environment, since the final thing will
-    be created remotely anyway. (This also illustrates the use of the nox.session
-    decorator called with arguments.)
     """
-    source_dir = _DOCS_DIR_PATH
-    output_dir = _DOCS_DIR_PATH / "_build" / "html"
-    session.run("sphinx-build", "-b", "html", source_dir, output_dir, *session.posargs)
+    session.install(".[docs]")
+    if "serve" in session.posargs:
+        session.run("mkdocs", "serve", *session.posargs)
+    else:
+        session.run("mkdocs", "build", *session.posargs)
 
 
 @nox.session
