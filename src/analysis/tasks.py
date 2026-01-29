@@ -133,9 +133,8 @@ def fit_peak(
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
     x_peak = hist.bin_centers()[np.argmax(hist.content)]
-    if xmin == float("-inf"):
+    if xmin == float("-inf") and xmax == float("inf"):
         xmin = x_peak - 0.5 * np.sqrt(x_peak)
-    if xmax == float("inf"):
         xmax = x_peak + 0.5 * np.sqrt(x_peak)
     # Define the dictionary of keyword arguments for the fit
     kwargs = dict(

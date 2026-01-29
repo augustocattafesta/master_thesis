@@ -19,21 +19,31 @@ pipeline:
       - target: main
         model: Fe55Forest
         # For well-behaved spectra no optional parameters should be needed
+      
+      - target: main_gauss
+        model: Gaussian
 
-    # Estimate the gain from the main line  
+    # Estimate the gain using the main line fit  
   - task: gain
     target: main
 
-    # Estimate the resolution from the main line 
+    # Estimate the resolution of the main line using Fe55Forest fit 
   - task: resolution
     target: main
+  
+    # Estimate the resolution of the main line using Gaussian fit 
+  - task: resolution
+    target: main_gauss
+
 
   - task: plot
     # Plot the spectrum in the region around the main line
     targets:
       - main
+      - main_gauss
     # Show the gain and resolution results in the legend.
     task_labels:
       - gain
       - resolution
     label: Example label for chip W1a 86.6 um
+
