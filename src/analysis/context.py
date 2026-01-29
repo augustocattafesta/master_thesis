@@ -47,6 +47,10 @@ class TargetContext:
     _res_escape_val: UFloat | None = field(default=None, init=False, repr=False)
     _res_escape_label: str | None = field(default=None, init=False, repr=False)
 
+    _time_from_start: float | None = field(default=None, init=False, repr=False)
+    _gain_trend_val: UFloat | None = field(default=None, init=False, repr=False)
+    _gain_trend_label: str = field(default="", init=False, repr=False)
+
     # Default energy for resolution labels
     _energy: float = field(default=5.9, init=False, repr=False)
 
@@ -93,6 +97,32 @@ class TargetContext:
         self._res_escape_val = value
         # Set the resolution (escape) label for the spectral plot
         self._res_escape_label = fr"$\Delta$E/E(esc.): {self.res_escape_val} %"
+
+    @property
+    def time_from_start(self) -> float:
+        """The time from the start of the measurement in hours.
+        """
+        if self._time_from_start is None:
+            raise AttributeError("Time from start has not been set yet.")
+        return self._time_from_start
+
+    @time_from_start.setter
+    def time_from_start(self, value: float):
+        self._time_from_start = value
+
+    @property
+    def gain_trend_val(self) -> UFloat:
+        """The gain trend value computed in the gain trend analysis task.
+        """
+        if self._gain_trend_val is None:
+            raise AttributeError("Gain trend value has not been set yet.")
+        return self._gain_trend_val
+    
+    @gain_trend_val.setter
+    def gain_trend_val(self, value: UFloat):
+        self._gain_trend_val = value
+        # Set the gain trend label for the spectral plot
+        self._gain_trend_label = f"Gain@{self.time_from_start:.2g} h: {self.gain_trend_val}"
 
     @property
     def energy(self) -> float:

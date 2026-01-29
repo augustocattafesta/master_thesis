@@ -28,7 +28,7 @@ In this example, the analysis of a folder is performed. You can see from the con
 --8<-- "docs/examples/folder_example_config.yaml"
 ```
 
-The command to run is simply:
+The command to run is:
 ```bash
 analysis path_folder path_config
 ```
@@ -38,7 +38,32 @@ Setting the `plot` key to `true` for the `gain` and `resolution` tasks, the outp
 ![Fit](figures/folder_gain.png)
 ![Fit](figures/folder_resolution.png)
 
-## Analysis of gain trend with time
+## Analysis of gain variation with time
 
+In this example, the analysis of a folder to study the gain variation with time is performed. The gain is estimated during the task, so it is not necessary to execute a `gain` task before. The gain is fitted in a fixed range with a composite model `StrecthedExponential + Constant`.
 
-## Comparison of folders
+```yaml
+--8<-- "docs/examples/gain_trend_example_config.yaml"
+```
+
+The command to run is the same as the [Folder Analysis](#folder-analysis) example. The output of the program is the following:
+
+![Fit](figures/gain_trend.png)
+
+## Gain comparison of two folders
+
+In this example, the gain estimates of two different folders is combined into a single dataset and fitted with an exponential model.
+
+```yaml
+--8<-- "docs/examples/compare_gain_example_config.yaml"
+```
+
+To run this analysis the command is:
+
+```bash
+analysis path_folder0 path_folder1 path_config
+```
+
+The output is the following:
+
+![Fit](figures/compare_gain.png)

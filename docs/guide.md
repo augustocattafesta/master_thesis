@@ -23,7 +23,7 @@ analysis path_folder0 path_folder1 path_config
 
 If the folders to analyze are inside the data directory in the package root, it is not necessary to specify all the path of the folders, and writing only the name of the folder is enough to locate them. This is not possible with single files.
 
-To run the analysis, a configuration file must always be specified. In the next section it is explained how to write a correct configuration file.
+To run the analysis, a configuration file must always be specified. In the next section how to write a correct configuration file is explained.
 
 ## Write the configuration file
 
@@ -105,12 +105,37 @@ If the analysis is performed on a single file, there are no other keys to specif
     fit: true            # Optional, fit the data with an exponential model
     plot: true           # Optional, plot gain vs back voltage
     label: Example label # Optional, label of the plot
+    yscale: linear       # Optional, y-axis scale of the plot (linear or log)
 ```
 
 #### Gain trend with time
 
+This task performs the study of the gain as a function of time. The gain is estimated in the same way as the *gain* task. For each source file, the time and the length of the acquisition are extracted from the header. The time info are combined together to get the variation of the gain with time.
+
+The gain trend can also be analyzed using fitting subtasks, which allow to fit the data with a model or a composition of models from *aptapy.models*. These subtasks share the same syntax of the spectral fitting subtasks.
+
+If more than one trend is visible in the data, multiple targets can be specified, and the fit range can be adjusted to each trend.
+
+```yaml
+  - task: gain_trend
+    target: main_peak
+    subtasks:                         # Optional, fitting subtasks
+      target: trend                   
+      model: Exponential + Constant   # Composition of models 
+    label: Example label              # Optional, label of the plot
+```
 
 #### Gain compare between folders
+
+This task allows to compare the gain results of two or more different folders on the same plot. To execute this task, it is required that at least a `gain` task has been completed on a given `target` emission line.
+
+It is also possible to combine the gain estimates from the folders and perform a single exponential fit on all the data.
+
+```yaml
+  - task: compare_gain
+    target: main_peak
+    combine: true                     # Optional, combine the data of all the folders 
+```
 
 
 #### Drift varying
@@ -151,6 +176,7 @@ The `plot` and `fit` keys can be specified if working on multiple files.
 
 #### Resolution compare between folders
 
+To be implemented...
 
 #### Plot the spectrum
 

@@ -255,6 +255,7 @@ def gain_trend(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         subtasks: list[dict[str, Any]] | None = None,
+        label: str | None = GainDefaults.label
     ) -> Context:
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
@@ -295,7 +296,8 @@ def gain_trend(
         # Access the target context and extract line value and voltage
         target_ctx = context.target_ctx(file_name, target)
         line_val = target_ctx.line_val
-        target_ctx.gain_val =  gain(w, line_val, energy)
+        target_ctx.gain_val = gain(w, line_val, energy)
+        gain_vals[i] = target_ctx.gain_val
     # Calculate the accumulated time in hours
     times = amptek_accumulate_time(start_times, real_times) / 3600
     # Save the results in the context
@@ -305,6 +307,8 @@ def gain_trend(
     # Create the figure for the gain trend
     fig = plt.figure("gain_vs_time")
     plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
+    plt.xlabel("Time [hours]")
+    plt.ylabel("Gain")
     # If fitting subtasks are provided, fit the gain trend with the specified models
     if subtasks:
         for subtask in subtasks:
@@ -323,9 +327,9 @@ def gain_trend(
             model.fit(times, y, sigma=yerr, **kwargs)
             model.plot(fit_output=True, plot_components=False)
             # Update the context with the fit results
-            context.add_subtask_fit_model(task, target, subtask["subtask"], model)
+            context.add_subtask_fit_model(task, target, subtask["target"], model)
             # context["results"][task][target][name] = dict(model=model)
-    plt.legend()
+    write_legend(label)
     context.add_figure(task, fig)
     return context
 
@@ -333,7 +337,7 @@ def gain_trend(
 def compare_gain(
         context: FoldersContext,
         target: str,
-        aggregate: bool = False,
+        combine: bool = False,
         label: str | None = None,
         yscale: Literal["linear", "log"] = "linear"
         ) -> FoldersContext:
@@ -344,8 +348,8 @@ def compare_gain(
     ---------
     context : FoldersContext
         The context object containing the fit results.
-    aggregate : bool, optional
-        Whether to aggregate all gain data from different folders and fit them together. Default is
+    combine : bool, optional
+        Whether to combine all gain data from different folders and fit them together. Default is
         False.
     label : str, optional
         The label for the gain comparison plot. Default is None.
@@ -375,7 +379,7 @@ def compare_gain(
         g_err = unumpy.std_devs(folder_gain.get("gain_vals", []))
         voltages = folder_gain.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not aggregate:
+        if not combine:
             plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=folder_name)
             model = folder_gain.get("model", None)
             if model:
@@ -385,7 +389,7 @@ def compare_gain(
             y[i] = g_val
             yerr[i] = g_err
             x[i] = voltages
-    if aggregate:
+    if combine:
         # Concatenate all data and fit with an exponential model
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)

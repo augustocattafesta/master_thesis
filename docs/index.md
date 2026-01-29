@@ -1,3 +1,4 @@
-# master_thesis
+# μGPD Analysis Tool Documentation
 
-Installation
+This package provides a CLI tool to analyze spectra from a *Microgap Gas Pixel Detectors* (μGPDs) and infer the characteristics of the detector, such as the gain, the energy resolution 
+

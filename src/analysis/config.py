@@ -90,12 +90,13 @@ class GainTrendConfig(BaseModel):
     energy: float = GainDefaults.energy
     # time_unit: Literal["s", "m", "h"] = "h"
     subtasks: list[FitSubtask] | None = Field(default=None)
+    label: str | None = GainDefaults.label
 
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
-    aggregate: bool = False
+    combine: bool = False
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
