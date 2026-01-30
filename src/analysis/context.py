@@ -117,7 +117,7 @@ class TargetContext:
         if self._gain_trend_val is None:
             raise AttributeError("Gain trend value has not been set yet.")
         return self._gain_trend_val
-    
+
     @gain_trend_val.setter
     def gain_trend_val(self, value: UFloat):
         self._gain_trend_val = value
