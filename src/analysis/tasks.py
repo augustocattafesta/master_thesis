@@ -12,6 +12,7 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
+    GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
     ResolutionDefaults,
@@ -336,9 +337,9 @@ def gain_trend(
 def compare_gain(
         context: FoldersContext,
         target: str,
-        combine: bool = False,
-        label: str | None = None,
-        yscale: Literal["linear", "log"] = "linear"
+        combine: bool = GainCompareDefaults.combine,
+        label: str | None = GainCompareDefaults.label,
+        yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
         ) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
@@ -412,7 +413,7 @@ def compare_gain(
 def resolution_task(
         context: Context,
         target: str,
-        show: bool = PlotDefaults.show,
+        show: bool = ResolutionDefaults.show,
         label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
@@ -480,8 +481,8 @@ def resolution_escape(
         context: Context,
         target_main: str,
         target_escape: str,
-        label: str | None = ResolutionDefaults.label,
-        show: bool = PlotDefaults.show
+        show: bool = ResolutionDefaults.show,
+        label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This calculation is based on the position and width of the main spectral line and
@@ -497,6 +498,10 @@ def resolution_escape(
     target_escape : str, optional
         The name of the fitting subtask corresponding to the escape peak. If None, no calculation is
         performed. Default is None.
+    label : str, optional
+        The label for the resolution trend plot. Default is None.
+    show : bool, optional
+        Whether to show the plots of the resolution trend. Default is True.
     
     Returns
     -------
@@ -552,7 +557,7 @@ def drift(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         threshold: float = DriftDefaults.threshold,
-        show: bool = PlotDefaults.show,
+        show: bool = DriftDefaults.show,
         rate: bool = DriftDefaults.rate,
         label: str | None = DriftDefaults.label,
         yscale: str = DriftDefaults.yscale,

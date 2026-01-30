@@ -93,12 +93,18 @@ class GainTrendConfig(BaseModel):
     label: str | None = GainDefaults.label
 
 
+class GainCompareDefaults:
+    combine: bool = False
+    label: str | None = None
+    yscale: Literal["linear", "log"] = "log"
+
+
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
-    combine: bool = False
-    label: str | None = GainDefaults.label
-    yscale: Literal["linear", "log"] = GainDefaults.yscale
+    combine: bool = GainCompareDefaults.combine
+    label: str | None = GainCompareDefaults.label
+    yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
 
 
 @dataclass(frozen=True)
@@ -118,7 +124,8 @@ class ResolutionEscapeConfig(BaseModel):
     task: Literal["resolution_escape"]
     target_main: str
     target_escape: str
-    show: bool = True
+    show: bool = ResolutionDefaults.show
+    label: str | None = ResolutionDefaults.label
 
 
 @dataclass(frozen=True)
@@ -144,12 +151,11 @@ class DriftConfig(BaseModel):
 
 @dataclass(frozen=True)
 class PlotDefaults:
-    plot: bool = True
+    show: bool = True
     xrange: list[float] | None = Field(None, min_length=2, max_length=2)
     label: str = ""
     task_labels: list[str] | None = None
     loc: str = "best"
-    show: bool = True
 
 
 class PlotConfig(BaseModel):
