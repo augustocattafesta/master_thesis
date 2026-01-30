@@ -13,14 +13,8 @@ class Acquisition(BaseModel):
     date: str
     chip: str
     structure: str
-
-
-class Detector(BaseModel):
     gas: str
     w: float = 26.0
-
-
-class Source(BaseModel):
     element: str
     e_peak: float = KALPHA
 
@@ -57,7 +51,7 @@ class FitPars(BaseModel):
 
 
 class FitSubtask(BaseModel):
-    subtask: str
+    target: str
     skip: bool = False
     model: str
     fit_pars: FitPars = Field(default_factory=FitPars)
@@ -96,12 +90,13 @@ class GainTrendConfig(BaseModel):
     energy: float = GainDefaults.energy
     # time_unit: Literal["s", "m", "h"] = "h"
     subtasks: list[FitSubtask] | None = Field(default=None)
+    label: str | None = GainDefaults.label
 
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
-    aggregate: bool = False
+    combine: bool = False
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
@@ -170,14 +165,17 @@ TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
 
 class AppConfig(BaseModel):
     acquisition: Acquisition
-    detector: Detector
-    source: Source
     pipeline: list[TaskType]
 
     @classmethod
     def from_yaml(cls, path: str | pathlib.Path) -> "AppConfig":
         with open(path, encoding="utf-8") as f:
             return cls(**yaml.safe_load(f))
+
+    def to_yaml(self, path: str | pathlib.Path) -> None:
+        data = self.model_dump()
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(data, f, sort_keys=False, default_flow_style=False)
 
     @property
     def calibration(self) -> CalibrationConfig | None:

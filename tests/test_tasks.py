@@ -31,7 +31,7 @@ def test_fit_peak(datadir, context: Context):
     source = SourceFile(source_file_path, charge_conv_model)
     context.add_source(source)
     # Perform peak fitting
-    context = tasks.fit_peak(context, subtask="subtask", model_class=[aptapy.models.Gaussian])
+    context = tasks.fit_peak(context, target="subtask", model_class=[aptapy.models.Gaussian])
     target_ctx = context.target_ctx(source.file_path.stem, "subtask")
     assert target_ctx is not None
     assert target_ctx.line_val is not None
@@ -53,7 +53,7 @@ def test_gain(datadir, context: Context):
     source = SourceFile(source_file_path, charge_conv_model)
     context.add_source(source)
     # Perform peak fitting
-    context = tasks.fit_peak(context, subtask=target, model_class=[aptapy.models.Gaussian])
+    context = tasks.fit_peak(context, target=target, model_class=[aptapy.models.Gaussian])
     # Perform gain calculation
     context = tasks.gain_task(context, target=target)
 
@@ -76,7 +76,7 @@ def test_resolution(datadir, context: Context):
     source = SourceFile(source_file_path, charge_conv_model)
     context.add_source(source)
     # Perform peak fitting
-    context = tasks.fit_peak(context, subtask=target, model_class=[aptapy.models.Gaussian])
+    context = tasks.fit_peak(context, target=target, model_class=[aptapy.models.Gaussian])
     # Perform resolution calculation
     context = tasks.resolution_task(context, target=target)
     resolution_ctx = context.task_results("resolution", target)

@@ -34,6 +34,7 @@ ANALYSIS_BASE = pathlib.Path(__file__).parent
 ANALYSIS_ROOT = ANALYSIS_BASE.parent.parent
 ANALYSIS_DATA = ANALYSIS_ROOT / "data"
 ANALYSIS_RESOURCES = ANALYSIS_ROOT / "resources"
-ANALYSIS_RESULTS = pathlib.Path.home() / "thesis_results"
+ANALYSIS_DOCS = ANALYSIS_ROOT / "docs"
+ANALYSIS_RESULTS = pathlib.Path.home() / "results"
 if not pathlib.Path.exists(ANALYSIS_RESULTS):
     pathlib.Path.mkdir(ANALYSIS_RESULTS)

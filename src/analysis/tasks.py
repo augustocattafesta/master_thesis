@@ -35,7 +35,7 @@ def calibration(
       ) -> Context:
     """Perform the calibration of the detector using pulse data at fixed voltages.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the pulse data in `context.pulse` as an instance
@@ -84,12 +84,15 @@ def calibration(
         plt.close(cal_fig)
     # Update the context with the calibration model
     context.conversion_model = model
+    # Update the context with the figures
+    context.add_figure("pulse", pulse_fig)
+    context.add_figure("calibration", cal_fig)
     return context
 
 
 def fit_peak(
           context: Context,
-          subtask: str,
+          target: str,
           model_class: list[type[AbstractFitModel]],
           xmin: float = FitPeakDefaults.xmin,
           xmax: float = FitPeakDefaults.xmax,
@@ -100,13 +103,13 @@ def fit_peak(
       ) -> Context:
     """Perform the fitting of a spectral emission line in the source data.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the source data in `context.last_source` as an instance
         of the class SourceFile.
-    subtask: str
-        The name of the fitting subtask.
+    target: str
+        The name of the fitting target.
     model_class : AbstractFitModel, optional
         The class of the model to use for fitting the spectral line. Default is Gaussian.
     xmin : float, optional
@@ -130,9 +133,8 @@ def fit_peak(
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
     x_peak = hist.bin_centers()[np.argmax(hist.content)]
-    if xmin == float("-inf"):
+    if xmin == float("-inf") and xmax == float("inf"):
         xmin = x_peak - 0.5 * np.sqrt(x_peak)
-    if xmax == float("inf"):
         xmax = x_peak + 0.5 * np.sqrt(x_peak)
     # Define the dictionary of keyword arguments for the fit
     kwargs = dict(
@@ -160,8 +162,8 @@ def fit_peak(
     else:
         raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
     # Update the context with the fit results
-    target_ctx = TargetContext(subtask, line_val, sigma, source.voltage, model)
-    target_ctx.energy = context.config.source.e_peak
+    target_ctx = TargetContext(target, line_val, sigma, source.voltage, model)
+    target_ctx.energy = context.config.acquisition.e_peak
     context.add_target_ctx(source, target_ctx)
     return context
 
@@ -179,7 +181,7 @@ def gain_task(
     """Calculate the gain of the detector vs the back voltage using the fit results obtained from
     the source data of multiple files.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -241,6 +243,8 @@ def gain_task(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -250,11 +254,12 @@ def gain_trend(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         subtasks: list[dict[str, Any]] | None = None,
+        label: str | None = GainDefaults.label
     ) -> Context:
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
     
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -290,7 +295,8 @@ def gain_trend(
         # Access the target context and extract line value and voltage
         target_ctx = context.target_ctx(file_name, target)
         line_val = target_ctx.line_val
-        target_ctx.gain_val =  gain(w, line_val, energy)
+        target_ctx.gain_val = gain(w, line_val, energy)
+        gain_vals[i] = target_ctx.gain_val
     # Calculate the accumulated time in hours
     times = amptek_accumulate_time(start_times, real_times) / 3600
     # Save the results in the context
@@ -298,8 +304,10 @@ def gain_trend(
     y = unumpy.nominal_values(gain_vals)
     yerr = unumpy.std_devs(gain_vals)
     # Create the figure for the gain trend
-    plt.figure("gain_vs_time")
+    fig = plt.figure("gain_vs_time")
     plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
+    plt.xlabel("Time [hours]")
+    plt.ylabel("Gain")
     # If fitting subtasks are provided, fit the gain trend with the specified models
     if subtasks:
         for subtask in subtasks:
@@ -318,29 +326,29 @@ def gain_trend(
             model.fit(times, y, sigma=yerr, **kwargs)
             model.plot(fit_output=True, plot_components=False)
             # Update the context with the fit results
-            context.add_subtask_fit_model(task, target, subtask["subtask"], model)
+            context.add_subtask_fit_model(task, target, subtask["target"], model)
             # context["results"][task][target][name] = dict(model=model)
-    plt.legend()
-    plt.show()
+    write_legend(label)
+    context.add_figure(task, fig)
     return context
 
 
 def compare_gain(
         context: FoldersContext,
         target: str,
-        aggregate: bool = False,
+        combine: bool = False,
         label: str | None = None,
         yscale: Literal["linear", "log"] = "linear"
         ) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
 
-    Arguments
+    Parameters
     ---------
     context : FoldersContext
         The context object containing the fit results.
-    aggregate : bool, optional
-        Whether to aggregate all gain data from different folders and fit them together. Default is
+    combine : bool, optional
+        Whether to combine all gain data from different folders and fit them together. Default is
         False.
     label : str, optional
         The label for the gain comparison plot. Default is None.
@@ -361,7 +369,7 @@ def compare_gain(
     yerr = np.zeros(len(folder_names), dtype=object)
     x = np.zeros(len(folder_names), dtype=object)
     # Create the figure for the gain comparison
-    plt.figure("gain_comparison")
+    fig = plt.figure("gain_comparison")
     # Iterate over all folders and plot the gain values
     for i, folder_name in enumerate(folder_names):
         folder_ctx = context.folder_ctx(folder_name)
@@ -370,7 +378,7 @@ def compare_gain(
         g_err = unumpy.std_devs(folder_gain.get("gain_vals", []))
         voltages = folder_gain.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not aggregate:
+        if not combine:
             plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=folder_name)
             model = folder_gain.get("model", None)
             if model:
@@ -380,7 +388,7 @@ def compare_gain(
             y[i] = g_val
             yerr[i] = g_err
             x[i] = voltages
-    if aggregate:
+    if combine:
         # Concatenate all data and fit with an exponential model
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
@@ -396,6 +404,8 @@ def compare_gain(
     plt.yscale(yscale)
     # Write the legend and show the plot
     write_legend(label)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -409,7 +419,7 @@ def resolution_task(
     source data. This estimate is based on the position and the width of the target spectral
     line.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -451,7 +461,7 @@ def resolution_task(
     min_idx = np.argmin(y)
     # Create the figure for the resolution trend
     fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
+    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
     # Write the minimum resolution value on the plot
     plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
                  textcoords="offset points", ha="center", va="top", fontsize=12)
@@ -461,6 +471,8 @@ def resolution_task(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -475,7 +487,7 @@ def resolution_escape(
     source data. This calculation is based on the position and width of the main spectral line and
     the position of the escape peak.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -529,6 +541,8 @@ def resolution_escape(
     write_legend(label)
     if not plot:
         plt.close(fig)
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -546,7 +560,7 @@ def drift(
     """Calculate the gain and rate of the detector vs the drift voltage using the fit results
     obtained from the source data of multiple files.
 
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the fit results.
@@ -618,7 +632,8 @@ def drift(
     write_legend(label, *axs, loc="lower right")
     if not plot:
         plt.close(fig)
-    # Update the context with the drift results
+    # Add the figure to the context
+    context.add_figure(task, fig)
     return context
 
 
@@ -633,7 +648,7 @@ def plot_spectrum(
     """Plot the spectra from the source data and overlay the fitted models for the specified
     targets.
     
-    Arguments
+    Parameters
     ---------
     context : Context
         The context object containing the source data the fit results.
@@ -662,7 +677,7 @@ def plot_spectrum(
     for file_name in file_names:
         # Create the plot figure and plot the spectrum
         source = context.source(file_name)
-        plt.figure(f"{source.file_path.stem}_{targets}")
+        fig = plt.figure(f"{source.file_path.stem}_{targets}")
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
         models = []
@@ -679,4 +694,5 @@ def plot_spectrum(
         if xrange is None:
             plt.xlim(get_xrange(source, models))
         write_legend(label, loc=loc)
+        context.add_figure(file_name, fig)
     return context

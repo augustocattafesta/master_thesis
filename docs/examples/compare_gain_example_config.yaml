@@ -1,0 +1,31 @@
+acquisition:
+  date: "2026-01-01"
+  chip: W1a
+  structure: 86.6um
+  gas: Ar
+  w: 26.
+  element: Fe55
+  e_peak: 5.9
+
+
+pipeline:
+  # Execute the calibration
+  - task: calibration
+    plot: false
+
+  - task: fit_spec
+    subtasks:
+      - target: main
+        model: Fe55Forest
+
+  # Estimate the gain from the main line  
+  - task: gain
+    target: main
+
+  # Execute the task to combine the gain results from two folders and fit the
+  # data with a single exponential model
+  - task: compare_gain
+    target: main
+    combine: true                                     # Combine the data
+    label: Combine gain label for chip W1a 86.6 um    # Set the label
+    yscale: linear

@@ -68,6 +68,7 @@ def run(
     else:
         source_file_paths = [Path(p) for p in paths[:-1]]
         pulse_file_path = Path(paths[-1])
+    context.paths = list(source_file_paths)
     # Run calibration task on the pulse file
     cal_config = config.calibration
     if cal_config is not None:
@@ -93,7 +94,7 @@ def run(
                 fit_pars = subtask.fit_pars.model_dump()
                 context = fit_peak(
                     context=context,
-                    subtask=subtask.subtask,
+                    target=subtask.target,
                     model_class=load_class(subtask.model),
                     **fit_pars
                 )
@@ -138,6 +139,7 @@ def run_folders(
     config = AppConfig.from_yaml(config_file_path)
     context = FoldersContext(config)
     # Execute the analysis pipeline for each folder
+    context.paths = list(folder_paths)
     for folder_path in folder_paths:
         folder_ctx = run(
             config_file_path,
