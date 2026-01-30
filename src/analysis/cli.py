@@ -49,10 +49,9 @@ def check_source_paths(paths: list[str]) -> tuple[list[Path], str]:
     # Return the checked paths and their type
     if all(is_file):
         return checked_paths, "file"
-    elif all(is_folder):
+    if all(is_folder):
         return checked_paths, "folder"
-    else:
-        raise ValueError("All source paths must be either files or folders.")
+    raise ValueError("All source paths must be either files or folders.")
 
 
 def check_config_path(path: str) -> Path:
@@ -74,7 +73,7 @@ def check_config_path(path: str) -> Path:
     if not config_path.exists():
         raise FileNotFoundError(f"Config file {path} does not exist.")
     # Check if the path is a .yaml file
-    if not config_path.suffix == ".yaml":
+    if config_path.suffix != ".yaml":
         raise ValueError("Config file must be a .yaml file.")
     return config_path
 
