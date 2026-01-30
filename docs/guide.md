@@ -4,36 +4,42 @@
 
 After the installation, the CLI can be used with the command:
 ```bash
-analysis paths config
+analysis config paths
 ```
 
-The arguments needed to run the analysis are the paths to the files or folders to analyze, and the path to the YAML configuration file.
+The .yaml configuration file path and the data files or folders path are the arguments needed to run the analysis.
 
-If only certain files need to be analyzed, the command needs a sequence of source file paths and at the end of the sequence a calibration file with signal from the pulsator. The YAML configuration file must always be the last argument passed to the command. The following is an example of the analysis:
+To analyze one or more source files, the command needs a sequence of source file paths and a calibration with pulsed data as the last argument. The .yaml configuration file must always be the first arguments to be passed to the command line. The following is an example of the analysis of two source files using the same calibration file:
 
 ```bash
-analysis path_file0 path_file1 path_calibration path_config
+analysis path_config path_file0 path_file1 path_calibration
 ```
 
-To analyze one or multiple folders the arguments are as before, with the exception that no calibration file must be specfied, as it is supposed that each folder contains its own file.
+To analyze one or more folders, the order of the arguments is the same as the previous case, with the exception that no calibration file has to be specified, as it is supposed that each folder contains its own calibration file:
 
 ```bash
-analysis path_folder0 path_folder1 path_config
+analysis path_config path_folder0 path_folder1
 ```
 
-If the folders to analyze are inside the data directory in the package root, it is not necessary to specify all the path of the folders, and writing only the name of the folder is enough to locate them. This is not possible with single files.
+The default directory to search for the data is the data directory in the package root. If a folder is inside this directory, there is no need to specify all the path of the folder, but the relative path is enough to locate it. This works for all the files and folders, as long as the path relative to the data directory is specified. 
 
-To run the analysis, a configuration file must always be specified. In the next section how to write a correct configuration file is explained.
+It is also possible to save the analysis results (e.g. plots and numerical values) inside the results directory, which is automatically created in the user home. This option can be enabled using the optional argument in the CLI command. It is also possible to choose the format to use to save the plots (pdf or png). An example of command to save the results is:
+
+```bash
+analysis path_config path_folder0 -s -f png
+```
+
+To run the analysis, a configuration file must always be specified. In the next section explains how to write a correct configuration file.
 
 ## Write the configuration file
 
-The configuration file is a YAML file which contains all the information about the acquisition (e.g. the date, the detector, the source, etc...) and the analysis pipeline. This file allows to write a modular pipeline, because it is possible to execute tasks and to easily configure them.
+The configuration file is a .yaml file which contains all the information about the acquisition (e.g. the date, the detector, the source, etc...) and the analysis pipeline. This file allows to write a modular pipeline, because it is possible to execute tasks and to easily configure them.
 
-**Warning:**  when a key is optional and you want the default value, all the line must be deleted and not only the value, otherwise a type error can be raised or a `None` value can be passed to the task.
+**Warning:**  when a key is optional and you want to set it to the default value, all the line must be deleted, not only the value, otherwise a type error can be raised or a `None` value can be assigned to the key.
 
 ### Acquisition
 
-At the beginning of the configuration file, the acquisition mapping is necessary to specify the date of the acquisition, the name and type of the chip and other detector properties. These properties are stored as keys of the mapping, and a value is associated to each of them. If not specified, the fields are mandatory.
+At the beginning of the configuration file, the acquisition mapping is necessary to specify the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the mapping, and a value is assigned to each of them. If not specified, the fields are mandatory.
 
 ```yaml
 acquisition:
@@ -48,16 +54,15 @@ acquisition:
 
 ### Pipeline
 
-The pipeline is the core of the analysis, where everything that has to be calculated is defined. Each step of the pipeline is a task that contains all the properties that are needed to execute it.
-The pipeline is structured as a sequence of tasks. Each task is a mapping, with its own key-value pairs. A task is defined by its name, and the other keys define its behaviour.
+The pipeline is the core of the analysis, where everything that has to be calculated is defined. Each step of the pipeline is a task that contains all the properties that are needed to execute it. The pipeline is structured as a sequence of tasks. Each task is a mapping, with its own key-value pairs. A task is defined by its name, and the other keys define its behaviour.
 
-The order of the tasks is not relevant, as the priority is given to the `calibration` task (the only mandatory task) and to the `fit_spec` task.
+The order of tasks in the configuration file does not addect execution, as priority is automatically assigned to the `calibration` task (which is mandatory for the pipeline) followed by the `fit_spec` task, if defined.
 
-Excluding the `calibration` and `fit_spec` tasks, all of the tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each line specifying the target used in the `fit_spec` subtasks.
+Besides of the `calibration` and `fit_spec` tasks, all the other tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
 
 #### Calibration
 
-This task performs the calibration between the charge (or voltage) and the ADC counts of the multi-channel analyzer. The calibration is made using the calibration pulse files, which contains data at fixed known voltages, and after fitting each signal with a Gaussian, a linear fit is performed to find the conversion parameters.
+This task performs the calibration between the ADC counts of the multi-channel analyzer and the charge (or voltage). It is performed using the calibration pulse files, which contain data at fixed known voltages, and after fitting each pulse with a Gaussian, a linear fit is performed to find the conversion parameters.
 
 ```yaml
 pipeline:
