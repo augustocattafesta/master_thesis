@@ -74,10 +74,9 @@ pipeline:
 
 #### Spectral fitting
 
-This task can perform the spectral fitting on one or multiple emission lines at the same time. The task is divided into subtasks, and each of them is defined by the `target` (a name given to the subtask), and the `model` to use for the emission line fit (which must be *Gaussian* or *Fe55Forest*). These keys are requested for all the subtasks.
+This task performs the spectral fitting on one or multiple emission lines at the same time. The task is divided into subtasks, each of them defined by the `target` (a name given to the subtask), and the `model` to use for the emission line fit (which must be *Gaussian* or *Fe55Forest*). These keys are mandatory for all the subtasks.
 
-A subtask also have another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If `fit_pars` is written, at least one property must be specified, but none of them is mandatory.
-
+A subtask also have another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If the key `fit_pars` is written in the configuration file, at least one property must be specified, but none of them is mandatory.
 
 ```yaml
   - task: fit_spec
@@ -90,8 +89,8 @@ A subtask also have another optional key, which is `fit_pars`, that allows to sp
         fit_pars:               # Optional
           xmin: 2.0             # Optional, left range limit for the fit
           xmax: 4.              # Optional, right range limit for the fit
-          num_sigma_left: 1.    # Optional, number of sigma to the left for the line fit
-          num_sigma_right: 1.   # Optional, number of sigma to the right for the line fit
+          num_sigma_left: 1.    # Optional, number of sigma to the left of the line center for the fit
+          num_sigma_right: 1.   # Optional, number of sigma to the right of the line center for the fit
           absoulute_sigma: true # Optional
           p0: [1., 1., 1.]      # Init parameters for the line fit
 ```
