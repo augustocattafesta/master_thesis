@@ -9,7 +9,7 @@ analysis config paths
 
 The .yaml configuration file path and the data files or folders path are the arguments needed to run the analysis.
 
-To analyze one or more source files, the command needs a sequence of source file paths and a calibration with pulsed data as the last argument. The .yaml configuration file must always be the first arguments to be passed to the command line. The following is an example of the analysis of two source files using the same calibration file:
+To analyze one or more source files, the command needs a sequence of source file paths and a calibration with pulsed data as the last argument. The .yaml configuration file must always be the first argument to be passed to the command line. The following is an example of the analysis of two source files using the same calibration file:
 
 ```bash
 analysis path_config path_file0 path_file1 path_calibration
@@ -56,9 +56,9 @@ acquisition:
 
 The pipeline is the core of the analysis, where everything that has to be calculated is defined. Each step of the pipeline is a task that contains all the properties that are needed to execute it. The pipeline is structured as a sequence of tasks. Each task is a mapping, with its own key-value pairs. A task is defined by its name, and the other keys define its behaviour.
 
-The order of tasks in the configuration file does not addect execution, as priority is automatically assigned to the `calibration` task (which is mandatory for the pipeline) followed by the `fit_spec` task, if defined.
+The order of tasks in the configuration file does not affect execution, as priority is automatically assigned to the `calibration` task (which is mandatory for the pipeline) followed by the `fit_spec` task, if defined.
 
-Besides of the `calibration` and `fit_spec` tasks, all the other tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
+Apart from the `calibration` and `fit_spec` tasks, all the other tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
 
 #### Calibration
 
@@ -76,7 +76,7 @@ pipeline:
 
 This task performs the spectral fitting on one or multiple emission lines at the same time. The task is divided into subtasks, each of them defined by the `target` (a name given to the subtask), and the `model` to use for the emission line fit (which must be *Gaussian* or *Fe55Forest*). These keys are mandatory for all the subtasks.
 
-A subtask also have another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If the key `fit_pars` is written in the configuration file, at least one property must be specified, but none of them is mandatory.
+A subtask also has another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If the key `fit_pars` is written in the configuration file, at least one property must be specified, but none of them is mandatory.
 
 ```yaml
   - task: fit_spec

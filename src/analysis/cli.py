@@ -6,7 +6,6 @@ from aptapy.plotting import plt
 from analysis import ANALYSIS_DATA, ANALYSIS_RESULTS
 from analysis.runner import run, run_folders
 
-
 __description__ = """
 Analysis CLI tool for processing and visualizing data collected with μGPDs. The workflow starts
 with a calibration step using pulsed data files. The resulting calibrated data is then used to
@@ -42,7 +41,8 @@ def check_source_paths(paths: list[str]) -> tuple[list[Path], str]:
             if not file_path.exists():
                 # Raise an error if the path does not exist in either location
                 raise FileNotFoundError(f"Data path {p} does not exist.")
-        checked_paths.append(file_path)
+            path = file_path
+        checked_paths.append(path)
     # Check if all paths are either files or folders
     is_file = [p.is_file() for p in checked_paths]
     is_folder = [p.is_dir() for p in checked_paths]
@@ -94,9 +94,9 @@ def main():
         "paths",
         nargs="+",
         help="Paths to source and calibration files or folders. If multiple files are provided, " \
-        " the calibration file should always be the last file. If folders are provided, there is" \
-        " no need to specify calibration files separately as they will be searched for in each" \
-        " folder.")
+        "the calibration file should always be the last file. If folders are provided, there is" \
+        "no need to specify calibration files separately as they will be searched for in each" \
+        "folder.")
 
     parser.add_argument(
         "-s", "--save",
