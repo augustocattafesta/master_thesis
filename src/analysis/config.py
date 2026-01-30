@@ -22,13 +22,13 @@ class Acquisition(BaseModel):
 @dataclass(frozen=True)
 class CalibrationDefaults:
     charge_conversion: bool = True
-    plot: bool = True
+    show: bool = True
 
 
 class CalibrationConfig(BaseModel):
     task: Literal["calibration"]
     charge_conversion: bool = CalibrationDefaults.charge_conversion
-    plot: bool = CalibrationDefaults.plot
+    show: bool = CalibrationDefaults.show
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,7 @@ class GainDefaults:
     w: float = 26.0
     energy: float = KALPHA
     fit: bool = True
-    plot: bool = True
+    show: bool = True
     label: str | None = None
     yscale: Literal["linear", "log"] = "log"
 
@@ -78,7 +78,7 @@ class GainConfig(BaseModel):
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
-    plot: bool = GainDefaults.plot
+    show: bool = GainDefaults.show
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
@@ -103,14 +103,14 @@ class GainCompareConfig(BaseModel):
 
 @dataclass(frozen=True)
 class ResolutionDefaults:
-    plot: bool = True
+    show: bool = True
     label: str | None = None
 
 
 class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     target: str
-    plot: bool = ResolutionDefaults.plot
+    show: bool = ResolutionDefaults.show
     label: str | None = ResolutionDefaults.label
 
 
@@ -118,13 +118,14 @@ class ResolutionEscapeConfig(BaseModel):
     task: Literal["resolution_escape"]
     target_main: str
     target_escape: str
+    show: bool = True
 
 
 @dataclass(frozen=True)
 class DriftDefaults:
     rate: bool = False
     threshold: float = 1.5
-    plot: bool = True
+    show: bool = True
     label: str | None = None
     yscale: Literal["linear", "log"] = "linear"
 
@@ -136,7 +137,7 @@ class DriftConfig(BaseModel):
     w: float = GainDefaults.w
     energy: float = GainDefaults.energy
     threshold: float = DriftDefaults.threshold
-    plot: bool = DriftDefaults.plot
+    show: bool = DriftDefaults.show
     label: str | None = DriftDefaults.label
     yscale: Literal["linear", "log"] = DriftDefaults.yscale
 
@@ -148,6 +149,7 @@ class PlotDefaults:
     label: str = ""
     task_labels: list[str] | None = None
     loc: str = "best"
+    show: bool = True
 
 
 class PlotConfig(BaseModel):
@@ -157,6 +159,7 @@ class PlotConfig(BaseModel):
     label: str | None = PlotDefaults.label
     task_labels: list[str] | None = PlotDefaults.task_labels
     loc: str = PlotDefaults.loc
+    show: bool = PlotDefaults.show
 
 
 

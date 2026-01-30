@@ -10,7 +10,7 @@ acquisition:
 
 pipeline:
   - task: calibration
-    plot: false
+    show: false
 
   - task: fit_spec
     subtasks:
@@ -20,7 +20,7 @@ pipeline:
   - task: gain
     target: main
     fit: true
-    plot: true
+    show: true
     label: Gain exponential fit
 
   - task: resolution

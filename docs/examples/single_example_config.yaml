@@ -11,7 +11,7 @@ acquisition:
 pipeline:
   # Execute the calibration
   - task: calibration
-    plot: false
+    show: false
 
   - task: fit_spec
     subtasks:

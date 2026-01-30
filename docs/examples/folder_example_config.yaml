@@ -11,7 +11,7 @@ acquisition:
 pipeline:
   # Execute the calibration
   - task: calibration
-    plot: false
+    show: false
 
   - task: fit_spec
     subtasks:
@@ -24,16 +24,12 @@ pipeline:
   - task: gain
     target: main
     fit: true         # Fit the gain with an exponential model
-    plot: true        # Plot gain vs back voltage
+    show: true        # Plot gain vs back voltage
     label: Gain label for chip W1a 86.6 um
     yscale: linear    # Set the linear scale for the y-axis
 
     # Estimate the resolution from the main line 
   - task: resolution
     target: main
-    plot: true        # Plot resolution vs back voltage
+    show: true        # Plot resolution vs back voltage
     label: Resolution label for chip W1a 86.6 um
-
-    # The plot task is not performed, as its output is the same as the single
-    # analysis but for all the spectra. If you are interested to see the spectral
-    # fit to check the goodness of the fits, you can write the task.

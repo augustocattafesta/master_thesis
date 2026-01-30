@@ -33,7 +33,7 @@ The command to run is:
 analysis path_folder path_config
 ```
 
-Setting the `plot` key to `true` for the `gain` and `resolution` tasks, the output plots are the following:
+Setting the `show` key to `true` for the `gain` and `resolution` tasks, the output plots are the following:
 
 ![Fit](figures/folder_gain.png)
 ![Fit](figures/folder_resolution.png)
