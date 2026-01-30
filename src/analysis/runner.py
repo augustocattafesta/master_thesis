@@ -77,7 +77,7 @@ def run(
         context = calibration(
             context=context,
             charge_conversion=cal_config.charge_conversion,
-            plot=cal_config.plot
+            show=cal_config.show
         )
     else:
         raise RuntimeError("No calibration task found in configuration.")

@@ -64,7 +64,7 @@ pipeline:
 
   - task: calibration
     charge_conversion: true     # Optional, whether to convert to voltage or charge
-    plot: false                 # Optional, plot the calibration results
+    show: false                 # Optional, plot the calibration results
 ```
 
 #### Spectral fitting
@@ -103,7 +103,7 @@ If the analysis is performed on a single file, there are no other keys to specif
   - task: gain
     target: main_peak
     fit: true            # Optional, fit the data with an exponential model
-    plot: true           # Optional, plot gain vs back voltage
+    show: true           # Optional, plot gain vs back voltage
     label: Example label # Optional, label of the plot
     yscale: linear       # Optional, y-axis scale of the plot (linear or log)
 ```
@@ -149,12 +149,12 @@ $$
 $$
 The result is reported as a percentage.
 
-As for the gain task, the `plot` and `label` keys works only if the analysis is performed on multiple files or folders
+As for the gain task, the `show` and `label` keys works only if the analysis is performed on multiple files or folders
 
 ```yaml
   - task: resolution
     target: main_peak
-    plot: true            # Optional, plot resolution vs back voltage
+    show: true            # Optional, plot resolution vs back voltage
     label: Example label  # Optional, label of the plot
 ```
 
@@ -166,7 +166,7 @@ $$
 $$
 where $E_{main}$ and $E_{peak}$ are the theoretical emission energies of the main and the escape peaks, and $x_{main}$ and $x_{peak}$ are the fitted line center positions. This estimate and the previous lead to the same result if the charge calibration has been correctly performed.
 
-The `plot` and `fit` keys can be specified if working on multiple files.
+The `show` and `fit` keys can be specified if working on multiple files.
 
 ```yaml
   - task: resolution_escape
@@ -194,4 +194,5 @@ In the case of spectral fitting and physical quantities estimate, it is possible
       - gain
     loc: best             # Optional, position of the legend in the plot
     xrange: [0., 3.]      # Optional, the x-axis range to show on the plot
+    show: true            # Optional, whether to show the plot
 ```

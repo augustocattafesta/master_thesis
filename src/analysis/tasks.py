@@ -12,6 +12,7 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
+    GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
     ResolutionDefaults,
@@ -31,7 +32,7 @@ from .utils import (
 def calibration(
           context: Context,
           charge_conversion: bool = CalibrationDefaults.charge_conversion,
-          plot: bool = CalibrationDefaults.plot
+          show: bool = PlotDefaults.show
       ) -> Context:
     """Perform the calibration of the detector using pulse data at fixed voltages.
 
@@ -43,7 +44,7 @@ def calibration(
     charge_conversion : bool, optional
         Whether to convert the calibration to charge (fC) or leave it in voltage (mV).
         Default is True.
-    plot : bool, optional
+    show : bool, optional
         Whether to generate and show the plots of the calibration process. Default is True.
     
     Returns
@@ -79,7 +80,7 @@ def calibration(
     plt.errorbar(xdata, ydata, fmt=".k", label="Data")
     model.plot(fit_output=True, color=last_line_color())
     plt.legend()
-    if not plot:
+    if not show:
         plt.close(pulse_fig)
         plt.close(cal_fig)
     # Update the context with the calibration model
@@ -174,7 +175,7 @@ def gain_task(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         fit: bool = GainDefaults.fit,
-        plot: bool = GainDefaults.plot,
+        show: bool = PlotDefaults.show,
         label: str | None = GainDefaults.label,
         yscale: str = GainDefaults.yscale
         ) -> Context:
@@ -193,7 +194,7 @@ def gain_task(
         The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
     fit : bool, optional
         Whether to fit the gain trend with an exponential model. Default is True.
-    plot : bool, optional
+    show : bool, optional
         Whether to show the plots of the gain trend. Default is True.
     label : str, optional
         The label for the gain trend plot. Default is None.
@@ -241,7 +242,7 @@ def gain_task(
         context.add_task_fit_model(task, target, model)
     # Write the legend and show or close the plot
     write_legend(label)
-    if not plot:
+    if not show:
         plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
@@ -336,9 +337,9 @@ def gain_trend(
 def compare_gain(
         context: FoldersContext,
         target: str,
-        combine: bool = False,
-        label: str | None = None,
-        yscale: Literal["linear", "log"] = "linear"
+        combine: bool = GainCompareDefaults.combine,
+        label: str | None = GainCompareDefaults.label,
+        yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
         ) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
@@ -412,7 +413,7 @@ def compare_gain(
 def resolution_task(
         context: Context,
         target: str,
-        plot: bool = ResolutionDefaults.plot,
+        show: bool = ResolutionDefaults.show,
         label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
@@ -426,7 +427,7 @@ def resolution_task(
     target : str, optional
         The name of the fitting subtask to use for resolution calculation. If None, no calculation
         is performed. Default is None.
-    plot : bool, optional
+    show : bool, optional
         Whether to show the plots of the resolution trend. Default is True.
     label : str, optional
         The label for the resolution trend plot. Default is None.
@@ -469,7 +470,7 @@ def resolution_task(
     plt.ylabel(r"$\Delta$E/E")
     # Write the legend and show or close the plot
     write_legend(label)
-    if not plot:
+    if not show:
         plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
@@ -480,8 +481,8 @@ def resolution_escape(
         context: Context,
         target_main: str,
         target_escape: str,
-        label: str | None = ResolutionDefaults.label,
-        plot: bool = ResolutionDefaults.plot
+        show: bool = ResolutionDefaults.show,
+        label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This calculation is based on the position and width of the main spectral line and
@@ -497,6 +498,10 @@ def resolution_escape(
     target_escape : str, optional
         The name of the fitting subtask corresponding to the escape peak. If None, no calculation is
         performed. Default is None.
+    label : str, optional
+        The label for the resolution trend plot. Default is None.
+    show : bool, optional
+        Whether to show the plots of the resolution trend. Default is True.
     
     Returns
     -------
@@ -539,7 +544,7 @@ def resolution_escape(
     plt.ylabel(r"$\Delta$E/E")
     # Write the legend and show or close the plot
     write_legend(label)
-    if not plot:
+    if not show:
         plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
@@ -552,7 +557,7 @@ def drift(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         threshold: float = DriftDefaults.threshold,
-        plot: bool = DriftDefaults.plot,
+        show: bool = DriftDefaults.show,
         rate: bool = DriftDefaults.rate,
         label: str | None = DriftDefaults.label,
         yscale: str = DriftDefaults.yscale,
@@ -573,7 +578,7 @@ def drift(
         The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
     threshold : float, optional
         The energy threshold (in keV) above which to calculate the rate. Default is 1.5 keV.
-    plot : bool, optional
+    show : bool, optional
         Whether to show the plots of the gain vs drift voltage. Default is True.
     rate : bool, optional
         Whether to plot the rate on a secondary y-axis. Default is False.
@@ -630,7 +635,7 @@ def drift(
         ax2.tick_params(axis="y",labelcolor=color)
     axs = (ax1, ax2) if rate else (ax1, )
     write_legend(label, *axs, loc="lower right")
-    if not plot:
+    if not show:
         plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
@@ -643,7 +648,8 @@ def plot_spectrum(
         xrange: list[float] | None = PlotDefaults.xrange,
         label: str | None = PlotDefaults.label,
         task_labels: list[str] | None = PlotDefaults.task_labels,
-        loc: str = PlotDefaults.loc
+        loc: str = PlotDefaults.loc,
+        show: bool = PlotDefaults.show
         ) -> Context:
     """Plot the spectra from the source data and overlay the fitted models for the specified
     targets.
@@ -665,6 +671,8 @@ def plot_spectrum(
         no labels are generated. Default is None.
     loc : str, optional
         The location of the legend in the plot. Default is "best".
+    show : bool, optional
+        Whether to show the plots after creation. Default is True.
     
     Returns
     -------
@@ -695,4 +703,6 @@ def plot_spectrum(
             plt.xlim(get_xrange(source, models))
         write_legend(label, loc=loc)
         context.add_figure(file_name, fig)
+        if not show:
+            plt.close(fig)
     return context
