@@ -29,7 +29,7 @@ It is also possible to save the analysis results (e.g. plots and numerical value
 analysis path_config path_folder0 -s -f png
 ```
 
-To run the analysis, a configuration file must always be specified. In the next section explains how to write a correct configuration file.
+To run the analysis, a configuration file must always be specified. The next section explains how to write a correct configuration file.
 
 ## Write the configuration file
 
