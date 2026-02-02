@@ -10,7 +10,6 @@ from uncertainties import UFloat
 
 from .config import AppConfig
 from .fileio import PulsatorFile, SourceFile
-from .utils import SIGMA_TO_FWHM
 
 
 @dataclass
@@ -41,6 +40,9 @@ class TargetContext:
     _gain_val: UFloat | None = field(default=None, init=False, repr=False)
     _gain_label: str = field(default="", init=False, repr=False)
 
+    _fhwm_val: UFloat | None = field(default=None, init=False, repr=False)
+    _fwhm_label : str = field(default="", init=False, repr=False)
+
     _res_val: UFloat | None = field(default=None, init=False, repr=False)
     _res_label: str = field(default="", init=False, repr=False)
 
@@ -53,6 +55,19 @@ class TargetContext:
 
     # Default energy for resolution labels
     _energy: float = field(default=5.9, init=False, repr=False)
+
+    @property
+    def fwhm_val(self) -> UFloat:
+        """The fwhm value computed in the resolution analysis task.
+        """
+        if self._fhwm_val is None:
+            raise AttributeError("FWHM value has not been set yet.")
+        return self._fhwm_val
+
+    @fwhm_val.setter
+    def fwhm_val(self, value: UFloat):
+        self._fhwm_val = value
+        self._fwhm_label = f"FWHM@{self._energy:.1f} keV: {value} fC"
 
     @property
     def gain_val(self) -> UFloat:
@@ -79,10 +94,8 @@ class TargetContext:
     @res_val.setter
     def res_val(self, value: UFloat):
         self._res_val = value
-        fwhm = SIGMA_TO_FWHM * self.sigma
-        # Set the resolution label for the spectral plot
-        self._res_label = f"FWHM@{self._energy:.1f} keV: {fwhm} fC\n"
-        self._res_label += fr"$\Delta$E/E: {self.res_val} %"
+        # Set the fwhm and resolution labels for the spectral plot
+        self._res_label = fr"$\frac{{\Delta E}}{{E}}$: {self.res_val:.1f} % FWHM"
 
     @property
     def res_escape_val(self) -> UFloat:
@@ -148,6 +161,7 @@ class TargetContext:
             The label string corresponding to the specified task.
         """
         label_mapping = {
+            "fwhm": self._fwhm_label,
             "gain": self._gain_label,
             "resolution": self._res_label,
             "resolution_escape": self._res_escape_label

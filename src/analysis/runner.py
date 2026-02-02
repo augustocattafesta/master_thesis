@@ -7,6 +7,7 @@ from .fileio import Folder, PulsatorFile, SourceFile
 from .tasks import (
     calibration,
     compare_gain,
+    compare_resolution,
     drift,
     fit_peak,
     gain_task,
@@ -31,7 +32,8 @@ TASK_REGISTRY: dict[str, TaskFunction] = {
 
 
 FOLDERS_TASK_REGISTRY: dict[str, TaskFunctionFolders] = {
-    "compare_gain": compare_gain
+    "compare_gain": compare_gain,
+    "compare_resolution": compare_resolution,
 }
 
 

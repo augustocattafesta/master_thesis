@@ -15,11 +15,13 @@ from .config import (
     GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
-    ResolutionDefaults,
+    ResolutionCompareDefaults,
+    ResolutionDefaults
 )
 from .context import Context, FoldersContext, TargetContext
 from .plotting import get_label, get_xrange, write_legend
 from .utils import (
+    SIGMA_TO_FWHM,
     amptek_accumulate_time,
     energy_resolution,
     energy_resolution_escape,
@@ -165,6 +167,10 @@ def fit_peak(
     # Update the context with the fit results
     target_ctx = TargetContext(target, line_val, sigma, source.voltage, model)
     target_ctx.energy = context.config.acquisition.e_peak
+    # Add the fwhm to the target context
+    fwhm = SIGMA_TO_FWHM * sigma
+    target_ctx.fwhm_val = fwhm    
+    # Save the target context in the main context
     context.add_target_ctx(source, target_ctx)
     return context
 
@@ -348,6 +354,8 @@ def compare_gain(
     ---------
     context : FoldersContext
         The context object containing the fit results.
+    target : str
+        The name of the spectral line fitting subtask to use for gain comparison.
     combine : bool, optional
         Whether to combine all gain data from different folders and fit them together. Default is
         False.
@@ -551,6 +559,72 @@ def resolution_escape(
     return context
 
 
+def compare_resolution(
+        context: FoldersContext,
+        target: str,
+        combine: bool = ResolutionCompareDefaults.combine,
+        label: str | None = ResolutionCompareDefaults.label
+        ) -> FoldersContext:
+    """Compare the energy resolution of multiple folders vs voltage using the results obtained
+    from the resolution task.
+
+    Parameters
+    ---------
+    context : FoldersContext
+        The context object containing the resolution results.
+    target : str
+        The name of the spectral line fitting subtask to use for resolution comparison.
+    combine : bool, optional
+        Whether to combine all resolution data from different folders and show as a single dataset.
+        Default is False.
+    label : str, optional
+        The label for the resolution comparison plot. Default is None.
+    
+    Returns
+    -------
+    context : FoldersContext
+        The updated context object containing the resolution comparison results.
+    """
+    task = "compare_resolution"
+    # Get the different folder names
+    folder_names = context.folder_names
+    # Create the empty arrays to store resolution values and voltages
+    y = np.zeros(len(folder_names), dtype=object)
+    yerr = np.zeros(len(folder_names), dtype=object)
+    x = np.zeros(len(folder_names), dtype=object)
+    # Create the figure for the resolution comparison
+    fig = plt.figure("resolution_comparison")
+    # Iterate over all folders and plot the resolution values
+    for i, folder_name in enumerate(folder_names):
+        folder_ctx = context.folder_ctx(folder_name)
+        folder_res = folder_ctx.task_results("resolution", target)
+        res_val = unumpy.nominal_values(folder_res.get("res_vals", []))
+        res_err = unumpy.std_devs(folder_res.get("res_vals", []))
+        voltages = folder_res.get("voltages", [])
+        # If not aggregating, plot each folder separately
+        if not combine:
+            plt.errorbar(voltages, res_val, yerr=res_err, fmt=".", label=folder_name)
+        # If aggregating, store the data together for later plotting
+        else:
+            y[i] = res_val
+            yerr[i] = res_err
+            x[i] = voltages
+    if combine:
+        # Concatenate all data
+        y = np.concatenate(y)
+        yerr = np.concatenate(yerr)
+        x = np.concatenate(x)
+        # Plot the aggregated data
+        plt.errorbar(x, y, yerr=yerr, fmt=".")
+    plt.xlabel("Voltage [V]")
+    plt.ylabel(r"$\Delta$E/E")
+    # Write the legend and show the plot
+    write_legend(label)
+    # Add the figure to the context
+    context.add_figure(task, fig)
+    return context
+
+
 def drift(
         context: Context,
         target: str,
@@ -645,10 +719,14 @@ def drift(
 def plot_spectrum(
         context: Context,
         targets: list[str] | None = None,
-        xrange: list[float] | None = PlotDefaults.xrange,
+        title: str | None = PlotDefaults.title,
         label: str | None = PlotDefaults.label,
         task_labels: list[str] | None = PlotDefaults.task_labels,
         loc: str = PlotDefaults.loc,
+        xrange: list[float] | None = PlotDefaults.xrange,
+        xmin_factor: float = PlotDefaults.xmin_factor,
+        xmax_factor: float = PlotDefaults.xmax_factor,
+        voltage: bool = PlotDefaults.voltage,
         show: bool = PlotDefaults.show
         ) -> Context:
     """Plot the spectra from the source data and overlay the fitted models for the specified
@@ -661,9 +739,8 @@ def plot_spectrum(
     targets : list[str], optional
         The list of fitting subtask names to plot the fitted models for. If None, no models are
         plotted. Default is None.
-    xrange : list[float], optional
-        The x-axis range for the plot. If None, the range is automatically calculated based on
-        the data and fitted models. Default is None.
+    title : str, optional
+        The title for the plot. Default is None.
     label : str, optional
         The label for the plot legend. Default is None.
     task_labels : list[str], optional
@@ -671,6 +748,17 @@ def plot_spectrum(
         no labels are generated. Default is None.
     loc : str, optional
         The location of the legend in the plot. Default is "best".
+    xrange : list[float], optional
+        The x-axis range for the plot. If None, the range is automatically calculated based on
+        the data and fitted models. Default is None.
+    xmin_factor : float, optional
+        The factor to apply to the minimum x value when automatically calculating the xrange.
+        Default is 1.0.
+    xmax_factor : float, optional
+        The factor to apply to the maximum x value when automatically calculating the xrange.
+        Default is 1.0.
+    voltage: bool, optional
+        Whether to include the voltage information in the legend. Default is False.
     show : bool, optional
         Whether to show the plots after creation. Default is True.
     
@@ -683,9 +771,10 @@ def plot_spectrum(
     file_names = context.file_names
     # Iterate over all files and plot the spectra with fitted models, if desired
     for file_name in file_names:
-        # Create the plot figure and plot the spectrum
         source = context.source(file_name)
+        # Create the plot figure and plot the spectrum and set the title
         fig = plt.figure(f"{source.file_path.stem}_{targets}")
+        plt.title(title)
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
         models = []
@@ -700,9 +789,16 @@ def plot_spectrum(
         # Set the x-axis range
         plt.xlim(xrange)
         if xrange is None:
-            plt.xlim(get_xrange(source, models))
-        write_legend(label, loc=loc)
+            _xrange = get_xrange(source, models)
+            plt.xlim(_xrange[0] * xmin_factor, _xrange[1] * xmax_factor)
+        _label = label
+        # If voltage info is requested, add it to the legend
+        if voltage:
+            _label += f"\nBack: {source.voltage:>4.0f} V\nDrift: {source.drift_voltage:>4.0f} V"
+        write_legend(_label, loc=loc)
+        # Add the figure to the context
         context.add_figure(file_name, fig)
         if not show:
             plt.close(fig)
+        plt.tight_layout()
     return context
