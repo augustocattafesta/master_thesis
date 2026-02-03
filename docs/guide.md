@@ -7,9 +7,9 @@ After the installation, the CLI can be used with the command:
 analysis config paths
 ```
 
-The .yaml configuration file path and the data files or folders path are the arguments needed to run the analysis.
+To run the analysis, the requested arguments are the .yaml configuration file path and the data files or folders paths. The .yaml configuration file path is always the first argument.
 
-To analyze one or more source files, the command needs a sequence of source file paths and a calibration with pulsed data as the last argument. The .yaml configuration file must always be the first argument to be passed to the command line. The following is an example of the analysis of two source files using the same calibration file:
+To analyze one or more source files, the command needs a sequence of source file paths and a calibration with pulsed data as the last argument. This is an example of the analysis of two source files using the same calibration file:
 
 ```bash
 analysis path_config path_file0 path_file1 path_calibration
@@ -21,29 +21,60 @@ To analyze one or more folders, the order of the arguments is the same as the pr
 analysis path_config path_folder0 path_folder1
 ```
 
-The default directory to search for the data is the data directory in the package root. If a folder is inside this directory, there is no need to specify all the path of the folder, but the relative path is enough to locate it. This works for all the files and folders, as long as the path relative to the data directory is specified. 
+The default directory to search for data files or folders is the data directory in the package root. If a file or a folder is inside this directory, there is no need to specify all the path of the folder, but the relative path from the data directory is enough to locate it.
 
-It is also possible to save the analysis results (e.g. plots and numerical values) inside the results directory, which is automatically created in the user home. This option can be enabled using the optional argument in the CLI command. It is also possible to choose the format to use to save the plots (pdf or png). An example of command to save the results is:
+It is also possible to save the analysis results (e.g. plots and numerical values) inside the results directory, which is automatically created in the user's home. This option can be enabled using the optional argument `-s` (or `--save`) in the CLI command. It is also possible to choose the format to use to save the plots (pdf or png). An example of command to save the results is:
 
 ```bash
 analysis path_config path_folder0 -s -f png
 ```
 
-To run the analysis, a configuration file must always be specified. The next section explains how to write a correct configuration file.
+### File naming
+
+To correctly analyze the data, the files have to be named in a specific way, to correctly identify file type, the voltages and also the chronological order.
+
+#### Calibration files
+For calibration files, the name has to be of the form (case-insensitive):
+
+```txt
+[any_prefix]ci[voltages][any_literal_suffix].mca
+```
+
+where voltages is a sequence of integers separated by `-` or `_`. An example of correct file name is `data_ci1-2-3-4mV.mca`.
+
+
+#### Source files
+For source files, the name must contain the information about the back `B[back_voltage]` and the drift `D[drift_voltage]` voltages. The order in which they appear and where they are written are not important, but in this case it is case-sensitive, so `B` and `D` must be capital letters. An example of correct name is `data_D1000_B300.mca`
+
+
+#### Time trend files
+When analyzing data and the chronological order is important, the naming convention is similar to that of source files, with the exceptions that the order of the voltages matters. In particular, the back voltage must be the last to be specified, and after that an index that indicates the order has to be written. The name should be of the following form:
+
+```txt
+[any_prefix]B[voltage]_[index].mca
+```
+
+An example of correct file name is `data_D1000B380_40.mca`
+
+
 
 ## Write the configuration file
 
-The configuration file is a .yaml file which contains all the information about the acquisition (e.g. the date, the detector, the source, etc...) and the analysis pipeline. This file allows to write a modular pipeline, because it is possible to execute tasks and to easily configure them.
+To run the analysis, a configuration file must always be specified. This section explains how to write a correct configuration file.
+
+The configuration file is a .yaml file which contains all the information about the acquisition (e.g. the date, the detector, the source, etc...) and the analysis pipeline. This file allows to write an analysis pipeline in which each task can be finely configured, contrarly to a simple CLI.
 
 **Warning:**  when a key is optional and you want to set it to the default value, all the line must be deleted, not only the value, otherwise a type error can be raised or a `None` value can be assigned to the key.
 
 ### Acquisition
 
-At the beginning of the configuration file, the acquisition mapping is necessary to specify the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the mapping, and a value is assigned to each of them. If not specified, the fields are mandatory.
+At the beginning of the configuration file, the acquisition dictionary is necessary to specify the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the dictionary, and a value is assigned to each of them. If not specified, the fields are mandatory.
+
+**Note:** currently these info are not being used for any purpose, but in the future they can be useful for some tasks.
 
 ```yaml
 acquisition:
-  date: "2026-01-01"
+  date: 2026-01-01
   chip: W1a
   structure: 86.6 um
   gas: Ar
@@ -54,15 +85,17 @@ acquisition:
 
 ### Pipeline
 
-The pipeline is the core of the analysis, where everything that has to be calculated is defined. Each step of the pipeline is a task that contains all the properties that are needed to execute it. The pipeline is structured as a sequence of tasks. Each task is a mapping, with its own key-value pairs. A task is defined by its name, and the other keys define its behaviour.
+The pipeline is the core of the analysis, where everything that has to be calculated is defined. Each step of the pipeline is a task that contains all the properties that are needed to configure and execute it. The pipeline is structured as a sequence of tasks. Each task is a dictionary, with its own key-value pairs. A task is defined by its name, and the other keys define its behaviour.
 
-The order of tasks in the configuration file does not affect execution, as priority is automatically assigned to the `calibration` task (which is mandatory for the pipeline) followed by the `fit_spec` task, if defined.
+The tasks order in the configuration file does not affect execution, as priority is automatically assigned to the `calibration` task (which is mandatory for the pipeline) followed by the `fit_spec` task (which is optional, e.g. if you only want to plot the data without doing any analysis).
 
-Apart from the `calibration` and `fit_spec` tasks, all the other tasks can be written multiple times, specifying different `target` or parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the gain from each of them, it is possible to write a `gain` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
+Apart from the `calibration` and `fit_spec` tasks, which are executed once at the beginning of the analysis, all the other tasks can be written multiple times, specifying different `target` or configuration parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the resolution from each of them independently, it is possible to write a `resolution` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
+
+For a complete description of the possible keys of each task, please see [Tasks](tasks.md).
 
 #### Calibration
 
-This task performs the calibration between the ADC counts of the multi-channel analyzer and the charge (or voltage). It is performed using the calibration pulse files, which contain data at fixed known voltages, and after fitting each pulse with a Gaussian, a linear fit is performed to find the conversion parameters.
+This task performs the calibration between the ADC counts of the multi-channel analyzer and the charge (or voltage). It is performed using the calibration pulse file specified in the command or located into the folder. This file contains data at fixed known voltages (which must be written in the name), and after fitting each pulse with a Gaussian curve, a linear fit of the peak positions is performed to find the conversion parameters.
 
 ```yaml
 pipeline:
@@ -76,7 +109,7 @@ pipeline:
 
 This task performs the spectral fitting on one or multiple emission lines at the same time. The task is divided into subtasks, each of them defined by the `target` (a name given to the subtask), and the `model` to use for the emission line fit (which must be *Gaussian* or *Fe55Forest*). These keys are mandatory for all the subtasks.
 
-A subtask also has another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If the key `fit_pars` is written in the configuration file, at least one property must be specified, but none of them is mandatory.
+A subtask also has another optional key, which is `fit_pars`, that allows to specify some properties of the fitting procedure. If the `fit_pars` key is written in the configuration file, at least one property must be specified, but none of them is mandatory.
 
 ```yaml
   - task: fit_spec
@@ -91,8 +124,8 @@ A subtask also has another optional key, which is `fit_pars`, that allows to spe
           xmax: 4.              # Optional, right range limit for the fit
           num_sigma_left: 1.    # Optional, number of sigma to the left of the line center for the fit
           num_sigma_right: 1.   # Optional, number of sigma to the right of the line center for the fit
-          absoulute_sigma: true # Optional
-          p0: [1., 1., 1.]      # Init parameters for the line fit
+          absoulute_sigma: true # Optional, set absolute sigma
+          p0: [1., 1., 1.]      # Optional, init parameters for the line fit
 ```
 
 #### Gain estimate
@@ -101,7 +134,7 @@ This task performs the estimate of the gain using the spectral fitting results o
 
 If the analysis is performed on a single file, there are no other keys to specify. If the analysis is performed on multiple files or on one or multiple folders, the `fit`, `plot` and `label` can be specified. 
 
-**Note:** no error is raised if these optional keys are specified during the analysis of a single file.  
+**Note:** no error is raised if these optional keys are specified during the analysis of a single file, but no fit will be performed and no plot will be shown.
 
 ```yaml
   - task: gain
@@ -186,17 +219,20 @@ To be implemented...
 
 This task is used to plot the spectrum of all the analyzed files. It is possible to plot the spectrum without performing the spectral fitting before writing only the name of the task.
 
-In the case of spectral fitting and physical quantities estimate, it is possible to specify the `target` to plot, the general `label` of the plot, if you want to show the quantity estimates in the legend using `task_labels` and where to show the legend with `loc`. It is also possible to set a specific x-axis range for the plot using `xrange`.
+In the case of spectral fitting and physical quantities estimate, it is possible to specify the `target` to plot, the general `label` of the plot, if you want to show the quantity estimates in the legend using `task_labels` and where to show the legend with `loc`. It is also possible to set a specific x-axis range for the plot using `xrange` or modify the automatic one by a factor on the left and/or on the right with `xmin_factor` and `xmax_factor`. If the `xrange` has been specified, it has the priority over the other two keys. You can decide whether to show the plots with the `show` key.
 
 ```yaml
   - task: plot
     targets:              # Optional, target fit to show
       - main_peak
       - escape_peak
-    label: Example label  # Optional, general label of the plot
+    title: Example title  # Optional, the title of the plot
+    label: Example label  # Optional, legend label of the plot
     task_labels:          # Optional, estimated quantities to show in the legend
       - gain
     loc: best             # Optional, position of the legend in the plot
     xrange: [0., 3.]      # Optional, the x-axis range to show on the plot
     show: true            # Optional, whether to show the plot
+    xmin_fac: 0.5         # Optional, scale the automatic xrange left limit by a factor
+    xmax_fac: 1.5         # Optional, scale the automatic xrange right limit by a factor
 ```

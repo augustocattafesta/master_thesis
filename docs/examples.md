@@ -13,10 +13,10 @@ In this example, a basic analysis of a single source file is performed. See the 
 After writing the configuration file, the analysis can be launched from the command line interface with:
 
 ```bash
-analysis path_source path_calibration path_config
+analysis path_config path_source path_calibration
 ```
 
-After the analysis is completed, the result is the following plot, showing the main emission line of the spectrum along with the fit model and the legend showing the gain and energy resolution results:
+After the analysis is completed, the result is the following plot, showing the main emission line and the escape peak, along with the fit models and the legend showing the gain and energy resolution results:
 
 ![Fit](figures/single_example.png)
 
@@ -30,7 +30,7 @@ In this example, the analysis of a folder is performed. You can see from the con
 
 The command to run is:
 ```bash
-analysis path_folder path_config
+analysis path_config path_folder
 ```
 
 Setting the `show` key to `true` for the `gain` and `resolution` tasks, the output plots are the following:
@@ -50,20 +50,24 @@ The command to run is the same as the [Folder Analysis](#folder-analysis) exampl
 
 ![Fit](figures/gain_trend.png)
 
-## Gain comparison of two folders
+## Gain and resolution comparison of two folders
 
-In this example, the gain estimates of two different folders is combined into a single dataset and fitted with an exponential model.
+In this example, two folders are analyzed to compare the gain and the energy resolution estimates. The gain data is combined together and fitted with a single exponential. The energy resolution is only compared. 
+
+**Note:** to execute these tasks, it is necessary to first execute the `gain` or `resolution` tasks, and then
 
 ```yaml
---8<-- "docs/examples/compare_gain_example_config.yaml"
+--8<-- "docs/examples/folder_comparison_example_config.yaml"
 ```
 
 To run this analysis the command is:
 
 ```bash
-analysis path_folder0 path_folder1 path_config
+analysis path_config path_folder0 path_folder1
 ```
 
 The output is the following:
 
 ![Fit](figures/compare_gain.png)
+
+![Fit](figures/compare_resolution.png)

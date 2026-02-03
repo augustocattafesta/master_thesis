@@ -52,7 +52,6 @@ class FitPars(BaseModel):
 
 class FitSubtask(BaseModel):
     target: str
-    skip: bool = False
     model: str
     fit_pars: FitPars = Field(default_factory=FitPars)
 
@@ -129,6 +128,19 @@ class ResolutionEscapeConfig(BaseModel):
 
 
 @dataclass(frozen=True)
+class ResolutionCompareDefaults:
+    combine: bool = False
+    label: str | None = None
+
+
+class ResolutionCompareConfig(BaseModel):
+    task: Literal["compare_resolution"]
+    target: str
+    combine: bool = ResolutionCompareDefaults.combine
+    label: str | None = ResolutionCompareDefaults.label
+
+
+@dataclass(frozen=True)
 class DriftDefaults:
     rate: bool = False
     threshold: float = 1.5
@@ -151,26 +163,34 @@ class DriftConfig(BaseModel):
 
 @dataclass(frozen=True)
 class PlotDefaults:
-    show: bool = True
-    xrange: list[float] | None = Field(None, min_length=2, max_length=2)
-    label: str = ""
+    title: str | None = None
+    label: str | None = None
     task_labels: list[str] | None = None
     loc: str = "best"
+    xrange: list[float] | None = Field(None, min_length=2, max_length=2)
+    xmin_factor: float = 1.
+    xmax_factor: float = 1.
+    voltage: bool = False
+    show: bool = True
 
 
 class PlotConfig(BaseModel):
     task: Literal["plot"]
     targets: list[str] | None = None
-    xrange: list[float] | None = PlotDefaults.xrange
+    title: str | None = PlotDefaults.title
     label: str | None = PlotDefaults.label
     task_labels: list[str] | None = PlotDefaults.task_labels
     loc: str = PlotDefaults.loc
+    xrange: list[float] | None = PlotDefaults.xrange
+    xmin_factor: float = PlotDefaults.xmin_factor
+    xmax_factor: float = PlotDefaults.xmax_factor
+    voltage: bool = PlotDefaults.voltage
     show: bool = PlotDefaults.show
 
 
-
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
-    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig
+    ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig | \
+    ResolutionCompareConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition

@@ -1,5 +1,5 @@
 acquisition:
-  date: "2026-01-01"
+  date: "2026-01-1"
   chip: chip
   structure: structure
   gas: Ar
@@ -9,28 +9,21 @@ acquisition:
 
 
 pipeline:
+  # Calibrate the ADC counts with the calibration file
   - task: calibration
     show: false
 
   - task: fit_spec
     subtasks:
-      - target: main
-        model: Fe55Forest
-  
-  - task: gain
-    target: main
-    fit: true
-    show: true
-    label: Gain exponential fit
-
-  - task: resolution
-    target: main
-    label: Insert resolution label
+    - target: main
+      model: Fe55Forest
+      fit_pars:
+        xmin: 0.1
 
   - task: plot
     targets:
-      - main_peak
-    label: Testing plot task
-    task_labels:
-      - gain
-      - resolution
+      - main
+      - escape
+
+
+

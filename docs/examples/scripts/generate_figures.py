@@ -27,8 +27,11 @@ gain_trend_fig = context._figures["gain_trend"]
 gain_trend_fig.savefig(FIGURES_PATH / "gain_trend.png")
 
 folder1_path = EXAMPLES_PATH / "data/folder1"
-compare_config_path = EXAMPLES_PATH / "compare_gain_example_config.yaml"
+compare_config_path = EXAMPLES_PATH / "folder_comparison_example_config.yaml"
 context = run_folders(compare_config_path, folder_path, folder1_path)
-combine_fig = context._figures["compare_gain"]
-combine_fig.savefig(FIGURES_PATH / "compare_gain.png")
+compare_gain_fig = context._figures["compare_gain"]
+compare_gain_fig.savefig(FIGURES_PATH / "compare_gain.png")
+compare_resolution_fig = context._figures["compare_resolution"]
+compare_resolution_fig.savefig(FIGURES_PATH / "compare_resolution.png")
+
 

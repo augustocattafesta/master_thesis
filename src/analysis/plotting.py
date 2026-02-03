@@ -25,8 +25,9 @@ def write_legend(label: str | None, *axs: plt.Axes | None, loc: str = "best" ) -
     if len(valid_axs) > 1:
         valid_axs[0].set_zorder(max(zorders) + 1)
         valid_axs[0].set_frame_on(False)
-    leg = valid_axs[0].legend(headers, labels, loc=loc, title=label, title_fontsize=11)
-    leg._legend_box.align = "bottom"    # type: ignore[attr-defined]
+    if headers and labels:
+        leg = valid_axs[0].legend(headers, labels, loc=loc, title=label, title_fontsize=11)
+        leg._legend_box.align = "bottom"    # type: ignore[attr-defined]
 
 
 def get_xrange(source: SourceFile, models: list[AbstractFitModel]) -> list[float]:
