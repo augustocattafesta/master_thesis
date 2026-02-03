@@ -91,6 +91,8 @@ The tasks order in the configuration file does not affect execution, as priority
 
 Apart from the `calibration` and `fit_spec` tasks, which are executed once at the beginning of the analysis, all the other tasks can be written multiple times, specifying different `target` or configuration parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the resolution from each of them independently, it is possible to write a `resolution` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
 
+For a complete description of the possible keys of each task, please see [Tasks](tasks.md).
+
 #### Calibration
 
 This task performs the calibration between the ADC counts of the multi-channel analyzer and the charge (or voltage). It is performed using the calibration pulse file specified in the command or located into the folder. This file contains data at fixed known voltages (which must be written in the name), and after fitting each pulse with a Gaussian curve, a linear fit of the peak positions is performed to find the conversion parameters.
@@ -132,7 +134,7 @@ This task performs the estimate of the gain using the spectral fitting results o
 
 If the analysis is performed on a single file, there are no other keys to specify. If the analysis is performed on multiple files or on one or multiple folders, the `fit`, `plot` and `label` can be specified. 
 
-**Note:** no error is raised if these optional keys are specified during the analysis of a single file.  
+**Note:** no error is raised if these optional keys are specified during the analysis of a single file, but no fit will be performed and no plot will be shown.
 
 ```yaml
   - task: gain

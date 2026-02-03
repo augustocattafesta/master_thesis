@@ -2,7 +2,7 @@
 
 In this documentation there is a full explanation of all the tasks and their parameters that can be executed through the pipeline in the YAML configuration file.
 
-**Note:** all the tasks have a `context` parameter that is used during the execution, but must not be specified in the pipeline
+**Note:** all the tasks have a `context` argument that contains all the analysis data and is constantly updated during the execution, but it must not be specified in the pipeline.
 
 ## Calibration
 ::: src.analysis.tasks.calibration
@@ -13,7 +13,7 @@ In this documentation there is a full explanation of all the tasks and their par
 ## Gain estimate
 ::: src.analysis.tasks.gain_task
 
-## Gain trend with time
+## Gain time trend
 ::: src.analysis.tasks.gain_trend
 
 ## Gain compare between folders
@@ -29,7 +29,6 @@ In this documentation there is a full explanation of all the tasks and their par
 ::: src.analysis.tasks.resolution_escape
 
 ## Resolution compare between folders
-
 
 ## Plot the spectrum
 ::: src.analysis.tasks.plot_spectrum

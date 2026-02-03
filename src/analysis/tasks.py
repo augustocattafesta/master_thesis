@@ -16,7 +16,7 @@ from .config import (
     GainDefaults,
     PlotDefaults,
     ResolutionCompareDefaults,
-    ResolutionDefaults
+    ResolutionDefaults,
 )
 from .context import Context, FoldersContext, TargetContext
 from .plotting import get_label, get_xrange, write_legend
@@ -169,7 +169,7 @@ def fit_peak(
     target_ctx.energy = context.config.acquisition.e_peak
     # Add the fwhm to the target context
     fwhm = SIGMA_TO_FWHM * sigma
-    target_ctx.fwhm_val = fwhm    
+    target_ctx.fwhm_val = fwhm
     # Save the target context in the main context
     context.add_target_ctx(source, target_ctx)
     return context
@@ -774,7 +774,8 @@ def plot_spectrum(
         source = context.source(file_name)
         # Create the plot figure and plot the spectrum and set the title
         fig = plt.figure(f"{source.file_path.stem}_{targets}")
-        plt.title(title)
+        if title is not None:
+            plt.title(title)
         source.hist.plot(label="Data")
         # Plot the fitted models for the specified targets and get labels
         models = []
@@ -793,7 +794,7 @@ def plot_spectrum(
             plt.xlim(_xrange[0] * xmin_factor, _xrange[1] * xmax_factor)
         _label = label
         # If voltage info is requested, add it to the legend
-        if voltage:
+        if voltage and _label is not None:
             _label += f"\nBack: {source.voltage:>4.0f} V\nDrift: {source.drift_voltage:>4.0f} V"
         write_legend(_label, loc=loc)
         # Add the figure to the context

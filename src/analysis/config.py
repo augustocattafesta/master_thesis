@@ -52,7 +52,6 @@ class FitPars(BaseModel):
 
 class FitSubtask(BaseModel):
     target: str
-    skip: bool = False
     model: str
     fit_pars: FitPars = Field(default_factory=FitPars)
 
