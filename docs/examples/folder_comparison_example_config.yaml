@@ -1,0 +1,41 @@
+acquisition:
+  date: "2026-01-01"
+  chip: W1a
+  structure: 86.6um
+  gas: Ar
+  w: 26.
+  element: Fe55
+  e_peak: 5.9
+
+
+pipeline:
+  # Execute the calibration
+  - task: calibration
+    show: false
+
+  - task: fit_spec
+    subtasks:
+      - target: main
+        model: Fe55Forest
+
+  # Estimate the gain from the main line  
+  - task: gain
+    target: main
+
+  # Estimate the resolution from the main line
+  - task: resolution
+    target: main
+
+
+  # Execute the task to combine the gain results from two folders and fit the
+  # data with a single exponential model
+  - task: compare_gain
+    target: main
+    combine: true                                     # Combine the data
+    label: Combine gain for chip W1a 86.6 um    # Set the label
+    yscale: linear
+
+  # Execute the task to show the energy resolution results from the two folders.
+  - task: compare_resolution
+    target: main
+    label: Compare resolution for chip W1a 86.6 um
