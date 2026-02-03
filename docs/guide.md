@@ -186,17 +186,20 @@ To be implemented...
 
 This task is used to plot the spectrum of all the analyzed files. It is possible to plot the spectrum without performing the spectral fitting before writing only the name of the task.
 
-In the case of spectral fitting and physical quantities estimate, it is possible to specify the `target` to plot, the general `label` of the plot, if you want to show the quantity estimates in the legend using `task_labels` and where to show the legend with `loc`. It is also possible to set a specific x-axis range for the plot using `xrange`.
+In the case of spectral fitting and physical quantities estimate, it is possible to specify the `target` to plot, the general `label` of the plot, if you want to show the quantity estimates in the legend using `task_labels` and where to show the legend with `loc`. It is also possible to set a specific x-axis range for the plot using `xrange` or modify the automatic one by a factor on the left and/or on the right with `xmin_factor` and `xmax_factor`. If the `xrange` has been specified, it has the priority over the other two keys. You can decide whether to show the plots with the `show` key.
 
 ```yaml
   - task: plot
     targets:              # Optional, target fit to show
       - main_peak
       - escape_peak
-    label: Example label  # Optional, general label of the plot
+    title: Example title  # Optional, the title of the plot
+    label: Example label  # Optional, legend label of the plot
     task_labels:          # Optional, estimated quantities to show in the legend
       - gain
     loc: best             # Optional, position of the legend in the plot
     xrange: [0., 3.]      # Optional, the x-axis range to show on the plot
     show: true            # Optional, whether to show the plot
+    xmin_fac: 0.5         # Optional, scale the automatic xrange left limit by a factor
+    xmax_fac: 1.5         # Optional, scale the automatic xrange right limit by a factor
 ```

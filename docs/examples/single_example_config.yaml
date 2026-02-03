@@ -41,9 +41,13 @@ pipeline:
     targets:
       - main
       - main_gauss
-    # Show the gain and resolution results in the legend.
+    title: $^{55}$Fe Spectrum of 43.3 $\mu$m $\mu$gap
+    # Show the gain and resolution results in the legend
     task_labels:
       - gain
       - resolution
     label: Example label for chip W1a 86.6 um
+    # Scale the xrange on the left to show the escape peak, which of Fe55 is
+    # located at about half the charge of the main peak.
+    xmin_factor: 0.5
 
