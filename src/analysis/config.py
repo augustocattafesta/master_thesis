@@ -1,7 +1,7 @@
 """Configuration models for the analysis application."""
 import pathlib
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Optional
 
 import yaml
 from pydantic import BaseModel, Field
@@ -94,16 +94,18 @@ class GainTrendConfig(BaseModel):
     label: str | None = GainDefaults.label
 
 
+@dataclass(frozen=True)
 class GainCompareDefaults:
-    combine: bool = False
+    combine: list[str] = Field(default_factory=list)
     label: str | None = None
     yscale: Literal["linear", "log"] = "log"
+
 
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
-    combine: bool = GainCompareDefaults.combine
+    combine: list[str] = GainCompareDefaults.combine
     label: str | None = GainCompareDefaults.label
     yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
 
@@ -133,14 +135,13 @@ class ResolutionEscapeConfig(BaseModel):
 
 @dataclass(frozen=True)
 class ResolutionCompareDefaults:
-    combine: bool = False
+    combine: list[str] = Field(default_factory=list)
     label: str | None = None
-
 
 class ResolutionCompareConfig(BaseModel):
     task: Literal["compare_resolution"]
     target: str
-    combine: bool = ResolutionCompareDefaults.combine
+    combine: list[str] = ResolutionCompareDefaults.combine
     label: str | None = ResolutionCompareDefaults.label
 
 
@@ -192,13 +193,32 @@ class PlotConfig(BaseModel):
     show: bool = PlotDefaults.show
 
 
+@dataclass(frozen=None)
+class FolderStyleDefaults:
+    label: str | None = None
+    marker: str = "."
+    linestyle: str = "-"
+    color: Optional[str] = None
+
+class FolderStyleConfig(BaseModel):
+    label: str | None = FolderStyleDefaults.label
+    marker: str = FolderStyleDefaults.marker
+    linestyle: str = FolderStyleDefaults.linestyle
+    color: str = FolderStyleDefaults.color
+
+
+class StyleConfig(BaseModel):
+    folders: dict[str, FolderStyleConfig] = Field(default_factory=dict)
+
+
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
     ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig | \
     ResolutionCompareConfig
 
 class AppConfig(BaseModel):
-    acquisition: Acquisition
+    acquisition: Acquisition = Field(default_factory=Acquisition)
     pipeline: list[TaskType]
+    style: StyleConfig = Field(default_factory=StyleConfig)
 
     @classmethod
     def from_yaml(cls, path: str | pathlib.Path) -> "AppConfig":

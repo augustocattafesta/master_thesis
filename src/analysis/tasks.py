@@ -12,6 +12,7 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
+    FolderStyleConfig,
     GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
@@ -135,10 +136,10 @@ def fit_peak(
     source = context.last_source
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
-    x_peak = hist.bin_centers()[np.argmax(hist.content)]
+    x_peak = hist.bin_centers()[hist.content > 0][5:][np.argmax(hist.content[hist.content > 0][5:])]
     if xmin == float("-inf") and xmax == float("inf"):
-        xmin = x_peak - 0.5 * np.sqrt(x_peak)
-        xmax = x_peak + 0.5 * np.sqrt(x_peak)
+        xmin = x_peak - 0.3 * np.sqrt(x_peak)
+        xmax = x_peak + 0.3 * np.sqrt(x_peak)
     # Define the dictionary of keyword arguments for the fit
     kwargs = dict(
          xmin=xmin,
@@ -349,7 +350,7 @@ def gain_trend(
 def compare_gain(
         context: FoldersContext,
         target: str,
-        combine: bool = GainCompareDefaults.combine,
+        combine: list[str] = GainCompareDefaults.combine,
         label: str | None = GainCompareDefaults.label,
         yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
         ) -> FoldersContext:
@@ -377,42 +378,63 @@ def compare_gain(
     """
     # pylint: disable=invalid-unary-operand-type
     task = "compare_gain"
+    folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
     # Create empty arrays to store gain values and voltages
-    y = np.zeros(len(folder_names), dtype=object)
-    yerr = np.zeros(len(folder_names), dtype=object)
-    x = np.zeros(len(folder_names), dtype=object)
+    y = np.zeros(len(combine), dtype=object)
+    yerr = np.zeros(len(combine), dtype=object)
+    x = np.zeros(len(combine), dtype=object)
     # Create the figure for the gain comparison
     fig = plt.figure("gain_comparison")
     # Iterate over all folders and plot the gain values
-    for i, folder_name in enumerate(folder_names):
+    j = 0
+    for folder_name in folder_names:
         folder_ctx = context.folder_ctx(folder_name)
         folder_gain = folder_ctx.task_results("gain", target)
         g_val = unumpy.nominal_values(folder_gain.get("gain_vals", []))
         g_err = unumpy.std_devs(folder_gain.get("gain_vals", []))
         voltages = folder_gain.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not combine:
-            plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=folder_name)
+        if folder_name not in combine:
+            style = folders_style.get(folder_name, FolderStyleConfig())
+            style = style.model_dump(exclude_none=True)
+            plt.errorbar(voltages, g_val, yerr=g_err,
+                         marker=style.get("marker", "."),
+                         color=style.get("color", None),
+                         ls="",
+                         label=style.get("label", folder_name))
             model = folder_gain.get("model", None)
             if model:
-                model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+                model.plot(label=f"Scale: {-model.scale.ufloat()} V",
+                           linestyle=style.get("linestyle", "-"),
+                           color=style.get("color", last_line_color()))
         # If aggregating, store the data together for later fitting and plotting
         else:
-            y[i] = g_val
-            yerr[i] = g_err
-            x[i] = voltages
+            y[j] = g_val
+            yerr[j] = g_err
+            x[j] = voltages
+            j += 1
     if combine:
         # Concatenate all data and fit with an exponential model
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
+        # Calculate the mean gain for each repeated voltage
+        x, y, yerr = mean_by_x(x, y, yerr)
         model = aptapy.models.Exponential()
         model.fit(x, y, sigma=yerr, absolute_sigma=True)
         # Plot the aggregated data and fit model
-        plt.errorbar(x, y, yerr=yerr, fmt=".")
-        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+        style = folders_style.get("combine", FolderStyleConfig()).model_dump(exclude_none=True)
+        plt.errorbar(x, y, yerr=yerr,
+                    marker=style.get("marker", "."),
+                    color=style.get("color", None),
+                    ls="",
+                    label=style.get("label", "Combined"))
+        model.plot(label=f"Scale: {-model.scale.ufloat()} V",
+                    linestyle=style.get("linestyle", "-"),
+                    color=style.get("color", last_line_color()))
+                   # If the color is specified in the style, it ovverrides the default color
         context.add_task_results(task, target, dict(model=model))
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
@@ -422,6 +444,39 @@ def compare_gain(
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
+
+
+def mean_by_x(x: np.ndarray, y: np.ndarray, yerr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Aggregate repeated x values by computing mean y and combined uncertainty.
+
+    Parameters
+    ---------
+    x : np.ndarray
+        X values (may include repeats).
+    y : np.ndarray
+        Y values corresponding to x.
+    yerr : np.ndarray
+        Uncertainties on y values.
+
+    Returns
+    -------
+    x_unique : np.ndarray
+        Unique x values.
+    y_mean : np.ndarray
+        Mean y for each unique x.
+    yerr_mean : np.ndarray
+        Combined uncertainty on the mean y.
+    """
+    x_unique, inverse = np.unique(x, return_inverse=True)
+    y_mean = np.zeros_like(x_unique, dtype=float)
+    yerr_mean = np.zeros_like(x_unique, dtype=float)
+    for idx in range(len(x_unique)):
+        mask = inverse == idx
+        y_vals = np.asarray(y)[mask]
+        y_errs = np.asarray(yerr)[mask]
+        y_mean[idx] = np.mean(y_vals)
+        yerr_mean[idx] = np.sqrt(np.sum(y_errs ** 2)) / np.sum(mask)
+    return x_unique, y_mean, yerr_mean
 
 
 def resolution_task(
@@ -566,8 +621,8 @@ def resolution_escape(
 def compare_resolution(
         context: FoldersContext,
         target: str,
-        combine: bool = ResolutionCompareDefaults.combine,
-        label: str | None = ResolutionCompareDefaults.label
+        combine: list[str] = ResolutionCompareDefaults.combine,
+        label: str | None = ResolutionCompareDefaults.label,
         ) -> FoldersContext:
     """Compare the energy resolution of multiple folders vs voltage using the results obtained
     from the resolution task.
@@ -590,36 +645,52 @@ def compare_resolution(
         The updated context object containing the resolution comparison results.
     """
     task = "compare_resolution"
+    folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
     # Create the empty arrays to store resolution values and voltages
-    y = np.zeros(len(folder_names), dtype=object)
-    yerr = np.zeros(len(folder_names), dtype=object)
-    x = np.zeros(len(folder_names), dtype=object)
+    y = np.zeros(len(combine), dtype=object)
+    yerr = np.zeros(len(combine), dtype=object)
+    x = np.zeros(len(combine), dtype=object)
     # Create the figure for the resolution comparison
     fig = plt.figure("resolution_comparison")
     # Iterate over all folders and plot the resolution values
-    for i, folder_name in enumerate(folder_names):
+    j = 0
+    for folder_name in folder_names:
         folder_ctx = context.folder_ctx(folder_name)
         folder_res = folder_ctx.task_results("resolution", target)
         res_val = unumpy.nominal_values(folder_res.get("res_vals", []))
         res_err = unumpy.std_devs(folder_res.get("res_vals", []))
         voltages = folder_res.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not combine:
-            plt.errorbar(voltages, res_val, yerr=res_err, fmt=".", label=folder_name)
+        if folder_name not in combine:
+            style = folders_style.get(folder_name, FolderStyleConfig())
+            style = style.model_dump(exclude_none=True)
+            plt.errorbar(voltages, res_val, yerr=res_err,
+                         marker=style.get("marker", "."),
+                         color=style.get("color", None),
+                         ls="",
+                         label=style.get("label", folder_name))
         # If aggregating, store the data together for later plotting
         else:
-            y[i] = res_val
-            yerr[i] = res_err
-            x[i] = voltages
+            y[j] = res_val
+            yerr[j] = res_err
+            x[j] = voltages
+            j += 1
     if combine:
         # Concatenate all data
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
+        x, y, yerr = mean_by_x(x, y, yerr)
         # Plot the aggregated data
-        plt.errorbar(x, y, yerr=yerr, fmt=".")
+        style = folders_style.get("combine", FolderStyleConfig())
+        style = style.model_dump(exclude_none=True)
+        plt.errorbar(x, y, yerr=yerr,
+                     marker=style.get("marker", "."),
+                     color=style.get("color", None),
+                     ls="",
+                     label=style.get("label", "Combined"))
     plt.xlabel("Voltage [V]")
     plt.ylabel(r"$\Delta$E/E")
     # Write the legend and show the plot

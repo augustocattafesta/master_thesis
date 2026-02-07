@@ -162,3 +162,4 @@ def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
     if not kwargs.get("show", True):
         plt.close()
     return fig
+
