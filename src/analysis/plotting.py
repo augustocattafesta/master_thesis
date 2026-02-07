@@ -1,8 +1,9 @@
 from typing import Any
 
 import numpy as np
-from aptapy.modeling import AbstractFitModel
-from aptapy.plotting import plt
+from aptapy.modeling import AbstractFitModel, FitModelSum
+from aptapy.plotting import plt, last_line_color
+from uncertainties import unumpy
 
 from .context import TargetContext
 from .fileio import SourceFile
@@ -90,3 +91,74 @@ def get_label(task_labels: list[str] | None, target_ctx: TargetContext) -> str |
     # Remove the trailing newline character
     label = label[:-1]
     return label
+
+
+def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
+              **kwargs) -> plt.Figure:
+    """Plot the data and fitted models for a given analysis task.
+
+    Arguments
+    ---------
+    xdata : np.ndarray
+        The x-axis data points.
+    ydata : np.ndarray
+        The y-axis data points, which may include uncertainties.
+    models : AbstractFitModel
+        The fitted models to plot alongside the data.
+    kwargs : dict
+        Additional keyword arguments for customizing the plot, such as labels, titles, and scales.
+    
+    Returns
+    -------
+    fig : plt.Figure
+        The matplotlib figure object containing the plot.
+    """
+    # Extract the nominal values and standard deviations. Note that even if ydata is not a unumpy
+    # array with nominal values and std devs, these functions will still work correctly, and the
+    # output of std devs is an array full of zeros.
+    ydata_vals = unumpy.nominal_values(ydata)
+    ydata_errs = unumpy.std_devs(ydata)
+    # Create the figure object
+    fig = plt.figure(kwargs.get("fig_name", None))
+    # Plot the data
+    plt.errorbar(
+        xdata,
+        ydata_vals,
+        yerr=ydata_errs,
+        fmt=".",
+        label=kwargs.get("data_label", "Data"),
+        color=kwargs.get("color", "black"),
+    )
+    # Plot all models
+    for i, model in enumerate(models):
+        model_label = kwargs.get(f"model{i}_label", None)
+        fit_output = kwargs.get(f"fit_output", False)
+        if isinstance(model, FitModelSum):
+            plot_components = False
+            model.plot(fit_output=fit_output, label=model_label, color=last_line_color(), plot_components=plot_components)
+        else:
+            model.plot(fit_output=fit_output, label=model_label, color=last_line_color())
+    # Annotate the minimum y value if requested
+    if kwargs.get("annotate_min", False):
+        min_idx = np.argmin(ydata_vals)
+        plt.annotate(f"{ydata_vals[min_idx]:.2f}",
+                    xy=(xdata[min_idx], 
+                    ydata_vals[min_idx]),
+                    xytext=(0, 30),
+                    textcoords="offset points",
+                    ha="center", va="top",
+                    fontsize=12)
+    # Set the labels and scales
+    plt.xlabel(kwargs.get("xlabel", "X axis"))
+    plt.ylabel(kwargs.get("ylabel", "Y axis"))
+    plt.yscale(kwargs.get("yscale", "linear"))
+    # Set the title if provided
+    if "title" in kwargs:
+        plt.title(kwargs["title"])
+    # Write the legend with the provided label
+    write_legend(kwargs.get("label", None))
+    plt.tight_layout()
+    # Close the plot if specified
+    if not kwargs.get("show", True):
+        plt.close()
+    return fig

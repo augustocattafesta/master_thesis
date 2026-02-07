@@ -19,7 +19,7 @@ from .config import (
     ResolutionDefaults,
 )
 from .context import Context, FoldersContext, TargetContext
-from .plotting import get_label, get_xrange, write_legend
+from .plotting import get_label, get_xrange, write_legend, plot_task
 from .utils import (
     SIGMA_TO_FWHM,
     amptek_accumulate_time,
@@ -182,6 +182,7 @@ def gain_task(
         energy: float = GainDefaults.energy,
         fit: bool = GainDefaults.fit,
         show: bool = PlotDefaults.show,
+        title: str | None = GainDefaults.title,
         label: str | None = GainDefaults.label,
         yscale: str = GainDefaults.yscale
         ) -> Context:
@@ -202,6 +203,8 @@ def gain_task(
         Whether to fit the gain trend with an exponential model. Default is True.
     show : bool, optional
         Whether to show the plots of the gain trend. Default is True.
+    title : str, optional
+        The title for the gain trend plot. Default is None.
     label : str, optional
         The label for the gain trend plot. Default is None.
     yscale : str, optional
@@ -231,25 +234,22 @@ def gain_task(
     # If only a single file is analyzed, return the context without plotting or fitting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    # Create the figure for the gain trend
-    fig = plt.figure("gain_vs_voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
-    plt.xlabel("Voltage [V]")
-    plt.ylabel("Gain")
-    plt.yscale(yscale)
-    # If fit is requested, fit the gain trend with an exponential model
     if fit:
         model = aptapy.models.Exponential()
-        model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
-        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
-        # Add the fit model to the context
+        model.fit(voltages, unumpy.nominal_values(gain_vals),
+                  sigma=unumpy.std_devs(gain_vals), absolute_sigma=True)
         context.add_task_fit_model(task, target, model)
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
+    # Define the plot keyword arguments for style and labels
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel="Gain",
+        title=title,
+        label=label,
+        yscale=yscale,
+        show=show
+    )
+    # Create the figure for the gain trend
+    fig = plot_task(voltages, gain_vals, model, **plot_kwargs)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -308,14 +308,17 @@ def gain_trend(
     times = amptek_accumulate_time(start_times, real_times) / 3600
     # Save the results in the context
     context.add_task_results(task, target, dict(times=times, gain_vals=gain_vals))
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    # Create the figure for the gain trend
-    fig = plt.figure("gain_vs_time")
-    plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
-    plt.xlabel("Time [hours]")
-    plt.ylabel("Gain")
+    # Define the plot keyword arguments for style and labels
+    plot_kwargs = dict(
+        xlabel="Time [hours]",
+        ylabel="Gain",
+        title=None,
+        label=label,
+        yscale="linear",
+        show=True
+    )
     # If fitting subtasks are provided, fit the gain trend with the specified models
+    models = []
     if subtasks:
         for subtask in subtasks:
             # Think how to refactor this part
@@ -330,12 +333,15 @@ def gain_trend(
                 absolute_sigma=fit_pars["absolute_sigma"],
                 p0=fit_pars["p0"]
             )
-            model.fit(times, y, sigma=yerr, **kwargs)
-            model.plot(fit_output=True, plot_components=False)
+            model.fit(times, unumpy.nominal_values(gain_vals),
+                      sigma=unumpy.std_devs(gain_vals),
+                      **kwargs)
+            # model.plot(fit_output=True, plot_components=False)
+            models.append(model)
             # Update the context with the fit results
             context.add_subtask_fit_model(task, target, subtask["target"], model)
             # context["results"][task][target][name] = dict(model=model)
-    write_legend(label)
+    fig = plot_task(times, gain_vals, *models, **plot_kwargs)
     context.add_figure(task, fig)
     return context
 
@@ -422,6 +428,7 @@ def resolution_task(
         context: Context,
         target: str,
         show: bool = ResolutionDefaults.show,
+        title: str | None = ResolutionDefaults.title,
         label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
@@ -437,6 +444,8 @@ def resolution_task(
         is performed. Default is None.
     show : bool, optional
         Whether to show the plots of the resolution trend. Default is True.
+    title : str, optional
+        The title for the resolution trend plot. Default is None.
     label : str, optional
         The label for the resolution trend plot. Default is None.
     
@@ -465,21 +474,18 @@ def resolution_task(
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    min_idx = np.argmin(y)
+    # Define the plot keyword arguments for style and labels
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel=r"$\Delta$E/E % FWHM",
+        title=title,
+        label=label,
+        yscale="linear",
+        annotate_min=True,
+        show=show,
+    )
     # Create the figure for the resolution trend
-    fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
-    # Write the minimum resolution value on the plot
-    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
-                 textcoords="offset points", ha="center", va="top", fontsize=12)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E/E")
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
+    fig = plot_task(voltages, res_vals, **plot_kwargs)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -490,6 +496,7 @@ def resolution_escape(
         target_main: str,
         target_escape: str,
         show: bool = ResolutionDefaults.show,
+        title: str | None = ResolutionDefaults.title,
         label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
@@ -506,6 +513,8 @@ def resolution_escape(
     target_escape : str, optional
         The name of the fitting subtask corresponding to the escape peak. If None, no calculation is
         performed. Default is None.
+    title : str, optional
+        The title for the resolution trend plot. Default is None.
     label : str, optional
         The label for the resolution trend plot. Default is None.
     show : bool, optional
@@ -539,22 +548,17 @@ def resolution_escape(
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    min_idx = np.argmin(y)
     # Create the figure for the resolution trend
-    fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
-    # Write the minimum resolution value on the plot
-    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
-                 textcoords="offset points", ha="center", va="top", fontsize=12)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E/E")
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
-    # Add the figure to the context
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel=r"$\Delta$E/E % FWHM",
+        title=title,
+        label=label,
+        yscale="linear",
+        annotate_min=True,
+        show=show,
+    )
+    fig = plot_task(voltages, res_vals, **plot_kwargs)
     context.add_figure(task, fig)
     return context
 

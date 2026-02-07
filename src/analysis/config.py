@@ -67,6 +67,7 @@ class GainDefaults:
     energy: float = KALPHA
     fit: bool = True
     show: bool = True
+    title: str | None = None
     label: str | None = None
     yscale: Literal["linear", "log"] = "log"
 
@@ -78,6 +79,7 @@ class GainConfig(BaseModel):
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
     show: bool = GainDefaults.show
+    title: str | None = GainDefaults.title
     label: str | None = GainDefaults.label
     yscale: Literal["linear", "log"] = GainDefaults.yscale
 
@@ -109,6 +111,7 @@ class GainCompareConfig(BaseModel):
 @dataclass(frozen=True)
 class ResolutionDefaults:
     show: bool = True
+    title: str | None = None
     label: str | None = None
 
 
@@ -116,6 +119,7 @@ class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     target: str
     show: bool = ResolutionDefaults.show
+    title: str | None = ResolutionDefaults.title
     label: str | None = ResolutionDefaults.label
 
 
