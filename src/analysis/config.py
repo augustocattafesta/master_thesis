@@ -10,12 +10,12 @@ from .utils import KALPHA
 
 
 class Acquisition(BaseModel):
-    date: str
-    chip: str
-    structure: str
-    gas: str
+    date: str | None = None
+    chip: str | None = None
+    structure: str | None = None
+    gas: str | None = None
     w: float = 26.0
-    element: str
+    element: str | None = None
     e_peak: float = KALPHA
 
 
@@ -108,6 +108,12 @@ class GainCompareConfig(BaseModel):
     combine: list[str] = GainCompareDefaults.combine
     label: str | None = GainCompareDefaults.label
     yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
+
+
+class TrendCompareConfig(BaseModel):
+    task: Literal["compare_trend"]
+    target: str
+    label: str | None = GainCompareDefaults.label
 
 
 @dataclass(frozen=True)
@@ -213,7 +219,7 @@ class StyleConfig(BaseModel):
 
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
     ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig | \
-    ResolutionCompareConfig
+    ResolutionCompareConfig | TrendCompareConfig
 
 class AppConfig(BaseModel):
     acquisition: Acquisition = Field(default_factory=Acquisition)

@@ -24,6 +24,7 @@ from .plotting import get_label, get_xrange, write_legend, plot_task
 from .utils import (
     SIGMA_TO_FWHM,
     amptek_accumulate_time,
+    average_repeats,
     energy_resolution,
     energy_resolution_escape,
     find_peaks_iterative,
@@ -351,6 +352,7 @@ def compare_gain(
         context: FoldersContext,
         target: str,
         combine: list[str] = GainCompareDefaults.combine,
+        title: str | None = GainCompareDefaults.title,
         label: str | None = GainCompareDefaults.label,
         yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
         ) -> FoldersContext:
@@ -363,9 +365,10 @@ def compare_gain(
         The context object containing the fit results.
     target : str
         The name of the spectral line fitting subtask to use for gain comparison.
-    combine : bool, optional
-        Whether to combine all gain data from different folders and fit them together. Default is
-        False.
+    combine : list[str], optional
+        List of folder names to combine for gain comparison. Default is an empty list.
+    title : str, optional
+        The title for the gain comparison plot. Default is None.
     label : str, optional
         The label for the gain comparison plot. Default is None.
     yscale : str, optional
@@ -421,7 +424,7 @@ def compare_gain(
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
         # Calculate the mean gain for each repeated voltage
-        x, y, yerr = mean_by_x(x, y, yerr)
+        x, y, yerr = average_repeats(x, y, yerr)
         model = aptapy.models.Exponential()
         model.fit(x, y, sigma=yerr, absolute_sigma=True)
         # Plot the aggregated data and fit model
@@ -436,6 +439,8 @@ def compare_gain(
                     color=style.get("color", last_line_color()))
                    # If the color is specified in the style, it ovverrides the default color
         context.add_task_results(task, target, dict(model=model))
+    if title is not None:
+        plt.title(title)
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
     plt.yscale(yscale)
@@ -446,37 +451,41 @@ def compare_gain(
     return context
 
 
-def mean_by_x(x: np.ndarray, y: np.ndarray, yerr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Aggregate repeated x values by computing mean y and combined uncertainty.
+def compare_trend(
+        context: FoldersContext,
+        target: str,
+        label: str | None = GainDefaults.label
+        ) -> FoldersContext:
+    task = "compare_trend"
+    folder_style = context.config.style.folders
 
-    Parameters
-    ---------
-    x : np.ndarray
-        X values (may include repeats).
-    y : np.ndarray
-        Y values corresponding to x.
-    yerr : np.ndarray
-        Uncertainties on y values.
-
-    Returns
-    -------
-    x_unique : np.ndarray
-        Unique x values.
-    y_mean : np.ndarray
-        Mean y for each unique x.
-    yerr_mean : np.ndarray
-        Combined uncertainty on the mean y.
-    """
-    x_unique, inverse = np.unique(x, return_inverse=True)
-    y_mean = np.zeros_like(x_unique, dtype=float)
-    yerr_mean = np.zeros_like(x_unique, dtype=float)
-    for idx in range(len(x_unique)):
-        mask = inverse == idx
-        y_vals = np.asarray(y)[mask]
-        y_errs = np.asarray(yerr)[mask]
-        y_mean[idx] = np.mean(y_vals)
-        yerr_mean[idx] = np.sqrt(np.sum(y_errs ** 2)) / np.sum(mask)
-    return x_unique, y_mean, yerr_mean
+    folder_names = context.folder_names
+    fig = plt.figure("trend_comparison")
+    for folder_name in folder_names:
+        folder_ctx = context.folder_ctx(folder_name)
+        trend = folder_ctx.task_results("gain_trend", target)
+        times = trend.get("times", [])
+        g_val = unumpy.nominal_values(trend.get("gain_vals", []))
+        g_err = unumpy.std_devs(trend.get("gain_vals", []))
+        style = folder_style.get(folder_name, FolderStyleConfig()).model_dump(exclude_none=True)
+        plt.errorbar(times, g_val, yerr=g_err,
+                     marker=style.get("marker", "."),
+                     color=style.get("color", None),
+                     ls="",
+                     label=style.get("label", folder_name))
+        for key, model_target in trend.items():
+            if key in ["times", "gain_vals"]:
+                continue
+            model = model_target.get("model", None)
+            if model:
+                model.plot(fit_output=True, plot_components=False,
+                           linestyle=style.get("linestyle", "-"),
+                           color=style.get("color", last_line_color()))
+    plt.xlabel("Time [hours]")
+    plt.ylabel("Gain")
+    write_legend(label)
+    context.add_figure(task, fig)
+    return context
 
 
 def resolution_task(
@@ -682,7 +691,7 @@ def compare_resolution(
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
-        x, y, yerr = mean_by_x(x, y, yerr)
+        x, y, yerr = average_repeats(x, y, yerr)
         # Plot the aggregated data
         style = folders_style.get("combine", FolderStyleConfig())
         style = style.model_dump(exclude_none=True)
@@ -874,7 +883,7 @@ def plot_spectrum(
         write_legend(_label, loc=loc)
         # Add the figure to the context
         context.add_figure(file_name, fig)
+        plt.tight_layout()
         if not show:
             plt.close(fig)
-        plt.tight_layout()
     return context

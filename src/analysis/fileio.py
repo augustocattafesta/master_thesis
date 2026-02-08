@@ -158,17 +158,6 @@ class Folder:
                                                            _f.name,re.IGNORECASE) is not None][0]
 
 
-class AnalysisResults:
-    def __init__(self, results_path: pathlib.Path) -> None:
-        with open(results_path, encoding="utf-8") as results_file:
-            self.results = yaml.safe_load(results_file)
-    
-        
-
-
-
-
-
 def load_label(key: str) -> str | None:
     """Load a label from the analysis resources labels.yaml file based on the calling function
     name and on the file name.
