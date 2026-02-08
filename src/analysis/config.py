@@ -67,9 +67,6 @@ class GainDefaults:
     energy: float = KALPHA
     fit: bool = True
     show: bool = True
-    title: str | None = None
-    label: str | None = None
-    yscale: Literal["linear", "log"] = "log"
 
 
 class GainConfig(BaseModel):
@@ -79,9 +76,6 @@ class GainConfig(BaseModel):
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
     show: bool = GainDefaults.show
-    title: str | None = GainDefaults.title
-    label: str | None = GainDefaults.label
-    yscale: Literal["linear", "log"] = GainDefaults.yscale
 
 
 class GainTrendConfig(BaseModel):
@@ -91,29 +85,23 @@ class GainTrendConfig(BaseModel):
     energy: float = GainDefaults.energy
     # time_unit: Literal["s", "m", "h"] = "h"
     subtasks: list[FitSubtask] | None = Field(default=None)
-    label: str | None = GainDefaults.label
 
 
 @dataclass(frozen=True)
 class GainCompareDefaults:
     combine: list[str] = Field(default_factory=list)
     label: str | None = None
-    yscale: Literal["linear", "log"] = "log"
-
 
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
     combine: list[str] = GainCompareDefaults.combine
-    label: str | None = GainCompareDefaults.label
-    yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
 
 
 class TrendCompareConfig(BaseModel):
     task: Literal["compare_trend"]
     target: str
-    label: str | None = GainCompareDefaults.label
 
 
 @dataclass(frozen=True)
@@ -127,8 +115,6 @@ class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     target: str
     show: bool = ResolutionDefaults.show
-    title: str | None = ResolutionDefaults.title
-    label: str | None = ResolutionDefaults.label
 
 
 class ResolutionEscapeConfig(BaseModel):
@@ -142,13 +128,12 @@ class ResolutionEscapeConfig(BaseModel):
 @dataclass(frozen=True)
 class ResolutionCompareDefaults:
     combine: list[str] = Field(default_factory=list)
-    label: str | None = None
+
 
 class ResolutionCompareConfig(BaseModel):
     task: Literal["compare_resolution"]
     target: str
     combine: list[str] = ResolutionCompareDefaults.combine
-    label: str | None = ResolutionCompareDefaults.label
 
 
 @dataclass(frozen=True)
@@ -200,21 +185,38 @@ class PlotConfig(BaseModel):
 
 
 @dataclass(frozen=None)
-class FolderStyleDefaults:
+class PlotStyleDefaults:
+    xscale: Literal["linear", "log"] = "linear"
+    yscale: Literal["linear", "log"] = "linear"
+    title: str | None = None
     label: str | None = None
+    legend_label: str | None = None
+    legend_loc: str = "best"
     marker: str = "."
     linestyle: str = "-"
     color: Optional[str] = None
+    fit_output: bool = False
+    annotate_min: bool = False
 
-class FolderStyleConfig(BaseModel):
-    label: str | None = FolderStyleDefaults.label
-    marker: str = FolderStyleDefaults.marker
-    linestyle: str = FolderStyleDefaults.linestyle
-    color: str = FolderStyleDefaults.color
+
+class PlotStyleConfig(BaseModel):
+    xscale: Literal["linear", "log"] = PlotStyleDefaults.xscale
+    yscale: Literal["linear", "log"] = PlotStyleDefaults.yscale
+    title: str | None = PlotStyleDefaults.title
+    label: str | None = PlotStyleDefaults.label
+    legend_label: str | None = PlotStyleDefaults.legend_label
+    legend_loc: str = PlotStyleDefaults.legend_loc
+    marker: str = PlotStyleDefaults.marker
+    linestyle: str = PlotStyleDefaults.linestyle
+    color: str = PlotStyleDefaults.color
+    fit_output: bool = PlotStyleDefaults.fit_output
+    annotate_min: bool = PlotStyleDefaults.annotate_min
 
 
 class StyleConfig(BaseModel):
-    folders: dict[str, FolderStyleConfig] = Field(default_factory=dict)
+    tasks: dict[str, PlotStyleConfig] = Field(default_factory=dict)
+    folders: dict[str, PlotStyleConfig] = Field(default_factory=dict)
+
 
 
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
