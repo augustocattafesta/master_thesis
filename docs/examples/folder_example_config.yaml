@@ -1,13 +1,3 @@
-acquisition:
-  date: "2026-01-01"
-  chip: W1a
-  structure: 86.6um
-  gas: Ar
-  w: 26.
-  element: Fe55
-  e_peak: 5.9
-
-
 pipeline:
   # Execute the calibration
   - task: calibration
@@ -25,11 +15,27 @@ pipeline:
     target: main
     fit: true         # Fit the gain with an exponential model
     show: true        # Plot gain vs back voltage
-    label: Gain label for chip W1a 86.6 um
-    yscale: linear    # Set the linear scale for the y-axis
 
     # Estimate the resolution from the main line 
   - task: resolution
     target: main
     show: true        # Plot resolution vs back voltage
-    label: Resolution label for chip W1a 86.6 um
+  
+style:
+  tasks:
+    gain:
+      marker: d
+      linestyle: --
+      color: black
+      label: Data
+      legend_label: $\mu$GPD
+      title: Gain analysis
+      yscale: log
+    
+    resolution:
+      marker: .
+      color: blue
+      label: Data
+      legend_label: $\mu$GPD
+      title: Energy resolution analysis
+      annotate_min: true

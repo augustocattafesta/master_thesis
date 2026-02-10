@@ -91,6 +91,7 @@ class GainTrendConfig(BaseModel):
 class GainCompareDefaults:
     combine: list[str] = Field(default_factory=list)
     label: str | None = None
+    show: bool = True
 
 
 class GainCompareConfig(BaseModel):
@@ -189,7 +190,7 @@ class PlotStyleDefaults:
     xscale: Literal["linear", "log"] = "linear"
     yscale: Literal["linear", "log"] = "linear"
     title: str | None = None
-    label: str | None = None
+    label: str = "Data"
     legend_label: str | None = None
     legend_loc: str = "best"
     marker: str = "."

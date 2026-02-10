@@ -1,6 +1,6 @@
 """Analysis tasks.
 """
-from typing import Any, Literal
+from typing import Any
 
 import aptapy.models
 import numpy as np
@@ -338,9 +338,9 @@ def gain_trend(
     # Define the plot keyword arguments for style and labels
     style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
-        xlabel="Voltage [V]",
+        xlabel="Time from start [hours]",
         ylabel="Gain",
-        fig_name=f"gain_{target}",
+        fig_name=f"gain_trend_{target}",
         show=show,
         **model_labels,
         **style)
@@ -355,6 +355,7 @@ def compare_gain(
         context: FoldersContext,
         target: str,
         combine: list[str] = GainCompareDefaults.combine,
+        show: bool = GainCompareDefaults.show,
         ) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
@@ -367,6 +368,8 @@ def compare_gain(
         The name of the spectral line fitting subtask to use for gain comparison.
     combine : list[str], optional
         List of folder names to combine for gain comparison. Default is an empty list.
+    show : bool, optional
+        Whether to show the plots of the gain comparison. Default is True.
     
     Returns
     -------
@@ -435,6 +438,8 @@ def compare_gain(
     # Write the legend and show the plot
     write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
     plt.tight_layout()
+    if not show:
+        plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -443,6 +448,7 @@ def compare_gain(
 def compare_trend(
         context: FoldersContext,
         target: str,
+        show: bool = GainCompareDefaults.show,
         ) -> FoldersContext:
     task = "compare_trend"
     folder_style = context.config.style.folders
@@ -472,6 +478,8 @@ def compare_trend(
     plt.xlabel("Time [hours]")
     plt.ylabel("Gain")
     # write_legend(label)
+    if not show:
+        plt.close(fig)
     context.add_figure(task, fig)
     return context
 
@@ -524,7 +532,7 @@ def resolution_task(
     style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Voltage [V]",
-        ylabel=r"$\Delta E / E$",
+        ylabel=r"$\Delta$E/E",
         fig_name=f"resolution_{target}",
         show=show,
         **style)
@@ -590,7 +598,7 @@ def resolution_escape(
     style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Voltage [V]",
-        ylabel=r"$\Delta E / E$ (escape)",
+        ylabel=r"$\Delta$E/E (escape)",
         fig_name=f"resolution_esc_{target_main}",
         show=show,
         **style)
@@ -603,12 +611,13 @@ def compare_resolution(
         context: FoldersContext,
         target: str,
         combine: list[str] = ResolutionCompareDefaults.combine,
+        show: bool = ResolutionCompareDefaults.show,
         ) -> FoldersContext:
     """Compare the energy resolution of multiple folders vs voltage using the results obtained
     from the resolution task.
 
     Parameters
-    ---------
+    ----------
     context : FoldersContext
         The context object containing the resolution results.
     target : str
@@ -616,6 +625,8 @@ def compare_resolution(
     combine : bool, optional
         Whether to combine all resolution data from different folders and show as a single dataset.
         Default is False.
+    show : bool, optional
+        Whether to show the plots of the resolution comparison. Default is True.
     
     Returns
     -------
@@ -673,6 +684,8 @@ def compare_resolution(
     # Write the legend and show the plot
     write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
     plt.tight_layout()
+    if not show:
+        plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
