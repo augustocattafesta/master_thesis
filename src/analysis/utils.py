@@ -83,7 +83,8 @@ def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
     return xdata[peaks], ydata[peaks]
 
 
-def average_repeats(x: np.ndarray, y: np.ndarray, yerr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def average_repeats(x: np.ndarray, y: np.ndarray, yerr: np.ndarray
+                    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the average of values on the y axis for each unique value on the x axis.
 
     Parameters

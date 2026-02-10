@@ -3,7 +3,7 @@ from typing import Any
 import aptapy.models
 import numpy as np
 from aptapy.modeling import AbstractFitModel, FitModelSum
-from aptapy.plotting import plt, last_line_color
+from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
 from .context import TargetContext
@@ -105,14 +105,15 @@ def get_model_label(task: str, model: AbstractFitModel) -> str:
         The fitted model for which to generate the label.
     """
     # If gain task, return the scale parameter of the exponential
-    if task == "gain" or task == "compare_gain":
+    if task in ("gain", "compare_gain"):
         if isinstance(model, aptapy.models.Exponential):
             return f"Scale: {-model.scale.ufloat()} V"
-        else:
-            return model.name()
+        return model.name()
     # If gain trend task, think about what to return.
     if task == "gain_trend":
         return "IDK"
+    raise NotImplementedError(f"Model label generation not implemented for task '{task}' and "
+                              f"model type '{type(model)}'.")
 
 
 def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
@@ -141,7 +142,7 @@ def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
     ydata_vals = unumpy.nominal_values(ydata)
     ydata_errs = unumpy.std_devs(ydata)
     # Create the figure object
-    fig = plt.figure(kwargs.get("fig_name", None))
+    fig = plt.figure(kwargs.get("fig_name"))
     # Plot the data
     plt.errorbar(
         xdata,
@@ -155,13 +156,13 @@ def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
     # Plot all models
     for i, model in enumerate(models):
         model_label = kwargs.get(f"model{i}_label", None)
-        fit_output = kwargs.get(f"fit_output", False)
+        fit_output = kwargs.get("fit_output", False)
         if isinstance(model, FitModelSum):
             plot_components = False
             model.plot(fit_output=fit_output,
                        label=model_label,
                        linestyle=kwargs["linestyle"],
-                       color=last_line_color(), 
+                       color=last_line_color(),
                        plot_components=plot_components)
         else:
             model.plot(fit_output=fit_output,
@@ -172,7 +173,7 @@ def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
     if kwargs["annotate_min"]:
         min_idx = np.argmin(ydata_vals)
         plt.annotate(f"{ydata_vals[min_idx]:.2f}",
-                    xy=(xdata[min_idx], 
+                    xy=(xdata[min_idx],
                     ydata_vals[min_idx]),
                     xytext=(0, 30),
                     textcoords="offset points",
@@ -229,7 +230,7 @@ def plot_compare_task(ax: plt.Axes, xdata: np.ndarray, ydata: np.ndarray,
     )
     # Plot the model if provided
     if model:
-        model_label = kwargs.get("model_label", None)
+        model_label = kwargs.get("model_label")
         model.plot(label=model_label,
                    linestyle=kwargs["linestyle"],
                    color=last_line_color())

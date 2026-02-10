@@ -12,21 +12,22 @@ from .config import (
     CalibrationDefaults,
     DriftDefaults,
     FitPeakDefaults,
-    PlotStyleConfig,
     GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
+    PlotStyleConfig,
     ResolutionCompareDefaults,
     ResolutionDefaults,
 )
 from .context import Context, FoldersContext, TargetContext
 from .plotting import (
     get_label,
+    get_model_label,
     get_xrange,
-    write_legend,
     plot_compare_task,
     plot_task,
-    get_model_label)
+    write_legend,
+)
 from .utils import (
     SIGMA_TO_FWHM,
     amptek_accumulate_time,

@@ -1,7 +1,7 @@
 """Configuration models for the analysis application."""
 import pathlib
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel, Field
@@ -129,12 +129,14 @@ class ResolutionEscapeConfig(BaseModel):
 @dataclass(frozen=True)
 class ResolutionCompareDefaults:
     combine: list[str] = Field(default_factory=list)
+    show: bool = True
 
 
 class ResolutionCompareConfig(BaseModel):
     task: Literal["compare_resolution"]
     target: str
     combine: list[str] = ResolutionCompareDefaults.combine
+    show: bool = ResolutionCompareDefaults.show
 
 
 @dataclass(frozen=True)
@@ -185,7 +187,7 @@ class PlotConfig(BaseModel):
     show: bool = PlotDefaults.show
 
 
-@dataclass(frozen=None)
+@dataclass(frozen=True)
 class PlotStyleDefaults:
     xscale: Literal["linear", "log"] = "linear"
     yscale: Literal["linear", "log"] = "linear"
@@ -195,7 +197,7 @@ class PlotStyleDefaults:
     legend_loc: str = "best"
     marker: str = "."
     linestyle: str = "-"
-    color: Optional[str] = None
+    color: str | None = None
     fit_output: bool = False
     annotate_min: bool = False
 
@@ -209,7 +211,7 @@ class PlotStyleConfig(BaseModel):
     legend_loc: str = PlotStyleDefaults.legend_loc
     marker: str = PlotStyleDefaults.marker
     linestyle: str = PlotStyleDefaults.linestyle
-    color: str = PlotStyleDefaults.color
+    color: str | None = PlotStyleDefaults.color
     fit_output: bool = PlotStyleDefaults.fit_output
     annotate_min: bool = PlotStyleDefaults.annotate_min
 

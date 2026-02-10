@@ -5,7 +5,7 @@ import datetime
 
 import numpy as np
 
-from analysis.fileio import PulsatorFile, SourceFile, AnalysisResults
+from analysis.fileio import PulsatorFile, SourceFile
 
 
 def test_pulse(datadir):
@@ -27,7 +27,3 @@ def test_source(datadir):
     assert source.voltage == 370.0
     assert np.isclose(real_time, 163.800000)
     assert source.start_time ==  datetime.datetime(2025, 11, 18, 11, 57, 6)
-
-
-def test_analysis_results():
-    pass
