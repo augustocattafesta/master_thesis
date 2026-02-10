@@ -78,11 +78,7 @@ def run(
     if cal_config is not None:
         pulse = PulsatorFile(pulse_file_path)
         context.pulse = pulse
-        context = calibration(
-            context=context,
-            charge_conversion=cal_config.charge_conversion,
-            show=cal_config.show
-        )
+        context = calibration(context)
     else:
         raise RuntimeError("No calibration task found in configuration.")
     # Load source files with the calculated calibration model
@@ -95,13 +91,7 @@ def run(
         if spec_fit_config is not None:
             # Execute all fitting subtasks defined in the configuration file
             for subtask in spec_fit_config.subtasks:
-                fit_pars = subtask.fit_pars.model_dump()
-                context = fit_peak(
-                    context=context,
-                    target=subtask.target,
-                    model_class=load_class(subtask.model),
-                    **fit_pars
-                )
+                context = fit_peak(context=context, subtask=subtask)
     # Now we run all the tasks defined in the configuration file. The pipeline is sorted
     # so that the plotting task is always executed at the end (to compute resolution or gain).
     pipeline = sorted(config.pipeline, key=lambda t: 1 if t.task == "plot" else 0)
@@ -114,9 +104,7 @@ def run(
         # Select the appropriate task function from the registry
         func = TASK_REGISTRY.get(task.task)
         if func:
-            # Remove the name of the task from the keyword arguments
-            kwargs = task.model_dump(exclude={"task"})
-            context = func(context, **kwargs)
+            context = func(context, task)
     return context
 
 

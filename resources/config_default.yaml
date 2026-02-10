@@ -20,10 +20,12 @@ pipeline:
       fit_pars:
         xmin: 0.1
 
-  - task: plot
-    targets:
-      - main
-      - escape
+  - task: gain
+    target: main
+
+  # - task: plot
+  #   targets:
+  #     - main
 
 
 
