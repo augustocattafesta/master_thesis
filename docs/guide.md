@@ -34,6 +34,7 @@ analysis path_config path_folder0 -s -f png
 To correctly analyze the data, the files have to be named in a specific way, to correctly identify file type, the voltages and also the chronological order.
 
 #### Calibration files
+
 For calibration files, the name has to be of the form (case-insensitive):
 
 ```txt
@@ -57,7 +58,6 @@ When analyzing data and the chronological order is important, the naming convent
 An example of correct file name is `data_D1000B380_40.mca`
 
 
-
 ## Write the configuration file
 
 To run the analysis, a configuration file must always be specified. This section explains how to write a correct configuration file.
@@ -68,7 +68,9 @@ The configuration file is a .yaml file which contains all the information about 
 
 ### Acquisition
 
-At the beginning of the configuration file, the acquisition dictionary is necessary to specify the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the dictionary, and a value is assigned to each of them. If not specified, the fields are mandatory.
+The acquisition dictionary stores information about the acquisition, such as the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the dictionary, and a value is assigned to each of them. 
+
+The acquisition dictionary is optional and none of its field is mandatory
 
 **Note:** currently these info are not being used for any purpose, but in the future they can be useful for some tasks.
 
@@ -78,9 +80,9 @@ acquisition:
   chip: W1a
   structure: 86.6 um
   gas: Ar
-  w: 26.        # Optional. Default is 26.0 eV
+  w: 26.
   element: Fe55
-  e_peak: 5.9   # Optional. Default is 5.95 keV.
+  e_peak: 5.9
 ```
 
 ### Pipeline
@@ -132,7 +134,7 @@ A subtask also has another optional key, which is `fit_pars`, that allows to spe
 
 This task performs the estimate of the gain using the spectral fitting results of a given `target`, previously specified during the *fit_spec* task.
 
-If the analysis is performed on a single file, there are no other keys to specify. If the analysis is performed on multiple files or on one or multiple folders, the `fit`, `plot` and `label` can be specified. 
+If the analysis is performed on a single file, there are no other keys to specify. If the analysis is performed on multiple files or on one or multiple folders, the `fit` and `plot` can be specified. 
 
 **Note:** no error is raised if these optional keys are specified during the analysis of a single file, but no fit will be performed and no plot will be shown.
 
@@ -141,8 +143,6 @@ If the analysis is performed on a single file, there are no other keys to specif
     target: main_peak
     fit: true            # Optional, fit the data with an exponential model
     show: true           # Optional, plot gain vs back voltage
-    label: Example label # Optional, label of the plot
-    yscale: linear       # Optional, y-axis scale of the plot (linear or log)
 ```
 
 #### Gain trend with time
@@ -151,7 +151,7 @@ This task performs the study of the gain as a function of time. The gain is esti
 
 The gain trend can also be analyzed using fitting subtasks, which allow to fit the data with a model or a composition of models from *aptapy.models*. These subtasks share the same syntax of the spectral fitting subtasks.
 
-If more than one trend is visible in the data, multiple targets can be specified, and the fit range can be adjusted to each trend.
+If more than one trend is visible in the same data, multiple targets can be specified, and the fit range can be adjusted to each trend.
 
 ```yaml
   - task: gain_trend
@@ -159,19 +159,22 @@ If more than one trend is visible in the data, multiple targets can be specified
     subtasks:                         # Optional, fitting subtasks
       target: trend                   
       model: Exponential + Constant   # Composition of models 
-    label: Example label              # Optional, label of the plot
 ```
 
 #### Gain compare between folders
 
 This task allows to compare the gain results of two or more different folders on the same plot. To execute this task, it is required that at least a `gain` task has been completed on a given `target` emission line.
 
-It is also possible to combine the gain estimates from the folders and perform a single exponential fit on all the data.
+It is also possible to combine the gain estimates from a list of folders specified in the `combine` key, and also perform a single exponential fit on the data from these folders.
+
+If there are multiple data taken at a given voltage, the mean of the gain estimated from these files is calculated.
 
 ```yaml
   - task: compare_gain
     target: main_peak
-    combine: true                     # Optional, combine the data of all the folders 
+    combine:                     # Optional, combine the data of all the folders 
+      - folder0
+      - folder1
 ```
 
 
@@ -186,13 +189,12 @@ $$
 $$
 The result is reported as a percentage.
 
-As for the gain task, the `show` and `label` keys works only if the analysis is performed on multiple files or folders
+As for the gain task, the `show` key works only if the analysis is performed on multiple files or folders
 
 ```yaml
   - task: resolution
     target: main_peak
     show: true            # Optional, plot resolution vs back voltage
-    label: Example label  # Optional, label of the plot
 ```
 
 #### Resolution estimate with escape peak
@@ -213,7 +215,17 @@ The `show` and `fit` keys can be specified if working on multiple files.
 
 #### Resolution compare between folders
 
-To be implemented...
+This task allows to compare the energy resolution between different folders. As for `compare_gain` task, you need first to perform a `resolution` task on a `target` to compare the results. 
+
+You can combine the results of different folders by specifying a list with the names of folders to combine in the `combine` key.
+
+```yaml
+  - task: compare_resolution
+    target: main_peak
+    combine:      # Optional, combine the results from the specified folders
+      - folder0
+      - folder1
+```
 
 #### Plot the spectrum
 
@@ -236,3 +248,8 @@ In the case of spectral fitting and physical quantities estimate, it is possible
     xmin_fac: 0.5         # Optional, scale the automatic xrange left limit by a factor
     xmax_fac: 1.5         # Optional, scale the automatic xrange right limit by a factor
 ```
+
+### Style
+
+The style dictionary allows to set the style, labels and titles of the plot.
+

@@ -10,12 +10,12 @@ from .utils import KALPHA
 
 
 class Acquisition(BaseModel):
-    date: str
-    chip: str
-    structure: str
-    gas: str
+    date: str | None = None
+    chip: str | None = None
+    structure: str | None = None
+    gas: str | None = None
     w: float = 26.0
-    element: str
+    element: str | None = None
     e_peak: float = KALPHA
 
 
@@ -67,8 +67,6 @@ class GainDefaults:
     energy: float = KALPHA
     fit: bool = True
     show: bool = True
-    label: str | None = None
-    yscale: Literal["linear", "log"] = "log"
 
 
 class GainConfig(BaseModel):
@@ -78,8 +76,6 @@ class GainConfig(BaseModel):
     energy: float = GainDefaults.energy
     fit: bool = GainDefaults.fit
     show: bool = GainDefaults.show
-    label: str | None = GainDefaults.label
-    yscale: Literal["linear", "log"] = GainDefaults.yscale
 
 
 class GainTrendConfig(BaseModel):
@@ -89,26 +85,30 @@ class GainTrendConfig(BaseModel):
     energy: float = GainDefaults.energy
     # time_unit: Literal["s", "m", "h"] = "h"
     subtasks: list[FitSubtask] | None = Field(default=None)
-    label: str | None = GainDefaults.label
 
 
+@dataclass(frozen=True)
 class GainCompareDefaults:
-    combine: bool = False
+    combine: list[str] = Field(default_factory=list)
     label: str | None = None
-    yscale: Literal["linear", "log"] = "log"
+    show: bool = True
 
 
 class GainCompareConfig(BaseModel):
     task: Literal["compare_gain"]
     target: str
-    combine: bool = GainCompareDefaults.combine
-    label: str | None = GainCompareDefaults.label
-    yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
+    combine: list[str] = GainCompareDefaults.combine
+
+
+class TrendCompareConfig(BaseModel):
+    task: Literal["compare_trend"]
+    target: str
 
 
 @dataclass(frozen=True)
 class ResolutionDefaults:
     show: bool = True
+    title: str | None = None
     label: str | None = None
 
 
@@ -116,7 +116,6 @@ class ResolutionConfig(BaseModel):
     task: Literal["resolution"]
     target: str
     show: bool = ResolutionDefaults.show
-    label: str | None = ResolutionDefaults.label
 
 
 class ResolutionEscapeConfig(BaseModel):
@@ -129,15 +128,15 @@ class ResolutionEscapeConfig(BaseModel):
 
 @dataclass(frozen=True)
 class ResolutionCompareDefaults:
-    combine: bool = False
-    label: str | None = None
+    combine: list[str] = Field(default_factory=list)
+    show: bool = True
 
 
 class ResolutionCompareConfig(BaseModel):
     task: Literal["compare_resolution"]
     target: str
-    combine: bool = ResolutionCompareDefaults.combine
-    label: str | None = ResolutionCompareDefaults.label
+    combine: list[str] = ResolutionCompareDefaults.combine
+    show: bool = ResolutionCompareDefaults.show
 
 
 @dataclass(frozen=True)
@@ -188,13 +187,49 @@ class PlotConfig(BaseModel):
     show: bool = PlotDefaults.show
 
 
+@dataclass(frozen=True)
+class PlotStyleDefaults:
+    xscale: Literal["linear", "log"] = "linear"
+    yscale: Literal["linear", "log"] = "linear"
+    title: str | None = None
+    label: str = "Data"
+    legend_label: str | None = None
+    legend_loc: str = "best"
+    marker: str = "."
+    linestyle: str = "-"
+    color: str | None = None
+    fit_output: bool = False
+    annotate_min: bool = False
+
+
+class PlotStyleConfig(BaseModel):
+    xscale: Literal["linear", "log"] = PlotStyleDefaults.xscale
+    yscale: Literal["linear", "log"] = PlotStyleDefaults.yscale
+    title: str | None = PlotStyleDefaults.title
+    label: str | None = PlotStyleDefaults.label
+    legend_label: str | None = PlotStyleDefaults.legend_label
+    legend_loc: str = PlotStyleDefaults.legend_loc
+    marker: str = PlotStyleDefaults.marker
+    linestyle: str = PlotStyleDefaults.linestyle
+    color: str | None = PlotStyleDefaults.color
+    fit_output: bool = PlotStyleDefaults.fit_output
+    annotate_min: bool = PlotStyleDefaults.annotate_min
+
+
+class StyleConfig(BaseModel):
+    tasks: dict[str, PlotStyleConfig] = Field(default_factory=dict)
+    folders: dict[str, PlotStyleConfig] = Field(default_factory=dict)
+
+
+
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
     ResolutionEscapeConfig | GainTrendConfig | PlotConfig | DriftConfig | GainCompareConfig | \
-    ResolutionCompareConfig
+    ResolutionCompareConfig | TrendCompareConfig
 
 class AppConfig(BaseModel):
-    acquisition: Acquisition
+    acquisition: Acquisition = Field(default_factory=Acquisition)
     pipeline: list[TaskType]
+    style: StyleConfig = Field(default_factory=StyleConfig)
 
     @classmethod
     def from_yaml(cls, path: str | pathlib.Path) -> "AppConfig":

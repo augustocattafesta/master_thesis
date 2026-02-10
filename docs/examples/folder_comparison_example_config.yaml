@@ -1,13 +1,3 @@
-acquisition:
-  date: "2026-01-01"
-  chip: W1a
-  structure: 86.6um
-  gas: Ar
-  w: 26.
-  element: Fe55
-  e_peak: 5.9
-
-
 pipeline:
   # Execute the calibration
   - task: calibration
@@ -31,11 +21,41 @@ pipeline:
   # data with a single exponential model
   - task: compare_gain
     target: main
-    combine: true                                     # Combine the data
-    label: Combine gain for chip W1a 86.6 um    # Set the label
-    yscale: linear
+    combine:                                     # Combine the data
+      - folder
+      - folder1
 
-  # Execute the task to show the energy resolution results from the two folders.
+  # Execute the task to show the energy resolution results from the two folders
+  # without combining the data
   - task: compare_resolution
     target: main
-    label: Compare resolution for chip W1a 86.6 um
+
+# Define the styles for comparison plots
+style:
+  # Set the labels for gain and resolution comparison plot
+  tasks:
+    compare_gain:
+      title: Combine gain results
+      legend_label: $\mu$GPD
+      yscale: linear
+
+    compare_resolution:
+      title: Combine energy resolution results
+      legend_label: $\mu$GPD
+
+  folders:
+    combine:
+      label: Combined data
+      marker: .
+      color: black
+      linestyle: "-"
+    
+    folder:
+      label: Folder 0 data
+      marker: x
+      color: black
+
+    folder1:
+      label: Folder 1 data
+      marker: v
+      color: red

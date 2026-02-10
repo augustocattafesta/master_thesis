@@ -83,6 +83,40 @@ def find_peaks_iterative(xdata: np.ndarray, ydata: np.ndarray,
     return xdata[peaks], ydata[peaks]
 
 
+def average_repeats(x: np.ndarray, y: np.ndarray, yerr: np.ndarray
+                    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calculate the average of values on the y axis for each unique value on the x axis.
+
+    Parameters
+    ---------
+    x : np.ndarray
+        Array of x values.
+    y : np.ndarray
+        Array of y values.
+    yerr : np.ndarray
+        Array of uncertainties on the y values.
+
+    Returns
+    -------
+    x_unique : np.ndarray
+        Unique x values.
+    y_mean : np.ndarray
+        Mean y values for each unique x value.
+    yerr_mean : np.ndarray
+        Uncertainties on the mean y values for each unique x value.
+    """
+    # Find unique x values and indices to reconstruct the original array
+    x_unique, inverse = np.unique(x, return_inverse=True)
+    # Use np.bincount to sum y values and yerr^2 for each unique x value
+    counts = np.bincount(inverse)
+    y_sum = np.bincount(inverse, weights=y)
+    yerr_sq_sum = np.bincount(inverse, weights=yerr**2)
+    # Calculate the mean and uncertainty for each unique x value
+    y_mean = y_sum / counts
+    yerr_mean = np.sqrt(yerr_sq_sum) / counts
+    return x_unique, y_mean, yerr_mean
+
+
 def gain(w: float, line_val: np.ndarray | UFloat, energy: float) -> np.ndarray:
     """Estimate the gain of the detector from the analysis of a spectral emission line.
 

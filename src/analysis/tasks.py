@@ -1,6 +1,6 @@
 """Analysis tasks.
 """
-from typing import Any, Literal
+from typing import Any
 
 import aptapy.models
 import numpy as np
@@ -15,14 +15,23 @@ from .config import (
     GainCompareDefaults,
     GainDefaults,
     PlotDefaults,
+    PlotStyleConfig,
     ResolutionCompareDefaults,
     ResolutionDefaults,
 )
 from .context import Context, FoldersContext, TargetContext
-from .plotting import get_label, get_xrange, write_legend
+from .plotting import (
+    get_label,
+    get_model_label,
+    get_xrange,
+    plot_compare_task,
+    plot_task,
+    write_legend,
+)
 from .utils import (
     SIGMA_TO_FWHM,
     amptek_accumulate_time,
+    average_repeats,
     energy_resolution,
     energy_resolution_escape,
     find_peaks_iterative,
@@ -39,7 +48,7 @@ def calibration(
     """Perform the calibration of the detector using pulse data at fixed voltages.
 
     Parameters
-    ---------
+    ----------
     context : Context
         The context object containing the pulse data in `context.pulse` as an instance
         of the class PulsatorFile.
@@ -107,7 +116,7 @@ def fit_peak(
     """Perform the fitting of a spectral emission line in the source data.
 
     Parameters
-    ---------
+    ----------
     context : Context
         The context object containing the source data in `context.last_source` as an instance
         of the class SourceFile.
@@ -135,10 +144,10 @@ def fit_peak(
     source = context.last_source
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
-    x_peak = hist.bin_centers()[np.argmax(hist.content)]
+    x_peak = hist.bin_centers()[hist.content > 0][5:][np.argmax(hist.content[hist.content > 0][5:])]
     if xmin == float("-inf") and xmax == float("inf"):
-        xmin = x_peak - 0.5 * np.sqrt(x_peak)
-        xmax = x_peak + 0.5 * np.sqrt(x_peak)
+        xmin = x_peak - 0.3 * np.sqrt(x_peak)
+        xmax = x_peak + 0.3 * np.sqrt(x_peak)
     # Define the dictionary of keyword arguments for the fit
     kwargs = dict(
          xmin=xmin,
@@ -182,14 +191,12 @@ def gain_task(
         energy: float = GainDefaults.energy,
         fit: bool = GainDefaults.fit,
         show: bool = PlotDefaults.show,
-        label: str | None = GainDefaults.label,
-        yscale: str = GainDefaults.yscale
         ) -> Context:
     """Calculate the gain of the detector vs the back voltage using the fit results obtained from
     the source data of multiple files.
 
     Parameters
-    ---------
+    ----------
     context : Context
         The context object containing the fit results.
     target : str
@@ -202,10 +209,6 @@ def gain_task(
         Whether to fit the gain trend with an exponential model. Default is True.
     show : bool, optional
         Whether to show the plots of the gain trend. Default is True.
-    label : str, optional
-        The label for the gain trend plot. Default is None.
-    yscale : str, optional
-        The y-axis scale for the gain trend plot. Can be "linear" or "log". Default is "log".
     
     Returns
     -------
@@ -231,25 +234,22 @@ def gain_task(
     # If only a single file is analyzed, return the context without plotting or fitting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    # Create the figure for the gain trend
-    fig = plt.figure("gain_vs_voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
-    plt.xlabel("Voltage [V]")
-    plt.ylabel("Gain")
-    plt.yscale(yscale)
-    # If fit is requested, fit the gain trend with an exponential model
     if fit:
         model = aptapy.models.Exponential()
-        model.fit(voltages, y, sigma=yerr, absolute_sigma=True)
-        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
-        # Add the fit model to the context
+        model.fit(voltages, unumpy.nominal_values(gain_vals),
+                  sigma=unumpy.std_devs(gain_vals), absolute_sigma=True)
         context.add_task_fit_model(task, target, model)
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
+    # Define the plot keyword arguments for style and labels
+    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel="Gain",
+        fig_name=f"gain_{target}",
+        model0_label=get_model_label(task, model) if fit else None,
+        show=show,
+        **style)
+    # Create the figure for the gain
+    fig = plot_task(voltages, gain_vals, model, **plot_kwargs)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -261,7 +261,7 @@ def gain_trend(
         w: float = GainDefaults.w,
         energy: float = GainDefaults.energy,
         subtasks: list[dict[str, Any]] | None = None,
-        label: str | None = GainDefaults.label
+        show: bool = GainDefaults.show,
     ) -> Context:
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
@@ -280,6 +280,8 @@ def gain_trend(
     subtasks : list[str], optional
         The list of fitting subtasks to fit the gain trend. If None, no fitting is performed.
         Default is None.
+    show : bool, optional
+        Whether to display the plot. Default is True.
     
     Returns
     -------
@@ -308,16 +310,11 @@ def gain_trend(
     times = amptek_accumulate_time(start_times, real_times) / 3600
     # Save the results in the context
     context.add_task_results(task, target, dict(times=times, gain_vals=gain_vals))
-    y = unumpy.nominal_values(gain_vals)
-    yerr = unumpy.std_devs(gain_vals)
-    # Create the figure for the gain trend
-    fig = plt.figure("gain_vs_time")
-    plt.errorbar(times, y, yerr=yerr, fmt=".", label="Data")
-    plt.xlabel("Time [hours]")
-    plt.ylabel("Gain")
     # If fitting subtasks are provided, fit the gain trend with the specified models
+    models = []
+    model_labels = dict()
     if subtasks:
-        for subtask in subtasks:
+        for i, subtask in enumerate(subtasks):
             # Think how to refactor this part
             model_list = load_class(subtask["model"])
             model = model_list[0]()
@@ -330,12 +327,27 @@ def gain_trend(
                 absolute_sigma=fit_pars["absolute_sigma"],
                 p0=fit_pars["p0"]
             )
-            model.fit(times, y, sigma=yerr, **kwargs)
-            model.plot(fit_output=True, plot_components=False)
+            model.fit(times, unumpy.nominal_values(gain_vals),
+                      sigma=unumpy.std_devs(gain_vals),
+                      **kwargs)
+            # model.plot(fit_output=True, plot_components=False)
+            models.append(model)
+            model_labels[f"model{i}_label"] = get_model_label(task, model)
             # Update the context with the fit results
             context.add_subtask_fit_model(task, target, subtask["target"], model)
             # context["results"][task][target][name] = dict(model=model)
-    write_legend(label)
+    # Define the plot keyword arguments for style and labels
+    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    plot_kwargs = dict(
+        xlabel="Time from start [hours]",
+        ylabel="Gain",
+        fig_name=f"gain_trend_{target}",
+        show=show,
+        **model_labels,
+        **style)
+    # Create the figure for the gain trend
+    fig = plot_task(times, gain_vals, *models, **plot_kwargs)
+    # Add the figure to the context
     context.add_figure(task, fig)
     return context
 
@@ -343,9 +355,8 @@ def gain_trend(
 def compare_gain(
         context: FoldersContext,
         target: str,
-        combine: bool = GainCompareDefaults.combine,
-        label: str | None = GainCompareDefaults.label,
-        yscale: Literal["linear", "log"] = GainCompareDefaults.yscale
+        combine: list[str] = GainCompareDefaults.combine,
+        show: bool = GainCompareDefaults.show,
         ) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
@@ -356,13 +367,10 @@ def compare_gain(
         The context object containing the fit results.
     target : str
         The name of the spectral line fitting subtask to use for gain comparison.
-    combine : bool, optional
-        Whether to combine all gain data from different folders and fit them together. Default is
-        False.
-    label : str, optional
-        The label for the gain comparison plot. Default is None.
-    yscale : str, optional
-        The y-axis scale for the gain comparison plot. Can be "linear" or "log". Default is "log".
+    combine : list[str], optional
+        List of folder names to combine for gain comparison. Default is an empty list.
+    show : bool, optional
+        Whether to show the plots of the gain comparison. Default is True.
     
     Returns
     -------
@@ -371,49 +379,108 @@ def compare_gain(
     """
     # pylint: disable=invalid-unary-operand-type
     task = "compare_gain"
+    folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
     # Create empty arrays to store gain values and voltages
-    y = np.zeros(len(folder_names), dtype=object)
-    yerr = np.zeros(len(folder_names), dtype=object)
-    x = np.zeros(len(folder_names), dtype=object)
+    y = np.zeros(len(combine), dtype=object)
+    yerr = np.zeros(len(combine), dtype=object)
+    x = np.zeros(len(combine), dtype=object)
     # Create the figure for the gain comparison
-    fig = plt.figure("gain_comparison")
+    fig, ax = plt.subplots(num="gain_comparison")
     # Iterate over all folders and plot the gain values
-    for i, folder_name in enumerate(folder_names):
+    j = 0
+    for folder_name in folder_names:
         folder_ctx = context.folder_ctx(folder_name)
         folder_gain = folder_ctx.task_results("gain", target)
-        g_val = unumpy.nominal_values(folder_gain.get("gain_vals", []))
-        g_err = unumpy.std_devs(folder_gain.get("gain_vals", []))
+        gain_vals = folder_gain.get("gain_vals", [])
         voltages = folder_gain.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not combine:
-            plt.errorbar(voltages, g_val, yerr=g_err, fmt=".", label=folder_name)
+        if folder_name not in combine:
+            style = folders_style.get(folder_name, PlotStyleConfig()).model_dump()
             model = folder_gain.get("model", None)
-            if model:
-                model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+            plot_kwargs = dict(
+                model_label=get_model_label(task, model) if model else None,
+                **style)
+            plot_compare_task(ax, voltages, gain_vals, model, **plot_kwargs)
         # If aggregating, store the data together for later fitting and plotting
         else:
-            y[i] = g_val
-            yerr[i] = g_err
-            x[i] = voltages
+            y[j] = unumpy.nominal_values(gain_vals)
+            yerr[j] = unumpy.std_devs(gain_vals)
+            x[j] = voltages
+            j += 1
     if combine:
         # Concatenate all data and fit with an exponential model
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
+        # Calculate the mean gain for each repeated voltage
+        x, y, yerr = average_repeats(x, y, yerr)
         model = aptapy.models.Exponential()
         model.fit(x, y, sigma=yerr, absolute_sigma=True)
         # Plot the aggregated data and fit model
-        plt.errorbar(x, y, yerr=yerr, fmt=".")
-        model.plot(label=f"Scale: {-model.scale.ufloat()} V", color=last_line_color())
+        style = folders_style.get("combine", PlotStyleConfig()).model_dump()
+        plot_kwargs = dict(
+            model_label=get_model_label(task, model),
+            **style)
+        plot_compare_task(ax, x, unumpy.uarray(y, yerr), model, **plot_kwargs)
+        # Update the context with the fit results
         context.add_task_results(task, target, dict(model=model))
+    # Define the task plot keyword arguments for style and labels
+    task_style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    # Set the title of the plot
+    if task_style["title"] is not None:
+        plt.title(task_style["title"])
+    # Set the labels and the axis scales
     plt.xlabel("Voltage [V]")
     plt.ylabel("Gain")
-    plt.yscale(yscale)
+    plt.xscale(task_style["xscale"])
+    plt.yscale(task_style["yscale"])
     # Write the legend and show the plot
-    write_legend(label)
+    write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
+    plt.tight_layout()
+    if not show:
+        plt.close(fig)
     # Add the figure to the context
+    context.add_figure(task, fig)
+    return context
+
+
+def compare_trend(
+        context: FoldersContext,
+        target: str,
+        show: bool = GainCompareDefaults.show,
+        ) -> FoldersContext:
+    task = "compare_trend"
+    folder_style = context.config.style.folders
+
+    folder_names = context.folder_names
+    fig = plt.figure("trend_comparison")
+    for folder_name in folder_names:
+        folder_ctx = context.folder_ctx(folder_name)
+        trend = folder_ctx.task_results("gain_trend", target)
+        times = trend.get("times", [])
+        g_val = unumpy.nominal_values(trend.get("gain_vals", []))
+        g_err = unumpy.std_devs(trend.get("gain_vals", []))
+        style = folder_style.get(folder_name, PlotStyleConfig()).model_dump(exclude_none=True)
+        plt.errorbar(times, g_val, yerr=g_err,
+                     marker=style.get("marker", "."),
+                     color=style.get("color", None),
+                     ls="",
+                     label=style.get("label", folder_name))
+        for key, model_target in trend.items():
+            if key in ["times", "gain_vals"]:
+                continue
+            model = model_target.get("model", None)
+            if model:
+                model.plot(fit_output=True, plot_components=False,
+                           linestyle=style.get("linestyle", "-"),
+                           color=style.get("color", last_line_color()))
+    plt.xlabel("Time [hours]")
+    plt.ylabel("Gain")
+    # write_legend(label)
+    if not show:
+        plt.close(fig)
     context.add_figure(task, fig)
     return context
 
@@ -422,7 +489,6 @@ def resolution_task(
         context: Context,
         target: str,
         show: bool = ResolutionDefaults.show,
-        label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This estimate is based on the position and the width of the target spectral
@@ -437,8 +503,6 @@ def resolution_task(
         is performed. Default is None.
     show : bool, optional
         Whether to show the plots of the resolution trend. Default is True.
-    label : str, optional
-        The label for the resolution trend plot. Default is None.
     
     Returns
     -------
@@ -465,21 +529,16 @@ def resolution_task(
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    min_idx = np.argmin(y)
+    # Define the plot keyword arguments for style and labels
+    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel=r"$\Delta$E/E",
+        fig_name=f"resolution_{target}",
+        show=show,
+        **style)
     # Create the figure for the resolution trend
-    fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".", label="Data")
-    # Write the minimum resolution value on the plot
-    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
-                 textcoords="offset points", ha="center", va="top", fontsize=12)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E/E")
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
+    fig = plot_task(voltages, res_vals, **plot_kwargs)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -490,7 +549,6 @@ def resolution_escape(
         target_main: str,
         target_escape: str,
         show: bool = ResolutionDefaults.show,
-        label: str | None = ResolutionDefaults.label
         ) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This calculation is based on the position and width of the main spectral line and
@@ -506,8 +564,6 @@ def resolution_escape(
     target_escape : str, optional
         The name of the fitting subtask corresponding to the escape peak. If None, no calculation is
         performed. Default is None.
-    label : str, optional
-        The label for the resolution trend plot. Default is None.
     show : bool, optional
         Whether to show the plots of the resolution trend. Default is True.
     
@@ -539,22 +595,15 @@ def resolution_escape(
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
-    y = unumpy.nominal_values(res_vals)
-    yerr = unumpy.std_devs(res_vals)
-    min_idx = np.argmin(y)
     # Create the figure for the resolution trend
-    fig = plt.figure("Resolution vs Voltage")
-    plt.errorbar(voltages, y, yerr=yerr, fmt=".k", label=label)
-    # Write the minimum resolution value on the plot
-    plt.annotate(f"{y[min_idx]:.2f}", xy=(voltages[min_idx], y[min_idx]), xytext=(0, 30),
-                 textcoords="offset points", ha="center", va="top", fontsize=12)
-    plt.xlabel("Voltage [V]")
-    plt.ylabel(r"$\Delta$E/E")
-    # Write the legend and show or close the plot
-    write_legend(label)
-    if not show:
-        plt.close(fig)
-    # Add the figure to the context
+    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    plot_kwargs = dict(
+        xlabel="Voltage [V]",
+        ylabel=r"$\Delta$E/E (escape)",
+        fig_name=f"resolution_esc_{target_main}",
+        show=show,
+        **style)
+    fig = plot_task(voltages, res_vals, **plot_kwargs)
     context.add_figure(task, fig)
     return context
 
@@ -562,14 +611,14 @@ def resolution_escape(
 def compare_resolution(
         context: FoldersContext,
         target: str,
-        combine: bool = ResolutionCompareDefaults.combine,
-        label: str | None = ResolutionCompareDefaults.label
+        combine: list[str] = ResolutionCompareDefaults.combine,
+        show: bool = ResolutionCompareDefaults.show,
         ) -> FoldersContext:
     """Compare the energy resolution of multiple folders vs voltage using the results obtained
     from the resolution task.
 
     Parameters
-    ---------
+    ----------
     context : FoldersContext
         The context object containing the resolution results.
     target : str
@@ -577,8 +626,8 @@ def compare_resolution(
     combine : bool, optional
         Whether to combine all resolution data from different folders and show as a single dataset.
         Default is False.
-    label : str, optional
-        The label for the resolution comparison plot. Default is None.
+    show : bool, optional
+        Whether to show the plots of the resolution comparison. Default is True.
     
     Returns
     -------
@@ -586,40 +635,58 @@ def compare_resolution(
         The updated context object containing the resolution comparison results.
     """
     task = "compare_resolution"
+    folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
     # Create the empty arrays to store resolution values and voltages
-    y = np.zeros(len(folder_names), dtype=object)
-    yerr = np.zeros(len(folder_names), dtype=object)
-    x = np.zeros(len(folder_names), dtype=object)
+    y = np.zeros(len(combine), dtype=object)
+    yerr = np.zeros(len(combine), dtype=object)
+    x = np.zeros(len(combine), dtype=object)
     # Create the figure for the resolution comparison
-    fig = plt.figure("resolution_comparison")
+    fig, ax = plt.subplots(num="resolution_comparison")
     # Iterate over all folders and plot the resolution values
-    for i, folder_name in enumerate(folder_names):
+    j = 0
+    for folder_name in folder_names:
         folder_ctx = context.folder_ctx(folder_name)
         folder_res = folder_ctx.task_results("resolution", target)
-        res_val = unumpy.nominal_values(folder_res.get("res_vals", []))
-        res_err = unumpy.std_devs(folder_res.get("res_vals", []))
+        res_vals = folder_res.get("res_vals", [])
+        # res_val = unumpy.nominal_values(folder_res.get("res_vals", []))
+        # res_err = unumpy.std_devs(folder_res.get("res_vals", []))
         voltages = folder_res.get("voltages", [])
         # If not aggregating, plot each folder separately
-        if not combine:
-            plt.errorbar(voltages, res_val, yerr=res_err, fmt=".", label=folder_name)
+        if folder_name not in combine:
+            style = folders_style.get(folder_name, PlotStyleConfig()).model_dump()
+            plot_compare_task(ax, voltages, res_vals, None, **style)
         # If aggregating, store the data together for later plotting
         else:
-            y[i] = res_val
-            yerr[i] = res_err
-            x[i] = voltages
+            y[j] = unumpy.nominal_values(res_vals)
+            yerr[j] = unumpy.std_devs(res_vals)
+            x[j] = voltages
+            j += 1
     if combine:
         # Concatenate all data
         y = np.concatenate(y)
         yerr = np.concatenate(yerr)
         x = np.concatenate(x)
+        x, y, yerr = average_repeats(x, y, yerr)
         # Plot the aggregated data
-        plt.errorbar(x, y, yerr=yerr, fmt=".")
+        style = folders_style.get("combine", PlotStyleConfig()).model_dump()
+        plot_compare_task(ax, x, unumpy.uarray(y, yerr), None, **style)
+    # Define the task plot keyword arguments for style and labels
+    task_style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    # Set the title of the plot
+    if task_style["title"] is not None:
+        plt.title(task_style["title"])
+    # Set the labels and the axis scales
     plt.xlabel("Voltage [V]")
     plt.ylabel(r"$\Delta$E/E")
+    plt.xscale(task_style["xscale"])
+    plt.yscale(task_style["yscale"])
     # Write the legend and show the plot
-    write_legend(label)
+    write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
+    plt.tight_layout()
+    if not show:
+        plt.close(fig)
     # Add the figure to the context
     context.add_figure(task, fig)
     return context
@@ -799,7 +866,7 @@ def plot_spectrum(
         write_legend(_label, loc=loc)
         # Add the figure to the context
         context.add_figure(file_name, fig)
+        plt.tight_layout()
         if not show:
             plt.close(fig)
-        plt.tight_layout()
     return context

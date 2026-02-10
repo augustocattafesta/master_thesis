@@ -1,13 +1,3 @@
-acquisition:
-  date: "2026-01-01"
-  chip: W1a
-  structure: 86.6um
-  gas: Ar
-  w: 26.
-  element: Fe55
-  e_peak: 5.9
-
-
 pipeline:
   # Execute the calibration
   - task: calibration
@@ -50,4 +40,3 @@ pipeline:
     # Scale the xrange on the left to show the escape peak, which of Fe55 is
     # located at about half the charge of the main peak.
     xmin_factor: 0.5
-

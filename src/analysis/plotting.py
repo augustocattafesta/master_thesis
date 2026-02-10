@@ -1,8 +1,10 @@
 from typing import Any
 
+import aptapy.models
 import numpy as np
-from aptapy.modeling import AbstractFitModel
-from aptapy.plotting import plt
+from aptapy.modeling import AbstractFitModel, FitModelSum
+from aptapy.plotting import last_line_color, plt
+from uncertainties import unumpy
 
 from .context import TargetContext
 from .fileio import SourceFile
@@ -90,3 +92,145 @@ def get_label(task_labels: list[str] | None, target_ctx: TargetContext) -> str |
     # Remove the trailing newline character
     label = label[:-1]
     return label
+
+
+def get_model_label(task: str, model: AbstractFitModel) -> str:
+    """Generate a label for the fitted model based on the analysis task and the model parameters.
+    
+    Arguments
+    ---------
+    task : str
+        The name of the analysis task being performed.
+    model : AbstractFitModel
+        The fitted model for which to generate the label.
+    """
+    # If gain task, return the scale parameter of the exponential
+    if task in ("gain", "compare_gain"):
+        if isinstance(model, aptapy.models.Exponential):
+            return f"Scale: {-model.scale.ufloat()} V"
+        return model.name()
+    # If gain trend task, think about what to return.
+    if task == "gain_trend":
+        return "IDK"
+    raise NotImplementedError(f"Model label generation not implemented for task '{task}' and "
+                              f"model type '{type(model)}'.")
+
+
+def plot_task(xdata: np.ndarray, ydata: np.ndarray, *models: AbstractFitModel,
+              **kwargs) -> plt.Figure:
+    """Plot the data and fitted models for a given analysis task.
+
+    Arguments
+    ---------
+    xdata : np.ndarray
+        The x-axis data points.
+    ydata : np.ndarray
+        The y-axis data points, which may include uncertainties.
+    models : AbstractFitModel
+        The fitted models to plot alongside the data.
+    kwargs : dict
+        Additional keyword arguments for customizing the plot, such as labels, titles, and scales.
+    
+    Returns
+    -------
+    fig : plt.Figure
+        The matplotlib figure object containing the plot.
+    """
+    # Extract the nominal values and standard deviations. Note that even if ydata is not a unumpy
+    # array with nominal values and std devs, these functions will still work correctly, and the
+    # output of std devs is an array full of zeros.
+    ydata_vals = unumpy.nominal_values(ydata)
+    ydata_errs = unumpy.std_devs(ydata)
+    # Create the figure object
+    fig = plt.figure(kwargs.get("fig_name"))
+    # Plot the data
+    plt.errorbar(
+        xdata,
+        ydata_vals,
+        yerr=ydata_errs,
+        marker=kwargs["marker"],
+        linestyle="",
+        label=kwargs["label"],
+        color=kwargs["color"]
+    )
+    # Plot all models
+    for i, model in enumerate(models):
+        model_label = kwargs.get(f"model{i}_label")
+        fit_output = kwargs.get("fit_output", False)
+        if isinstance(model, FitModelSum):
+            plot_components = False
+            model.plot(fit_output=fit_output,
+                       label=model_label,
+                       linestyle=kwargs["linestyle"],
+                       color=last_line_color(),
+                       plot_components=plot_components)
+        else:
+            model.plot(fit_output=fit_output,
+                       label=model_label,
+                       linestyle=kwargs["linestyle"],
+                       color=last_line_color())
+    # Annotate the minimum y value if requested
+    if kwargs["annotate_min"]:
+        min_idx = np.argmin(ydata_vals)
+        plt.annotate(f"{ydata_vals[min_idx]:.2f}",
+                    xy=(xdata[min_idx],
+                    ydata_vals[min_idx]),
+                    xytext=(0, 30),
+                    textcoords="offset points",
+                    ha="center", va="top",
+                    fontsize=12)
+    # Set the labels and scales
+    plt.xlabel(kwargs.get("xlabel", "X axis"))
+    plt.ylabel(kwargs.get("ylabel", "Y axis"))
+    plt.xscale(kwargs["xscale"])
+    plt.yscale(kwargs["yscale"])
+    # Set the title if provided
+    if "title" in kwargs:
+        plt.title(kwargs["title"])
+    # Write the legend with the provided label
+    write_legend(kwargs["legend_label"], loc=kwargs["legend_loc"])
+    plt.tight_layout()
+    # Close the plot if specified
+    if not kwargs.get("show", True):
+        plt.close()
+    return fig
+
+
+def plot_compare_task(ax: plt.Axes, xdata: np.ndarray, ydata: np.ndarray,
+                 model: AbstractFitModel | None = None, **kwargs) -> None:
+    """Plot the data and fitted model for a comparison task on the given axes.
+    
+    Arguments
+    ---------
+    ax : plt.Axes
+        The matplotlib axes on which to plot the data and model.
+    xdata : np.ndarray
+        The x-axis data points.
+    ydata : np.ndarray
+        The y-axis data points, which may include uncertainties.
+    model : AbstractFitModel, optional
+        The fitted model to plot alongside the data, by default None.
+    kwargs : dict
+        Additional keyword arguments for customizing the plot, such as labels, titles, and scales.
+    """
+    # Extract the nominal values and standard deviations. Note that even if ydata is not a unumpy
+    # array with nominal values and std devs, these functions will still work correctly, and the
+    # output of std devs is an array full of zeros.
+    ydata_vals = unumpy.nominal_values(ydata)
+    ydata_errs = unumpy.std_devs(ydata)
+    # Plot the data with error bars on the provided axes
+    ax.errorbar(
+        xdata,
+        ydata_vals,
+        yerr=ydata_errs,
+        marker=kwargs["marker"],
+        linestyle="",
+        label=kwargs["label"],
+        color=kwargs["color"]
+    )
+    # Plot the model if provided
+    if model:
+        model_label = kwargs.get("model_label")
+        model.plot(label=model_label,
+                   linestyle=kwargs["linestyle"],
+                   color=last_line_color())
