@@ -285,6 +285,14 @@ class Context(ContextBase):
         file_name = source.file_path.stem
         self._sources[file_name] = source
 
+    def remove_source(self, source: str | SourceFile) -> None:
+        """Remove a source from the private `source` dictionary of the context.
+        """
+        if isinstance(source, SourceFile):
+            self._sources.pop(source.file_path.stem)
+        elif isinstance(source, str):
+            self._sources.pop(source)
+
     def source(self, file_name: str) -> SourceFile:
         """Retrieve a source file from the private `sources` dictionary by its file name."""
         if file_name not in self._sources:

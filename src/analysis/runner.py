@@ -17,7 +17,6 @@ from .tasks import (
     resolution_escape,
     resolution_task,
 )
-from .utils import load_class
 
 TaskFunction = Callable[..., Context]
 TaskFunctionFolders = Callable[..., FoldersContext]
@@ -143,9 +142,8 @@ def run_folders(
     for task in pipeline:
         if task.task not in FOLDERS_TASK_REGISTRY:
             continue
+        # Select the appropriate task function from the registry
         func = FOLDERS_TASK_REGISTRY.get(task.task)
         if func:
-            # Remove the name of the task from the keyword arguments
-            kwargs = task.model_dump(exclude={"task"})
-            context = func(context, **kwargs)
+            context = func(context, task)
     return context

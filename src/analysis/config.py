@@ -333,33 +333,56 @@ class TrendGainConfig(BaseModel):
 
 @dataclass(frozen=True)
 class PlotDefaults:
-    title: str | None = None
-    label: str | None = None
+    """Default values for the plot task.
+    """
     task_labels: list[str] | None = None
-    loc: str = "best"
+    voltage: bool = False
     xrange: list[float] | None = Field(None, min_length=2, max_length=2)
     xmin_factor: float = 1.
     xmax_factor: float = 1.
-    voltage: bool = False
     show: bool = True
 
 
 class PlotConfig(BaseModel):
+    """Plot the spectra and the fit results for each source file. It is possible to specify
+    different plotting options and choose which fit results to show.
+
+    Attributes
+    ----------
+    task: str
+        Name of the task, to perform it must be 'plot'.
+    targets: list[str] | None
+        List of target names of the fitting subtasks to show in the plot. If None, the entire
+        spectrum is shown, with no best-fit curve. Default is None.
+    task_labels: list[str] | None
+        List of analysis task result labels to show in the plot legend. If None, no result is
+        shown in the legend. Default is None.
+    voltage: bool, optional
+        Whether to show the source voltage information in the plot legend. Default is False.
+    xrange: list[float] | None
+        Range of x values to show in the plot. If None, the range is automatically determined from
+        the best-fit results, taking 5 sigma around the peak(s) position(s). Default is None.
+    xmin_factor: float
+        Factor to multiply the automatically determined minimum x value for the plot. Default is 1.
+    xmax_factor: float
+        Factor to multiply the automatically determined maximum x value for the plot. Default is 1.
+    show: bool, optional
+        Whether to show the generated plot. Default is True.
+    """
     task: Literal["plot"]
     targets: list[str] | None = None
-    title: str | None = PlotDefaults.title
-    label: str | None = PlotDefaults.label
     task_labels: list[str] | None = PlotDefaults.task_labels
-    loc: str = PlotDefaults.loc
+    voltage: bool = PlotDefaults.voltage
     xrange: list[float] | None = PlotDefaults.xrange
     xmin_factor: float = PlotDefaults.xmin_factor
     xmax_factor: float = PlotDefaults.xmax_factor
-    voltage: bool = PlotDefaults.voltage
     show: bool = PlotDefaults.show
 
 
 @dataclass(frozen=True)
 class PlotStyleDefaults:
+    """Default values for the plot style.
+    """
     xscale: Literal["linear", "log"] = "linear"
     yscale: Literal["linear", "log"] = "linear"
     title: str | None = None
@@ -374,6 +397,42 @@ class PlotStyleDefaults:
 
 
 class PlotStyleConfig(BaseModel):
+    """Configure the style of the plots. These settings can be configured for each task and folder
+    analyzed during the pipeline analysis.
+
+    Attributes
+    ----------
+    xscale : str
+        Set the scale of the x-axis of the plot. The choices are between `linear` and `log`.
+        Default is `linear`.
+    yscale : str
+        Set the scale of the y-axis of the plot. The choices are between `linear` and `log`.
+        Default is `linear`.
+    title : str | None
+        Set the title shown at the top of the plot. Default is None.
+    label : str | None
+        Set the label associated to data to show in the legend. Default is 'Data'.
+    legend_label : str | None
+        Set the label to show at the top of the legend. This setting is useful to add information
+        to the legend. Default is None.
+    legend_loc : str
+        Set the position of the legend in the plot. See matplotlib docs for the possible choices.
+        Default is `best`.
+    marker : str
+        Set the marker style for the data points. See matplotlib docs for the possible choices.
+        Default is `.`.
+    linestyle : str
+        Set the line style for the best-fit curve. See matplotlib docs for the possible choices.
+        Default is `-`.
+    color : str
+        Set the color of the marker and of the line. See matplotlib docs for the possible choices.
+        Default is `black`.
+    fit_output : bool
+        Whether to show the best-fit parameters and information in the legend. Default is False.
+    annotate_min : bool
+        Whether to show a textbox with the value of the minimum of the plot near the point. Default
+        is False.
+    """
     xscale: Literal["linear", "log"] = PlotStyleDefaults.xscale
     yscale: Literal["linear", "log"] = PlotStyleDefaults.yscale
     title: str | None = PlotStyleDefaults.title
@@ -388,6 +447,18 @@ class PlotStyleConfig(BaseModel):
 
 
 class StyleConfig(BaseModel):
+    """Define the style of the tasks performed during the analysis pipeline and configure the style
+    for each folder. See the guide or the example in the package documentation for more
+    informations.
+
+    Attributes
+    ----------
+    tasks : dict[str, PlotStyleConfig]
+        Write a .yaml dictionary to configure the style for each task.
+    folders : dict[str, PlotStyleConfig]
+        Write a .yaml dictionary to configure the style of each folder analyzed during the
+        analysis. 
+    """
     tasks: dict[str, PlotStyleConfig] = Field(default_factory=dict)
     folders: dict[str, PlotStyleConfig] = Field(default_factory=dict)
 
@@ -404,7 +475,8 @@ class Acquisition(BaseModel):
 
 TaskType = CalibrationConfig | FitSpecConfig | GainConfig | ResolutionConfig | \
     ResolutionEscapeConfig | TrendGainConfig | PlotConfig | DriftConfig | CompareGainConfig | \
-    CompareResolutionConfig | CompareTrendConfig | SourceConfig
+    CompareResolutionConfig | CompareTrendConfig
+
 
 class AppConfig(BaseModel):
     acquisition: Acquisition = Field(default_factory=Acquisition)
@@ -424,8 +496,12 @@ class AppConfig(BaseModel):
             yaml.safe_dump(data, f, sort_keys=False, default_flow_style=False)
 
     @property
-    def calibration(self) -> CalibrationConfig | None:
-        return next((t for t in self.pipeline if isinstance(t, CalibrationConfig)), None)
+    def calibration(self) -> CalibrationConfig:
+        _config = next((t for t in self.pipeline if isinstance(t, CalibrationConfig)), None)
+        if not _config:
+            raise RuntimeError("No calibration task found in the pipeline. Make sure to specify a" \
+            " calibration task.")
+        return _config
 
     @property
     def fit_spec(self) -> FitSpecConfig | None:
@@ -434,6 +510,3 @@ class AppConfig(BaseModel):
     @property
     def plot(self) -> PlotConfig | None:
         return next((t for t in self.pipeline if isinstance(t, PlotConfig)), None)
-
-
-
