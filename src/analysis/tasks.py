@@ -128,31 +128,26 @@ def fit_peak(context: Context, subtask: FitSubtaskConfig) -> Context:
     # Fit the data. We only support Gaussian and Fe55Forest models.
     if isinstance(model, aptapy.models.Fe55Forest):
         model.intensity1.freeze(0.16)   # type: ignore[attr-defined]
-    try:
-        model.fit_iterative(hist, **kwargs) # type: ignore[attr-defined]
-        # Extract the line value and sigma from the fit results
-        if isinstance(model, aptapy.models.Gaussian):
-            line_val = model.status.correlated_pars[1]
-            sigma = model.status.correlated_pars[2]
-        elif isinstance(model, aptapy.models.Fe55Forest):
-            reference_energy: float = model.energies[0]   # type: ignore [attr-defined]
-            line_val = reference_energy / model.status.correlated_pars[1]
-            sigma = model.status.correlated_pars[2]
-        else:
-            raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
-        # Update the context with the fit results
-        target_ctx = TargetContext(target, line_val, sigma, source.voltage, model)
-        target_ctx.energy = context.config.acquisition.e_peak
-        # Add the fwhm to the target context
-        fwhm = SIGMA_TO_FWHM * sigma
-        target_ctx.fwhm_val = fwhm
-        # Save the target context in the main context
-        context.add_target_ctx(source, target_ctx)
-        return context
-    except RuntimeError:
-        # Remove the source from the context to avoid accessing the results in later tasks
-        context.remove_source(source)
-        return context
+    model.fit_iterative(hist, **kwargs) # type: ignore[attr-defined]
+    # Extract the line value and sigma from the fit results
+    if isinstance(model, aptapy.models.Gaussian):
+        line_val = model.status.correlated_pars[1]
+        sigma = model.status.correlated_pars[2]
+    elif isinstance(model, aptapy.models.Fe55Forest):
+        reference_energy: float = model.energies[0]   # type: ignore [attr-defined]
+        line_val = reference_energy / model.status.correlated_pars[1]
+        sigma = model.status.correlated_pars[2]
+    else:
+        raise TypeError(f"Model of type {type(model)} not supported in fit_peak task")
+    # Update the context with the fit results
+    target_ctx = TargetContext(target, line_val, sigma, source.voltage, model)
+    target_ctx.energy = context.config.acquisition.e_peak
+    # Add the fwhm to the target context
+    fwhm = SIGMA_TO_FWHM * sigma
+    target_ctx.fwhm_val = fwhm
+    # Save the target context in the main context
+    context.add_target_ctx(source, target_ctx)
+    return context
 
 
 def gain_task(context: Context, task: GainConfig) -> Context:
