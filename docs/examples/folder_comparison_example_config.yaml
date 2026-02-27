@@ -40,16 +40,18 @@ style:
       yscale: linear
 
     compare_resolution:
-      title: Combine energy resolution results
+      title: Compare energy resolution results
       legend_label: $\mu$GPD
 
   folders:
+    # Set combined data style (only for gain)
     combine:
       label: Combined data
       marker: .
       color: black
-      linestyle: "-"
+      linestyle: "--"
     
+    # Set folder data style (for resolution)
     folder:
       label: Folder 0 data
       marker: x

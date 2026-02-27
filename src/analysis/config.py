@@ -121,6 +121,17 @@ class SourceDefaults:
 
 
 class SourceConfig(BaseModel):
+    """Set the acquisition parameters of the source and the detector.
+
+    Attributes
+    ----------
+    energy : float
+        The energy of the main emission line, expressed in keV. Default is K-alpha of Fe55
+        (5.9keV).
+    w : float
+        W-value of the gas used in the detector, expressed in eV. Default is 26.0 eV, which
+        is the W-value of Argon.
+    """
     energy: float = SourceDefaults.energy
     w: float = SourceDefaults.w
 
