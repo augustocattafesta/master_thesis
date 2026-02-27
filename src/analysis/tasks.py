@@ -150,7 +150,6 @@ def fit_peak(context: Context, subtask: FitSubtaskConfig) -> Context:
         context.add_target_ctx(source, target_ctx)
         return context
     except RuntimeError:
-        # TODO: Insert a logger to monitor the fit results
         # Remove the source from the context to avoid accessing the results in later tasks
         context.remove_source(source)
         return context
