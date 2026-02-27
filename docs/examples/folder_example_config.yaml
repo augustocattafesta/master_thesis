@@ -8,7 +8,6 @@ pipeline:
       # Fit the main line of the spectrum with a double Gaussian.
       - target: main
         model: Fe55Forest
-        # For well-behaved spectra no optional parameters should be needed
 
     # Estimate the gain from the main line  
   - task: gain
@@ -21,13 +20,15 @@ pipeline:
     target: main
     show: true        # Plot resolution vs back voltage
   
+# Set the style of the tasks plot
 style:
   tasks:
+    # Configure gain task plot
     gain:
       marker: d
       linestyle: --
       color: black
-      label: Data
+      label: Gain data
       legend_label: $\mu$GPD
       title: Gain analysis
       yscale: log
@@ -35,7 +36,7 @@ style:
     resolution:
       marker: .
       color: blue
-      label: Data
+      label: Resolution data
       legend_label: $\mu$GPD
       title: Energy resolution analysis
       annotate_min: true

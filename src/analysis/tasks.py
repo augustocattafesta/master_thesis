@@ -1,23 +1,23 @@
 """Analysis tasks.
 """
-from typing import Any
 
 import aptapy.models
 import numpy as np
-from aptapy.modeling import AbstractFitModel
 from aptapy.plotting import last_line_color, plt
 from uncertainties import unumpy
 
 from .config import (
-    CalibrationDefaults,
-    DriftDefaults,
-    FitPeakDefaults,
-    GainCompareDefaults,
-    GainDefaults,
-    PlotDefaults,
+    CompareGainConfig,
+    CompareResolutionConfig,
+    CompareTrendConfig,
+    DriftConfig,
+    FitSubtaskConfig,
+    GainConfig,
+    PlotConfig,
     PlotStyleConfig,
-    ResolutionCompareDefaults,
-    ResolutionDefaults,
+    ResolutionConfig,
+    ResolutionEscapeConfig,
+    TrendGainConfig,
 )
 from .context import Context, FoldersContext, TargetContext
 from .plotting import (
@@ -40,11 +40,7 @@ from .utils import (
 )
 
 
-def calibration(
-          context: Context,
-          charge_conversion: bool = CalibrationDefaults.charge_conversion,
-          show: bool = PlotDefaults.show
-      ) -> Context:
+def calibration(context: Context) -> Context:
     """Perform the calibration of the detector using pulse data at fixed voltages.
 
     Parameters
@@ -52,11 +48,6 @@ def calibration(
     context : Context
         The context object containing the pulse data in `context.pulse` as an instance
         of the class PulsatorFile.
-    charge_conversion : bool, optional
-        Whether to convert the calibration to charge (fC) or leave it in voltage (mV).
-        Default is True.
-    show : bool, optional
-        Whether to generate and show the plots of the calibration process. Default is True.
     
     Returns
     -------
@@ -64,6 +55,8 @@ def calibration(
         The updated context object containing the calibration results in
         `context.conversion_model`.
     """
+    # Get the CalibrationConfig
+    config = context.config.calibration.model_dump()
     # Get the histogram of the data and plot it
     pulse = context.pulse
     hist = pulse.hist
@@ -81,7 +74,7 @@ def calibration(
         peak_model.plot(fit_output=True)
     plt.legend()
     # Fit the data to find the calibration parameters
-    ylabel = "Charge [fC]" if charge_conversion else "Voltage [mV]"
+    ylabel = "Charge [fC]" if config["charge_conversion"] else "Voltage [mV]"
     model = aptapy.models.Line("Calibration", "ADC Channel", ylabel)
     xdata = unumpy.nominal_values(mu_peak)
     ydata = pulse.voltage
@@ -91,7 +84,7 @@ def calibration(
     plt.errorbar(xdata, ydata, fmt=".k", label="Data")
     model.plot(fit_output=True, color=last_line_color())
     plt.legend()
-    if not show:
+    if not config["show"]:
         plt.close(pulse_fig)
         plt.close(cal_fig)
     # Update the context with the calibration model
@@ -102,17 +95,7 @@ def calibration(
     return context
 
 
-def fit_peak(
-          context: Context,
-          target: str,
-          model_class: list[type[AbstractFitModel]],
-          xmin: float = FitPeakDefaults.xmin,
-          xmax: float = FitPeakDefaults.xmax,
-          num_sigma_left: float = FitPeakDefaults.num_sigma_left,
-          num_sigma_right: float = FitPeakDefaults.num_sigma_right,
-          absolute_sigma: bool = FitPeakDefaults.absolute_sigma,
-          p0: list[float] | None = FitPeakDefaults.p0
-      ) -> Context:
+def fit_peak(context: Context, subtask: FitSubtaskConfig) -> Context:
     """Perform the fitting of a spectral emission line in the source data.
 
     Parameters
@@ -120,46 +103,29 @@ def fit_peak(
     context : Context
         The context object containing the source data in `context.last_source` as an instance
         of the class SourceFile.
-    target: str
-        The name of the fitting target.
-    model_class : AbstractFitModel, optional
-        The class of the model to use for fitting the spectral line. Default is Gaussian.
-    xmin : float, optional
-        The minimum x value to consider for the fit range. Default is -inf.
-    xmax : float, optional
-        The maximum x value to consider for the fit range. Default is inf.
-    num_sigma_left : float, optional
-        The number of sigmas to extend the fit range to the left of the peak. Default is 1.5.
-    num_sigma_right : float, optional
-        The number of sigmas to extend the fit range to the right of the peak. Default is 1.5.
-    absolute_sigma : bool, optional
-        Whether to use absolute sigma values for the fit. Default is True.
+    subtask : FitSubtaskConfig
+        The configuration of the fitting subtask, containing the target name, the model class and
+        the fit parameters.
     
     Returns
     -------
     context : Context
         The updated context object containing the fit results.
     """
+    # Access target, model and fit parameters
+    target = subtask.target
+    model = load_class(subtask.model)[0]()
+    fit_pars = subtask.fit_pars
     # Access the last source data added to the context and get the histogram
     source = context.last_source
     hist = source.hist
     # Without a proper initialization of xmin and xmax the fit doesn't converge
+    kwargs = fit_pars.model_dump()
     x_peak = hist.bin_centers()[hist.content > 0][5:][np.argmax(hist.content[hist.content > 0][5:])]
-    if xmin == float("-inf") and xmax == float("inf"):
-        xmin = x_peak - 0.3 * np.sqrt(x_peak)
-        xmax = x_peak + 0.3 * np.sqrt(x_peak)
-    # Define the dictionary of keyword arguments for the fit
-    kwargs = dict(
-         xmin=xmin,
-         xmax=xmax,
-         num_sigma_left=num_sigma_left,
-         num_sigma_right=num_sigma_right,
-         absolute_sigma=absolute_sigma,
-         p0=p0)
-    # Initialize the model and fit the data.
-    # model_class is given as a list of models, even if it contains only one model, but so far
-    # we only support fitting a single model at a time in this context.
-    model = model_class[0]()
+    if fit_pars.xmin == float("-inf") and fit_pars.xmax == float("inf"):
+        kwargs["xmin"] = x_peak - 0.3 * np.sqrt(x_peak)
+        kwargs["xmax"] = x_peak + 0.3 * np.sqrt(x_peak)
+    # Fit the data. We only support Gaussian and Fe55Forest models.
     if isinstance(model, aptapy.models.Fe55Forest):
         model.intensity1.freeze(0.16)   # type: ignore[attr-defined]
     model.fit_iterative(hist, **kwargs) # type: ignore[attr-defined]
@@ -184,14 +150,7 @@ def fit_peak(
     return context
 
 
-def gain_task(
-        context: Context,
-        target: str,
-        w: float = GainDefaults.w,
-        energy: float = GainDefaults.energy,
-        fit: bool = GainDefaults.fit,
-        show: bool = PlotDefaults.show,
-        ) -> Context:
+def gain_task(context: Context, task: GainConfig) -> Context:
     """Calculate the gain of the detector vs the back voltage using the fit results obtained from
     the source data of multiple files.
 
@@ -199,24 +158,16 @@ def gain_task(
     ----------
     context : Context
         The context object containing the fit results.
-    target : str
-        The name of the fitting subtask to use for gain calculation.
-    w : float, optional
-        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
-    energy : float, optional
-        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
-    fit : bool, optional
-        Whether to fit the gain trend with an exponential model. Default is True.
-    show : bool, optional
-        Whether to show the plots of the gain trend. Default is True.
-    
+    task : GainConfig
+        The gain configuration instance.
+        
     Returns
     -------
     context : Context
         The updated context object containing the gain results.
     """
-    # pylint: disable=invalid-unary-operand-type
-    task = "gain"
+    name = task.task
+    target = task.target
     # Get the file names from the fit context keys
     file_names = context.file_names
     # Create empty arrays to store gain values and voltages
@@ -227,42 +178,38 @@ def gain_task(
         target_ctx = context.target_ctx(file_name, target)
         line_val = target_ctx.line_val
         voltages[i] = target_ctx.voltage
-        target_ctx.gain_val = gain(w, line_val, energy)
+        target_ctx.gain_val = gain(context.config.source.w,
+                                   line_val,
+                                   context.config.source.energy)
         gain_vals[i] = target_ctx.gain_val
     # Save the results in the context
-    context.add_task_results(task, target, dict(voltages=voltages, gain_vals=gain_vals))
+    context.add_task_results(name, target, dict(voltages=voltages, gain_vals=gain_vals))
     # If only a single file is analyzed, return the context without plotting or fitting
     if len(file_names) == 1:
         return context
-    if fit:
+    model = None
+    if task.fit:
         model = aptapy.models.Exponential()
         model.fit(voltages, unumpy.nominal_values(gain_vals),
                   sigma=unumpy.std_devs(gain_vals), absolute_sigma=True)
-        context.add_task_fit_model(task, target, model)
+        context.add_task_fit_model(name, target, model)
     # Define the plot keyword arguments for style and labels
-    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Voltage [V]",
         ylabel="Gain",
         fig_name=f"gain_{target}",
-        model0_label=get_model_label(task, model) if fit else None,
-        show=show,
+        model0_label=get_model_label(name, model) if task.fit else None,
+        show=task.show,
         **style)
     # Create the figure for the gain
     fig = plot_task(voltages, gain_vals, model, **plot_kwargs)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def gain_trend(
-        context: Context,
-        target: str,
-        w: float = GainDefaults.w,
-        energy: float = GainDefaults.energy,
-        subtasks: list[dict[str, Any]] | None = None,
-        show: bool = GainDefaults.show,
-    ) -> Context:
+def gain_trend(context: Context, task: TrendGainConfig) -> Context:
     """Calculate the gain of the detector vs time using the fit results obtained from the source
     data.
     
@@ -270,25 +217,17 @@ def gain_trend(
     ---------
     context : Context
         The context object containing the fit results.
-    target : str
-        The name of the fitting subtask to use for gain calculation. If None, no calculation is
-        performed. Default is None.
-    w : float, optional
-        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
-    energy : float, optional
-        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
-    subtasks : list[str], optional
-        The list of fitting subtasks to fit the gain trend. If None, no fitting is performed.
-        Default is None.
-    show : bool, optional
-        Whether to display the plot. Default is True.
-    
+    task : TrendGainConfig
+        The gain trend configuration instance.
+
     Returns
     -------
     context : Context
         The updated context object containing the gain trend and fit results.
     """
-    task = "gain_trend"
+    name = task.task
+    target = task.target
+    subtasks = task.subtasks
     # Get the different file names
     file_names = context.file_names
     # Create empty arrays to store gain values and start times
@@ -304,23 +243,25 @@ def gain_trend(
         # Access the target context and extract line value and voltage
         target_ctx = context.target_ctx(file_name, target)
         line_val = target_ctx.line_val
-        target_ctx.gain_val = gain(w, line_val, energy)
+        target_ctx.gain_val = gain(context.config.source.w,
+                                   line_val,
+                                   context.config.source.energy)
         gain_vals[i] = target_ctx.gain_val
     # Calculate the accumulated time in hours
     times = amptek_accumulate_time(start_times, real_times) / 3600
     # Save the results in the context
-    context.add_task_results(task, target, dict(times=times, gain_vals=gain_vals))
+    context.add_task_results(name, target, dict(times=times, gain_vals=gain_vals))
     # If fitting subtasks are provided, fit the gain trend with the specified models
     models = []
     model_labels = dict()
     if subtasks:
         for i, subtask in enumerate(subtasks):
             # Think how to refactor this part
-            model_list = load_class(subtask["model"])
+            model_list = load_class(subtask.model)
             model = model_list[0]()
             for m in model_list[1:]:
                 model += m()
-            fit_pars = subtask.get("fit_pars", {})
+            fit_pars = subtask.fit_pars.model_dump()
             kwargs = dict(
                 xmin=fit_pars["xmin"],
                 xmax=fit_pars["xmax"],
@@ -332,32 +273,27 @@ def gain_trend(
                       **kwargs)
             # model.plot(fit_output=True, plot_components=False)
             models.append(model)
-            model_labels[f"model{i}_label"] = get_model_label(task, model)
+            model_labels[f"model{i}_label"] = get_model_label(name, model)
             # Update the context with the fit results
-            context.add_subtask_fit_model(task, target, subtask["target"], model)
+            context.add_subtask_fit_model(name, target, subtask.target, model)
             # context["results"][task][target][name] = dict(model=model)
     # Define the plot keyword arguments for style and labels
-    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Time from start [hours]",
         ylabel="Gain",
         fig_name=f"gain_trend_{target}",
-        show=show,
+        show=task.show,
         **model_labels,
         **style)
     # Create the figure for the gain trend
     fig = plot_task(times, gain_vals, *models, **plot_kwargs)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def compare_gain(
-        context: FoldersContext,
-        target: str,
-        combine: list[str] = GainCompareDefaults.combine,
-        show: bool = GainCompareDefaults.show,
-        ) -> FoldersContext:
+def compare_gain(context: FoldersContext, task: CompareGainConfig) -> FoldersContext:
     """Compare the gain of multiple folders vs voltage using the fit results obtained from the
     source data.
 
@@ -365,20 +301,17 @@ def compare_gain(
     ---------
     context : FoldersContext
         The context object containing the fit results.
-    target : str
-        The name of the spectral line fitting subtask to use for gain comparison.
-    combine : list[str], optional
-        List of folder names to combine for gain comparison. Default is an empty list.
-    show : bool, optional
-        Whether to show the plots of the gain comparison. Default is True.
+    task : CompareGainConfig
+        The gain comparison configuration instance.
     
     Returns
     -------
     context : FoldersContext
         The updated context object containing the gain comparison results.
     """
-    # pylint: disable=invalid-unary-operand-type
-    task = "compare_gain"
+    name = task.task
+    target = task.target
+    combine = task.combine
     folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
@@ -400,7 +333,7 @@ def compare_gain(
             style = folders_style.get(folder_name, PlotStyleConfig()).model_dump()
             model = folder_gain.get("model", None)
             plot_kwargs = dict(
-                model_label=get_model_label(task, model) if model else None,
+                model_label=get_model_label(name, model) if model else None,
                 **style)
             plot_compare_task(ax, voltages, gain_vals, model, **plot_kwargs)
         # If aggregating, store the data together for later fitting and plotting
@@ -421,13 +354,13 @@ def compare_gain(
         # Plot the aggregated data and fit model
         style = folders_style.get("combine", PlotStyleConfig()).model_dump()
         plot_kwargs = dict(
-            model_label=get_model_label(task, model),
+            model_label=get_model_label(name, model),
             **style)
         plot_compare_task(ax, x, unumpy.uarray(y, yerr), model, **plot_kwargs)
         # Update the context with the fit results
-        context.add_task_results(task, target, dict(model=model))
+        context.add_task_results(name, target, dict(model=model))
     # Define the task plot keyword arguments for style and labels
-    task_style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    task_style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     # Set the title of the plot
     if task_style["title"] is not None:
         plt.title(task_style["title"])
@@ -439,30 +372,47 @@ def compare_gain(
     # Write the legend and show the plot
     write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
     plt.tight_layout()
-    if not show:
+    if not task.show:
         plt.close(fig)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def compare_trend(
-        context: FoldersContext,
-        target: str,
-        show: bool = GainCompareDefaults.show,
-        ) -> FoldersContext:
-    task = "compare_trend"
-    folder_style = context.config.style.folders
+def compare_trend(context: FoldersContext, task: CompareTrendConfig) -> FoldersContext:
+    """Compare the gain trend of multiple folders vs time using the fit results obtained from
+    the source data.
 
+    Parameters
+    ---------
+    context : FoldersContext
+        The context object containing the fit results.
+    task : CompareTrendConfig
+        The gain trend comparison configuration instance.
+    
+    Returns
+    -------
+    context : FoldersContext
+        The updated context object containing the gain trend comparison results.
+    """
+    # Access the task name and the target line
+    name = task.task
+    target = task.target
+    # Load the folder style configurations
+    folder_style = context.config.style.folders
+    # Get folder names
     folder_names = context.folder_names
     fig = plt.figure("trend_comparison")
+    # Iterate over all folders and load gain trend results
     for folder_name in folder_names:
         folder_ctx = context.folder_ctx(folder_name)
         trend = folder_ctx.task_results("gain_trend", target)
         times = trend.get("times", [])
         g_val = unumpy.nominal_values(trend.get("gain_vals", []))
         g_err = unumpy.std_devs(trend.get("gain_vals", []))
+        # Load the specific folder plot style
         style = folder_style.get(folder_name, PlotStyleConfig()).model_dump(exclude_none=True)
+        # Plot the data
         plt.errorbar(times, g_val, yerr=g_err,
                      marker=style.get("marker", "."),
                      color=style.get("color", None),
@@ -471,6 +421,7 @@ def compare_trend(
         for key, model_target in trend.items():
             if key in ["times", "gain_vals"]:
                 continue
+            # Load the fit model and plot, if present
             model = model_target.get("model", None)
             if model:
                 model.plot(fit_output=True, plot_components=False,
@@ -479,17 +430,14 @@ def compare_trend(
     plt.xlabel("Time [hours]")
     plt.ylabel("Gain")
     # write_legend(label)
-    if not show:
+    if not task.show:
         plt.close(fig)
-    context.add_figure(task, fig)
+    # Add the figure to the context
+    context.add_figure(name, fig)
     return context
 
 
-def resolution_task(
-        context: Context,
-        target: str,
-        show: bool = ResolutionDefaults.show,
-        ) -> Context:
+def resolution_task(context: Context, task: ResolutionConfig) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This estimate is based on the position and the width of the target spectral
     line.
@@ -498,18 +446,16 @@ def resolution_task(
     ---------
     context : Context
         The context object containing the fit results.
-    target : str, optional
-        The name of the fitting subtask to use for resolution calculation. If None, no calculation
-        is performed. Default is None.
-    show : bool, optional
-        Whether to show the plots of the resolution trend. Default is True.
+    task : ResolutionConfig
+        The resolution configuration instance.
     
     Returns
     -------
     context : Context
         The updated context object containing the resolution results.
     """
-    task = "resolution"
+    name = task.task
+    target = task.target
     # Get the file names from the fit context keys
     file_names = context.file_names
     # Create empty arrays to store resolution values and voltages
@@ -525,31 +471,26 @@ def resolution_task(
         target_ctx.res_val = energy_resolution(line_val, sigma)
         res_vals[i] = target_ctx.res_val
     # Save the results in the context
-    context.add_task_results(task, target, dict(voltages=voltages, res_vals=res_vals))
+    context.add_task_results(name, target, dict(voltages=voltages, res_vals=res_vals))
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
     # Define the plot keyword arguments for style and labels
-    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Voltage [V]",
         ylabel=r"$\Delta$E/E",
         fig_name=f"resolution_{target}",
-        show=show,
+        show=task.show,
         **style)
     # Create the figure for the resolution trend
     fig = plot_task(voltages, res_vals, **plot_kwargs)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def resolution_escape(
-        context: Context,
-        target_main: str,
-        target_escape: str,
-        show: bool = ResolutionDefaults.show,
-        ) -> Context:
+def resolution_escape(context: Context, task: ResolutionEscapeConfig) -> Context:
     """Calculate the energy resolution of the detector using the fit results obtained from the
     source data. This calculation is based on the position and width of the main spectral line and
     the position of the escape peak.
@@ -558,21 +499,17 @@ def resolution_escape(
     ---------
     context : Context
         The context object containing the fit results.
-    target_main : str, optional
-        The name of the fitting subtask corresponding to the main spectral line. If None, no
-        calculation is performed. Default is None.
-    target_escape : str, optional
-        The name of the fitting subtask corresponding to the escape peak. If None, no calculation is
-        performed. Default is None.
-    show : bool, optional
-        Whether to show the plots of the resolution trend. Default is True.
+    task : ResolutionEscapeConfig
+        The resolution escape configuration instance.
     
     Returns
     -------
     context : Context
         The updated context object containing the resolution results.
     """
-    task = "resolution_escape"
+    name = task.task
+    target_main = task.target_main
+    target_escape = task.target_escape
     # Get the single file names from the fit context keys
     file_names = context.file_names
     # Create empty arrays to store resolution values and voltages
@@ -591,29 +528,24 @@ def resolution_escape(
                                                              sigma_main)
         res_vals[i] = target_ctx.res_escape_val
     # Save the results in the context
-    context.add_task_results(task, target_main, dict(voltages=voltages, res_vals=res_vals))
+    context.add_task_results(name, target_main, dict(voltages=voltages, res_vals=res_vals))
     # If only a single file is analyzed, return the context without plotting
     if len(file_names) == 1:
         return context
     # Create the figure for the resolution trend
-    style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     plot_kwargs = dict(
         xlabel="Voltage [V]",
         ylabel=r"$\Delta$E/E (escape)",
         fig_name=f"resolution_esc_{target_main}",
-        show=show,
+        show=task.show,
         **style)
     fig = plot_task(voltages, res_vals, **plot_kwargs)
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def compare_resolution(
-        context: FoldersContext,
-        target: str,
-        combine: list[str] = ResolutionCompareDefaults.combine,
-        show: bool = ResolutionCompareDefaults.show,
-        ) -> FoldersContext:
+def compare_resolution(context: FoldersContext, task: CompareResolutionConfig) -> FoldersContext:
     """Compare the energy resolution of multiple folders vs voltage using the results obtained
     from the resolution task.
 
@@ -621,20 +553,17 @@ def compare_resolution(
     ----------
     context : FoldersContext
         The context object containing the resolution results.
-    target : str
-        The name of the spectral line fitting subtask to use for resolution comparison.
-    combine : bool, optional
-        Whether to combine all resolution data from different folders and show as a single dataset.
-        Default is False.
-    show : bool, optional
-        Whether to show the plots of the resolution comparison. Default is True.
+    task : CompareResolutionConfig
+        The resolution comparison configuration instance.
     
     Returns
     -------
     context : FoldersContext
         The updated context object containing the resolution comparison results.
     """
-    task = "compare_resolution"
+    name = "compare_resolution"
+    target = task.target
+    combine = task.combine
     folders_style = context.config.style.folders
     # Get the different folder names
     folder_names = context.folder_names
@@ -673,7 +602,7 @@ def compare_resolution(
         style = folders_style.get("combine", PlotStyleConfig()).model_dump()
         plot_compare_task(ax, x, unumpy.uarray(y, yerr), None, **style)
     # Define the task plot keyword arguments for style and labels
-    task_style = context.config.style.tasks.get(task, PlotStyleConfig()).model_dump()
+    task_style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     # Set the title of the plot
     if task_style["title"] is not None:
         plt.title(task_style["title"])
@@ -685,24 +614,14 @@ def compare_resolution(
     # Write the legend and show the plot
     write_legend(task_style["legend_label"], loc=task_style["legend_loc"])
     plt.tight_layout()
-    if not show:
+    if not task.show:
         plt.close(fig)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def drift(
-        context: Context,
-        target: str,
-        w: float = GainDefaults.w,
-        energy: float = GainDefaults.energy,
-        threshold: float = DriftDefaults.threshold,
-        show: bool = DriftDefaults.show,
-        rate: bool = DriftDefaults.rate,
-        label: str | None = DriftDefaults.label,
-        yscale: str = DriftDefaults.yscale,
-        ) -> Context:
+def drift(context: Context, task: DriftConfig) -> Context:
     """Calculate the gain and rate of the detector vs the drift voltage using the fit results
     obtained from the source data of multiple files.
 
@@ -710,30 +629,17 @@ def drift(
     ---------
     context : Context
         The context object containing the fit results.
-    target : str
-        The name of the fitting subtask to use for gain calculation. If None, no calculation is
-        performed. Default is None.
-    w : float, optional
-        The W-value of the gas inside the detector. Default is 26.0 eV (Ar).
-    energy : float, optional
-        The energy of the emission line used for gain calculation. Default is 5.895 keV (Fe-55 Kα).
-    threshold : float, optional
-        The energy threshold (in keV) above which to calculate the rate. Default is 1.5 keV.
-    show : bool, optional
-        Whether to show the plots of the gain vs drift voltage. Default is True.
-    rate : bool, optional
-        Whether to plot the rate on a secondary y-axis. Default is False.
-    label : str, optional
-        The label for the gain trend plot. Default is None.
-    yscale : str, optional
-        The y-axis scale for the gain trend plot. Can be "linear" or "log". Default is "linear".
+    task : DriftConfig
+        The drift configuration instance.
     
     Returns
     -------
     context : Context
         The updated context object containing the drift results.
     """
-    task = "drift"
+    name = task.task
+    target = task.target
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     # Get the different file names and create arrays to store rate values and drift voltages
     file_names = context.file_names
     rates = np.zeros(len(file_names), dtype=object)
@@ -746,13 +652,13 @@ def drift(
         integration_time = source.real_time
         target_ctx = context.target_ctx(file_name, target)
         line_val = target_ctx.line_val
-        gain_vals[i] = gain(w, line_val, energy)
+        gain_vals[i] = gain(context.config.source.w, line_val, context.config.source.energy)
         # Calculate the threshold in charge and calculate the rate
-        charge_thr = (threshold / energy) * line_val
+        charge_thr = (task.energy_threshold / context.config.source.energy) * line_val
         hist = source.hist
         counts = hist.content[hist.bin_centers() > charge_thr.n].sum()
         rates[i] = counts / integration_time
-    context.add_task_results(task, target, dict(drift_voltages=drift_voltages,
+    context.add_task_results(name, target, dict(drift_voltages=drift_voltages,
                                                gain_vals=gain_vals,
                                                rates=rates))
     # Prepare the quantities for plotting
@@ -766,36 +672,24 @@ def drift(
     ax1.set_xlabel("Drift Voltage [V]")
     ax1.set_ylabel("Gain", color=last_line_color())
     ax1.tick_params(axis="y", labelcolor=last_line_color())
-    ax1.set_yscale(yscale)
+    ax1.set_yscale(style["yscale"])
     # Plot the rate on a secondary y-axis if requested
-    if rate:
+    if task.show_rate:
         color = "red"
         ax2 = ax1.twinx()
         ax2.errorbar(drift_voltages, y_rate, yerr=yerr_rate, fmt=".", color=color, label="Rate")
         ax2.set_ylabel("Rate [counts/s]", color=color)
         ax2.tick_params(axis="y",labelcolor=color)
-    axs = (ax1, ax2) if rate else (ax1, )
-    write_legend(label, *axs, loc="lower right")
-    if not show:
+    axs = (ax1, ax2) if task.show_rate else (ax1, )
+    write_legend(style["legend_label"], *axs, loc=style["legend_loc"])
+    if not task.show:
         plt.close(fig)
     # Add the figure to the context
-    context.add_figure(task, fig)
+    context.add_figure(name, fig)
     return context
 
 
-def plot_spectrum(
-        context: Context,
-        targets: list[str] | None = None,
-        title: str | None = PlotDefaults.title,
-        label: str | None = PlotDefaults.label,
-        task_labels: list[str] | None = PlotDefaults.task_labels,
-        loc: str = PlotDefaults.loc,
-        xrange: list[float] | None = PlotDefaults.xrange,
-        xmin_factor: float = PlotDefaults.xmin_factor,
-        xmax_factor: float = PlotDefaults.xmax_factor,
-        voltage: bool = PlotDefaults.voltage,
-        show: bool = PlotDefaults.show
-        ) -> Context:
+def plot_spectrum(context: Context, task: PlotConfig) -> Context:
     """Plot the spectra from the source data and overlay the fitted models for the specified
     targets.
     
@@ -803,70 +697,50 @@ def plot_spectrum(
     ---------
     context : Context
         The context object containing the source data the fit results.
-    targets : list[str], optional
-        The list of fitting subtask names to plot the fitted models for. If None, no models are
-        plotted. Default is None.
-    title : str, optional
-        The title for the plot. Default is None.
-    label : str, optional
-        The label for the plot legend. Default is None.
-    task_labels : list[str], optional
-        The list of task names to use for generating the labels of the fitted models. If None,
-        no labels are generated. Default is None.
-    loc : str, optional
-        The location of the legend in the plot. Default is "best".
-    xrange : list[float], optional
-        The x-axis range for the plot. If None, the range is automatically calculated based on
-        the data and fitted models. Default is None.
-    xmin_factor : float, optional
-        The factor to apply to the minimum x value when automatically calculating the xrange.
-        Default is 1.0.
-    xmax_factor : float, optional
-        The factor to apply to the maximum x value when automatically calculating the xrange.
-        Default is 1.0.
-    voltage: bool, optional
-        Whether to include the voltage information in the legend. Default is False.
-    show : bool, optional
-        Whether to show the plots after creation. Default is True.
-    
+    task : PlotConfig
+        The plot configuration instance.
+
     Returns
     -------
     context : Context
         The context object (in future it will be updated with the figures).
     """
     # Get the file names from the sources keys
+    name = task.task
+    targets = task.targets
     file_names = context.file_names
+    style = context.config.style.tasks.get(name, PlotStyleConfig()).model_dump()
     # Iterate over all files and plot the spectra with fitted models, if desired
     for file_name in file_names:
         source = context.source(file_name)
         # Create the plot figure and plot the spectrum and set the title
         fig = plt.figure(f"{source.file_path.stem}_{targets}")
-        if title is not None:
-            plt.title(title)
-        source.hist.plot(label="Data")
+        if style["title"] is not None:
+            plt.title(style["title"])
+        source.hist.plot(label=style["label"])
         # Plot the fitted models for the specified targets and get labels
         models = []
         if targets is not None:
             for target in targets:
                 target_ctx = context.target_ctx(file_name, target)
                 model = target_ctx.model
-                model_label = get_label(task_labels, target_ctx)
+                model_label = get_label(task.task_labels, target_ctx)
                 # Save the model for automatic xrange calculation
                 models.append(model)
                 model.plot(label=model_label)
         # Set the x-axis range
-        plt.xlim(xrange)
-        if xrange is None:
+        plt.xlim(task.xrange)
+        if task.xrange is None:
             _xrange = get_xrange(source, models)
-            plt.xlim(_xrange[0] * xmin_factor, _xrange[1] * xmax_factor)
-        _label = label
+            plt.xlim(_xrange[0] * task.xmin_factor, _xrange[1] * task.xmax_factor)
+        _label = style["legend_label"]
         # If voltage info is requested, add it to the legend
-        if voltage and _label is not None:
+        if task.voltage and _label is not None:
             _label += f"\nBack: {source.voltage:>4.0f} V\nDrift: {source.drift_voltage:>4.0f} V"
-        write_legend(_label, loc=loc)
+        write_legend(_label, loc=style["legend_loc"])
         # Add the figure to the context
         context.add_figure(file_name, fig)
         plt.tight_layout()
-        if not show:
+        if not task.show:
             plt.close(fig)
     return context

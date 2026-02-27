@@ -62,11 +62,11 @@ An example of correct file name is `data_D1000B380_40.mca`
 
 To run the analysis, a configuration file must always be specified. This section explains how to write a correct configuration file.
 
-The configuration file is a .yaml file which contains all the information about the acquisition (e.g. the date, the detector, the source, etc...) and the analysis pipeline. This file allows to write an analysis pipeline in which each task can be finely configured, contrarly to a simple CLI.
+The configuration file is a .yaml file which contains all the information to run the analysis and also for the plot style. This file allows to write an analysis pipeline in which each task can be configured.
 
 **Warning:**  when a key is optional and you want to set it to the default value, all the line must be deleted, not only the value, otherwise a type error can be raised or a `None` value can be assigned to the key.
 
-### Acquisition
+<!-- ### Acquisition
 
 The acquisition dictionary stores information about the acquisition, such as the date of the acquisition, the name and type of the chip and other detector and source properties. These properties are stored as keys of the dictionary, and a value is assigned to each of them. 
 
@@ -84,6 +84,20 @@ acquisition:
   element: Fe55
   e_peak: 5.9
 ```
+ -->
+
+### Source
+
+The source dictionary allows to set the properties of the source, such as the energy of the main emission line, and also the detector constants, such as the W-value of the gas.
+
+This dictionary is optional, and none of its field is mandatory. In case a key is not specified, the analysis use the default value.
+
+```yaml
+source:
+  energy: 5.9   # Optional, default is K-alpha of Fe55
+  w: 26.0       # Optional, default is w-value of Ar
+```
+
 
 ### Pipeline
 
@@ -93,7 +107,7 @@ The tasks order in the configuration file does not affect execution, as priority
 
 Apart from the `calibration` and `fit_spec` tasks, which are executed once at the beginning of the analysis, all the other tasks can be written multiple times, specifying different `target` or configuration parameters. As an example, if you have multiple emission lines in a spectrum and you want to estimate the resolution from each of them independently, it is possible to write a `resolution` task for each of them by specifying the target declared during the `fit_spec` subtasks. See the next sections for more details.
 
-For a complete description of the possible keys of each task, please see [Tasks](tasks.md).
+For a complete description of the possible keys of each task, please see [Tasks](configs.md).
 
 #### Calibration
 
@@ -172,7 +186,7 @@ If there are multiple data taken at a given voltage, the mean of the gain estima
 ```yaml
   - task: compare_gain
     target: main_peak
-    combine:                     # Optional, combine the data of all the folders 
+    combine:                     # Optional, combine the data of the specified folders
       - folder0
       - folder1
 ```
@@ -238,18 +252,40 @@ In the case of spectral fitting and physical quantities estimate, it is possible
     targets:              # Optional, target fit to show
       - main_peak
       - escape_peak
-    title: Example title  # Optional, the title of the plot
-    label: Example label  # Optional, legend label of the plot
     task_labels:          # Optional, estimated quantities to show in the legend
       - gain
-    loc: best             # Optional, position of the legend in the plot
     xrange: [0., 3.]      # Optional, the x-axis range to show on the plot
-    show: true            # Optional, whether to show the plot
     xmin_fac: 0.5         # Optional, scale the automatic xrange left limit by a factor
     xmax_fac: 1.5         # Optional, scale the automatic xrange right limit by a factor
+    show: true            # Optional, whether to show the plot. If false, they can still be saved.
 ```
 
 ### Style
 
-The style dictionary allows to set the style, labels and titles of the plot.
+The style dictionary allows to set the style, labels and titles of the plots. The main keys of this dictionary are `tasks` and `folders`. To each of them can be assigned other dictionaries, whose key is the name of a task or a folder. Inside the latter dictionaries, the style settings of the plots can be specified.
+
+The `tasks` dictionary allows to modify the style and labels of the plots produced during tasks (e.g. `gain`, `resolution`, etc...).
+
+The `folders` dictionary is useful when producing plots with comparison between different folders. The labels, color, marker and line style of data points and best-fit curves can be configured. It is also possible to configure the label and style of combined results specifying the key `combine`.
+
+```yaml
+style:
+  # For tasks the syntax is the following  
+  tasks:
+    # Name of the task
+    plot:
+      # Configure the settings
+      title: $^{55}$Fe spectrum
+      legend_label: Chip
+      label: null
+  
+  # For folders
+  folders:
+    # Specify the name of the folder
+    folder0:  
+      label: Folder 0 Data
+      marker: .
+      color: black
+      linestyle: "-"
+```
 

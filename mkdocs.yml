@@ -14,7 +14,8 @@ nav:
   - Home: index.md
   - Analysis and Configuration Guide: guide.md
   - Examples: examples.md
-  - Tasks: tasks.md
+  - Tasks: configs.md
+  - Style: style.md
 
 plugins:
   - search
@@ -23,10 +24,16 @@ plugins:
         python:
           options:
             docstring_style: numpy
-            show_source: true
-            show_root_heading: false
-            show_root_toc_entry: false
-            show_signature_annotations: false
+            docstring_section_style: table  # <--- Fondamentale per la griglia
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: false
+            # Nascondiamo i membri individuali così non vedi i doppioni in grassetto
+            members: false 
+            show_if_no_docstring: false
+            show_default_values: true
+            parse_refs: true
+
 
 markdown_extensions:
   - pymdownx.highlight:
