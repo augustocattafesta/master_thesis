@@ -192,6 +192,7 @@ def gain_task(context: Context, task: GainConfig) -> Context:
     # If only a single file is analyzed, return the context without plotting or fitting
     if len(file_names) == 1:
         return context
+    model = None
     if task.fit:
         model = aptapy.models.Exponential()
         model.fit(voltages, unumpy.nominal_values(gain_vals),
@@ -384,7 +385,7 @@ def compare_gain(context: FoldersContext, task: CompareGainConfig) -> FoldersCon
 
 
 def compare_trend(context: FoldersContext, task: CompareTrendConfig) -> FoldersContext:
-    """Compare the gain trend of multiple folders vs voltage using the fit results obtained from
+    """Compare the gain trend of multiple folders vs time using the fit results obtained from
     the source data.
 
     Parameters
@@ -402,7 +403,7 @@ def compare_trend(context: FoldersContext, task: CompareTrendConfig) -> FoldersC
     # Access the task name and the target line
     name = task.task
     target = task.target
-    # Load the folder style condigurations
+    # Load the folder style configurations
     folder_style = context.config.style.folders
     # Get folder names
     folder_names = context.folder_names
@@ -719,9 +720,9 @@ def plot_spectrum(context: Context, task: PlotConfig) -> Context:
         source = context.source(file_name)
         # Create the plot figure and plot the spectrum and set the title
         fig = plt.figure(f"{source.file_path.stem}_{targets}")
-        if style.get("title") is not None:
+        if style["title"] is not None:
             plt.title(style["title"])
-        source.hist.plot(label=style.get("label"))
+        source.hist.plot(label=style["label"])
         # Plot the fitted models for the specified targets and get labels
         models = []
         if targets is not None:
@@ -737,11 +738,11 @@ def plot_spectrum(context: Context, task: PlotConfig) -> Context:
         if task.xrange is None:
             _xrange = get_xrange(source, models)
             plt.xlim(_xrange[0] * task.xmin_factor, _xrange[1] * task.xmax_factor)
-        _label = style.get("legend_label")
+        _label = style["legend_label"]
         # If voltage info is requested, add it to the legend
         if task.voltage and _label is not None:
             _label += f"\nBack: {source.voltage:>4.0f} V\nDrift: {source.drift_voltage:>4.0f} V"
-        write_legend(_label, loc=style.get("loc", "best"))
+        write_legend(_label, loc=style["legend_loc"])
         # Add the figure to the context
         context.add_figure(file_name, fig)
         plt.tight_layout()
