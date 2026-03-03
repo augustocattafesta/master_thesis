@@ -5,20 +5,32 @@
 \usepackage[margin=3cm]{geometry} % Think how to format the page
 \usepackage{hyperref}   % Handle hypertext
 \usepackage{fancyhdr}   % Set the page style
+\usepackage{titlesec}   % Modify chapter first page
+\usepackage{subcaption} % Insert subcaptions in subplots
 
 % Set the hyperlinks style
 \hypersetup{colorlinks=true, linktoc=page, linkcolor=black}
+
 % Configure the page style
 \pagestyle{fancy}
 \fancyhf{} % Clear all the default style settings
 \fancyhead[RO,LE]{\thepage} % RO = RightOdd, LE = LeftEven
-
 % Opzionale: Titolo capitolo/sezione al centro o lato interno
 \fancyhead[RE]{\itshape \leftmark}  % Capitolo su pagine pari (interno)
 \fancyhead[LO]{\itshape \rightmark} % Sezione su pagine dispari (interno)
-
 \renewcommand{\headrulewidth}{0.4pt} % Linea sottile sotto l'header (usa 0pt per rimuoverla)
 \renewcommand{\footrulewidth}{0pt}   % Nessuna linea in basso
+
+% Configure chapter style
+\titleformat{\chapter}[hang]
+  {\normalfont\scshape\huge}
+  {\color{gray}\thechapter} 
+  {20pt}
+  {\huge}
+
+% Opzionale: regola lo spazio sopra e sotto il titolo
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
 
 % Bibliography package and resources
 \usepackage[backend=biber, sorting=ynt]{biblatex}
@@ -41,10 +53,10 @@
 
 
  % Load the chapters
- \include{chapters/chapter1.tex}
- \include{chapters/recon.tex}
-  \include{chapters/gain.tex}
-  \include{chapters/resolution.tex}
+\include{chapters/chapter1.tex}
+\include{chapters/recon.tex}
+\include{chapters/gain.tex}
+\include{chapters/resolution.tex}
  
 
  
