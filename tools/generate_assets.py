@@ -1,3 +1,4 @@
 from pathlib import Path
 
-FIGURES_DIR = Path(__file__).parent.parent / "figures"
+from scripts import gain
+
