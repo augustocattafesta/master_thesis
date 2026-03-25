@@ -19,13 +19,11 @@ FIGURES_GAIN.mkdir(exist_ok=True)
 
 ENERGY = 1e4
 SIGNAL_E = int(ENERGY / xraydb.ionization_potential("Si"))
-SNR = 20
-NOISE_E = int(SIGNAL_E / SNR)
+NOISE_E = 100
 NUM_EVENTS = 500000
 
 print(f"Number of events: {NUM_EVENTS}")
 print(f"Number of signal electrons: {SIGNAL_E}")
-print(f"Signal-to-noise ratio: {SNR}")
 print(f"Number of noise electrons: {NOISE_E}")
 
 # Create the gain matrix file.
@@ -46,7 +44,7 @@ if not sim_path.exists():
             beam="disk",
             energy=ENERGY,
             radius=0.15,    # With 0.15 cm we have about 3000 pixels
-            enc=NOISE_ADC, # We need to scale the ENC by the mean gain to get the same S/N
+            enc=NOISE_E,    # We need the number of noise electrons here
             zero_sup_threshold=0,
             readout_mode="rectangular",
             pitch=0.005,
@@ -55,7 +53,7 @@ if not sim_path.exists():
             num_rows=352,
             map_gain_file=gain_path,
             padding=Padding(2, 2, 2, 2),
-            seed=SEED)
+            random_seed=SEED)
 
 # Run the calibration pipeline.
 cal_gain_path = GAIN_DIR / "sim_gaussian_matrix_gain.h5"
@@ -91,7 +89,8 @@ print(f"Mean number of hits per pixel: {hits.mean():.2f}")
 
 
 # Now run the reconstruction pipeline.
-ZSUP = 3 * NOISE_ADC
+ZSUP = 2 * NOISE_ADC
+print(f"Zero suppression threshold: {ZSUP} ADC counts")
 
 mc = GAIN_DIR / "sim_gaussian_recon_mc.h5"
 if not mc.exists():
@@ -133,16 +132,21 @@ mc_file = ReconInputFile(mc)
 cal_file = ReconInputFile(cal)
 no_cal_file = ReconInputFile(no_cal)
 
-mc_energy = mc_file.column("energy")
-cal_energy = cal_file.column("energy")
-no_cal_energy = no_cal_file.column("energy")
+SIZES = [1, 2, 3]
+mc_size = mc_file.column("cluster_size")
+mc_energy = mc_file.column("energy")[np.isin(mc_size, SIZES)]
+cal_size = cal_file.column("cluster_size")
+cal_energy = cal_file.column("energy")[np.isin(cal_size, SIZES)]
+no_cal_size = no_cal_file.column("cluster_size")
+no_cal_energy = no_cal_file.column("energy")[np.isin(no_cal_size, SIZES)]
 
 mc_file.close()
 cal_file.close()
 no_cal_file.close()
 
-edges = np.linspace(min(mc_energy), max(mc_energy), 100)
+# edges = np.linspace(min(mc_energy), max(mc_energy), 100)
 no_cal_edges = np.arange(min(no_cal_energy), max(no_cal_energy), 3.68/0.08)
+edges = no_cal_edges
 hist_mc_energy = Histogram1d(edges, xlabel="Energy (eV)")
 hist_mc_energy.fill(mc_energy)
 hist_cal_energy = Histogram1d(edges, xlabel="Energy (eV)")
@@ -159,12 +163,12 @@ spectra = plt.figure()
 hist_mc_energy.plot(label="MC gain")
 hist_cal_energy.plot(label="Calibration")
 hist_no_cal_energy.plot(label=r"Fixed gain ($g=0.08$ ADC/e$^-$)")
-mc_model.plot(label=rf"MC fit: $\mu=${mc_model.mu.ufloat()} eV", color="C0")
-cal_model.plot(label=rf"Cal fit: $\mu=${cal_model.mu.ufloat()} eV", color="C1")
+mc_model.plot(label=rf"MC fit: $\mu=${mc_model.mu.ufloat()} eV" + f"\nFWHM = {mc_model.fwhm()} eV", color="C0")
+cal_model.plot(label=rf"Cal fit: $\mu=${cal_model.mu.ufloat()} eV" + f"\nFWHM = {cal_model.fwhm()} eV", color="C1")
 plt.xlim(hist_mc_energy.bin_edges()[0]*0.9, hist_mc_energy.bin_edges()[-1]*1.1)
 plt.legend()
-
 
 gain_distr.savefig(FIGURES_GAIN / "gain_distribution.pdf", format="pdf")
 spectra.savefig(FIGURES_GAIN / "spectra.pdf", format="pdf")
 
+plt.show()

@@ -1,0 +1,55 @@
+\chapter{NNet}
+\label{chap:nnet}
+
+
+We want to train a neural network to remove the noise from the pixels. To perform this task, the network needs to know the physics that happens inside the detector, in particular it has to learn how the charge diffuse. Without this information, the probability that the network correctly removes the noise is low. This goes under the multi-task learning, a way to improve the performances of a neural network which consists in letting the network learn as much as it can about the system it is analyzing. In our case, the system is the detector, and the different physical processes it has to learn to completely determine the event are: conversion of the photon, which has a dependance on the energy of the photon and also has an exponential pdf of interaction inside the silicon sensor; the diffusion process, whom properties depends on the latter process: a photon converting in the upper layer of the sensor has  a larger diffused electron cloud; the noise distribution and the clipping process in the readout, which removes some information from the final measures. All of these processes can be modeled and used to derive a correct physical loss function for the network. This method let the netwrok understand the real phyisics that works inside the detector, and not only minimizing a MSE which has wrong assumption.
+
+To derive this loss function, we need first to understand the pdf of each process.
+
+\section{Signal and noise}
+We know that the noise is distributed according to a gaussian distribution with zero mean and a known variance (we determined it in another chapter). In the readout process, the pixels that have a negative voltage are clipped to zero. We have to take into account the different manipulation for these two types of pixels.
+
+For pixels with counts above zero, the distribution follows the same gaussian distribution of the noise, with the mean equal to the true signal counts. It follows that for these pixels, the negative log likelihood is the usual:
+
+\begin{equation}
+\ln \mathcal{L} = \sum_i \frac{(\textrm{PHA}_{true} - \textrm{PHA}_{pred})^2}{2\sigma^2},
+\end{equation}
+
+where the sum over $i$ is intended only over the pixels with counts over 0.
+
+For clipped pixels, our event is the probability to get a value below 0 for a given PHA$_{pred}$. This is calculated as the CDF $\Phi(-PHA/\sigma)$. The total log likelihood is the sum over all the clipped pixels:
+
+\begin{equation}
+\ln \mathcal{L} = \sum_i \ln \Phi(-PHA_{i, pred}/\sigma),
+\end{equation}
+
+\section{Conversion point}
+The probability of a photon of given energy to be absorbed in the material follows an exponential law:
+
+\begin{equation}
+p(z; \mu, E) = \mu(E)e^{-\mu(E)z},
+\end{equation}
+
+where $\mu$ is the absorption coefficient and depends on the energy of the photon. This becomes:
+
+\begin{equation}
+\ln \mathcal{L} = \ln \mu(E_{pred}) - \mu(E_{pred})z_{pred},
+\end{equation}
+
+where $E_{pred}$ is given by the sum of the predicted PHAs and the value of $\mu$ for a given energy is tabulated.
+
+\section{Position}
+For the position we don't make any assumption, and we can just use the MSE.
+
+\section{Loss function}
+The final loss function is obtained by summing all the contributes from any term, considering that the losso function is the negative log likelihood, thus:
+
+\begin{equation}
+\textrm{loss} = \sum_i \frac{(\textrm{PHA}_{true} - \textrm{PHA}_{pred})^2}{2\sigma^2} - \sum_i \ln \Phi(-PHA_{i, pred}/\sigma) - \ln \mu(E_{pred}) + \mu(E_{pred})z_{pred} + MSE(x, y)
+\end{equation}
+
+THIS LOSS NEEDS SOME FIXES. WE NEED THE MSE(z), A TERM FOR THE TOTAL ENERGY, AND WE SHOULD ALSO UNDERSTAND IF WE NEED THE TERM FOR THE CLIPPING.
+
+
+
+
