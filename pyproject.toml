@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "thesis"
+name = "master_thesis"
 version = "0.0.0"
-description = "Scripts and .tex source for thesis"
+description = "Scripts and .tex source for master thesis"
 requires-python = ">=3.13"
 authors = [
   { name = "Augusto Cattafesta", email = "a.cattafesta@studenti.unipi.it" }

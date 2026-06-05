@@ -1,72 +1,57 @@
-from hexsample.hexagon import HexagonalLayout
 from hexsample.readout import HexagonalReadoutRectangular, Padding
 from hexsample.sensor import Sensor
 from hexsample.source import DiskBeam, Line, Source
+from hexsample.xpol import XPOL3
 
-DEFAULT_ENERGY = 1e4
+from . import CALDB
+
+# Default calibration files
+DEFAULT_ENC_0 = CALDB / "sim_xpol3_enc-0_uniform_v001.h5"
+DEFAULT_ENC_20 = CALDB / "sim_xpol3_enc-20_gauss-p10_v001.h5"
+DEFAULT_ENC_100 = CALDB / "sim_xpol3_enc-100_gauss-p10_v001.h5"
+
+DEFAULT_NOISE_0 = CALDB / "sim_xpol3_noise-0_uniform_v001.h5"
+DEFAULT_NOISE_8 = CALDB / "sim_xpol3_noise-8_gauss-p10_v001.h5"
+DEFAULT_NOISE_20 = CALDB / "sim_xpol3_noise-20_gauss-p10_v001.h5"
+DEFAULT_NOISE_100 = CALDB / "sim_xpol3_noise-100_gauss-p10_v001.h5"
+
+DEFAULT_GAIN_ONE = CALDB / "sim_xpol3_gain-1_uniform_v001.h5"
+DEFAULT_GAIN_SMALL = CALDB / "sim_xpol3_gain-0p08_gauss-p10_v001.h5"
+
+DEFAULT_PEDESTAL_0 = CALDB / "sim_xpol3_pedestal-0_uniform_v001.h5"
+DEFAULT_PEDESTAL_1000 = CALDB / "sim_xpol3_pedestal-1000_gauss-p10_v001.h5" 
+
+# Default chip configuration parameters
+DEFAULT_LAYOUT = XPOL3.layout
+DEFAULT_NUM_COLS, DEFAULT_NUM_ROWS = XPOL3.size
+DEFAULT_PITCH = XPOL3.pitch
 DEFAULT_READOUT_MODE = "rectangular"
-DEFAULT_LAYOUT = HexagonalLayout.ODD_R
-DEFAULT_NUM_COLS = 304
-DEFAULT_NUM_ROWS = 352
-DEFAULT_PITCH = 0.005
-DEFAULT_TRANS_SIGMA = 60
 DEFAULT_PADDING = Padding(7, 4, 4, 4)
-DEFAULT_GAIN = 1.
-DEFAULT_ENC = 100
 
+# Default sensor parameters
+DEFAULT_TRANS_SIGMA = 60
+DEFAULT_MATERIAL_SYMBOL = "Si"
+DEFAULT_THICKNESS = 0.03
+DEFAULT_SENSOR = Sensor(
+    material_symbol=DEFAULT_MATERIAL_SYMBOL,
+    thickness=DEFAULT_THICKNESS,
+    diffusion_sigma=DEFAULT_TRANS_SIGMA
+    )
+
+# Default source parameters
+DEFAULT_ENERGY = 1e4
 DEFAULT_SPECTRUM = Line(DEFAULT_ENERGY)
 DEFAULT_BEAM = DiskBeam(radius=0.5)
-DEFAULT_SOURCE = Source(spectrum=DEFAULT_SPECTRUM, beam=DEFAULT_BEAM)
-
-DEFAULT_SENSOR = Sensor(diffusion_sigma=DEFAULT_TRANS_SIGMA)
-
-DEFAULT_NO_NOISE_READOUT = HexagonalReadoutRectangular(
-    layout=DEFAULT_LAYOUT,
-    num_cols=DEFAULT_NUM_COLS,
-    num_rows=DEFAULT_NUM_ROWS,
-    pitch=DEFAULT_PITCH,
-    enc=0,
-    gain=DEFAULT_GAIN,
-    padding=DEFAULT_PADDING
-)
-
-DEFAULT_NOISE_READOUT = HexagonalReadoutRectangular(
-    layout=DEFAULT_LAYOUT,
-    num_cols=DEFAULT_NUM_COLS,
-    num_rows=DEFAULT_NUM_ROWS,
-    pitch=DEFAULT_PITCH,
-    enc=DEFAULT_ENC,
-    gain=DEFAULT_GAIN,
-    padding=DEFAULT_PADDING
-)
+DEFAULT_SOURCE = Source(
+    spectrum=DEFAULT_SPECTRUM,
+    beam=DEFAULT_BEAM
+    )
 
 HEADER_KWARGS = dict(
     readout_mode=DEFAULT_READOUT_MODE,
-    gain=DEFAULT_GAIN,
-    enc=DEFAULT_ENC,
     layout=DEFAULT_LAYOUT,
     num_cols=DEFAULT_NUM_COLS,
     num_rows=DEFAULT_NUM_ROWS,
     pitch=DEFAULT_PITCH,
     padding=DEFAULT_PADDING,
 )
-
-
-DEFAULT_SIMULATION = dict(
-    source=DEFAULT_SOURCE,
-    sensor=DEFAULT_SENSOR,
-    readout=DEFAULT_NO_NOISE_READOUT,
-    header_kwargs=HEADER_KWARGS
-)
-
-
-# Eta recon parameters for 60 um/cm^0.5 diffusion sigma
-DEFAULT_RECON_PARS = dict(
-    eta_2pix_rad = 0.172,
-    eta_2pix_pivot = 0.,
-    eta_3pix_rad0 = 0.491,
-    eta_3pix_rad1 = 0.1999,
-    eta_3pix_rad_pivot = 0.,
-    eta_3pix_theta0 = 0.1516,
-)
-

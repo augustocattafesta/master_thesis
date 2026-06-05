@@ -1,12 +1,19 @@
 \documentclass[12pt, a4paper, twoside]{book}
 % List of packages. Let's try to keep it simple and ordinated.
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[margin=3cm]{geometry} % Think how to format the page
 \usepackage{hyperref}   % Handle hypertext
 \usepackage{fancyhdr}   % Set the page style
 \usepackage{titlesec}   % Modify chapter first page
 \usepackage{subcaption} % Insert subcaptions in subplots
+\usepackage{tikz}	   % For pixel figures
+\usetikzlibrary{shapes.geometric, shadings}
+\usetikzlibrary{patterns} % For pixel figures
+\usepackage{enumitem}	% To change the style of itemize
+\usepackage{xcolor}
+
 
 % Set the hyperlinks style
 \hypersetup{colorlinks=true, linktoc=page, linkcolor=black}
@@ -31,6 +38,37 @@
 % Opzionale: regola lo spazio sopra e sotto il titolo
 \titlespacing*{\chapter}{0pt}{-20pt}{40pt}
 
+% Define pixel geometry
+\newcommand{\hexpix}[2][]{%
+    \draw[#1] (90:#2) -- (30:#2) -- (-30:#2) -- (-90:#2) -- (-150:#2) -- (150:#2) -- cycle;
+    \fill[#1] (0, 0) circle (0.8pt);
+}
+\newcommand{\hexsize}{0.5cm}
+
+% 1. Definiamo prima la sfumatura in bianco e nero (il nero copre, il bianco diventa trasparente)
+\pgfdeclareradialshading{sfumaturaGaussiana}{\pgfpoint{0cm}{0cm}}{
+    color(0.00cm)=(black);       % Centro opaco
+    color(0.15cm)=(black!60);    
+    color(0.30cm)=(black!13);    
+    color(0.45cm)=(black!1);     
+    color(0.70cm)=(white);       % Bordo totalmente trasparente
+    color(1.20cm)=(white)        
+}
+
+% 2. Creiamo il fading vero e proprio a partire dalla sfumatura appena fatta
+\pgfdeclarefading{gaussianaPerfetta}{\pgfuseshading{sfumaturaGaussiana}}
+
+\pgfdeclareradialshading{paletteScienza}{\pgfpoint{0cm}{0cm}}{
+    color(0.00cm)=(yellow!95!orange); % Centro caldo
+    color(0.15cm)=(orange!90!red);    % 1*sigma
+    color(0.30cm)=(red!75!magenta);   % 2*sigma
+    color(0.45cm)=(magenta!60!blue);  % 3*sigma
+    color(0.75cm)=(white);            % 5*sigma -> FORZIAMO IL BIANCO QUI: la sfumatura si interrompe visivamente a 0.75cm
+    color(1.20cm)=(white)             % Tutto il resto è bianco della pagina
+}
+% Definiamo un comando rapido \fix che scrive in rosso acceso e in grassetto
+\newcommand{\fix}[1]{{\color{red}\textbf{#1}}}
+
 
 % Bibliography package and resources
 \usepackage[backend=biber, sorting=ynt]{biblatex}
@@ -54,17 +92,16 @@
 
  % Load the chapters
 \include{chapters/chapter1.tex}
-\include{chapters/recon.tex}
-\include{chapters/gain.tex}
-\include{chapters/noise.tex}
-\include{chapters/resolution.tex}
-\include{chapters/nnet.tex}
+\include{chapters/chapter2.tex}
+\include{chapters/chapter3.tex}
+\include{chapters/chapter4.tex}
+\include{chapters/chapter5.tex}
  
 
  
  
  
- 
+\nocite{*}
 \printbibliography
 
 \end{document}

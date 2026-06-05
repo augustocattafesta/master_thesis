@@ -10,3 +10,6 @@ DATA_DIR.mkdir(exist_ok=True)
 
 FIGURES_DIR = Path(__file__).parent.parent.parent / "latex/figures"
 FIGURES_DIR.mkdir(exist_ok=True)
+
+CALDB = Path(__file__).parent.parent.parent / "caldb"
+CALDB.mkdir(exist_ok=True)
