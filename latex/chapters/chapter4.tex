@@ -410,8 +410,8 @@ where $q_0$ is always the cluster central pixel and $q_1$ is the second pixel wi
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.45\linewidth]{figures/chapter4/position/2pix_eta}
-%    \includegraphics[width=0.45\linewidth]{figures/chapter4/position/2pix_cumulative}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_eta}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_cumulative}
     \caption{\fix{inserire caption e figura della distribuzione di eta e la cumulante nel caso a due pixel}}
     \label{fig:eta_2pix}
 \end{figure}
@@ -474,8 +474,8 @@ Studying the $\eta_+$ and $\eta_-$ distributions and their cumulative distributi
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.45\linewidth]{figures/chapter4/position/2pix_eta}
-%    \includegraphics[width=0.45\linewidth]{figures/chapter4/position/2pix_cumulative}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_eta}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_cumulative}
     \caption{\fix{inserire caption e figura della distribuzione di eta e la cumulante nel caso a tre pixel sia per la componente radiale che per quella angolare.}}
     \label{fig:eta_3pix}
 \end{figure}
@@ -486,10 +486,10 @@ Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires
 
 The residuals of this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione sui risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è meno preciso della eta con calibrazione da monte carlo, quindi assumiamo che questo sia vero sempre e continuiamo con questa descrizione. Bisogna capire il confronto con l'MLE, mi aspetto che sia un pochino peggio. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo sbagliando la sigma e confrontandola con quella non monte carlo}
 
-The strenght of this method is that a Monte Carlo simulation is not necessary. However, in the case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. The charge diffusion model is necessary, but contrary to the likelihood method, some approximations can be considered and the diffusion process can be solved analytically. As said before, in the case of a two-pixel event the position can only be reconstructed along the line that connects the two centers. For this reason, the simplified uni-dimensional problem of a photon hitting the pixel exactly on this line can be considered. The charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel. Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected only by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel is the portion of the Gaussian that lies on the pixel
+The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. The charge diffusion model is necessary, but contrary to the likelihood method, some approximations can be considered and the diffusion process can be solved analytically. As said before, in the case of a two-pixel event the position can only be reconstructed along the line that connects the two centers. For this reason, the simplified uni-dimensional problem of a photon hitting the pixel exactly on this line can be considered. The charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel. Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected only by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel is the portion of the Gaussian that lies on the pixel
 
 \begin{equation}
-\eta(r) = \int ^{\infty}_{p/2} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = 1 - \Phi \left( \frac{r - p/2}{\sigma} \right),
+\eta(r) = \int ^{\infty}_{p/2} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = \Phi \left( \frac{r - p/2}{\sigma} \right),
 \label{eq:eta_2pix_int}
 \end{equation}
 where $\Phi(z)$ is the cumulative density function of the standard normal distribution and $p$ is the pixel pitch. Eq. \ref{eq:eta_2pix_int} can be inverted to find
@@ -498,9 +498,186 @@ where $\Phi(z)$ is the cumulative density function of the standard normal distri
 r(\eta) = \frac{p}{2} + \sigma \Phi^{-1}(\eta),
 \label{eq:eta_2pix_final}
 \end{equation}
-where $\Phi^{-1}(p)$ is the percent point function of the standard normal distribution.
+where $\Phi^{-1}(p)$ is the percent point function of the standard normal distribution. All the parameters in Eq. \ref{eq:eta_2pix_final} are known or can be calculated, but in the real case, where not all photons hit the central pixel exactly on the line connecting the centers, their value can change a bit. For this reason, a calibration is necessary and can be performed using Monte Carlo truth information. To perform it, the relevant quantity that has to be calculated is the projection of the true incident position onto the line that connects pixel centers. This quantity is calculated for each two-pixel event, then they are binned in $\eta$ and, for each value of $\eta$, the median of the $r$ distribution is computed. The choice to use the median has been made because these distributions have long tails, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
 
-A similar approximation can be made for the three-pixels case. 
+\begin{figure}
+    \centering
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_r_distr}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_best_fit}
+    \caption{\fix{inserire figure.} The left panel shows an example of distribution of the projected distance $r$ for all data in the range $\eta \in (\fix{boh})$. The right panel shows the median of the latter distributions as a function of $\eta$, along with the best-fit curve found using Eq. \ref{eq:eta_2pix_final} as the fit model. The best-fit value is $\sigma = \fix{a} \pm \fix{b}$. All values are expressed in pitch normalized units. This simulation is performed with a monochromatic source of 8 keV.}
+    \label{fig:eta_2pix_r_distr}
+\end{figure}
+
+The data obtained for each value of $\eta$ can be fitted with Eq. \ref{eq:eta_2pix_final} as fit model, using a least-squares minimizer. For the fit, the pitch parameter $p$ has been fixed to the pixel size, thus $\sigma$ is the only free parameter. Data and best-fit curve are shown in Fig. \ref{fig:eta_2pix_r_distr}. \fix{aggiungere piccolo confronto tra valore di sigma dal fit e expected da media di z assorbimento.}
+
+A similar approach can be used for three-pixels events. As already said above, this case requires to separate between the radial and the angular coordinates, with both components that are approximable with   two-pixels problems. For the radial coordinate, where the outer pixels can be seen as a single pixel whose charge is the sum of their charges, the problem is almost identical to the one that has just been discussed. The only difference is the lower integration limit of Eq. \ref{eq:eta_2pix_int}, that this time corresponds to the vertex of the hexagon, which is located at $r=p/\sqrt{3}$. The calculation thus becomes
+\begin{equation}
+\eta_+(r) = \int ^{\infty}_{p/\sqrt{3}} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = \Phi \left( \frac{r - p/\sqrt{3}}{\sigma} \right),
+\label{eq:eta_3pix_int}
+\end{equation}
+which leads to
+\begin{equation}
+r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}(\eta_+).
+\label{eq:eta_3pix_no_final}
+\end{equation}
+There is a small correction to apply, because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120$^{\circ}$. Indeed, if the charge would be equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$, thus the impact point would not be reconstructed on the vertex, but further from the central pixel. The solution is to normalize $\eta^+$ in order to correct this case, thus the model is
+\begin{equation}
+r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}\left( \frac{3}{4}\eta_+ \right).
+\label{eq:eta_3pix_final}
+\end{equation}
+
+To find the model for the angular coordinate it is possible to only consider the two outer pixels, because $\eta_-$ is normalized with respect to the charge collected by these two pixels. The charge diffusion between these two pixels can still be modeled as a one-dimensional Gaussian distribution, centered in $y$, which is the distance from the midpoint of the pixels. Calculating the fraction of Gaussian that falls inside each pixel, it is possible to find the relation between $\eta_-$ and $y$, which is
+
+\begin{equation}
+\eta_-(y) = \frac{\eta_1}{\eta_+} - \frac{\eta_2}{\eta_+} = \left[1 - \Phi \left( - \frac{y}{\sigma} \right ) \right] - \Phi \left( - \frac{y}{\sigma} \right).
+\label{eq:eta_3pix_ang}
+\end{equation}
+Using the approximation of small incident angles, the relation between the angular coordinate $\theta$ and $y$ is $\theta = y / r$. Inverting Eq. \ref{eq:eta_3pix_ang}, it is possible to find the relation between $\theta$ and $\eta_-$
+
+\begin{equation}
+\theta(\eta_-) =  - \frac{\sigma}{r} \Phi^{-1} \left( \frac{1 - \eta_-}{2} \right) = \frac{\sigma}{r} \Phi^{-1} \left( \frac{1 + \eta_-}{2} \right),
+\label{eq:eta_3pix_ang_final}
+\end{equation}
+where it has been used that $\Phi^{-1}(1 - z) = - \Phi^{-1}(z)$.
+
+To calibrate the radial and angular coordinates the strategy is identical to the calibration of two-pixels events. The projection onto the $\hat{r}$ axis and the angle with respect to it are calculated from Monte Carlo truth data of three-pixels events, then are binned in $\eta_+$ and $\eta_-$, and the median of the respective distributions are calculated. The resulting data are fitted with the respective models in Eqs. \ref{eq:eta_3pix_final} and \ref{eq:eta_3pix_ang_final}. Data and best-fit curves are shown in Fig. \ref{fig:eta_3pix_fit}.
+ 
+\begin{figure}
+    \centering
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_r_fit}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_ang_fit}
+    \caption{\fix{inserire figure.}}
+    \label{fig:eta_3pix_fit}
+\end{figure}
+
+The overall number of free parameters is four and after the calibration is concluded, they can be used to reconstruct the incident positions. \fix{distribuzioni ed eef per questo caso + discussione.}
+
+
+\subsection{Modulation transfer function}
+\label{subsec:mtf}
+
+\fix{inserire citazioni \cite{samei1998}, \cite{med_imaging}.}
+
+To characterize the imaging response of the detector, a method that is commonly applied in medical physics is to produce the image of a linear object. This can be achieved using an absorber material plate, such as lead for X-rays, with a slit on it \cite{qualcuno}. The intensity profile of the image on the axis perpendicular to the slit as a function of the position is then calculated, and the result is called line spread function (LSF). More precisely, the LSF is the convolution of the PSF with the slit
+
+\begin{equation}
+\operatorname{LSF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Slit}(x, y).
+\end{equation}
+
+It follows that in order to correctly characterize the resolution, the slit function should approach a Dirac $\delta$ function, thus the slit width must be smaller than the expected resolution. Another requirement for a better characterization is that the slit should be inclined with respect to the detector axes and the reason for this varies depending on the detector type. In case of energy integrating detectors, like the ones commonly used in radiography, the reason is that a slit aligned to an axis would produce a narrow LSF profile only few pixels wide, thus it would be under-sampled. Instead, using an inclined slit causes pixels in following rows to be hit in different positions, allowing to sample the LSF with sub-pixel sampling, which takes the name of presampled LSF. For single-photon driven readout detectors like ASIX, with which each photon is independently reconstructed with sub-pixel resolution, the reason of the inclined slit is not to increase the sampling, as the sub-pixel binning could be reduced to an arbitrary small dimension, but to uniformly sample the hexagonal pixel to estimate the average resolution of the detector on the entire pixel, and not only in a specific part of the pixel. The typical angle of the slit should be small, between 2 and 8 degrees, and should be far from all the possible main axes of the detector. An example of the geometry of the detector and the slits is shown if Fig. \ref{fig:hex_grid_slits}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.2]
+    
+    \foreach \row in {-2,-1,0,1,2} {
+        \foreach \col in {-4,-3,-2,-1,0,1,2,3,4} {
+            \pgfmathsetmacro{\xpos}{\col + 0.5*mod(abs(\row),2)}
+            \pgfmathsetmacro{\ypos}{\row * 0.866025}
+
+            \hexpix[xshift=\xpos cm, yshift=\ypos cm]{\hexsize}
+        }
+    }
+
+	\tikzset{slitLine/.style={very thick, opacity=0.7}}
+	\draw[very thick, black] (-4.5, -0.7) -- (4.5, -0.7);;
+	\draw[very thick, black, dashed] (-4.5, 0.84375) -- (4.5, 0.05625);
+
+    \end{tikzpicture}
+    \caption{Example of a grid with hexagonal pixels with two slits passing above. The solid line represents a slit parallel to the horizontal axis of the detector and always crosses the pixels in the same region. The dashed line represents an inclined slit with an angle of 5 degrees, and it crosses different regions each time.}
+    \label{fig:hex_grid_slits}
+\end{figure}
+
+Producing a slit that matches the requirements of a high-resolution detector can not always be possible. The alternative method to measure the spatial resolution is to use the sharp edge of a slab of absorber material. The sharp edge is necessary to not introduce distorsions in the image. The process is similar to the calculation of the LSF, as the produced image is a linear region of transition between the free and the covered part of the detector. The profile of the transition takes the name of edge spread function (ESF). As for the slit method, the edge method requires the edge to be inclined with a small angle with respect to the main axes of the detector, for the reasons discussed above. Similarly to the LSF, the ESF can be computed as
+
+\begin{equation}
+\operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Edge}(x, y).
+\end{equation}
+
+As mentioned above, the ideal edge should be perfetcly sharp, thus it can be represented with a step function. Using the convolution properties, it is possible to show that the derivative of the ESF corresponds to the LSF
+
+\begin{equation}
+\frac{d}{dx} \operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \frac{d}{dx} \operatorname{Edge}(x, y) = \operatorname{PSF}(x, y) \ast \operatorname{Line}(x, y) = \operatorname{LSF}(y).
+\label{eq:esf_lsf}
+\end{equation}
+
+Eq. \ref{eq:esf_lsf} is useful because once the LSF has been sampled, either with a slit or an edge, it is possible to characterize the profile to determine the spatial resolution, that can be defined as the full width at half maximum or alternatively, if the LSF can be described by a Gaussian curve, as its standard deviation. 
+
+All the quantities that have been discussed above are defined in the spatial domain. There is another quantity that is commonly used to characterize the imaging properties of a detector, but defined in the frequency domain, the modulation transfer function (MTF). The MTF is defined as the Fourier transform of the LSF
+
+\begin{equation}
+\operatorname{MTF}(f) = \mathcal{F}(\operatorname{LSF}(x)).
+\label{eq:mtf}
+\end{equation}
+
+By definition, the amplitude of MTF is normalized in order to have $\operatorname{MTF}(0) = 1$, which can be achieved either by normalizing the LSF area to 1 or by dividing the resulting MTF by $\operatorname{MTF}(0)$. The MTF measures how the contrast is transfered as a function of the spatial frequency of the incoming signal. A high value of the MTF for higher frequencies means that the detector has a high contrast, thus it can resolve well small objects. If the detector would ideally have infinite resolution, the LSF would be a Dirac $\delta$ function and the resulting MTF would have a constant value of 1. As for the LSF and the ESF, using an angled slit or edge to increase the sampling frequency allows to compute the presampled MTF.
+
+The usual metric used to determine the spatial resolution of a detector is related to the frequency $f_{10}$ for which the $\operatorname{MTF}(f_{10})$ decreases to 10\% of modulation. If the LSF can be described by a Gaussian curve $f_{10}$ can be related to the standard deviation of the curve, using that the Fourier transform of a Gaussian is still a Gaussian
+
+\begin{equation}
+\mathcal{F} \left( \frac{1}{\sqrt{2 \pi}\sigma} e^{-x^2/2\sigma^2 } \right) (f) = e^{-2 \pi^2 \sigma^2 f^2},
+\label{eq:mtf_gauss}
+\end{equation}
+and imposing that $\operatorname{MTF}(f_{10}) = 0.1$ it can be found that
+\begin{equation}
+\sigma = \sqrt{\frac{\ln 10}{2 \pi^2}} \frac{1}{f_{10}} \simeq \frac{1}{2.93 \cdot f_{10}}.
+\label{eq:mtf_sigma}
+\end{equation}
+
+It is possible to have cases where the LSF is not Gaussian. A simple example is to consider an ideal detector, without noise of any kind, composed by a grid of square pixels. If the detector does not have any method to reconstruct sub-pixel positions, the LSF can be represented by a constant function in the region occupied by the pixel, say from $-d/2$ and $d/2$ for a pixel of size $d$, and zero elsewhere. When calculating the MTF from this LSF, the result is
+
+\begin{equation}
+\operatorname{MTF}(f) = \frac{\sin (\pi d f)}{\pi df} = \operatorname{sinc}(df).
+\label{eq:mtf_square}
+\end{equation}
+
+When the MTF of a detector working as described above is described by Eq. \ref{eq:mtf_square}, it means that it has achieved the best spatial resolution possible. A similar discussion can also be made for hexagonal pixels to find the maximum theoretical resolution achievable by ASIX if no sub-pixel reconstruction algorithm would be employed, but all the signal would be assigned to the central pixel of the cluster. The two-dimensional $\operatorname{MTF}(f_x, f_y)$ of an hexagonal pixel has been calculated in \cite{barnard1991}, and for the directions orthogonal to the side and towards the vertex, considering a pixel with a pitch $p$ and with pointy-top orientation, they are equal to
+
+\begin{equation}
+\begin{split}
+\operatorname{MTF}(f_x, 0) = \frac{2}{3} \left[ \operatorname{sinc}(p f_x) + \frac{1}{2} \operatorname{sinc}^2\left( \frac{p}{2} f_x \right) \right], \\
+\operatorname{MTF}(0, f_y) = \operatorname{sinc} \left( 	\frac{p}{2 \sqrt{3}} f_y	\right) \operatorname{sinc} \left( 	\frac{\sqrt{3} p}{2} f_y	\right).
+\end{split}
+\end{equation}
+
+In Fig. \ref{fig:mtf_pixels}, where the comparison between the MTF of a square pixel and that of an hexagonal pixel with the same area is shown, is possible to see that the latter geometry has the best resolution between the two. This can be related to the highest degree of isotropy and symmetry of the hexagon, which is more similar to a circle than a square is. Even if this calculation is made for an ideal detector with no sources of noise or blurring, for the ASIX hexagonal geometry it can be interpreted as the worst case scenario resolution, as there is no sub-pixel reconstruction, which widely improves the performance.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mtf_hex_square}
+    \caption{MTFs calculated for square and hexagonal pixels with same area. The hexagonal pixel pitch is $p = 50$ $\mu$m. The MTFs referred to the hexagonal pixel are calculated along the directions towards the vertex and orthogonal to the side.}
+    \label{fig:mtf_pixels}
+\end{figure}
+
+A faster way to estimate the spatial resolution of a detector consists of using a line pair phantom, which is a plate with multiple sets of alternating slits with different widths and spatial frequencies, which are expressed as line pair or cycles per millimeter (lp/mm or cycles/mm). The phantom is made of an absorber material, usually lead, and when it's imaged the resolution can be estimated from the spatial frequency of the smallest set of slits that can be resolved. The only requirement for this method is to have a set of slits with a width smaller or comparable to the spatial resolution of the detector, but this may not be possible for high resolution detectors.
+
+Going back to the MTF calculation, in case the slit or the edge is tilted, for the reasons discussed above, it is first necessary to calculate the angle to then correctly reproject the LSF or the ESF. For the moment it can be assumed to be working with a slit image, but analyzing an edge image is essentially the same. To find the angle, the slit is the only reference in the image and its angle with respect to the detector $x$-axis has to be computed. The first step of the process is to detect the slit in the image, meaning that its edges have to be detected. To accomplish this task, the Canny edge detection algorithm \cite{canny1986} has been employed. This algorithm allows to detect the edges in an image, and returns a binary image of the same size where a value of 1 means that a pixel belongs to an edge and 0 if it does not. Before running this algorithm it is necessary to create an image binning the reconstructed positions along the slit, and this process requires to choose the bin size. Another important parameter to adjust is the width of the Gaussian filter applied by the algorithm to smooth the image. The bin size and the filter width have to be carefully chosen in order to not be influenced by the noise, that would mean detecting edges that do not correspond to the slit. The ideal filter width, which is expressed in pixels, should be of the same order of the slit width, as can be observed in Fig. \ref{fig:mtf_canny}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/chapter4/position/mtf_canny}
+    \caption{Example usage of the Canny edge detection algorithm on a simulated slit image. The simulated image (a) is binned with a $200 \times 200$ grid, while the slit has a Gaussian profile with a standard deviation of 5 pixels, a length of 160 pixels and a tilt angle of 5 degrees. Images from (b) to (f) show how the detected edges vary by changing the Gaussian filter width. A filter to small is very sensitive to low statistics and detects false edges. Increasing the filter width, this effect becomes less and less visible. If the filter is too wide with respect to the slit width, no edge is detected (case not shown).}
+    \label{fig:mtf_canny}
+\end{figure}
+
+The second step of the process consists in calculating the angle from the detected edges, which are sets of straight lines. This can be performed with the use of the Hough transform \cite{hough1959, duda1972}, which is a technique used to detect parameterizable curves, such as lines. In this specific case, a line in the plane is represented by a set of two parameters $(\rho, \theta)$, which define the Hough space, where $\rho$ is the distance of the line from the origin of the axes and $\theta$ is the angle between the $x$-axis and the distance vector. Within this representation, each point $(x, y)$ on the line respects
+
+\begin{equation}
+\rho = x \cos \theta + y \sin \theta.
+\label{eq:hough}
+\end{equation}
+
+To find the lines, for each point tested, the algorithm scans a given range of $\theta$ values, and for each one evaluates Eq. \ref{eq:hough}. The results are accumulated in a two-dimensional histogram, named accumulator space, where for each point and angle value an entry is added at the calculated $(\rho, \theta)$. A straight line is detected when a peak is identified in the latter space, and the tilt angle can be calculated as $\theta_{peak} - \pi/2$. An example of the result of the Hough transform of a slit edge obtained with the Canny edge detection algorithm is shown in Fig. \ref{fig:mtf_hough}. During the analysis, if multiple lines are present and multiple peaks are produced by the Hough transform, only the highest one is considered to calculate the tilt angle.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mtf_hough}
+    \caption{Accumulator space resulting from the Hough transform of the slit edge image from Fig. \ref{fig:mtf_canny}(e). The two nearly identical peaks that are visible correspond to the two long sides of the slits.}
+    \label{fig:mtf_hough}
+\end{figure}
+
+
+  
 
 
 
@@ -509,14 +686,6 @@ A similar approximation can be made for the three-pixels case.
 
 
 
-
-
-
-
-
-
-
-\subsection{Slanted edge technique}
 
 
 
@@ -532,7 +701,7 @@ A similar approximation can be made for the three-pixels case.
 
 \subsection{Cluster size}
 
-\subsection{Position resolution}
+\subsection{Spatial resolution}
 
 \subsection{Energy resolution}
 
