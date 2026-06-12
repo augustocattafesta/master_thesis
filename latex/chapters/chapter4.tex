@@ -1,6 +1,6 @@
 \chapter{Analog Spectral Imager for X-rays}
 \label{chap:chapter4}
-
+\cite{leo1994} \cite{kolanoski2020}, \cite{tomaiuolo2024}
 The Analog Spectral Imager for X-rays (ASIX) is a new class of solid-state hybrid pixel detectors (HPDs), with the ability to perform single photon event-driven readout, designed for both imaging and spectral study of photons at X-ray energies between 1 keV and 50 keV. The intended applications for this detectors are X-ray spectral imaging, material science and also micro-tomography in various fields. 
 
 In this section the detector design and the current state of the prototypes will be illustrated. Afterwards, the algorithms and the procedure to perform detector calibration are outlined, in order to allow the best event reconstruction possible, involving both position and energy reconstruction. In this regard, different possible algorithms for position reconstruction and their perfomance are shown, as well as the limits of the energy reconstruction. Then, a comparison between Monte Carlo simulations and real data is done, to verify the goodness of the simulation software to replicate the prototypes and to have a benchmark for the event reconstruction algorithms performance.
@@ -9,17 +9,68 @@ In this section the detector design and the current state of the prototypes will
 \section{Detector design}
 \label{sec:asix_design}
 
-ASIX is a solid-state HPD and it consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of hole-electron pairs, and the analog readout ASIC, whose job is to process the collected charge by amplifying and shaping the signal and then triggering the digital readout electronics.
-
-The goal is to achieve high resolution for both spectroscopy and imaging applications, but the performances are dependant on the active sensor design.
+ASIX is a solid-state HPD which consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of hole-electron pairs, and the analog readout ASIC, whose job is to process the collected charge by amplifying and shaping the signal and then triggering the digital readout electronics.
 
 \subsection{Active sensor}
+\cite{rossi2006}
+The active sensor is the part of the detector where the physical signal is produced by interation mechanisms between radiation and the sensor material, which is ionized during the passage of charge particles or electromagnetic radiation. In solid state detectors the active sensor is made of a semiconductor material. There are various choices for the sensor material, depending on the required properties of the detector and the type or radiation that has to be detected. For ASIX, which works with X-rays, the relevant materials are silicon and cadmium-telluride (CdTe), which currently are the two type of prototypes available. As already discussed in Chap. \ref{chap:chapter2}, CdTe is best suited for the harder portion of the electromagnetic spectrum, as the higher atomic numbers of cadmium and tellurium imply a higher photoelectric cross section than silicon, especially above photon energies of 30 keV. At these energies the main interaction process is represented by the photoelectric effect, thus other processes can be neglected for the discussion.
 
-The active sensor is a semiconductor diode with a pixelated structure similar or equal to the ASIC pattern. The two sides of the sensor are kept at a voltage difference $V_{b}$, called bias voltage.
+The probability density function of a photon of being absorbed by the sensor material at a depth $z$ is described by Eq. \ref{eq:absorption}, where $\mu$ is the attenuation factor, which can be calculated for a given energy knowing the cross section and the density of the material. This equation allows to calculate the probability of being absorbed by the sensor, which can define the sensitivity energy range of the detector given the sensor material and its thickness. Another important quantity that can be calculated from Eq. \ref{eq:absorption} is the mean absorption depth as a function of the energy, shown in Fig. \ref{fig:mean_z}, which is
 
-DISCUSSIONE SULLE GIUNZIONI QUI O IN CHAP. 2? COMUNQUE BISOGNA PARLARE DEI SCHOTTKY (metal-semiconductor) e delle pn (per il silicio). 
+\begin{equation}
+\langle z \rangle = \int_0^{d} \frac{\mu z e^{- \mu z}}{1 - e^{-\mu d}} = \frac{1 - e^{-\mu d} (1 + \mu d)}{\mu (1 - e^{-\mu d})}.
+\label{eq:mean_z}
+\end{equation}
 
-When a photon reaches the sensor, it interacts with matter via photoelectric effect and produces electron-hole pairs. [The interaction must occur inside the depletion region, but if we are with a fully depleted sensor we don't mind about this detail, because it is always the case.]
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/design/mean_z}
+    \caption{The left axis represents the mean absorption depth as a function of the photon energy for a Si sensor with 300 $\mu$m thickness and for a CdTe sensor with 750 $\mu$m thickness. The jumps that can be observed are effects caused by the K-edges. When the cross section becomes too small at high energies the mean value goes asymptotically to half the sensor thickness because the interaction probability becomes uniform. The right axis shows the absorption probability as a function of the energy for the same sensors.}
+    \label{fig:mean_z}
+\end{figure}
+
+\fix{forse questo va nel chap 2, oppure descritto per ixpe e ref qui} The interaction between the photon and the sensor initially produces a single free electron, which ionizes other atoms by collisions producing secondary electrons, and an excited atom, which can return to the ground state with two different mechanisms. The first is by releasing an Auger electron from the outer shell with enough energy to ionize other atoms. The second mechanism consists in producing fluorescence X-ray radiation by emitting an X-ray from the transition of an electron from outer shells into the inner shell of the electron emitted by photoelectric effect. This second X-ray photon can interact with the sensor producing another primary electron or can also escape from the detector, which can lead to the appearance of an escape peak under certain conditions. The number of electron-hole pairs is given by Eq. \ref{eq:num_ioniz} and depends on the sensor material. For semiconductors $w$ is smaller than for gases, thus the number of electrons produced by a photon is bigger for solid-state detectors. This property is essential to have a better energy resolution.
+
+This discussion is valid for any piece of material subjected to incoming radiation. In order to have an active sensor usable in a detector it has to satisfy different requierments, above all it must be made of an opportunely doped semiconductor in order to create a junction. The working principles of a semiconductor junction have already been explained in Chap. \ref{sec:semiconductors}. Currently there are two different ASIX prototypes \cite{minuti2025}: an hexagonally pixelated n-on-p 300 $\mu$m thick silicon sensor with a pixel pitch of 50 $\mu$m, and an hexagonally pixelated Schottky-type 750 $\mu$m thick cadmium-telluride sensor, shown in Fig. \ref{fig:cdte_proto}, with a pixel pitch of 100 $\mu$m. With the current ASIC readout chip, which has hexagonal pixels with 50 $\mu$m pitch, the CdTe sensor requires to connect one out of every four readout pixels.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/design/asix}
+    \caption{ASIX hybrid pixel detector with the CdTe sensor. The plate visible on top is a platinum electrode positioned on the back side of the CdTe sensor to apply the negative bias voltage to polarize the junction. Image taken from \cite{minuti2025}.}
+    \label{fig:cdte_proto}
+\end{figure}
+
+Besides defining the sensitive energy range of the detector, the sensor material, thickness and working conditions also define how the collected charge diffuses inside it. Once electron-hole pairs are produced by the photon interaction and consequent collision ionizations, which happen in a very short region about 1 $\mu$m wide, approximable as point-like, they start to drift towards opposite poles of the junction under the action of the electric field. Thermal agitation and collisions with the crystal lattice make the charge spread durign the drift in the direction transverse to it. This process is governed by Fick's diffusion laws and in absence of external fields, which is true for the transverse, the charge is distributed on the plane according to a two-dimensional Gaussian distribution, with standard deviation along the $x$ and $y$ axes given by
+
+\begin{equation}
+\sigma = \sigma_x = \sigma_y = \sqrt{2Dt_d},
+\label{eq:diff_sigma}
+\end{equation}
+where $D$ is the diffusion coefficient and $t_d$ is the drift time. Using the mobility of the charge carriers $\mu_c$ and the value of the electric field $\mathcal{E}$ it is possible to make explicit the dependence of Eq. \ref{eq:diff_sigma} on the drift distance $d$
+
+\begin{equation}
+\sigma = \sqrt{\frac{2D}{\mu_c \mathcal{E}}d} = \sqrt{\frac{2kT}{e\mathcal{E}}d}= \mathcal{D} \sqrt{d},
+\label{eq:diff_sigma_dist}
+\end{equation}
+where it has been used that in a semiconductor $D/\mu_c = kT/e$ and the transverse diffusion parameter $\mathcal{D}$ has been defined to isolate the dependence on the drift distance $d$. As clearly visible in Eq. \ref{eq:diff_sigma_dist}, there is also a dependence on the sensor working conditions, specifically the temperature and the electric field. This has to be taken into account during the analysis, because a wrong estimate of $\mathcal{D}$ can lead to errors, as will be clear in the following sections. The mean charge diffusion standard deviation can be calculated from Eqs. \ref{eq:mean_z} and \ref{eq:diff_sigma_dist}, and is useful to have an idea of how the charge cloud dimension varies as a function of the energy
+
+\begin{equation}
+\langle \sigma \rangle = \mathcal{D} \sqrt{t - \langle z \rangle},
+\label{eq:mean_diff_sigma}
+\end{equation}
+where $t$ is the sensor thickness. Fig. \ref{fig:mean_sigma} shows $\langle \sigma \rangle$ as a function of the photon energy for the two sensors.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/design/mean_sigma}
+    \caption{Normalized mean diffusion sigma as a function of the photon energy for the Si and CdTe sensors. In the sensitive energy range of the two sensors (up to about 15 keV for Si and 100 keV for CdTe) the average charge cloud size decreases of about 25\%.}
+    \label{fig:mean_sigma}
+\end{figure}
+
+Once the sensor working conditions like the temperature and the electric field are chosen, meaning that $\mathcal{D}$ is determined, Eq. \ref{eq:mean_diff_sigma} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector. If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for a spectroscope the smaller the number of pixels involved in the event, the better the energy resolution is, as the total readout noise on the final measurement goes as $\sqrt{N}$, where $N$ is the number of pixels. ASIX's goal is to find a compromise between an imager detector and a spectroscope, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch between 10-20\%. The relevant metric 
+
+
+
 
 
 Scaletta:
@@ -29,11 +80,14 @@ Scaletta:
 
 
 
-Studiare quanta carica si perde in funzione della soglia, sia senza rumore che con rumore. Descrivere diffusione
+Studiare quanta carica si perde in funzione della soglia, sia senza rumore che con rumore.
+
+\subsection{Readout}
 
 
 
-\subsection{Monte Carlo simulations}
+
+\subsection{Simulation software}
 
 
 
@@ -228,8 +282,8 @@ The positive aspects of this algorithm is that it does not require a calibration
     \node[labelStyle] at (-0.5, 0.866) {$q_6$};
 
 	\fill[black] (0.3, 0.2) circle (0.025cm);
-	\node[south, font=\scriptsize, text=black, bg=white, inner sep=1pt] 
-    at (0.3, 0.1) {$(x_0, y_0)$};
+	\node[anchor=south, font=\scriptsize, text=black, inner sep=1pt] 
+    at (0.3, 0.05) {$(x_0, y_0)$};
     \end{tikzpicture}
     
     \caption{Example of charge diffusion from a photon with a incident position $(x_0, y_0)$ and standard deviation of the bivariate Gaussian equal to 15\% of the pixel pitch. The charge cloud extends up to 5$\sigma$.}
@@ -296,7 +350,7 @@ In Eqns. \ref{eq:multivariate_gauss} and \ref{eq:cov_matrix}, the dependance fro
 \label{eq:nll_multivariate}
 \end{equation}
 
-This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \citep{iminuit}.
+This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \cite{iminuit}.
 
 \begin{figure}
     \centering
@@ -676,20 +730,15 @@ To find the lines, for each point tested, the algorithm scans a given range of $
     \label{fig:mtf_hough}
 \end{figure}
 
+To calculate the presampled LSF, the slit image has to be rotated with the angle found with the Hough transform. Once it has been aligned, the presampled LSF is calculated projecting all the points on the short side of the slit and creating the histogram of the reconstructed positions. The bin size of this histogram must be smaller than the expected resolution of the detector, in order to not incur in aliasing effects, as stated by the Nyquist theorem, but large enough to not be sensitive to statistical fluctuations of the measured positions. A possible way to limit effects from statistical fluctuations and noise is to apply some smoothing algorithm on the LSF, but this should be performed with caution as, in frequency domain, the smoothing acts as a low-pass filter, with the possible consequence of underestimating the actual detector resolution.
 
-  
+The presampled MTF is then obtained from Eq. \ref{eq:mtf} using a discrete fast Fourier transform algorithm.
 
-
-
-
-
-
-
-
-
-
+In conclusion, the MTF represents the only available way to characterize the spatial resolution of ASIX, and this analysis can be performed both on real and simulated data, in order to verify the consistency between the difference of the various implemented reconstruction algorithm and also the consistency between data and simulations.
 
 \section{Energy reconstruction}
+
+
 
 \subsection{Zero suppression}
 
@@ -697,11 +746,15 @@ To find the lines, for each point tested, the algorithm scans a given range of $
 
 
 
+
+
 \section{Simulation and data comparison}
 
-\subsection{Cluster size}
+\subsection{Experimental setup}
 
-\subsection{Spatial resolution}
+\subsection{Simulated data}
 
-\subsection{Energy resolution}
+\subsection{Results}
+
+
 

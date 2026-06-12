@@ -3,7 +3,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage[margin=3cm]{geometry} % Think how to format the page
+\usepackage[
+  a4paper,
+  top=3cm,
+  bottom=3cm,
+  inner=3.5cm,
+  outer=2.5cm, 
+]{geometry}
 \usepackage{hyperref}   % Handle hypertext
 \usepackage{fancyhdr}   % Set the page style
 \usepackage{titlesec}   % Modify chapter first page
@@ -13,10 +19,11 @@
 \usetikzlibrary{patterns} % For pixel figures
 \usepackage{enumitem}	% To change the style of itemize
 \usepackage{xcolor}
-
+\usepackage{tocloft}
+\renewcommand{\cftdot}{}
 
 % Set the hyperlinks style
-\hypersetup{colorlinks=true, linktoc=page, linkcolor=black}
+\hypersetup{colorlinks=true, linktoc=page, linkcolor=black, citecolor=blue}
 
 % Configure the page style
 \pagestyle{fancy}
@@ -71,7 +78,7 @@
 
 
 % Bibliography package and resources
-\usepackage[backend=biber, sorting=ynt]{biblatex}
+\usepackage[backend=biber, sorting=none]{biblatex}
 \addbibresource{bibliography.bib}
 
 \setcounter{tocdepth}{2} % 2 means show sections and subsections
@@ -87,7 +94,10 @@
 
 \maketitle
 
-\tableofcontents 
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+
 
 
  % Load the chapters
@@ -102,6 +112,6 @@
  
  
 \nocite{*}
-\printbibliography
+\printbibliography[heading=bibintoc]
 
 \end{document}
