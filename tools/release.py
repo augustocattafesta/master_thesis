@@ -33,7 +33,7 @@ def _cleanup() -> None:
 def _compile() -> None:
     """Compile the TeX source code.
     """
-    _cmd("latexmk", "-pdf", "-interaction=nonstopmode", "main.tex")
+    _cmd("latexmk", "-pdf", "-interaction=nonstopmode", "latex/main.tex")
 
 
 def _get_latest_tag() -> Version:
@@ -83,7 +83,7 @@ def release(mode: BumpMode) -> None:
     _cmd("git", "commit", "--allow-empty", "-a", "-m", msg)
     _cmd("git", "push")
     # Publish the release.
-    _cmd("gh", "release", "create", f"v{new_tag}", "main.pdf",
+    _cmd("gh", "release", "create", f"v{new_tag}", "latex/main.pdf",
          "--title", f"Release v{new_tag}", "--generate-notes")
     print(f"Release v{new_tag} created successfully.\n")
     print("Cleaning up the build directory again...\n")

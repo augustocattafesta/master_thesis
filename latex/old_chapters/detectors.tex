@@ -1,0 +1,54 @@
+\chapter{Ionization detectors}
+\label{chap:detectors}
+
+It is fundamental to identify the main physical processes involved in the interaction of radiation with matter to correctly modelize the behavior of a detector and being able to simulate it and reconstruct the intresting quantities from the observed signals.
+
+In this work, two different types of detectors have been employed, a gas-filled detector and a semiconductor detector. Even if the materials that are responsible for the conversion of photons into charges are very different, the underlying physical processes are the same. A short description of these processes is discussed in this chapter.
+
+\section{Photoelectric effect}
+A photon can interact with an atom via t
+
+\begin{equation}
+\gamma + (A, Z) \rightarrow e^- + (A, Z)^+
+\end{equation}
+
+In order to interact with the photoelectric effect, the photon energy $E_{\gamma}$ must be higher than the binding energy $E_{B}$ of the atomic electron, whose kinetic energy after ejection is:
+
+\begin{equation}
+E = E_{\gamma} - E_{B}.
+\end{equation} 
+
+The cross section of this interaction process shows a strong dependence on the energy and the atomic number $Z$, and with increasing $Z$ the absorption edges can be observed. These edges are rapid increases in the cross section that occur when the photon has enough energy to interact with electrons inside more internal atomic shells. The trend of the cross section from the energy of the photon depends on which shell the photon is interacting with, but an approximated treatment of the interaction with K-shell electrons shows that it goes as
+
+\begin{equation}
+\sigma_{photo} \propto E^{-3.5}Z^5.
+\end{equation}
+
+Fig. \ref{fig:photo_cross_section} shows the photoelectric cross section of silicon and cadmium telluride (CdTe) as a function of the photon energy, and it is possible to see the absorption edges of the two materials. It is possible to see that the absorption cross section of a shell is dominant until the photon has an energy large enough to interact with an inner shell.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/detector/photo_cross_section.png}
+    \caption{Photoelectric cross section for silicon ($Z = 14$) and cadmium telluride CdTe ($Z = 48, 54$). Data collected from NIST XCOM database \cite{nist_xcom}.}
+    \label{fig:photo_cross_section}
+\end{figure}
+
+The photoelectric effect is the dominant interaction process from energies lower than 1 keV up to tens of keV or even hundreds of keV for high-$Z$ elements. 
+
+
+
+
+
+
+
+
+\section{Charge multiplication in gas detectors}
+
+
+
+
+
+
+
+
+

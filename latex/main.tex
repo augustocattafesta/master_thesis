@@ -1,0 +1,120 @@
+\documentclass[12pt, a4paper, twoside]{book}
+% List of packages. Let's try to keep it simple and ordinated.
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[
+  a4paper,
+  top=3cm,
+  bottom=3cm,
+  inner=3.5cm,
+  outer=2.5cm, 
+]{geometry}
+\usepackage{hyperref}   % Handle hypertext
+\usepackage{fancyhdr}   % Set the page style
+\usepackage{titlesec}   % Modify chapter first page
+\usepackage{subcaption} % Insert subcaptions in subplots
+\usepackage{tikz}	   % For pixel figures
+\usetikzlibrary{shapes.geometric, shadings}
+\usetikzlibrary{patterns} % For pixel figures
+\usepackage{enumitem}	% To change the style of itemize
+\usepackage{xcolor}
+\usepackage{tocloft}
+\renewcommand{\cftdot}{}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+
+% Set the hyperlinks style
+\hypersetup{colorlinks=true, linktoc=page, linkcolor=black, citecolor=blue}
+
+% Configure the page style
+\pagestyle{fancy}
+\fancyhf{} % Clear all the default style settings
+\fancyhead[RO,LE]{\thepage} % RO = RightOdd, LE = LeftEven
+% Opzionale: Titolo capitolo/sezione al centro o lato interno
+\fancyhead[RE]{\itshape \leftmark}  % Capitolo su pagine pari (interno)
+\fancyhead[LO]{\itshape \rightmark} % Sezione su pagine dispari (interno)
+\renewcommand{\headrulewidth}{0.4pt} % Linea sottile sotto l'header (usa 0pt per rimuoverla)
+\renewcommand{\footrulewidth}{0pt}   % Nessuna linea in basso
+
+% Configure chapter style
+\titleformat{\chapter}[hang]
+  {\normalfont\scshape\huge}
+  {\color{gray}\thechapter} 
+  {20pt}
+  {\huge}
+
+% Opzionale: regola lo spazio sopra e sotto il titolo
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+% Define pixel geometry
+\newcommand{\hexpix}[2][]{%
+    \draw[#1] (90:#2) -- (30:#2) -- (-30:#2) -- (-90:#2) -- (-150:#2) -- (150:#2) -- cycle;
+    \fill[#1] (0, 0) circle (0.8pt);
+}
+\newcommand{\hexsize}{0.5cm}
+
+% 1. Definiamo prima la sfumatura in bianco e nero (il nero copre, il bianco diventa trasparente)
+\pgfdeclareradialshading{sfumaturaGaussiana}{\pgfpoint{0cm}{0cm}}{
+    color(0.00cm)=(black);       % Centro opaco
+    color(0.15cm)=(black!60);    
+    color(0.30cm)=(black!13);    
+    color(0.45cm)=(black!1);     
+    color(0.70cm)=(white);       % Bordo totalmente trasparente
+    color(1.20cm)=(white)        
+}
+
+% 2. Creiamo il fading vero e proprio a partire dalla sfumatura appena fatta
+\pgfdeclarefading{gaussianaPerfetta}{\pgfuseshading{sfumaturaGaussiana}}
+
+\pgfdeclareradialshading{paletteScienza}{\pgfpoint{0cm}{0cm}}{
+    color(0.00cm)=(yellow!95!orange); % Centro caldo
+    color(0.15cm)=(orange!90!red);    % 1*sigma
+    color(0.30cm)=(red!75!magenta);   % 2*sigma
+    color(0.45cm)=(magenta!60!blue);  % 3*sigma
+    color(0.75cm)=(white);            % 5*sigma -> FORZIAMO IL BIANCO QUI: la sfumatura si interrompe visivamente a 0.75cm
+    color(1.20cm)=(white)             % Tutto il resto è bianco della pagina
+}
+% Definiamo un comando rapido \fix che scrive in rosso acceso e in grassetto
+\newcommand{\fix}[1]{{\color{red}\textbf{#1}}}
+
+
+% Bibliography package and resources
+\usepackage[backend=biber, sorting=none]{biblatex}
+\addbibresource{bibliography.bib}
+
+\setcounter{tocdepth}{2} % 2 means show sections and subsections
+
+% Title of the thesis
+\title{Development of High Resolution Hybrid X-Ray Detectors}
+\author{Augusto Cattafesta}
+\date{date}
+
+
+
+\begin{document}
+
+\maketitle
+
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+
+
+
+ % Load the chapters
+\include{chapters/chapter1.tex}
+\include{chapters/chapter2.tex}
+\include{chapters/chapter3.tex}
+\include{chapters/chapter4.tex}
+\include{chapters/chapter5.tex}
+ 
+
+ 
+ 
+ 
+\nocite{*}
+\printbibliography[heading=bibintoc]
+
+\end{document}

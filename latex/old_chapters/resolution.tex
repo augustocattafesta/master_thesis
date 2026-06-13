@@ -1,0 +1,86 @@
+\chapter{Resolution}
+\label{chap:resolution}
+NOTE: find some references for the slit method and the edge method, any book on medical imaging should provide the necessary informations.
+
+
+\section{Slanted edge}
+The ideal method to estimate the spatial sub-pixel resolution of a detector is to illuminate a slanted slit. In the ideal case of a infinite resolution detector, when projecting the reconstructed positions along the slit axis, all the pixel are concentrated in a point, thus the counts histogram is a delta. The function describing this projection is called line spread function (LSF). The usual quantity to evaluate the resolution is to calculate the Fourier transform of the LSF, which is called the modular transfer function (MTF). In the ideal case the MTF is a constant function all over the domain of the inverse of the position, thus we have a infinite good resolution.
+
+When considering an ideal detector with finite resolution, the LSF is a Gaussian curve. In this case, the MTF is represented by the Fourier transform of a Gaussian
+
+\begin{equation}
+\mathcal{F}[e^{-x^2/(2\sigma^2)}](k) = \sqrt{2\pi \sigma ^2} e^{-2\pi^2\sigma^2 k^2}.
+\end{equation}
+
+
+The metric used for the spatial resolution is the value $k_{0.1}$ where the normalized MTF reaches the value of 0.1. This quantity is related to the $\sigma$ of the LSF by the relation:
+
+ATTENZIONE FORMULA SBAGLIATA, CORREGGERE, IL VALORE NUMERICO 1.46 È GIUSTO MA IL FATTORE CON LOG E PI NO.
+\begin{equation}
+\frac{\sqrt{2 \ln{10}}}{\pi} \sigma \simeq 1.46 \sigma = \frac{1}{2 k_{0.1}},
+\end{equation}
+
+where the factor of 2 is because $k$ is measured in cycles/mm, where a cycle consists of a slit-edge pair.\\
+
+When the slit is larger than the pixel resolution, this method is no longer applicable. In case of infinite resolution, the normalized LSF is 1 inside the slit and 0 outside. It is clear that its Fourier transform doesn't reflect the properties of the detector, but it's a function that decrease more rapidly the larger is the slit, as the zeros of the absolute value of the Fourier transform are in $n/W$, where $W$ is the slit width.
+
+In general, the Fourier transform of the LSF is the trasnform of the convolution of the detector response and the slit shape. This is the reason why the ideal would be to have an infinite small slit, or at least a slit much smaller than the expected resolution.
+
+To avoid the limitation of producing a slit smaller than 1 $\mu$m, the solution is to use the edge method. This method consists of using a uniform illumination and to mask the detector with a high-Z target to cover part of the detector. It is possible to estimate the resolution by studying how the edge image is reconstructed by the detector. If the detector has infinite resolution, the transition region projection along the edge is a step function. This function is called edge spread function (ESF). It is possible to calculate the LSF from the ESF by derivating it. From this point on, everythig is the same as the preiously described method. In the case of a finite resolution detector, the ESF is a rising function.
+
+If using a large slit with respect to the resolution, it is possible to use the edges produced by the transition regions to infer the resolution.
+
+The image produced has to be tilted with respect to the main axes of the pixels, in order to avoid the presence of geometrical biases in the formation of the ESF or the LSF, and for the same reason the edge has to span many pixels.
+
+
+
+\section{Finding the MTF from data}
+When the detector is triggered by a photon, we described two algorithms to estimate the reconstructed position. We can use the slanted edge method to quantify the spatial resolution from simulation and we can also compare the results with real data. This data needs to be pre-processed before the actual MTF can be calculated. The process is divided into four steps. The first is to find the tilt angle, to rotate the image and project it onto the edge axis. The second step is binning the reconstructed positions and project them onto the edge axis. The third step is calculate the derivative of the ESF to obtain the LSF, and finally compute the Fourier transform of the LSF to find the MTF.
+
+\subsection{Find the tilt angle}
+We have a reference to find the tilt angle, which is the edge of the slit. When we reconstruct the incident position of the photons, we get the physical coordinates with respect to the detector frame. To find the angle, two steps are required. The first step is to detect the edges in the image, and this can be achieved using a basic algorithm of computer vision, Canny edge detection algorithm [reference]. This algorithm allows to find the edges in an image, and return a "binary" image with the same dimension, where a value of 1 means that the pixel corresponds to an edge. To run it, we first need to bin the data to create an image, and the only thing to be careful to is the binning dimension. It has to be at least larger than a pixel pitch, in order to not detect the pixel edges, but not larger than slit size, because otherwise the edge would be straight even if it is tilted.
+
+[INSERT AN IMAGE OF THE EDGE DETECTION]
+
+The second step to find the angle is to apply the Hough transform [reference], which consists of mapping the (x,y) coordinates of the edges returned by the Canny algorithm to the space of polar coordinates (r, $\theta$). When the latter space is scanned over a grid of different values of $\theta$, by counting the number of edge pixels that falls in a bin (I should review this part), you can determine the angle of the line. The finer is the grid, more precise is the value of the angle. (Inseire giusto qualche formulina, anche se sono stupide, ma giusto per chiarire come dovrebbe essere parametrizzata. Inoltre chiarire su cosa rappresenta l'angolo.)
+
+[INSERT AN IMAGE OF THE HUGH TRANSFORM]
+
+After finding the tilt angle, all the reconstructed positions can be rotated to align the edge to the detector axes (Non sono sicuro che sia corretto dire che lo stiamo allinenado agli assi del detector, quello che ci interessa è poter proiettare lungo un asse. Magari check Samei et al.)
+
+\subsection{Calculate the presampled MTF}
+
+After the reconstructed positions have been rotated to align them to the edge axis, it is possible to find the ESF, but it is first necessary to bin the data. The binning has to be smaller than the actual resolution of the detector, but it is also important to have enough entries in each bin, to compensate the noise, that introduces an uncertainty in the reconstruction. Another method to compensate the noise consists in applying a smoothing to sampled ESF.
+
+The smoothing method used in this case is a Gaussian filter, whose main characteristic is the filter width, which has to be tweaked to the correct size to avoid correlating the noise of different bins or eliminating real edge features. This can happen because the smoothing acts as a convolution on the data, hence modifing the results on the Fourier transform. A filter too wide would soften the edge, thus the resolution woyld be underestimated.
+
+After the ESF has been calculated, it is possible to calculate its derivative, that gives us the LSF. (Capire se inserire le difficoltà del calcolare la derivata su dati rumorosi, per ora ignoriamo).
+
+Now it's possible to calculate the Fourier transform of the data. This can be made using common FFT algorithms, available on almost all the data analysis packages. Finding the point where MTF(k) = 0.1 gives us the estimated resolution.
+
+\subsection{Resolution from MC data}
+
+A dataset of events has been simulated in the same conditions of the real dataset. This means that a beam with a monochromatic spectrym with energy of 9.7 keV (Check Au line) and a hit positions uniformly spread over a slit of width 1 cm and height 10 um., with a tilt angle of N degrees. The noise distribution sigma has been set to 80 electrons, corresponding to a signal-to-noise ratio of 25 (boh fare il check di tutti i numeri ovviamente).
+A total of N events have been simulated and reconstructed with both the algorithms implemented, namely the centroid and "eta" algorithms. The zero suppresion threshold used for the reconstruction is 2*ENC. To sample the ESF, the bin size has been set to 1 um (about 1/10 of the expected resolution), and a smoothing of 2 um (CAPIRE COME RENDERE DINAMICO LO SMOOTHING).
+
+After the tilt angle was estimated using the algorithms described in REF, giving a result of M degrees, the reconstructed positions were rotated and the ESF was calculated.
+
+The presampled MTFs for the two methods are show in Fig. REF, and the estimated spatial resolution are ... .
+
+\subsection{Resolution from real data}
+
+The analysis carried on real data followed the same procedure as the simulated data. The estimated tilt angle is N. The results for the resolution are ... .
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
