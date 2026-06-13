@@ -67,10 +67,61 @@ where $t$ is the sensor thickness. Fig. \ref{fig:mean_sigma} shows $\langle \sig
     \label{fig:mean_sigma}
 \end{figure}
 
-Once the sensor working conditions like the temperature and the electric field are chosen, meaning that $\mathcal{D}$ is determined, Eq. \ref{eq:mean_diff_sigma} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector. If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for a spectroscope the smaller the number of pixels involved in the event, the better the energy resolution is, as the total readout noise on the final measurement goes as $\sqrt{N}$, where $N$ is the number of pixels. ASIX's goal is to find a compromise between an imager detector and a spectroscope, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch between 10-20\%. The relevant metric 
+Once the sensor working conditions like the temperature and the electric field are chosen, meaning that $\mathcal{D}$ is determined, Eq. \ref{eq:mean_diff_sigma} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector. If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for a spectroscope the smaller the number of pixels involved in the event, the better the energy resolution is, as the total readout noise on the final measurement goes as $\sqrt{N}$, where $N$ is the number of pixels. ASIX's goal is to find a compromise between an imager detector and a spectroscope, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch in the range between 10-20\%. The relevant metric to gauge how this ratio affects the detector readout design and the event analysis is the cluster size, which is the number of pixels that have signal above a certain threshold. Tab. \ref{tab:cluster_size} shows how the cluster size distribution vary as a function of the ratio $\langle \sigma \rangle / p$ for a simulation without electronic noise and without applying any threshold on the pixel signal. The most frequent cluster size is 4, with a skewed distribution towards higher values. For a ratio of about 15\% the distribution becomes symmetric, and is expected to become skewed towards small cluster sizes below this ratio. 
 
+\begin{table}[htbp]
+\centering
+\begin{tabular}{c ccccccc}
+\multirow{2}{*}{$\langle \sigma \rangle / p$} & \multicolumn{7}{c}{ Cluster size occurrences [\%]} \\
+\cmidrule(lr){2-8}
+ & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
+\midrule
+19.6 & 0.0 & 0.0 & 1.5 & 45.0 & 38.1 & 10.7 & 4.6 \\
+19.4 & 0.0 & 0.0 & 1.1 & 44.9 & 38.5 & 10.5 & 4.9 \\
+19.2 & 0.0 & 0.0 & 1.4 & 43.5 & 38.8 & 10.8 & 5.5 \\
+18.8 & 0.0 & 0.0 & 2.3 & 43.6 & 38.3 & 10.4 & 5.3 \\
+18.2 & 0.2 & 0.3 & 4.8 & 44.5 & 35.4 & 9.7 & 5.1 \\
+17.5 & 0.8 & 0.9 & 8.7 & 44.4 & 31.7 & 8.8 & 4.7 \\
+16.9 & 1.8 & 1.9 & 12.9 & 43.4 & 27.8 & 7.8 & 4.3 \\
+16.3 & 2.7 & 2.9 & 16.2 & 41.5 & 25.8 & 7.2 & 3.8 \\
+15.8 & 3.7 & 3.6 & 18.4 & 40.2 & 23.9 & 6.7 & 3.6 \\
+15.4 & 4.4 & 4.5 & 20.4 & 38.7 & 22.3 & 6.2 & 3.5 \\
+15.2 & 5.1 & 5.0 & 21.4 & 37.7 & 21.3 & 6.0 & 3.5 \\
+15.0 & 5.6 & 5.4 & 22.2 & 36.4 & 20.7 & 6.3 & 3.5 \\
+\bottomrule
+\end{tabular}
+\caption{Mean relative abundance of event cluster size for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The cluster sizes are calculated from a simulation without electronic noise and without applying any threshold on the collected signal.}
+\label{tab:cluster_size}
+\end{table}
 
+The important feature is that for none of the ratio values there are occurrences of cluster sizes bigger than seven pixels. This means that, given the hexagonal geometry of the pixels, all the charge is contained inside a circular set of seven pixels, with the pixel with the most charge at the center of the set and the other six pixels arranged around it forming a circular corona. As will be discussed in Chap. \ref{subsec:readout} this feature defines the readout logic.
 
+Another important property of the charge diffusion that needs to be understood is how the charge is distributed among the pixels. This property is essential to determine the imaging and spectrocopical performance of the detector. As shown in Tab. \ref{tab:charge_distr}, the pixel charge distribution is highly asymmetrical, and more than 90-95\% of the charge is always collected by two pixels, a third pixel collects almost all of the remaining charge, while the other four pixels together always have about less than 1\% of the total charge. In real working conditions, even with low noise readout electronics, is highly probable that the charge collected by each one of these four pixels is comparable to the electronic noise or even smallest. For this reason, in the following sections, in the event reconstruction if a cluster with more than three pixels is detected it iis reduced to a three pixel cluster, as will be explained later.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{c cccc}
+\multirow{2}{*}{$\langle \sigma \rangle / p$} & \multicolumn{4}{c}{Pixel charge [\%]} \\
+\cmidrule(lr){2-5}
+ & 1 & 2 & 3 & 4--7 \\
+\midrule
+19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
+19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
+19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
+18.8 & 71.5 & 19.9 & 7.8 & 0.9 \\
+18.2 & 72.5 & 19.4 & 7.3 & 0.7 \\
+17.5 & 73.8 & 18.8 & 6.8 & 0.6 \\
+16.9 & 74.9 & 18.2 & 6.3 & 0.5 \\
+16.3 & 75.8 & 17.8 & 5.9 & 0.5 \\
+15.8 & 76.7 & 17.2 & 5.6 & 0.4 \\
+15.4 & 77.3 & 16.9 & 5.4 & 0.4 \\
+15.2 & 77.9 & 16.5 & 5.2 & 0.4 \\
+15.0 & 78.3 & 16.3 & 5.1 & 0.3 \\
+\bottomrule
+\end{tabular}
+\caption{Average charge collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It is clearly visible that the majority of the charge is collected by at most three pixels.}
+\label{tab:charge_distr}
+\end{table}
 
 
 Scaletta:
@@ -83,7 +134,7 @@ Scaletta:
 Studiare quanta carica si perde in funzione della soglia, sia senza rumore che con rumore.
 
 \subsection{Readout}
-
+\label{subsec:readout}
 
 
 
