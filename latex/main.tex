@@ -1,32 +1,46 @@
 \documentclass[12pt, a4paper, twoside]{book}
-% List of packages. Let's try to keep it simple and ordinated.
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage[
-  a4paper,
-  top=3cm,
-  bottom=3cm,
-  inner=3.5cm,
-  outer=2.5cm, 
-]{geometry}
-\usepackage{hyperref}   % Handle hypertext
-\usepackage{fancyhdr}   % Set the page style
-\usepackage{titlesec}   % Modify chapter first page
-\usepackage{subcaption} % Insert subcaptions in subplots
-\usepackage{tikz}	   % For pixel figures
-\usetikzlibrary{shapes.geometric, shadings}
-\usetikzlibrary{patterns} % For pixel figures
-\usepackage{enumitem}	% To change the style of itemize
-\usepackage{xcolor}
-\usepackage{tocloft}
-\renewcommand{\cftdot}{}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{multirow}
 
+
+% List of essential packages
+\usepackage{amsmath}
+\usepackage[backend=biber, sorting=none]{biblatex}
+\usepackage[a4paper, top=3cm, bottom=3cm, inner=3.5cm, outer=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+
+
+% Set the bibliography resources
+\addbibresource{bibliography.bib}
 % Set the hyperlinks style
-\hypersetup{colorlinks=true, linktoc=page, linkcolor=black, citecolor=blue}
+\hypersetup{colorlinks=true, linktoc=all, linkcolor=black, citecolor=blue}
+
+
+% List of other packages
+\usepackage{array}		% For better tables
+\usepackage{booktabs}	% For better tables
+\usepackage{enumitem}	% To change the style of itemize bullets
+\usepackage{fancyhdr}	% Set the page style
+\usepackage{multirow}	% For better tables
+\usepackage{siunitx}		% To format large numbers
+\usepackage{subcaption}	% Insert subcaptions in subplots
+\usepackage{tikz}		% To draw images
+\usepackage{titlesec}	% Modify chapter first page
+\usepackage{tocloft}		% Modify the TOC
+\usepackage{xcolor}
+
+
+% Import submodules from tikz
+\usetikzlibrary{shapes.geometric, shadings}
+\usetikzlibrary{patterns}
+
+
+% Modify the TOC
+\renewcommand{\cftdot}{}		% Remove the dots between names and page numbers
+\setcounter{tocdepth}{2}		% Force the TOC to show sections and subsections
+\setlength{\cftbeforetoctitleskip}{0pt}
+
+
 
 % Configure the page style
 \pagestyle{fancy}
@@ -48,12 +62,16 @@
 % Opzionale: regola lo spazio sopra e sotto il titolo
 \titlespacing*{\chapter}{0pt}{-20pt}{40pt}
 
+
+
 % Define pixel geometry
-\newcommand{\hexpix}[2][]{%
+\newcommand{\hexpix}[2][]{
     \draw[#1] (90:#2) -- (30:#2) -- (-30:#2) -- (-90:#2) -- (-150:#2) -- (150:#2) -- cycle;
     \fill[#1] (0, 0) circle (0.8pt);
-}
+    }
 \newcommand{\hexsize}{0.5cm}
+
+
 
 % 1. Definiamo prima la sfumatura in bianco e nero (il nero copre, il bianco diventa trasparente)
 \pgfdeclareradialshading{sfumaturaGaussiana}{\pgfpoint{0cm}{0cm}}{
@@ -80,28 +98,18 @@
 \newcommand{\fix}[1]{{\color{red}\textbf{#1}}}
 
 
-% Bibliography package and resources
-\usepackage[backend=biber, sorting=none]{biblatex}
-\addbibresource{bibliography.bib}
-
-\setcounter{tocdepth}{2} % 2 means show sections and subsections
-
-% Title of the thesis
-\title{Development of High Resolution Hybrid X-Ray Detectors}
-\author{Augusto Cattafesta}
-\date{date}
 
 
 
 \begin{document}
 
-\maketitle
-
+% Load the front page with the thesis title and logo
+\include{chapters/front.tex}
+% Insert a blank page after the title to align the Table of Contents to the right
 \cleardoublepage
 \tableofcontents
+% Same as before
 \cleardoublepage
-
-
 
  % Load the chapters
 \include{chapters/chapter1.tex}
@@ -109,11 +117,8 @@
 \include{chapters/chapter3.tex}
 \include{chapters/chapter4.tex}
 \include{chapters/chapter5.tex}
- 
 
- 
- 
- 
+% Add the bibliography 
 \nocite{*}
 \printbibliography[heading=bibintoc]
 
