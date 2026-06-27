@@ -9,12 +9,12 @@ In this section the detector design and the current state of the prototypes will
 \section{Detector design}
 \label{sec:asix_design}
 
-ASIX is a solid-state HPD which consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of hole-electron pairs, and the analog readout ASIC, whose job is to process the collected charge by amplifying and shaping the signal and then triggering the digital readout electronics.
+ASIX is a solid-state HPD which consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of hole-electron pairs, and the analog readout ASIC, whose role is to process the collected charge by amplifying and shaping the signal and then triggering the digital readout electronics.
 
 \subsection{Active sensor}
 \label{subsec:sensor}
 \cite{rossi2006}
-The active sensor is the part of the detector where the physical signal is produced by interation mechanisms between radiation and the sensor material, which is ionized during the passage of charge particles or electromagnetic radiation. In solid state detectors the active sensor is made of a semiconductor material. There are various choices for the sensor material, depending on the required properties of the detector and the type or radiation that has to be detected. For ASIX, which works with X-rays, the relevant materials are silicon and cadmium-telluride (CdTe), which currently are the two type of prototypes available. As already discussed in Chap. \ref{chap:chapter2}, CdTe is best suited for the harder portion of the electromagnetic spectrum, as the higher atomic numbers of cadmium and tellurium imply a higher photoelectric cross section than silicon, especially above photon energies of 30 keV. At these energies the main interaction process is represented by the photoelectric effect, thus other processes can be neglected for the discussion.
+The active sensor is the part of the detector where the physical signal is produced by interaction mechanisms between radiation and the sensor material, which is ionized during the passage of charge particles or electromagnetic radiation. In solid state detectors the active sensor is made of a semiconductor material. There are various choices for the sensor material, depending on the required properties of the detector and the type or radiation that has to be detected. For ASIX, which works with X-rays, the relevant materials are silicon and cadmium-telluride (CdTe), which currently are the two type of prototypes available. As already discussed in Chap. \ref{chap:chapter2}, CdTe is best suited for the harder portion of the electromagnetic spectrum, as the higher atomic numbers of cadmium and tellurium imply a higher photoelectric cross section than silicon, especially above photon energies of 30 keV. At these energies the main interaction process is represented by the photoelectric effect, thus other processes can be neglected for the discussion.
 
 The probability density function of a photon of being absorbed by the sensor material at a depth $z$ is described by Eq. \ref{eq:absorption}, where $\mu$ is the attenuation factor, which can be calculated for a given energy knowing the cross section and the density of the material. This equation allows to calculate the probability of being absorbed by the sensor, which can define the sensitivity energy range of the detector given the sensor material and its thickness. Another important quantity that can be calculated from Eq. \ref{eq:absorption} is the mean absorption depth as a function of the energy, shown in Fig. \ref{fig:mean_z}, which is
 
@@ -810,7 +810,7 @@ In conclusion, the MTF represents the only available way to characterize the spa
 
 \section{Energy reconstruction}
 \fix{Studiare quanta carica si perde in funzione della soglia, sia senza rumore che con rumore}
-
+The other important aspect of ASIX is the possibility to 
 
 
 \subsection{Zero suppression}
@@ -824,10 +824,15 @@ In conclusion, the MTF represents the only available way to characterize the spa
 \section{Simulation and data comparison}
 
 \subsection{Experimental setup}
+\fix{dire che attualmente il nuovo ASIC è ancora in fase di sviluppo, quindi si utilizza XPOL III per effettuare le prove. Questo implica che il rumore del detector non è ancora quello di design ma piu alto, con conseguente degradazione di risoluzione energetica e spaziale. Ma comunque questo lavoro spiana la strada al nuovo ASIC, perchè nel momento in cui si raggiungeranno gli obiettivi di design si otterranno i risultati attesi. A questo punto poi bisogna parlare del setup per i dati raccolti con il test di huttner e per quelli con il target in oro.}
+
+
 
 \subsection{Simulated data}
 
+
 \subsection{Results}
+
 
 
 
