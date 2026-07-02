@@ -8,6 +8,8 @@ This opportunity allowed to access a new perspective on the universe, which led 
 The limiting factor for the detection of X-rays is detector sensitivity. Indeed, the incoming fluxes from astrophysical sources are quite small. For reference, during active phases the Sun can reach a flux of $10^6$ ph cm$^{-2}$ s$^{-1}$ in the range 2-10 keV while Scorpius X-1 has a flux of about 30 ph cm$^{-2}$ s$^{-1}$ and 3C 273, the most luminous AGN, about 0.01 ph cm$^{-2}$ s$^{-1}$. The necessity to improve flux sensitivity, in order to discover fainter sources, has led the research and developement of X-ray detectors, which have evolved substantially across the years and have employed very different technologies.
 
 \section{History of X-ray Astrophysics}
+\label{section:history}
+
 The first orbiting satellites to employ instrumentation to observe X-rays were part of the Orbital Solar Observatory (OSO) program, but they were mainly focused on the study of the Sun X-ray emission. Despite their main mission goals, they also performed some observations of galactic and extragalactic sources that allowed to confirm discoveries made by other missions with sub-orbital flights. However, without dedicated instrumentation it was not possible to carry on systematic studies of fainter sources. In this context, a major advancement was achieved with UHURU, the first orbital mission fully dedicated to X-ray observations of extrasolar sources, launched in 1970. Before UHURU, each sub-orbital flight was able to observe the sky for about five minutes, and during the entire 1960s only about an hour of observations was cumulatively gathered. With the launch of UHURU, observations were carried continuosly for over two years, collecting an amount of data many orders of magnitude larger than the entire previous decade. This satellite performed an all-sky survey, scanning a different region of the sky each day. The results allowed to discover more than 300 new sources \cite{4ucatalog}, localized with a precision of 1 arc min, enabling the identification of counterparts in other regions of the electromagnetic spectrum, such as visible and radio.
 
 The heritage of UHURU was collected by the following missions that were part of the high-energy observatories program for X and $\gamma$ astrophysics, the three High Energy Astronomy Observatories (HEAO). One of the most important among them is HEAO-2, known as Einstein Observatory, launched in 1978. Einstein is, strictly speaking, the first true X-ray telescope, meaning that for the first time mirrors were used to focus X-rays onto a detector located in the focal point, marking the birth of imaging X-ray astronomy and paving the way to all the future detectors of this type. Until that moment, an X-ray observatory usually had a set of collimators to mechanically delimit the observed sky region. With different collimator geometries and with dedicated reconstruction algorithms it was possible to achieve a resolution of at most a few arc sec (about $7"$--$10"$ for HEAO-1 \cite{heao1a3}), but still it was not possible to produce images of extended sources. Moreover, a better spatial resolution in a collimator usually implies a decrease of the effective area, with the consequent drop of the signal-to-noise ratio. With Einstein Observatory these problems were solved using focusing optics. However, while for visible light a mirror surface reflects almost all the incoming photons, high-energy photons have a very high probability of penetrating the surface and thus not being reflected. The solution consists in using grazing incidence optics, relying on total reflection of light to have an increase of reflectivity. Indeed, this law holds for X-rays too, with the difference that the total reflection angle is usually below 1 degree and there is a quite strong dependence on the photon energy, making this method feasible only for low energy X-rays up to 10-20 keV. A possible optics geometry is the Wolter, named after its designer Hans Wolter, that consists in using two mirrors to focalize light at low incidence angles, usually one with parabolic section and one with hyperbolic or ellipsoid section. This layout allows to have a field of view large enough to be used in astrophysics and it is one of the reasons that makes it the most common layout between grazing incidence telescopes. The main issue of grazing incidence telescopes is the very small geometrical area due to the small inclination of the mirrors with respect to the optical axis. The natural solution to this problem is to use multiple nested concentrical mirrors to multiply the area, altough it introduces a series of technical and structural problematics that have been overcome in the years thanks to technological improvements. Einstein Observatory employed four nested mirrors with a diameter varying between 33 and 56 cm, a focal lenght of 3.4 m, a geometrical area of about 400 cm$^2$ and the capability of alternating four different detectors on the focal plane. For high resolution imaging, the effective area dropped down to 20 cm$^2$ at 0.25 keV and 5 cm$^2$ at 2 keV, with a spatial resolution of 2 arc sec \cite{heao2}. Other imaging and spectroscopy instruments on board were able to achieve an effective area between 100-200 cm$^2$. Results were remarkable and the first high-resolution images of X-ray sources were produced, allowing to study their morphology in a completely new electromagnetic band, even with a smaller effective area than HEAO-1. This was possible because, contrary to collimator observatories, the entire effective area was focused on a small region of the sky, reducing background signal and consequently increasing the signal-to-noise ratio and the instrumental sensitivity. Einstein Observatory produced a detailed catalogue with almost \num{5000} sources, even observing just a small fraction of the sky. For most of them the localization was accurate enough to identify their optical counterparts.
@@ -47,7 +49,7 @@ IXPE		 & 2021-- 		& Gas pixel detector	  & 2--8	  & 167 	  \\
 
 \bottomrule
 \end{tabularx}
-\caption{Some of the X-ray missions representing the technological evolution of X-ray detectors and telescopes, from collimators to grazing incidence optics and from gas proportional counters to solid-state pixel detectors for imaging and spectroscopy and Gas Pixel Detectors for polarimetry.}
+\caption{Some of the X-ray missions representing the technological evolution of X-ray detectors and telescopes, from collimators to grazing incidence optics and from gas proportional counters to solid state pixel detectors for imaging and spectroscopy and Gas Pixel Detectors for polarimetry.}
 \label{tab:missions}
 \end{table}
 
@@ -56,6 +58,7 @@ IXPE		 & 2021-- 		& Gas pixel detector	  & 2--8	  & 167 	  \\
 High energy photons can interact with matter mainly through three interaction mechanisms, which are photoelectric absorption, Compton scattering and electron-positron pair production. These processes are at the basis of photon detection and are commonly employed in the construction of high-energy photon detectors \cite{longair1992, leo1994}.
 
 \subsection{Photoelectric effect}
+\fix{Forse qui è il caso di inserire qualche parola sul fluorescence yield}
 The main interaction process when a photon has an energy $E_{\gamma} \ll m_e c^2$ is photoelectric absorption, and it is consists in a photon which is absorbed by an atom with the consequent ejection of a free electron
 
 \begin{equation}
@@ -133,23 +136,100 @@ At low energies, the cross section increases logarithmically with the photon ene
 \section{Working principles of X-ray detectors}
 As discussed in the previous section, photoelectric effect is the dominant interaction process in the X-ray energy band, with some dependence on the involved materials. For this reason, the following discussion is focused on photon detectors that employ this effect to convert an incoming photon into an interpretable signal which allows to measure one or multiple properties among energy, position, time of arrival and polarization.
 
+Various detector typologies have been devoleped across the years and used on board of X-ray missions, each of them suitable for measuring a particular property in a certain energy interval. The technology empolyed in the construction of these detectors can vary a lot, such as gas or solid state ionization detectors and scintillators, but all of them share the same working principles to convert photons in a readable signal. First photons interact with the active material through photoelectric effect and are absorbed, producing primary electrons. These electrons can have a lot of kinetic energy and transfer energy to the active material by collisions, described by the Bethe-Bloch formula
 
+\begin{equation}
+- \frac{dE}{dx} = 2 \pi N_A r_e^2 m_e c^2 \rho \frac{Z}{A} \frac{1}{\beta^2} \left[ \ln \left( \frac{2 m_e \gamma^2 v^2 W_{\textrm{max}}}{I} \right) - 2\beta^2 \right].
+\end{equation}
 
+The energy transferred to the active material is used to generate a cascade of ionization and excitation processes, generating a large number of charge carriers and excited states. In ionization detectors, the current induced by the motion of charges is read, while in scintillators the luminous emission produced by the de-excitation of atoms and molecules is collected, converted and amplified to generate an electric signal.
 
+The focus of this section is to briefly discuss which are the main ionization X-ray detectors and how they work. These detectors can be divided in two macro-groups, gas and solid state detectors, and are more suitable for soft X-rays detection, but can be adapted to detect hard X-rays too by varying materials and working points. Hard X and soft $\gamma$ rays detection was dominated by scintillation detectors in the past, but in the last two decades solid state ionization detectors made with high-$Z$ elements have have increasingly replaced them. 
 
+\subsection{Gas ionization detectors}
+The first X-rays detectors to be launched in space were gas detectors, thanks to decades of experience and development and to their low weight, which is essential to launch a satellite in orbit. A gas detector generally consists in a closed chamber filled with pressurized gas. As said before, photons interact with the gas and primary photoelectrons ionize it, generating a cascade of free electrons and ions. The number of electron-ion pairs produced by a photon is stochastic and depends on the photon energy and the gas. The mean number of electron-ion pairs can be calculated as
 
+\begin{equation}
+N = \frac{E}{w},
+\end{equation}
+where $w$ is the relevant parameter for this calculation and represents the mean energy necessary to create a pair. For gases this values ranges between 20 and 40 eV. As a first approximation, the number of pairs produced follows a Poisson distribution, thus the variance is given by the mean number of pairs produced. If all the incoming energy is absorbed by the gas, as is the case of X-ray photons, a constraint is added, because the number of pairs that are produced and the energy required to generate them is fixed by the photon energy. With this constraint the Possoin distribution approximation is no longer valid because events are not independent, and the variance of the resulting distribution is
 
+\begin{equation}
+\sigma^2 = F N,
+\label{eq:fano}
+\end{equation}
+where $F$ is called Fano factor. Tab. \ref{tab:w_fano} shows the mean ionization energy and Fano factor for some common materials used for ionization detectors. For most of materials, including gases and semiconductors, $F < 1$. Therefore, when the amount of deposited energy is fixed, the variance is smaller. The energy resolution of the detector can be estimated with the assumption that for a large number of events the number of pairs is distributed according to a Gaussian distribution, with the variance calculated with \ref{eq:fano}. The relative energy resolution at the energy $E$ is defined as
+ 
+\begin{equation}
+\frac{\Delta E}{E} = \frac{\operatorname{FWHM}}{E} = 2.35 \frac{\sqrt{F N}}{N} = 2.35 \sqrt{\frac{F w}{E}}.
+\end{equation} 
 
+The final energy resolution is the sum of more contributes, such as electronic noise and all the other possible instrumental noise sources.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{X c c}
+Material & Mean energy for pair creation [eV] & Fano factor \\
+\toprule
+Argon &  & \\
+Xenon &  & \\
+Silicon & & \\
+Cadmium-telluride &  & \\
+\bottomrule
+\end{tabularx}
+\caption{Mean energy for pair creation and Fano factor values for various gases and semiconductors. \fix{fillare la tabella}}
+\label{tab:w_fano}
+\end{table}
+
+Generally, only a few hundreds electron-ion pairs are produced after the interaction of a photon with an energy of a few keV. Furthermore, pairs are produced in a small and localized region, and without an external field that separate them they would recombine before it would be possible to detect the signal. These are the reason why gas-ionization detectors usually have a drift region and a multiplication region, both working with an external electric field that separates and accelerates charges.
+
+In the drift region, a small electric field of about 1 kV/cm is responsible for the separation of electron-ion pairs to avoid recombination. Charges are accelerated under the work of the electric field, which can is generated applying a potential difference between electrodes. The geometry of the electrodes can substantially vary between different detectors, with some examples represented by the axial geometry, like cylindrical proportional counters, or planar geometry. In the drift region charges are subjected to diffusion processes due to collisions and thermal agitation. If no external field is present along an axis, the final spatial distribution is Gaussian distribution, with variance equal to
+
+\begin{equation}
+\sigma_x = \sqrt{2D t_d},
+\end{equation}
+where $D$ is the diffusion coefficient, which depends on the material and on the working point (such as pressure or temperature), and $t_d$ is the drift time, which depends on the charge carriers mass and on the applied electric field. This holds along each axis where an external field is not applied.
+
+The multiplication region is where the charge is multiplied and it is achieved by accelerating charges with a strong electric field, with typical peak values around 100 kV/cm. The acquired energy is used by the charges to start an avalanche by further ionizing the gas, producing new electron-ion pairs that are accelerated by the electric field and continuing to ionize the gas. The induced current produced by all the charges generates an amplified signal that exceeds electronic noise and can be read and processed. Depending on the voltage applied to the electrodes and the resulting electric field, charge multiplication has different working regimes. At low voltages no multiplication process takes place and pair recombination is the dominant process. At higher voltages recombination is not favored, and in a certain interval multiplication occurs and the number of final electron-ion pairs is proportional to the number of primary ionization pairs, and the ratio between them represents the gain of the detector. This property is essential for spectroscopy, as it is possible to reconstruct energy. In this voltage interval, which is called proportional counting region, the gain grows exponentially with the voltage
+
+\begin{equation}
+G = e^{a V}.
+\end{equation}
+When the voltage becomes too high, the response becomes non-linear and even few ionization events produces a large pulse. This regime is called Geiger-Muller region.
+
+Charge multiplication can be obtained with various designs, going from electrodes disposed as in a cylindrical proportional counter to more complex and miniaturized designs, such as in micro-strip gas chambers or two-dimensional patterns like Gas Electron Multipliers (GEM).
+
+The first type of detector that flew on board of the first dedicated orbital mission, UHURU, consisted in a set of proportional counters. The external portion of a proportional counter is usually a thick metallic case, which serves as the cathode, with thin windows of beryllium that allow to suppress photons with energies below a few keV. At the center of the case there is a thin metallic wire, the anode, which has an applied voltage to generate the electric field. The electric field decreases with the distance from the wire, as it scales as $1/r$. This dependence allows to use the same electrodes to generate the electric field in the drift zone, in a large region far frome the wire, and only when electrons are accelerated to high energies near the wire the avalanche is produced and the amplified signal is produced. Due to their small mass, electrons reach the anode in a few ns, thus is the drift of positive ions to generate the signal. In the case of UHURU all the proportional counters on board were connected in parallel to a single common amplifier, thus it has no intrinsic position resolution. The reasons to have multiple proportional counters were essentially for redundancy, in case of damage of some of them, and to implement an additional veto logic to reject signals from cosmic rays.
+
+Indeed, a thing that can not be neglected in space is that the flux of cosmic rays is much larger than the flux from all X-ray sources. This represents a major source of noise that exceeds the relevant signal. In order to suppress it, a fundamental part that every X-ray detector must have is an anti-coincidence shield, sensitive to cosmic rays and transparent for X-rays, that surrounds the detector and allows to reject a signal when radiation penetrates the entire detector.
+
+Position sensitive proportional counters (PSPC) represent the evolution of proportional counters, with the possibility to reconstruct the incidence position of a photon together with its energy. This is achieved by using two separated layers of electrodes as cathodes instead of the metallic case. Each layer is a grid of thin wires spaced by a specific distance and the wire orientation between the layers is orthogonal. With this geometry one layer gives information on the $x$ position and one on the $y$ position. Usually multiple wires were grouped into virtual strips by connecting them in parallel to a single charge pre-amplifier. The anode is made of parallel wires placed in the middle between the two cathodes. 
+A possible layout is shown in Fig. \ref{fig:pspc}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter2/rosat_pspc}
+    \caption{Schematic diagram of the ROSAT PSPC \cite{rosat_pspc}. A photon enters the windows ...}
+    \label{fig:pspc}
+\end{figure}
  
 
-The final product of this interaction 
 
 
 
 
-\subsection{Gas detectors}
 
-\subsection{Solid-state detectors}
+
+
+
+
+
+
+
+
+
+\subsection{Solid state detectors}
 
 
 
@@ -181,13 +261,6 @@ The final product of this interaction
 \label{sec:semiconductors}
 \fix{qui descriviamo il funzionamento di un detector a semiconduttore, con le varie proprietà, e descriviamo anche il funzionamento delle giunzioni, in particolare pn e schottky. parliamo anche della diffusione della carica all'interno del sensore.}
 \fix{The interaction must occur inside the depletion region, but if we are with a fully depleted sensor we don't mind about this detail, because it is always the case}
-
-
-
-
-%\section{Charge multiplication in gas detectors}
-
-
 
 
 
