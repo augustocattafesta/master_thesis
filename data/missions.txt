@@ -1,0 +1,8 @@
+# name, year_start, year_end, sources
+UHURU, 1970, 1973, 300
+HEAO-1, 1977, 1979, 840
+Einstein, 1978, 1981, 5000
+ROSAT, 1990, 1999, 150000
+Chandra, 1999, 2026, 400000
+XMM, 1999, 2026, 800000
+eROSITA, 2019, 2026, 930000
