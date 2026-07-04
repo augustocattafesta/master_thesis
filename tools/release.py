@@ -14,11 +14,11 @@ class BumpMode(str, Enum):
     PATCH = "patch"
 
 
-def _cmd(*args, verbose=False) -> subprocess.CompletedProcess:
+def _cmd(*args, cwd=None, verbose=False) -> subprocess.CompletedProcess:
     """Run a command in a subprocess.
     """
     # print(f"Executing command \"{' '.join(args)}\"...")
-    result = subprocess.run(args, capture_output=True, text=True, check=True)
+    result = subprocess.run(args, capture_output=True, text=True, check=True, cwd=cwd)
     if verbose:
         print(result.stdout)
     return result
@@ -33,7 +33,13 @@ def _cleanup() -> None:
 def _compile() -> None:
     """Compile the TeX source code.
     """
-    _cmd("latexmk", "-pdf", "-interaction=nonstopmode", "latex/main.tex")
+    print("First compilation...\n")
+    _cmd("pdflatex", "main.tex", cwd="latex")
+    print("Compiling bibliography...\n")
+    _cmd("biber", "main", cwd="latex")
+    print("Second compilation...\n")
+    _cmd("pdflatex", "main.tex", cwd="latex")
+    _cmd("pdflatex", "main.tex", cwd="latex")
 
 
 def _get_latest_tag() -> Version:
