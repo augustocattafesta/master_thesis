@@ -49,10 +49,12 @@ The first generation of X-ray CCDs suffered from various problems, such as low q
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter2/sensitivity}
+    \includegraphics[width=0.7\linewidth]{figures/chapter2/sensitivity.png}
     \caption{Sensitivity of some X-ray observatories across the years, represented as number of sources with flux above a threshold $S$ observed in a square degree of sky as a function of the flux $S$ between 0.5 and 2 keV. The lower limit for each observatory is an indicator of the minimum observable flux. The slope of the curves is an indicator of how the sources are distributed across the universe. In case of UHURU the slope is different because the majority of sources are galactic, thus they have a different spatial distribution. Image taken from \cite{giacconi2003}.}
     \label{fig:sensitivity}
 \end{figure}
+
+\fix{Introdurre la polarimetria nella sezione precedente e accorciare un po qui}
 
 Beyond imaging and spectroscopy, polarization of X-ray emission from a source can be studied to infer important properties about its surrounding environment, such as magnetic fields, and the physical mechanisms at play \cite{xray_polarimetry}. The first successful X-ray polarimetry mission took place in 1971 and was carried out with sub-orbital rockets using a crystal Bragg polarimeter, resulting in the first measure of the polarization level of the Crab Nebula. This type of detector consists in a crystal of a specific material, which defines a narrow energy sensitivity band, mounted at an angle of 45 degrees with respect to the incident flux. If a photon has the electric field vector parallel to the crystal surface it is reflected, otherwise it penetrates the crystal and is absorbed. By counting the photons that are reflected as a function of the azimuthal angle while the detector is spinning around the axis that points towards the source, it is possible to measure the level of polarization. For many years this method represented the only feasible way to measure X-ray polarization, but there were many physical and technical problems associated to it. First of all, the energy range is very narrow, thus the observed rate is small and the consequence is that even for bright sources the observation time required to detect polarization is very long. The second big problem is technical, because it is difficult to make the detector spin pointing exactly towards the source, with the possibility of introducing systematics errors that could false the polarization. For these reasons a mission completely oriented to X-ray polarimetry was never realized until a new technique to measure was developed. This new method consists in using the dependence of the direction of motion of primary photoelectrons released in photoelectric absorption on the polarization. Tracking the motion of electrons after absorption allows to reconstruct the initial angle. This is the operational basis of Imaging X-ray Polarimetry Explorer (IXPE), launched in 2021, where Gas Pixel Detectors (GPD) are employed. IXPE allows to reach high sensitivity with observing times at least two orders of magnitude lower than old missions. Another important aspect of IXPE is its ability to provide not only polarization data of the observed source, but also imaging, spectral and timing data at the same time. More details about IXPE and its detectors will be given in Chap. \ref{chap:chapter3}.
 
@@ -208,6 +210,7 @@ where $F$ is called Fano factor. Tab. \ref{tab:w_fano} shows the mean ionization
  
 \begin{equation}
 \frac{\Delta E}{E} = \frac{\operatorname{FWHM}}{E} = 2.35 \frac{\sqrt{F N}}{N} = 2.35 \sqrt{\frac{F w}{E}}.
+\label{eq:e_resolution}
 \end{equation} 
 
 The final energy resolution is the sum of more contributes, as other sources of uncertainties must be taken into account, such as electronic noise and all the other possible instrumental noise sources.
@@ -254,14 +257,42 @@ To access position information, proportional counters have been gradually improv
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter2/rosat_pspc}
+    \includegraphics[width=0.7\linewidth]{figures/chapter2/rosat_pspc.png}
     \caption{Schematic diagram of the ROSAT PSPC \cite{rosat_pspc}. An X-ray photon enters the window and produces a photoelectron by interacting with the gas in the drift region. The photoelectron produces primary ionization electrons that drift to the front cathode and diffuse, creating a large charge cloud that involves multiple strips. These charges are accelerated by the strong electric field between the front cathode and the anode and generate ions that are collected by the front and the back cathode, giving information on the $x$ and $y$ positions. The electrodes after the back cathode are used for anticoincidence logic to reject cosmic rays.}
     \label{fig:pspc}
 \end{figure}
 
 Across the years these technologies has not evolved much in X-ray astrophysics and its use has gradually  decreased, in favor of other choices like semiconductors. In recent missions, gas detectors were mainly chosen for to cover large detection area for cost and technical reasons. \fix{devo parlare di qualcosa inerente a IXPE qui oppure rinviamo tutto a capitolo 3?}
 
- 
+
+
+
+
+\subsection{Semiconductor ionizaztion detectors}
+
+Gas detectors were for a long time the main type of detectors employed on board of satellites for high-energy astrophysics observatories. One of the negative side of these detectors is the short lifetime due to various instrumental aspects, such as small leaks in the detector which require a periodical refill of the gas to maintain the correct working conditions or aging of the electrodes, which can be deteriorated by the polimerization of molecules, with a consequent worsening in their performance over the years. The result is that an observatory that use a gas detector usually has a short lifetime. A possible solution to these problems is to use solid state detectors, which do not rely on the use of consumables materials, meaning that ideally the lifetime can be very long. In practice, these detectors are sensitive to other effects but, overall, their lifetime is usually much longer than an average gas detector and currently there are observatories which have been operating for more than 25 years with solid state detectors.
+
+A class of solid state detectors that have widely been used for soft X-rays observatories is semiconductor ionization detectors. These type of detectors rely on the same principles of gas ionization detectors, with the difference on the medium employed. Photons interact with an atom via photoelectric effet, produce a photoelectron which in turn ionizes the material and generates electron-ion pairs. A very useful property of semiconductors with respect to gases is that the average energy required to create a pair is small, of the order of some eV, as shown in Tab. \ref{tab:w_fano}. This property allows to have an excellent energy resolution, given by Eq. \ref{eq:e_resolution}. Furthermore, semiconductors have a much higher density than gases, enabling the detection of high energy photons with compact detectors.
+
+A semiconductor detector is, in general, a junction designed to separate the charge carriers generated by radiation interactions and produce a readable electrical signal. A largely used material for semiconductor detectors is silicon, but there are also other common materials such as germanium, gallium arsenide and cadmium telluride. There are different junction types that can be adopted to realize a semiconductor detector, depending on the materials employed and on the required detector properties.
+
+The $pn$ junction is an example of a junction that is employed on detectors. It consists of two differently doped semiconductor materials, $p$ with positive charge carriers and $n$ with negative ones, which are placed in contact \cite{kolanoski2020}. The charge gradient which occurs at the boundary generates a diffusion current which leads to charge recombination in a specific region, named depletion zone. Outside the depletion zone, the doped regions are not neutral and the result is the formation of an electric field that causes a motion of charges in the opposite direction to the diffusion current. At equilibrium, a constant voltage difference $V_{bi}$, called built-in voltage, is present and the depletion zone has a width given by
+
+\begin{equation}
+d \simeq \sqrt{\frac{2\epsilon \epsilon_0}{N_D e} V_{bi}},
+\label{eq:dep_zone}
+\end{equation}
+where $\epsilon$ and $\epsilon_0$ are the dielectric constant of the material and vacuum, $e$ the electron charge and $N_D$ is the doped donors concentration. For silicon the typical value of the built-in voltage is 0.6 V. The resulting depletion zone width is of the order of some micrometers and when radiation interacts within this region, the produced electron-ion pairs are under the effect of the electric field and charges are separated and recombination is avoided. The current induced by moving charges is then read and represent the relevant signal. However, due to the very small width of the depletion region, sensitivity to high energy radiation is low. By applying an external voltage difference $V_{ext}$ to the junction it is possible to extend the depletion zone, thus increasing sensitivity. Specifically, a voltage with the same direction of the built-in voltage (negative at $p$, positive at $n$) must be applied, which is usually called reverse bias. The reverse bias results in a weakening of the diffusion current, thus charge carriers are pushed away from the junction and consequently depletion zone becomes larger. Under reverse bias, the depletion zone width is given by
+
+\begin{equation}
+d_{n,p} \simeq \sqrt{\frac{2\epsilon \epsilon_0}{N_{D, A} e} (V_{bi} + V_{ext})},
+\label{eq:dep_zone}
+\end{equation}
+where the subscript $n$ or $p$ indicates the depletion width for the respective doped region. Full depletion is achieved when a sufficiently high $V_{ext}$ is applied and the depletion zone is large as the entire junction, thus the entire detector is sensitive to radiation.
+
+However, to reach very high depletion zone widths it is not possible to arbitrarily increase $V_{ext}$, otherwise the electric field becomes so strong that the breakdown point is reached. A solution is to decrease the dopants concentration, so that with the same voltage a larger region is depleted. This requires to produce very high pure crystals and some examples are represented by High-Purity Germanium (HPGe) or High-Resistivity Silicon (HR-Si) detectors, which allow to reach depletion widths of the order of a few centimeters and a few hundreds of micrometers, respectively.
+
+In the past it was technologically impossible to achieve such high purity levels in crystal realization processes, thus an alternative to obtain depletion zones with a width of the order of millimeters or centimeters was to dope semiconductors in order to have the same concentration of donors and acceptors. These materials are called compensated materials, and they act as if they were pure. By placing the compensated material, indicated with the letter $i$, between a $p$-doped and a $n$-doped region, a $pin$ junction is created, allowing to reach similar results to high-purity detectors. An example of $pin$ junction detector are Si(Li) or Ge(Li) detectors, where lithium is used to compensate semiconductors. This type of detector is the first semiconductor detector to be employed on board of an X-ray observatory, the Einstein Observatory. This detector was able to achieve an energy resolution better than all the previous gas detectors. The negative aspect of these detectors was that they were made by a single piece of silicon, thus it was not possible to carry out high resolution imaging and spectroscopy at the same time.
 
 
 
@@ -274,20 +305,7 @@ Across the years these technologies has not evolved much in X-ray astrophysics a
 
 
 
-
-
-
-
-
-
-
-
-\subsection{Solid state detectors}
-
-\fix{qui descriviamo il funzionamento di un detector a semiconduttore, con le varie proprietà, e descriviamo anche il funzionamento delle giunzioni, in particolare pn e schottky. parliamo anche della diffusione della carica all'interno del sensore.}
-\fix{The interaction must occur inside the depletion region, but if we are with a fully depleted sensor we don't mind about this detail, because it is always the case}
-
-
+\fix{qui descriviamo il funzionamento di un detector a semiconduttore, con le varie proprietà, e descriviamo anche il funzionamento delle giunzioni, in particolare pn e schottky. parliamo anche della diffusione della carica all'interno del sensore. Porterei come esempi il detector SSS a bordo di Einstein (p-i-n) Si(Li), poi le CCD}
 
 
 
