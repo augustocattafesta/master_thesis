@@ -279,13 +279,13 @@ A semiconductor detector is, in general, a junction designed to separate the cha
 The $pn$ junction is an example of a junction that is employed on detectors. It consists of two differently doped semiconductor materials, $p$ with positive charge carriers and $n$ with negative ones, which are placed in contact \cite{kolanoski2020}. The charge gradient which occurs at the boundary generates a diffusion current which leads to charge recombination in a specific region, named depletion zone. Outside the depletion zone, the doped regions are not neutral and the result is the formation of an electric field that causes a motion of charges in the opposite direction to the diffusion current. At equilibrium, a constant voltage difference $V_{bi}$, called built-in voltage, is present and the depletion zone has a width given by
 
 \begin{equation}
-d \simeq \sqrt{\frac{2\epsilon \epsilon_0}{N_D e} V_{bi}},
+d \simeq \sqrt{\frac{2\epsilon \epsilon_0}{eN_D} V_{bi}},
 \label{eq:dep_zone}
 \end{equation}
 where $\epsilon$ and $\epsilon_0$ are the dielectric constant of the material and vacuum, $e$ the electron charge and $N_D$ is the doped donors concentration. For silicon the typical value of the built-in voltage is 0.6 V. The resulting depletion zone width is of the order of some micrometers and when radiation interacts within this region, the produced electron-ion pairs are under the effect of the electric field and charges are separated and recombination is avoided. The current induced by moving charges is then read and represent the relevant signal. However, due to the very small width of the depletion region, sensitivity to high energy radiation is low. By applying an external voltage difference $V_{ext}$ to the junction it is possible to extend the depletion zone, thus increasing sensitivity. Specifically, a voltage with the same direction of the built-in voltage (negative at $p$, positive at $n$) must be applied, which is usually called reverse bias. The reverse bias results in a weakening of the diffusion current, thus charge carriers are pushed away from the junction and consequently depletion zone becomes larger. Under reverse bias, the depletion zone width is given by
 
 \begin{equation}
-d_{n,p} \simeq \sqrt{\frac{2\epsilon \epsilon_0}{N_{D, A} e} (V_{bi} + V_{ext})},
+d_{n,p} \simeq \sqrt{\frac{2\epsilon \epsilon_0}{eN_{D, A}} (V_{bi} + V_{ext})},
 \label{eq:dep_zone}
 \end{equation}
 where the subscript $n$ or $p$ indicates the depletion width for the respective doped region. Full depletion is achieved when a sufficiently high $V_{ext}$ is applied and the depletion zone is large as the entire junction, thus the entire detector is sensitive to radiation.
@@ -294,18 +294,14 @@ However, to reach very high depletion zone widths it is not possible to arbitrar
 
 In the past it was technologically impossible to achieve such high purity levels in crystal realization processes, thus an alternative to obtain depletion zones with a width of the order of millimeters or centimeters was to dope semiconductors in order to have the same concentration of donors and acceptors. These materials are called compensated materials, and they act as if they were pure. By placing the compensated material, indicated with the letter $i$, between a $p$-doped and a $n$-doped region, a $pin$ junction is created, allowing to reach similar results to high-purity detectors. An example of $pin$ junction detector are Si(Li) or Ge(Li) detectors, where lithium is used to compensate semiconductors. This type of detector is the first semiconductor detector to be employed on board of an X-ray observatory, the Einstein Observatory. This detector was able to achieve an energy resolution better than all the previous gas detectors. The negative aspect of these detectors was that they were made by a single piece of silicon, thus it was not possible to carry out high resolution imaging and spectroscopy at the same time.
 
+\fix{Qui parliamo brevemente delle schottky e quando si usano}
+
+\fix{Poi parliamo delle ccd}
+
+\fix{Infine introduciamo il concetto di hybrid pixel detectors}
 
 
 
-
-
-
-
-
-
-
-
-\fix{qui descriviamo il funzionamento di un detector a semiconduttore, con le varie proprietà, e descriviamo anche il funzionamento delle giunzioni, in particolare pn e schottky. parliamo anche della diffusione della carica all'interno del sensore. Porterei come esempi il detector SSS a bordo di Einstein (p-i-n) Si(Li), poi le CCD}
 
 
 
