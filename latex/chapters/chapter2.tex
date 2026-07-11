@@ -1,9 +1,18 @@
 \chapter{X-ray Detectors}
 \label{chap:chapter2}
 
-Since its birth in the 1960s \cite{giacconi2003}, X-ray astronomy has represented a powerful tool to study high-energy phenomena across the universe. The possibility to observe photons produced by galactic and extragalactic sources, such as neutron stars, binary systems, supernova remnants or active galactic nuclei (AGN), is made possible by the small probability of interaction with the low-density interstellar medium (ISM) and intergalactic medium (IGM) for energies above 0.1-1 keV. The main problem of X-ray astronomy arises when photons reach Earth's atmosphere, which is much denser than ISM and IGM, thus they are easily absorbed there and can not reach the surface. For comparison, atmosphere's outer layers have a density of about $10^{17}$ atoms cm$^{-3}$, while for ISM the average on the galactic plane is 1 atom cm$^{-3}$ and for IGM is $10^{-6}$--$10^{-7}$ atoms cm$^{-3}$ \cite{longair2011}, which correspond to mean free paths of about 10 m, 3 kpc and 3 Gpc for a 1 keV photon, respectively. The presence of the atmosphere makes it necessary to build space telescopes on board of satellites and send them into orbit around the Earth or the Sun. This is the reason why X-ray astronomy was born only after the progress of rocket science, when it became possible to launch the first detectors on sub-orbital flights, with which the first extrasolar sources were discovered, and then on satellites, which allowed to improve observations thanks to the increased available observation time and to fully dedicates missions. Fig. \ref{fig:transparency} shows how the altitude at which atmosphere becomes transparent varies with photon energy.
+Since its birth in the 1960s \cite{giacconi2003}, X-ray astronomy has represented a powerful tool to study high-energy phenomena across the universe. The possibility to observe photons produced by galactic and extragalactic sources, such as neutron stars, binary systems, supernova remnants or active galactic nuclei (AGN), is made possible by the small probability of interaction with the low-density interstellar medium (ISM) and intergalactic medium (IGM) for energies above 0.1-1 keV. The main problem of X-ray astronomy arises when photons reach Earth's atmosphere, which is much denser than ISM and IGM, thus they are easily absorbed there and can not reach the surface. For comparison, atmosphere's outer layers have a density of about $10^{17}$ atoms cm$^{-3}$, while for ISM the average on the galactic plane is 1 atom cm$^{-3}$ and for IGM is $10^{-6}$--$10^{-7}$ atoms cm$^{-3}$ \cite{longair2011}, which correspond to mean free paths of about 10 m, 3 kpc and 3 Gpc for a 1 keV photon, respectively. The dependence of the mean free path on the medium density for hydrogen and nitrogen is shown in Fig. \ref{fig:mean_free_path}.
 
-\begin{figure}[!b]
+\begin{figure}[h]
+    \centering
+    	\includegraphics[width=0.7\linewidth]{figures/chapter2/mean_free_path}
+    \caption{Dependence of the mean free path of a 1 keV photon on the density of atoms, considering mediums composed by hydrogen or nitrogen.}
+    \label{fig:mean_free_path}
+\end{figure}
+
+The presence of the atmosphere makes it necessary to build space telescopes on board of satellites and send them into orbit around the Earth or the Sun. This is the reason why X-ray astronomy was born only after the progress of rocket science, when it became possible to launch the first detectors on sub-orbital flights, with which the first extrasolar sources were discovered, and then on satellites, which allowed to improve observations thanks to the increased available observation time and to fully dedicates missions. Fig. \ref{fig:transparency} shows how the altitude at which atmosphere becomes transparent varies with photon energy.
+    	
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter2/transparency}
     \caption{Altitude above which the atmosphere becomes transparent for different energies across the electromagnetic spectrum. To observe soft X-rays (0.1--10 keV) it is necessary to reach altitudes above 80 km. The steep jump near 1 keV is due to photoelectric effect of nitrogen and oxygen. For hard X-rays (10--100 keV) and $\gamma$-rays ($>100$ keV) the minimum altitude goes down to about 20--40 km. Image taken from \cite{transparency}.}
@@ -42,38 +51,37 @@ The first orbiting satellites to employ instrumentation to observe X-rays were p
 
 The heritage of UHURU is represented by the following missions that were part of the high-energy observatories program for X-ray and $\gamma$-ray astrophysics, the three High Energy Astronomy Observatories (HEAO). One of the most important among them is HEAO-2, known as Einstein Observatory, launched in 1978. Einstein is, strictly speaking, the first true X-ray telescope, meaning that for the first time mirrors were used to focus X-rays onto a detector located in the focal plane, marking the birth of imaging X-ray astronomy and paving the way to all the future detectors of this type. Until that moment, an X-ray observatory usually had a set of collimators to mechanically delimit the observed sky region. With different collimator geometries and with dedicated reconstruction algorithms it was possible to achieve a resolution of at most a few arc sec (about 7--10 arc sec for HEAO-1 \cite{heao1a3}), but it was not possible to produce images of extended sources. Moreover, a better spatial resolution in a collimator usually implies a decrease of the effective area, with the consequent drop of the signal-to-noise ratio. With Einstein Observatory these problems were solved using focusing optics. However, while for visible light a mirror surface reflects almost all the incoming photons, high-energy photons have a very high probability of penetrating the surface and thus not being reflected. The solution consists in using grazing incidence optics, relying on total reflection of light to have an increase of reflectivity. Indeed, this law holds for X-rays too, with the difference that the total reflection angle is usually smaller than 1 degree and there is a strong dependence on the photon energy, making this method feasible only for low energy X-rays up to 10-20 keV. A possible optics geometry is the Wolter, named after its designer Hans Wolter, that consists of two mirrors used to focalize light with low incidence angles, usually one with parabolic section and one with hyperbolic or ellipsoid section. This layout allows to have a field of view large enough to be used in astrophysics and it is one of the reasons that makes it the most common layout for grazing incidence telescopes. The main issue of grazing incidence telescopes is their very small reflective geometrical area due to the small inclination of the mirrors with respect to the optical axis. The solution to this problem is to use multiple nested concentrical mirrors to increase the area, altough it introduces a series of technical and structural problematics that have been overcome in the years thanks to technological improvements. Einstein Observatory employed four nested mirrors with a diameter varying between 33 and 56 cm, a focal lenght of 3.4 m, a geometrical area of about 400 cm$^2$ and the capability of alternating four different detectors on the focal plane. For high resolution imaging, the effective area dropped down to 20 cm$^2$ at 0.25 keV and 5 cm$^2$ at 2 keV, with a spatial resolution of 2 arc sec \cite{heao2}. Other imaging and spectroscopy instruments on board were able to achieve an effective area between 100--200 cm$^2$. Results were remarkable and the first high-resolution images of X-ray sources were produced, allowing to study their morphology in a completely new electromagnetic band, even though the effective area was smaller than HEAO-1. This was possible because, contrary to collimator observatories, the entire effective area was focused on a small region of the sky, reducing background signal and consequently increasing the signal-to-noise ratio and the instrumental sensitivity. Einstein Observatory produced a detailed catalogue with almost \num{5000} sources observing just a small portion of the sky. For most of them the localization was accurate enough to identify their optical counterparts.
 
-\fix{Si può mettere un'immagine degli specchi di Chandra, magari anche un confronto con ROSAT / HEAO-2}
-
-The successive step in the creation of a new and more populated all-sky catalogue was lead by ROSAT, launched in 1990. ROSAT had a design very similar to Einstein Observatory, but the optics layout consisted in larger and more efficient mirrors and a different focal ratio, increasing both effective area and field of view, in order to rapidly scan the entire sky. Indeed, ROSAT had a field of view twice as large as Einstein and it also had a more uniform sensitivity across the field of view. In just 6 months, ROSAT was able to observe almost \num{150000} sources \cite{rosat}. During its nine years of operations, ROSAT also studied in detail many different sources, including emission from galactic stars and compact objects and spectral and morphological studies of supernova remnants. For the first time, it was also able to resolve the diffuse extragalactic emission into tens of thousands of AGN, giving a fundamental contribution to the development of the AGN unified model and to emission variability studies. The limit of ROSAT was its narrow energy range, which was partially attributable to the mirrors geometry, that had a relatively big angle of inclination with respect to the focal axis to achieve a large field of view sacrifying sensitivity to higher energies, but was also due to the employed detectors. Indeed, the main types of imaging detectors used until ROSAT were Position Sensitive Proportional Counters (PSPC) and Micro-Channel Plates (MCP). PSPC are a type of gas detectors and they loose sensitivity at high energies because the gas becomes optically thin, with a consequent reduction of the quantum efficiency. For similar reasons, MCPs are unefficent at high energies, because X-rays easily penetrate the internal coating and glass. Furthermore, even though MCPs were the only way to achieve very good spatial resolutions, they are not capable to measure energy, requiring to alternate different instruments in the focal plane to study morphology and spectrum of a source.
-
-\begin{figure}[htbp]
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter2/xsources}
     \caption{Number of sources detected by the main X-ray observatories across the years. Horizontal lines represent mission lifetimes. Sco X-1 referes to the observation of the first detected extrasolar source, which was realized with a sub-orbital flight. \fix{Add IXPE}}
     \label{fig:xsources}
 \end{figure}
 
+The successive step in the creation of a new and more populated all-sky catalogue was lead by ROSAT, launched in 1990. ROSAT had a design very similar to Einstein Observatory, but the optics layout consisted in larger and more efficient mirrors and a different focal ratio, increasing both effective area and field of view, in order to rapidly scan the entire sky. Indeed, ROSAT had a field of view twice as large as Einstein and it also had a more uniform sensitivity across the field of view. In just 6 months, ROSAT was able to observe almost \num{150000} sources \cite{rosat}. During its nine years of operations, ROSAT also studied in detail many different sources, including emission from galactic stars and compact objects and spectral and morphological studies of supernova remnants. For the first time, it was also able to resolve the diffuse extragalactic emission into tens of thousands of AGN, giving a fundamental contribution to the development of the AGN unified model and to emission variability studies. The limit of ROSAT was its narrow energy range, which was partially attributable to the mirrors geometry, that had a relatively big angle of inclination with respect to the focal axis to achieve a large field of view sacrifying sensitivity to higher energies, but was also due to the employed detectors. Indeed, the main types of imaging detectors used until ROSAT were Position Sensitive Proportional Counters (PSPC) and Micro-Channel Plates (MCP). PSPC are a type of gas detectors and they loose sensitivity at high energies because the gas becomes optically thin, with a consequent reduction of the quantum efficiency. For similar reasons, MCPs are unefficent at high energies, because X-rays easily penetrate the internal coating and glass. Furthermore, even though MCPs were the only way to achieve very good spatial resolutions, they are not capable to measure energy, requiring to alternate different instruments in the focal plane to study morphology and spectrum of a source.
 
-A new mission was launched in 1993 to overcome these limitations, Advanced Satellite for Cosmology and Astrophyisics (ASCA), with two revolutionary changes. The first was in the optics design, that for the first time in a space telescope were realized using a large number of nested concentric metal foils coated with a high-Z metal. ASCA had four telescopes, each with 120 nested gold-coated foils positioned with a very small angle with respect to the optical axis, increasing both the maximum observable energy up to 12 keV and the effective area, which reached 325 cm$^2$ at 1 keV for each telescope (without considering detector efficiency). The second innovation consisted in the use of CCDs as detectors in the focal plane, the first time for an X-ray telescope. With the use of CCDs in photon counting mode it became possible to perform high resolution imaging and spectroscopy of the source at the same time, even at high energies.
-
-The first generation of X-ray CCDs suffered from various problems, such as low quantum efficiency both at low and high energies, with the latter caused by a small depletion region, and electronical issues were responsible for spectral resolution deterioration. These problems were solved by the following generation of X-ray observatories, Chandra and XMM-Newton, both launched in 1999 and currently operational. These two missions pushed to the limit the technological advancement of CCDs. XMM-Newton is the first X-ray observatory to employ a high thickness and fully depleted CCD \cite{xmm_pn}, ensuring high quantum efficiency in the entire energy range of operation, which reaches 15 keV. On the other hand, Chandra's CCDs were optimized for low energy X-ray photons and spatial resolution, improving the readout electronics to decrease noise and also reducing the pixel size, in order to take full advantage of the 10 meters long focal length and achieve a spatial resolution of $0.5$ arc sec \cite{chandra}. Fig. \ref{fig:sensitivity} shows a measure of the sensitivity of some of the X-ray observatories mentioned above by comparing the number of sources with flux above a specific threshold observed in a square degree.
-
-\begin{figure}[htbp]
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter2/sensitivity.png}
     \caption{Sensitivity of some X-ray observatories across the years, represented as number of sources with flux above a threshold $S$ observed in a square degree of sky as a function of the flux $S$ between 0.5 and 2 keV. The lower limit for each observatory is an indicator of the minimum observable flux. The slope of the curves is an indicator of how the sources are distributed across the universe. In case of UHURU the slope is different because the majority of sources are galactic, thus they have a different spatial distribution with respect to extragalactic ones. Image taken from \cite{giacconi2003}.}
     \label{fig:sensitivity}
 \end{figure}
 
+A new mission was launched in 1993 to overcome these limitations, Advanced Satellite for Cosmology and Astrophyisics (ASCA), with two revolutionary changes. The first was in the optics design, that for the first time in a space telescope were realized using a large number of nested concentric metal foils coated with a high-Z metal. ASCA had four telescopes, each with 120 nested gold-coated foils positioned with a very small angle with respect to the optical axis, increasing both the maximum observable energy up to 12 keV and the effective area, which reached 325 cm$^2$ at 1 keV for each telescope (without considering detector efficiency). The second innovation consisted in the use of CCDs as detectors in the focal plane, the first time for an X-ray telescope. With the use of CCDs in photon counting mode it became possible to perform high resolution imaging and spectroscopy of the source at the same time, even at high energies.
+
+The first generation of X-ray CCDs suffered from various problems, such as low quantum efficiency both at low and high energies, with the latter caused by a small depletion region, and electronical issues were responsible for spectral resolution deterioration. These problems were solved by the following generation of X-ray observatories, Chandra and XMM-Newton, both launched in 1999 and currently operational. These two missions pushed to the limit the technological advancement of CCDs. XMM-Newton is the first X-ray observatory to employ a high thickness and fully depleted CCD \cite{xmm_pn}, ensuring high quantum efficiency in the entire energy range of operation, which reaches 15 keV. On the other hand, Chandra's CCDs were optimized for low energy X-ray photons and spatial resolution, improving the readout electronics to decrease noise and also reducing the pixel size, in order to take full advantage of the 10 meters long focal length and achieve a spatial resolution of $0.5$ arc sec \cite{chandra}. Fig. \ref{fig:sensitivity} shows a measure of the sensitivity of some of the X-ray observatories mentioned above by comparing the number of sources with flux above a specific threshold observed in a square degree.
+
 Regarding polarimetry, the development of detection technologies has been slower than other fields due to difficulties in realizing efficient detectors. The first successful X-ray polarimetry mission took place in 1971 and was carried out with sub-orbital rockets using a crystal Bragg polarimeter, resulting in the first measure of the polarization level of the Crab Nebula. This type of detector consists in a crystal of a specific material, which defines a narrow energy sensitivity band, mounted at an angle of 45 degrees with respect to the incident flux. If a photon has the electric field vector parallel to the crystal surface it is reflected, otherwise it penetrates the crystal and is absorbed. By counting the photons that are reflected as a function of the azimuthal angle while the detector is spinning around the axis that points towards the source, it is possible to measure the level of polarization. For many years this method represented the only feasible way to measure X-ray polarization, but there were many physical and technical problems associated to it. First of all, the sensitive energy range is very small, even less than 1 eV, thus the event rate is small and the consequence is that even for bright sources the observational time required to detect polarization is very long. The second big problem is technical, because it is difficult to make the detector spin pointing exactly towards the source, with the possibility of introducing systematic errors that could false the polarization. For these reasons a mission completely oriented to X-ray polarimetry was never realized until a new technique to measure polarization was developed. This new method consists of using the dependence of the direction of motion of primary photoelectrons emitted by photoelectric effect on the polarization. By tracking the motion of photoelectrons it is possible to infer the emission angle. This is the idea behind Imaging X-ray Polarimetry Explorer (IXPE), launched in 2021, where Gas Pixel Detectors (GPD) are employed to track photoelectrons. IXPE has a sensitivity much higher than Bragg crystal polarimeters, requiring observing times at least two orders of magnitude smaller than older missions. Another important aspect of IXPE is its ability to provide not only polarization data of the observed source, but also imaging, spectral and timing data at the same time. More details about IXPE and its detectors will be given in Chap. \ref{chap:chapter3}.
 
-\begin{table}[!t]
+\begin{table}[h]
 \centering
 \small
 \begin{tabularx}{\textwidth}{l l X c c}
 Mission & Lifetime & Main instruments & Energy [keV] & Eff. Area [cm$^2$] \\
 \toprule
 UHURU 	 & 1970--1973   & Proportional counters & 2--20 & 840 \\
+\addlinespace
+HEAO-1 & 1977--1979   & Proportional counters & 0.15--60 & 400--1900 \\
 \addlinespace
 Einstein & 1978--1981   & PSPC & 0.4--4.0 & 100 \\
          &              & Microchannel plates & 0.15--3.0 & 5--20 \\
@@ -101,8 +109,6 @@ IXPE		 & 2021-- 		& Gas pixel detector	  & 2--8	  & 167 	  \\
 
 \section{Light-matter interaction mechanisms}
 There are three main mechanisms with which high energy photons can interact with matter, which are photoelectric effect, Compton scattering and electron-positron pair production. These processes are at the basis of photon detection and are commonly employed in the construction of high-energy photon detectors \cite{longair1992, leo1994}.
-
-\fix{Forse bisogna inserire qualcosa di generico sulla lunghezza di assorbimento}
 
 \subsection{Photoelectric effect}
 When a photon has an energy $E_{\gamma} \ll m_e c^2$ the main interaction process is photoelectric effect, which consists in a photon that is absorbed by an atom with the consequent ejection of a free electron
@@ -191,6 +197,66 @@ At low energies, the cross section increases logarithmically with the photon ene
 
 In high energy astrophysics, this interaction mechanism is exploited in pair production telescopes for $\gamma$-rays, where the produced electron and positron are tracked to determine the incoming photon direction and their energy is measured with an electromagnetic calorimeter to gauge the initial photon energy.
 
+\subsection{Attenuation length}
+
+The total interaction cross section is given by the sum of the cross section of the single processes, as shown in Fig. \ref{fig:photo_cross_section}. When a monochromatic photon beam illuminates a homogeneous material, some photons are absorbed by photoelectric effect or pair production and others are scattered by Compton effect. The result is that the beam is attenuated while it passes through the material, and the variation of the intensity $I$ is described by an exponential decay
+
+\begin{equation}
+I(x) = I_0 e^{-x/\mu},
+\label{eq:beam_intensity}
+\end{equation}
+where $I_0$ is the initial intensity and $\mu$ is the mean free path, also called attenuation length, which is related to the total cross section by $\mu = 1 /(\sigma_{tot} \rho)$, thus depends on the the energy of the beam and on the material.
+
+Considering a single photon, the absorption probability density function is given by
+
+\begin{equation}
+p(x; \mu) = \frac{1}{\mu} e^{-x/\mu},
+\label{eq:pdf_photoabs}
+\end{equation}
+from which it is possible to calculate the photoabsorption efficiency of an absorbing medium with a thickness $d$, which is equal to
+
+\begin{equation}
+\varepsilon = \int_0^d \frac{1}{\mu} e^{-x/\mu} \mathrm{d}x = 1 - e^{-d/\mu}.
+\end{equation}
+
+Fig. \ref{fig:photoabs} shows how photoelectric absorption efficiency for some materials varies as a function of energy.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/chapter2/photoabs_eff}
+    \caption{Dependence of photoelectric absorption efficency on energy for 300 $\mu$m of silicon, 300 $\mu$m of cadmium-telluride (CdTe) and 1 cm of argon (at a temperature of 273 K and pressure of 1 bar). Due to low gas density, argon has a very low efficiency when compared to solid materials like silicon, even if considering a thickness more than ten times larger.}
+    \label{fig:photoabs}
+\end{figure}
+
+
+An interesting quantity relevant for later discussion that can be calculated is the mean value $\langle \sqrt{d - z} \rangle$, and in particular seeing how it varies with energy. To calculate this quantity the probability density function to consider is different from Eq. \ref{eq:pdf_photoabs}, because now it is necessary to consider the truncated exponential
+
+\begin{equation}
+p(x; \mu) = \frac{e^{-x/\mu}}{\mu(1 - e^{-d/\mu})}, \quad \quad 0 \leq x \leq d.
+\label{eq:pdf_truncated}
+\end{equation}
+
+Defining $z \equiv \sqrt{d - x}$, the probability density function of $z$ can be found with the change of variable of a probability density function, and is given by
+
+\begin{equation}
+p(z; \mu) = \frac{2}{\mu (e^{d/\mu} - 1)} z e^{z^2/\mu}, \quad \quad 0 \leq z \leq \sqrt{d}.
+\label{eq:pdf_z}
+\end{equation}
+
+The average of this distribution can not be calculated analytically, but can be expressed with special functions, and is equal to
+
+\begin{equation}
+\langle z \rangle = \langle \sqrt{d - x} \rangle = \frac{1}{e^{d/\mu} - 1} \left( \sqrt{d} e^{d / \mu} - \frac{\sqrt{\pi \mu}}{2} \operatorname{erfi} (\sqrt{d / \mu}) \right),
+\label{eq:z_average}
+\end{equation}
+where $\operatorname{erfi}(x)$ is the imaginary error function.
+
+
+
+
+
+
+
 \section{Working principles of X-ray detectors}
 As said above, photoelectric effect is the dominant interaction process in the X-ray energy band. For this reason, the following discussion is focused on photon detectors that employ this effect to convert an incoming photon into an interpretable signal which allows to measure one or multiple properties among energy, position, time of arrival and polarization.
 
@@ -225,34 +291,62 @@ The energy resolution of the detector can be estimated with the assumption that 
 \label{eq:e_resolution}
 \end{equation} 
 
-The final energy resolution is the sum of more contributes, as other sources of uncertainties must be taken into account, such as electronic noise and other possible sources of instrumental noise.
+The final energy resolution is the sum of more contributes, as other sources of uncertainties must be taken into account, such as electronic noise and other possible sources of instrumental noise, and is calculated as
 
-\begin{table}[htbp]
+\begin{equation}
+\left( \frac{\Delta E}{E} \right)_{\textrm{tot}}^2 = \left( \frac{\Delta E}{E} \right)_{\textrm{Fano}}^2 + \left( \frac{\Delta E}{E} \right)_{\textrm{el. noise}}^2 + \left( \frac{\Delta E}{E} \right)_{\textrm{others}}^2.
+\end{equation}
+
+\begin{table}[!t]
 \centering
 \small
 \begin{tabularx}{\textwidth}{X c c}
 Material & $w$ [eV] & Fano factor \\
 \toprule
-Argon &  & \\
-Xenon &  & \\
-Silicon & & \\
-Germanium & & \\
-Cadmium-telluride &  & \\
-Gallium-arsenide & & \\
+Argon & 26 & 0.2 \\
+Xenon & 22 & 0.15 \\
+Silicon & 3.6 & 0.12 \\
+Germanium & 3.0 & 0.08--0.13\\
+Cadmium-telluride & 4.4 & 0.15 \\
+Gallium-arsenide & 4.2 & 0.12\\
 \bottomrule
 \end{tabularx}
-\caption{Mean energy required to generate an electron-ion pair and Fano factor values for various gases and semiconductors. \fix{fillare la tabella}}
+\caption{Mean energy required to generate an electron-ion pair and Fano factor values for various gases and semiconductors. Fano factor values are measured experimentally and generally have a big uncertainty associated. Data gathered from \cite{kolanoski2020, knoll2010, takahashi2001, bertuccio2002}.}
 \label{tab:w_fano}
 \end{table}
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter2/fano_limit}
+    \includegraphics[width=0.49\linewidth]{figures/chapter2/enc_limit}
+    \caption{Left panel shows energy resolution in the Fano limit as a function of photon energy for Ar, Si and CdTe. The two vertical lines represent the energy of two reference lines, the Mn K$\alpha$ at 5.9 keV emitted after decay of Fe-55 and Cu K$\alpha$ at 8.0 keV. Right panel shows the dependence of energy resolution on the electronic noise, expressed as equivalent noise charge (ENC), at the fixed energy of 5.9 keV. For ENC $=0$ the Fano limit is recovered, while for large ENC the energy resolution is dominated by noise.}
+    \label{fig:fano_enc_limit}
+\end{figure}
+
+Fig. \ref{fig:fano_enc_limit} shows how energy resolution in the Fano limit varies for different materials and how its dependence on electric noise.
 
 In gases, only a few hundreds electron-ion pairs are produced after the interaction of a photon with an energy of a few keV, thus the signal is too small to be detected. Furthermore, without an external field that separates them they would recombine before any signal could be detected. These are the reasons why gas ionization detectors usually have a drift region and a multiplication region, both employing an electric field to separate and accelerate charges.
 
 In the drift region, an electric field of the order of 1 kV/cm is responsible for the separation of primariy electron-ion pairs to avoid recombination. The electric field is generated by applying a potential difference between electrodes. The geometry of electrodes can significantly vary between different detectors, with some examples represented by the axial geometry of cylindrical proportional counters or planar geometry. Inside the drift region charges are subjected to diffusion processes due to collisions with gas molecules and thermal agitation. If no external field is present along an axis, charges are distributed according to a Gaussian distribution, with a standard deviation equal to
 
 \begin{equation}
-\sigma = \sqrt{2D t_d},
+\sigma = \sqrt{2D t_d} = \sqrt{\frac{2Dx_d}{v_d}}
 \end{equation}
-where $D$ is the diffusion coefficient, which depends on the material and on the working conditions (such as pressure or temperature), and $t_d$ is the drift time, which depends on the charge carriers mass and on the applied electric field. This holds along each axis where an external field is not applied.
+where $D$ is the diffusion coefficient, which depends on the material and on the working conditions (such as pressure or temperature), $t_d$ is the drift time, $x_d$ is the distance travelled during the drift and $v_d$ is the drift velocity. When an electric field is applied along a direction, the ratio $D/v_d$ can be expressed in terms of the characteristic energy $\epsilon_k$, the charge of the carriers $q$ and the drift electric field intensity $E$, resulting in a diffusion $\sigma$ equal to
+
+\begin{equation}
+\sigma = \sqrt{\frac{2\epsilon_k x_d}{qE}}.
+\label{eq:diffusion_sigma}
+\end{equation}
+
+The minimal dispersion is reached when the gas is in thermal equilibrium and the characteristic energy is $\epsilon_k = kT$. The diffusion coefficient is different for the transverse and the longitudinal directions and in general it is $D_T > D_L$, meaning that the charge dispersion is broader on the transverse direction. Fig. \ref{fig:diffusion} shows the transverse and longitudinal diffusion widths for different gases and their dependence on the drift field.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/chapter2/diff_coeff}
+    \caption{Dependence of transverse and longitudinal diffusion widths on the drift field for various gases, for a drift distance of 1 cm. It can be seen that $\sigma_T > \sigma_L$. Image taken from \cite{kolanoski2020}.}
+    \label{fig:fig:diffusion}
+\end{figure}
 
 The multiplication region is where charges are multiplied and it is achieved by accelerating charges with a strong electric field, with typical peak values of the order of 100 kV/cm. The kinetic energy acquired by the charges is used to start a ionization avalanche, producing new electron-ion pairs that are accelerated by the electric field and in turn continue to ionize the gas. The induced current produced by the charges generates an amplified signal that exceeds electronic noise and can be read and processed. Depending on the voltage applied to the electrodes and the resulting intensity of the electric field, charge multiplication has different working regimes. At low voltages multiplication does not take place and recombination is the dominant process. At higher voltages recombination is not favored, and in a specific volateges interval multiplication occurs and the number of final electron-ion pairs is proportional to the number of primary ionization pairs. The ratio between the initial and final number of pairs represents the gain of the detector. The proportional regime is essential for spectroscopy, as it is possible to directly measure the photon energy. In this voltage interval, which is called proportional counting region, gain grows exponentially with voltage
 
@@ -272,7 +366,7 @@ To mesure the incidence position proportional counters have been gradually impro
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter2/rosat_pspc.png}
-    \caption{Schematic diagram of the ROSAT PSPC \cite{rosat_pspc}. An X-ray photon enters the window and produces a photoelectron by interacting with the gas in the drift region. The photoelectron produces primary ionization electrons that drift to the front cathode and diffuse, creating a large charge cloud that involves multiple strips. These charges are accelerated by the strong electric field between the front cathode and the anode and generate ions that are collected by the front and the back cathode, giving information on the $x$ and $y$ positions. The electrodes after the back cathode are used for anticoincidence logic to reject cosmic rays.}
+    \caption{Schematic diagram of the ROSAT PSPC \cite{rosat_pspc}. An X-ray photon enters the window and produces a photoelectron by interacting with the gas in the drift region. The photoelectron produces primary ionization electrons that drift to the front cathode and diffuse, creating a large charge cloud that involves multiple strips. These charges are accelerated by the strong electric field between the front cathode and the anode and generate ions that are collected by the front and the back cathode, giving information on the $x$ and $y$ positions. The electrodes after the back cathode - quando parli delle varie tipologie e geometrie dei rivelatori a gas, espanderei significativamente. are used for anticoincidence logic to reject cosmic rays.}
     \label{fig:pspc}
 \end{figure}
 
@@ -307,10 +401,11 @@ In the past it was technologically impossible to achieve such high purity levels
 
 Another type of junction is the Schottky. This junction is obtained at the contact interface between a semiconductor and a metal which have a difference between the vacuum energy and the Fermi energy larger than that of the semiconductor. At thermal equilibrium semiconductor electrons flow towards the metal, a depletion zone is formed on the interface and a potential barrier is established. As for $pn$ junctions, when operating in reverse bias by applying negative voltage to the metal, the depletion zone becomes larger because the external electric field pulls electrons far from the semiconductor. The width of the depletion zone still follows Eq. \ref{eq:dep_zone}. This junction is useful for compound materials, where it is difficult to grow crystals with few impurities or crystal imperfections, posing a technical limit to $N_D$ and resulting in a very high voltage required to achieve a large depletion zone. Some examples of common materials for which a Schottky junction is ideal are GaAs or CdTe and CdZnTe, which are all high-$Z$ materials with a large interaction cross section for high energy photons in the hard X-ray and $\gamma$-ray regions.
 
-Finally, another important junction is obtained with a layer of semiconductor, one of oxide and one of metal, forming a Metal-Oxide-Semiconductor (MOS) junction. When a voltage below a specific thershold is applied a depletion zone is formed, but its width is usually smaller than what it is possible to obtain with other junctions. MOS are commonly employed in CCDs, but due to the small depletion zone they are typically suited for energies below 10 keV and loose efficient for higher energies. $pn$CCDs, which were developed later, allow to obtain larger depletion zones and thus to increase sensitivity to high energy photons up to a few tens of keV. Overall, CCDs allowed to obtain many progresses in X-ray astrophysics because it became possible to achieve high resolution for both imaging and spectroscopy at the same time as well as an higher quantum efficiency with respect to gas detectors. As mentioned above, CCDs work by moving the accumulated charge inside each pixel towards a readout circuit to digitalize the signals. On a large CCD, which can have up to thousands of pixels per side, this process can take from tens of milliseconds up to a few seconds to read the entire array. Due to the absence of a shutter on X-ray teescopes, while charges are moving the CCD is still exposed to radiation and image deterioration can occur. A solution is to move the frame in auxiliars arrays which are not exposed, enabling to reduce this effect. However, to correctly perform spectroscopy it is necessary that event pile-up does not occur, but this is limited by readout speed. The consequence of this problem is that it is difficult to perform spectroscopy of bright sources with rates much larger than the readout rate.
+Finally, another important junction is obtained with a layer of semiconductor, one of oxide and one of metal, forming a Metal-Oxide-Semiconductor (MOS) junction. When a voltage below a specific thershold is applied a depletion zone is formed, but its width is usually smaller than what it is possible to obtain with other junctions. MOS are commonly employed in CCDs, but due to the small depletion zone they are typically suited for energies below 10 keV and loose efficient for higher energies. $pn$CCDs, which were developed later, allow to obtain larger depletion zones and thus to increase sensitivity to high energy photons up to a few tens of keV. Overall, CCDs allowed to obtain many progresses in X-ray astrophysics because it became possible to achieve high resolution for both imaging and spectroscopy at the same time as well as an higher quantum efficiency with respect to gas detectors. As mentioned above, CCDs work by moving the accumulated charge inside each pixel towards a readout circuit to digitalize the signals. On a large CCD, which can have up to thousands of pixels per side, this process can take from tens of milliseconds up to a few seconds to read the entire array. Due to the absence of a shutter on X-ray telescopes, while charges are moving the CCD is still exposed to radiation and image deterioration can occur. A solution is to move the frame in auxiliars arrays which are not exposed, enabling to reduce this effect. However, to correctly perform spectroscopy it is necessary that event pile-up does not occur, but this is limited by readout speed. The consequence of this problem is that it is difficult to perform spectroscopy of bright sources with rates much larger than the readout rate.
 
 A different approach to CCDs is to separate the active part of the detector, where the interaction between radiation and matter takes place and electron-hole pairs are generated, from the passive part, which is responsible for the readout of the signal. Detectors that adopt this approach are called hybrid pixel detectors, in contrast to monolithic detectors like CCD. This design allows for the construction of highly-optimized detectors, where the readout chip can be designed to satisfy the requirements needed for the specific application without the contraints imposed by the active sensor.  
 
+\fix{specificare la diffusione nei semiconduttori con relazione einstein}
 
 
 
