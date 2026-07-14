@@ -31,10 +31,13 @@ plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter2/photoabs_eff.pdf", dpi=300, bbox_inches="tight")
 
-e = np.linspace(1e3, 3e4, 1000)
+e = np.linspace(1e3, 3e5, 1000)
 si_mu = xraydb.material_mu("Si", e, density=2.33)
-mean_z = 1 / (np.exp(D_semi * si_mu) - 1) * (np.sqrt(D_semi)*np.exp(D_semi * si_mu) - np.sqrt(D_semi * np.pi)/2 * erfi(np.sqrt(D_semi * si_mu)))
+# Soluzione stabile che non rompe Python ad alte energie o grandi spessori
+arg_erfi = np.sqrt(D_semi * si_mu)
+exp_neg = np.exp(-D_semi * si_mu)
 
+mean_z = (1 / (1 - exp_neg)) * (np.sqrt(D_semi) - (np.sqrt(np.pi / si_mu) / 2) * exp_neg * erfi(arg_erfi))
 plt.figure()
 plt.plot(e*1e-3, mean_z * 40 /50, "-k")
 plt.xlabel("Energy [keV]")

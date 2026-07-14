@@ -75,3 +75,4 @@ def cluster_size_hist(recon_file, density=True):
     hist.set_content(content)
 
     return hist
+

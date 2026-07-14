@@ -26,7 +26,7 @@ fano_si = fano_limit(E, *SI)
 fano_cdte = fano_limit(E, *CDTE)
 fano_ar = fano_limit(E, *AR)
 
-ENC = np.linspace(0, 200, 100)
+ENC = np.linspace(0, 150, 100)
 
 res = enc_limit(ENC, E, *SI)
 
@@ -37,7 +37,7 @@ plt.plot(ENC, enc_limit(ENC, E, *CDTE), "--k", label="CdTe")
 plt.xlabel("ENC [e$^-$]")
 plt.ylabel(r"$\Delta$E/E@5.9 keV (FWHM)")
 plt.legend(frameon=False)
-plt.xlim(0, 200)
+plt.xlim(0, 150)
 plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter2/enc_limit.pdf", dpi=300, bbox_inches="tight")
