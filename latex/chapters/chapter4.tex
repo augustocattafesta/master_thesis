@@ -518,11 +518,13 @@ Contrary to charge barycenter, this algorithm does not implement any type of sup
 
 As a consequence, defining the cluster size becomes ambiguous. For plotting purposes and to compare different algorithms, the cluster size used in Fig. \ref{fig:mle_dx_dy} to separate events is the cluster size that is obtained with the charge barycenter algorithm.
 
-Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. WIth this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch.
+Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. With this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch.
 
-This same behaviour can be can be observed in Fig. \ref{fig:mle_eef} as well, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution.
+This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
 
-\fix{C'è altro da dire? Sarebbe carino far vedere quanto peggiora la ricostruzione quando usiamo il file con la dimensione della nube sbagliata, in modo da quantificare anche in un certo senso i sistematici.}
+Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution. It must be noted that for the position reconstruction a set of calibration matrices has been produced for each diffusion width.
+
+\fix{C'è altro da dire? Sarebbe carino far vedere quanto peggiora la ricostruzione quando usiamo il file con la dimensione della nube sbagliata, in modo da quantificare in un certo senso i sistematici.}
 
 \begin{figure}
     \centering
@@ -532,12 +534,13 @@ This same behaviour can be can be observed in Fig. \ref{fig:mle_eef} as well, wh
     \label{fig:mle_dx_dy}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mle_eef}
-    \caption{Encircled energy fraction of the maximum likelihood estimator reconstruction for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise. \fix{Variare i colori e sistemare un pochino il plot.}}
+    \caption{Encircled energy fraction of the maximum likelihood estimator reconstruction for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
     \label{fig:mle_eef}
 \end{figure}
+
 \begin{table}[htbp]
 \centering
 \begin{tabular}{c cccc}
@@ -551,7 +554,7 @@ $\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
 \bottomrule
 \end{tabular}
 \caption{Pitch distances at which EEF contains 50\% and 90\% of the events with maximum likelihood estimator reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:mle_eef}}
-\label{tab:eef_barycenter}
+\label{tab:eef_mle}
 \end{table}
 
 
@@ -563,21 +566,19 @@ In the context of silicon microstrip detectors, a common and widely used algorit
 \eta = \frac{q_R}{q_L + q_R},
 \label{eq:def_eta}
 \end{equation}
-that for a microstrip detector is the ratio between the charge collected by the right strip and the total charge collected by the two strips involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, contrary to the charge baryecenter, that takes into account how the charge diffuses, like the maximum likelihood estimation with the charge diffusion model.
+that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, contrary to the charge baryecenter, that takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
 
-The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. Assuming that the events are uniformly distributed between the two strips, the cumulative distribution of the $\eta$ gives the relation between the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
+The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. Assuming that the events are uniformly distributed between the two strips, the cumulative distribution of $\eta$ gives the relation between the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.45\linewidth]{figures/chapter4/position/belau_eta}
     \includegraphics[width=0.45\linewidth]{figures/chapter4/position/belau_cumulative}
-    \caption{In the left panel, experimental distribution of the $\eta$ variable calculated for a silicon microstrip detector. In the rigth panel, the cumulative distribution calculated from the latter, which gives the calibration fucntion to reconstruct the event incident position. Both images are taken from \cite{belau1983}.}
+    \caption{In the left panel, experimental distribution of the $\eta$ variable calculated for a silicon microstrip detector. In the rigth panel, the cumulative distribution calculated from the latter, which gives the calibration function to reconstruct the event incident position. Images taken from \cite{belau1983}.}
     \label{fig:belau_eta}
 \end{figure}
 
-This methodology can also be applied to the case of hexagonal pixel detectors, but there are some things that need to be adapted. The main difference is the two-dimensional nature of the problem to reconstruct the position on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. As already said for the other reconstruction methods, for a one-pixel event there is nothing that can be done, thus the reconstruction position must coincide with the pixel center.
-
-The case of two pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. A small change in the definition of $\eta$ is necessary, which is now defined as
+This methodology can also be applied to the case of hexagonal pixel detectors, but there are some things that need to be modified. The main difference is the two-dimensional nature of position reconstruction on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. As said before, for one-pixel events there is nothing that can be done, thus the reconstruction position must coincide with the pixel center.
 
 \begin{figure}[htbp]
     \centering
@@ -601,12 +602,12 @@ The case of two pixel events is more interesting, and it can be treated in a sim
     \label{fig:two_pixel_event}
 \end{figure}
 
-
+The case of two-pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. Considering the readout deisgn of ASIX, where the pixel that triggering pixel is always located at the center of a seven pixel cluster, a small change in the definition of $\eta$ is necessary, which is now defined as
 \begin{equation}
 \eta = \frac{q_1}{q_0 + q_1},
 \label{eq:eta_2pix}
 \end{equation}
-where $q_0$ is always the cluster central pixel and $q_1$ is the second pixel with signal. This is because of how the ASIX readout works, because the pixel that triggered the cluster is always positioned at the center of the cluster, and the second pixel is one of the six pixels in the circular corona around it, as visible in Fig. \ref{fig:mle_model}. This means that in ASIX case the definition of left and right has no more sense, while the only correct spatial orientation is central or outer pixel. This change in the definition affects the shape of the $\eta$ variable distribution, because now it is defined in the range $(0, 0.5)$ and shows a single peak corresponding to the central pixel. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
+where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and shows a single peak corresponding to the central pixel. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
 
 \begin{figure}
     \centering
