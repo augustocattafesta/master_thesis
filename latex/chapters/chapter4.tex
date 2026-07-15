@@ -611,7 +611,19 @@ The case of two-pixel events is more interesting, and it can be treated in a sim
 \eta = \frac{q_1}{q_0 + q_1},
 \label{eq:eta_2pix}
 \end{equation}
-where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and shows a single peak corresponding to the central pixel. \fix{parlare della correzione geometrica}
+where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and does not have a double peak as in Fig. \ref{fig:belau_eta}. 
+
+Before calculating the $\eta$ distribution it is necessary to verify if two-pixel events are uniformly distributed along the axis that connects the two pixel centers shown if Fig. \ref{fig:two_pixel_event}. The scatter plot shown in Fig. \ref{fig:2pix_scatter} shows how the real impact position of two-pixel events are distributed. By observing the count distribution of these events projected onto the axes connecting the center of the central pixel with the outer ones, shown in Fig. \ref{fig:2pix_scatter} as well, it is possible to see that the events are not uniformly distributed.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_2pix_scatter}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_dr_hist}
+    \caption{Scatter plot of Monte Carlo truth impact positions of two-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the relevant axes, shown with dashed lines (right panel).}
+    \label{fig:2pix_scatter}
+\end{figure}
+
+To apply the correction on the $\eta$ distribution, an iterative method can be adopted. In the first step the relation between $\eta$ and $r$ is assumed to be linear, and the minimum and maximum observed values of $\eta$ correspond to the minimum and maximum values of $r$. The $\eta$ distribution is calculated by weighting each bin with the inverse of the $r$ distribution. Then, the second step consists of calculating the cumulative distribution of $\eta$, which gives a non-linear relation between $\eta$ and $r$. Using the latter relation, the first and the second steps are repeated for a certain number of iterations.
 
 The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
 
@@ -684,6 +696,16 @@ The angular coordinate can be parametrized as a two-pixel event problem as well.
 \eta_- = \frac{\eta_1 - \eta_2}{\eta_+}.
 \label{eq:eta_minus}
 \end{equation}
+
+As in the case of two-pixel events, the uniformity of the events along the relevant axis has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the relevant axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the relevant axes, shown with dashed lines (right panel).}
+    \label{fig:2pix_scatter}
+\end{figure}
 
 Similarly to two-pixel events, by studying the $\eta_+$ and $\eta_-$ distributions and their cumulative distributions, it is possible to get a calibration for the radial and angular coordinates, which can then be used to reconstruct the photon incident position. An example of these distributions is shown in Fig. \ref{fig:eta_3pix}, and it can be noted that the shape of the distributions are \fix{very different} from the two dimensional cases in Figs. \ref{fig:belau_eta} and \ref{fig:eta_2pix}.
 
