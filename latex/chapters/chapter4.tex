@@ -697,7 +697,7 @@ The angular coordinate can be parametrized as a two-pixel event problem as well.
 \label{eq:eta_minus}
 \end{equation}
 
-As in the case of two-pixel events, the uniformity of the events along the relevant axis has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the relevant axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
+As in the case of two-pixel events, the uniformity of the events along the relevant axes has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the radial axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
 
 Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical propertie. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
 
@@ -705,29 +705,27 @@ Contrary to two-pixel events, for which the non-uniformity is primarily introduc
     \centering
     \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
-    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the relevant axes, shown with dashed lines (right panel).}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel).}
     \label{fig:3pix_scatter}
 \end{figure}
 
-This non-uniformity heavily affects the shape of $\eta_+$ and $\eta_-$ distributions. Fig. \ref{fig:3pix_rad_eta} shows a comparison between the $\eta_+$ with and without the correction for uniformity.
+A similar behaviour can be observed for $\eta_-$ projecting onto the axis perpendicular to the radial one. This non-uniformities heavily affect the shape of $\eta_+$ and $\eta_-$ distributions. Fig. \ref{fig:3pix_rad_eta} shows a comparison between the $\eta_+$ with and without the correction for uniformity.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_uncorrected_hist}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_uncorrected_hist}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_hist}
-    \caption{$\eta_+$ distribution without weigthing the entries to correct for non-uniformity (left panel) and distribution with the correction applied.}
+    \caption{$\eta_+$ distribution without weigthing the entries to correct for non-uniformity (left panel) and distribution with the correction applied (right panel). $\eta_-$ distribution is not shown, but the distorsion in the uncorrected distribution is of a similar magnitude.}
     \label{fig:3pix_scatter}
 \end{figure}
 
-
-
-Similarly to two-pixel events, by studying the $\eta_+$ and $\eta_-$ distributions and their cumulative distributions, it is possible to get a calibration for the radial and angular coordinates, which can then be used to reconstruct the photon incident position. An example of these distributions is shown in Fig. \ref{fig:eta_3pix}, and it can be noted that the shape of the distributions are \fix{very different} from the two dimensional cases in Figs. \ref{fig:belau_eta} and \ref{fig:eta_2pix}.
+After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions with the same iterative approach used for two-pixel events, the cumulative distributions can be calculated. The cumulative distributions are shown in Fig. \ref{fig:eta_3pix}.
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_eta}
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_cumulative}
-    \caption{\fix{inserire caption e figura della distribuzione di eta e la cumulante nel caso a tre pixel sia per la componente radiale che per quella angolare.}}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_cumulative}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_ang_cumulative}
+    \caption{Cumulative distributions for $\eta_+$ (left panel) and $\eta_-$ (right panel) variables. }
     \label{fig:eta_3pix}
 \end{figure}
 
