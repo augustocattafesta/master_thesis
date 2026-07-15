@@ -578,7 +578,11 @@ The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ a
     \label{fig:belau_eta}
 \end{figure}
 
-This methodology can also be applied to the case of hexagonal pixel detectors, but there are some things that need to be modified. The main difference is the two-dimensional nature of position reconstruction on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. As said before, for one-pixel events there is nothing that can be done, thus the reconstruction position must coincide with the pixel center.
+This methodology can also be applied to the case of hexagonal pixel detectors, but there are some things that need to be modified. The main difference is the two-dimensional nature of position reconstruction on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. The second difference is that, contrary to microstrips, the event distribution along any axis produced by a uniform source that illuminates an hexagonal pixel is not uniform. This is a fundamental requirement to use this method, as stated in \cite{belau1983}, thus it is necessary to apply geometrical corrections dependent on the pixel shape and on the event typology.
+
+These corrections can be calculated running a Monte Carlo simulation with a source that illuminates the detector with a uniform beam. Using Monte Carlo truth positions, the event distribution along the relevant axis for the event typology can be calculated. These distributions can be used to correctly weight the $\eta$ distributions as if the events were uniformly distributed along the axis. The approach that has been used for each event typology will be explained in a moment.
+
+As said for other reconstruction methods, for one-pixel events there is nothing that can be done, thus the reconstructed position must coincide with the pixel center.
 
 \begin{figure}[htbp]
     \centering
@@ -607,19 +611,21 @@ The case of two-pixel events is more interesting, and it can be treated in a sim
 \eta = \frac{q_1}{q_0 + q_1},
 \label{eq:eta_2pix}
 \end{equation}
-where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and shows a single peak corresponding to the central pixel. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
+where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and shows a single peak corresponding to the central pixel. \fix{parlare della correzione geometrica}
+
+The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_eta}
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/2pix_cumulative}
-    \caption{\fix{inserire caption e figura della distribuzione di eta e la cumulante nel caso a due pixel}}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_hist}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_cumulative}
+    \caption{$\eta$ distribution (left panel) and its cumulative distribution (right panel) for two-pixel events. The two distributions are truncated near $\eta=0$ because of a zero-suppression threshold that is applied.}
     \label{fig:eta_2pix}
 \end{figure}
 
-For event reconstruction, the cumulative distribution can be interpolated to get a continuos function $f(\eta)$.
+For event reconstruction, the cumulative distribution can be interpolated to get a continuos function $r(\eta)$.
 
-This approach can also be generalized to the case of three-pixels events. This is a two-dimensional problem, contrary to the two-pixels case, which is still uni-dimensional. A single $\eta$ variable is not enough and the obvious generalization of the previous case is to define the variables
+This approach can be generalized to the case of three-pixels events as well. This is a two-dimensional problem, contrary to the two-pixels case. A single $\eta$ variable is not enough and the generalization of the previous case is to define the variables
 
 \begin{equation}
 \eta_1 = \frac{q_1}{q_0 + q_1 + q_2}, \quad \quad \eta_2 = \frac{q_2}{q_0 + q_1 + q_2}, \quad \quad q_0 > q_1 > q_2.
@@ -656,22 +662,30 @@ This approach can also be generalized to the case of three-pixels events. This i
     \label{fig:three_pixel_event}
 \end{figure}
 
-Defining these two new variables still is not enough, because they are not good to easily parametrize the problem. Looking at the disposition of the three pixel in Fig. \ref{fig:three_pixel_event}, a better parametrization can be employed to simplify the description of this type of events. The idea is to reduce a three-pixels event to a two-pixels event, where the central pixel remains the same, while the outer pixel becomes the sum of the two outer pixels. This automatically defines a new $\eta_+$ variable which is defined as
+These two new variables are still not good enough, because it is not easy to parametrize the geometry of the problem with them. By looking at the geometry of the three pixel in Fig. \ref{fig:three_pixel_event}, a better parametrization can be employed to simplify the description of this type of events.
+
+The idea is to decompose the two-dimensional problem into two one-dimensional problems that can be treated as two-pixel events, each describing a specific coordinate. The best coordinates for this problem 
+are a radial coordinate and an angular coordinate. The two coordinates, which are shown in Fig. \ref{fig:three_pixel_event}, are defined as follows:
+\begin{itemize}[label=-]
+\item $r$ is distance of the incident position projected onto the axis that passes through the middle point between the outer pixels centers;\\
+\item $\theta$ is the angle measured starting from the latter axis and oriented towards the outer pixel with the highest charge collected.
+\end{itemize}
+
+Considering the ASIX readout geometry, where the central pixel is always the one with the highest pixel and the other two pixels are neighbors, the radial component can be parametrized as a two-pixel event by considering the outer pixels as a single pixel with charge equal to the sum of the two. This automatically defines a new $\eta_+$ variable which is defined as
 
 \begin{equation}
-\eta_+ = \eta_1 + \eta_2,
+\eta_+ = \eta_1 + \eta_2.
 \label{eq:eta_sum}
 \end{equation}
-which is related to the coordinate $r$, which is the distance of the incident position projected onto the axis that passes through the middle point between the outer pixels' centers.
 
-Once the radial coordinate is defined, it is necessary to define also an angular coordinate $\theta$, which describes how far the incident position is from the latter axis. Even in this case it is possible to reduce the problem to a two-pixel event problem, where the interesting relation is between the two outer pixels. For this purpose, a new variable can be defined, and a possible definition is
+The angular coordinate can be parametrized as a two-pixel event problem as well. In this case the relevant property is how the charge collected by the outer pixels is divided between them. As a consequence, a new variable can be defined as
 
 \begin{equation}
 \eta_- = \frac{\eta_1 - \eta_2}{\eta_+}.
 \label{eq:eta_minus}
 \end{equation}
 
-Studying the $\eta_+$ and $\eta_-$ distributions and their cumulative distributions, it is possible to get a calibration for the radial and angular coordinates, which can then be used to reconstruct the photon incident position. An example of these distributions is shown in Fig. \ref{fig:eta_3pix}, and it can be noted that the shape of the distributions are very different from the two dimensional cases in Figs. \ref{fig:belau_eta} and \ref{fig:eta_2pix}.
+Similarly to two-pixel events, by studying the $\eta_+$ and $\eta_-$ distributions and their cumulative distributions, it is possible to get a calibration for the radial and angular coordinates, which can then be used to reconstruct the photon incident position. An example of these distributions is shown in Fig. \ref{fig:eta_3pix}, and it can be noted that the shape of the distributions are \fix{very different} from the two dimensional cases in Figs. \ref{fig:belau_eta} and \ref{fig:eta_2pix}.
 
 \begin{figure}
     \centering
