@@ -73,15 +73,15 @@ Once the sensor working conditions like the temperature and the electric field a
 19.6 & 0.0 & 0.0 & 1.5 & 45.0 & 38.1 & 10.7 & 4.6 \\
 19.4 & 0.0 & 0.0 & 1.1 & 44.9 & 38.5 & 10.5 & 4.9 \\
 19.2 & 0.0 & 0.0 & 1.4 & 43.5 & 38.8 & 10.8 & 5.5 \\
-18.8 & 0.0 & 0.0 & 2.3 & 43.6 & 38.3 & 10.4 & 5.3 \\
-18.2 & 0.2 & 0.3 & 4.8 & 44.5 & 35.4 & 9.7 & 5.1 \\
-17.5 & 0.8 & 0.9 & 8.7 & 44.4 & 31.7 & 8.8 & 4.7 \\
-16.9 & 1.8 & 1.9 & 12.9 & 43.4 & 27.8 & 7.8 & 4.3 \\
-16.3 & 2.7 & 2.9 & 16.2 & 41.5 & 25.8 & 7.2 & 3.8 \\
-15.8 & 3.7 & 3.6 & 18.4 & 40.2 & 23.9 & 6.7 & 3.6 \\
-15.4 & 4.4 & 4.5 & 20.4 & 38.7 & 22.3 & 6.2 & 3.5 \\
-15.2 & 5.1 & 5.0 & 21.4 & 37.7 & 21.3 & 6.0 & 3.5 \\
-15.0 & 5.6 & 5.4 & 22.2 & 36.4 & 20.7 & 6.3 & 3.5 \\
+18.7 & 0.0 & 0.0 & 2.3 & 43.6 & 38.3 & 10.4 & 5.3 \\
+18.1 & 0.2 & 0.3 & 4.8 & 44.5 & 35.4 & 9.7 & 5.1 \\
+17.4 & 0.8 & 0.9 & 8.7 & 44.4 & 31.7 & 8.8 & 4.7 \\
+16.6 & 1.8 & 1.9 & 12.9 & 43.4 & 27.8 & 7.8 & 4.3 \\
+15.9 & 2.7 & 2.9 & 16.2 & 41.5 & 25.8 & 7.2 & 3.8 \\
+15.3 & 3.7 & 3.6 & 18.4 & 40.2 & 23.9 & 6.7 & 3.6 \\
+14.9 & 4.4 & 4.5 & 20.4 & 38.7 & 22.3 & 6.2 & 3.5 \\
+14.5 & 5.1 & 5.0 & 21.4 & 37.7 & 21.3 & 6.0 & 3.5 \\
+14.3 & 5.6 & 5.4 & 22.2 & 36.4 & 20.7 & 6.3 & 3.5 \\
 \bottomrule
 \end{tabular}
 \caption{Mean relative abundance of event cluster size for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The cluster sizes are calculated from a simulation without electronic noise and without applying any threshold on the collected signal.}
@@ -102,15 +102,15 @@ Another important property of the charge diffusion that needs to be understood i
 19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
 19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
 19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
-18.8 & 71.5 & 19.9 & 7.8 & 0.9 \\
-18.2 & 72.5 & 19.4 & 7.3 & 0.7 \\
-17.5 & 73.8 & 18.8 & 6.8 & 0.6 \\
-16.9 & 74.9 & 18.2 & 6.3 & 0.5 \\
-16.3 & 75.8 & 17.8 & 5.9 & 0.5 \\
-15.8 & 76.7 & 17.2 & 5.6 & 0.4 \\
-15.4 & 77.3 & 16.9 & 5.4 & 0.4 \\
-15.2 & 77.9 & 16.5 & 5.2 & 0.4 \\
-15.0 & 78.3 & 16.3 & 5.1 & 0.3 \\
+18.7 & 71.5 & 19.9 & 7.8 & 0.9 \\
+18.1 & 72.5 & 19.4 & 7.3 & 0.7 \\
+17.4 & 73.8 & 18.8 & 6.8 & 0.6 \\
+16.6 & 74.9 & 18.2 & 6.3 & 0.5 \\
+15.9 & 75.8 & 17.8 & 5.9 & 0.5 \\
+15.3 & 76.7 & 17.2 & 5.6 & 0.4 \\
+14.9 & 77.3 & 16.9 & 5.4 & 0.4 \\
+14.5 & 77.9 & 16.5 & 5.2 & 0.4 \\
+14.3 & 78.3 & 16.3 & 5.1 & 0.3 \\
 \bottomrule
 \end{tabular}
 \caption{Average charge collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It is clearly visible that the majority of the charge is collected by at most three pixels.}
@@ -477,8 +477,8 @@ This equation can now be minimized with respect to the unknown parameters $(x, y
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mle_nll}
-    \caption{Example of $\operatorname{NLL}(x, y)$ for a fixed value of $Q$. \fix{inserire plot}.}
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/nll}
+    \caption{Example of $\operatorname{NLL}(x, y, Q)$ calculated by fixing the total charge value $Q$ to the sum of all the pixels.}
     \label{fig:mle_nll}
 \end{figure}
 
@@ -733,7 +733,7 @@ The $\eta$ algorithm presented for three-pixel events could also be generalized 
 
 Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
 
-After analyzing the same dataset as the other algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione sui risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è comparabile alla eta con calibrazione da monte carlo. Bisogna capire il confronto con l'MLE. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo con una sigma diversa dal MC}
+After analyzing the same dataset as the other algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione dei risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è comparabile alla eta con calibrazione da monte carlo. Bisogna capire il confronto con l'MLE. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo con una sigma diversa dal MC}
 
 \begin{figure}
     \centering
