@@ -729,13 +729,27 @@ After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions wit
     \label{fig:eta_3pix}
 \end{figure}
 
-The $\eta$ algorithm presented for the three-pixels case could also be generalized to all cluster sizes, because the only necessary thing to do is to identify the symmetry axes of the specific cluster size and then opportunely define two linear combinations of the $\eta_i$, like $\eta_+$ and $\eta_-$. Anyway, with an increasing number of pixels the charge barycenter reconstruction improves so, as already described in Sec. \ref{subsec:barycenter}, in the limit of a large number of pixels the gain obtained by the $\eta$ algorithm is negligible. For this detector, only the case up to three pixels has been covered, as it is designed to not have big cluster sizes to not deteriorate the energy resolution and three is the maximum accepted size for a cluster.
+The $\eta$ algorithm presented for three-pixel events could also be generalized to all cluster sizes. The only necessary thing to do is identifying the symmetry axes of the specific cluster size and then opportunely define two combinations of the $\eta_i$. However, with an increasing number of pixels involved in an event the charge barycenter algorithm becomes better and the improvement of an $\eta$ algorithm could become negligible. For ASIX only events with up to three pixels have been analyzed, as it is designed to not have big cluster sizes.
 
-Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The important difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only thing to be careful to is using a source that uniformly samples the hexagon, which is easily achievable with a large enough beam. This is really important when, for some reason, it is not possible to have a Monte Carlo simulation perfectly reproducing the detector, but the charge barycenter reconstruction accuracy is not enough.
+Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
 
-The residuals of this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione sui risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è meno preciso della eta con calibrazione da monte carlo, quindi assumiamo che questo sia vero sempre e continuiamo con questa descrizione. Bisogna capire il confronto con l'MLE, mi aspetto che sia un pochino peggio. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo sbagliando la sigma e confrontandola con quella non monte carlo}
+After analyzing the same dataset as the other algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione sui risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è comparabile alla eta con calibrazione da monte carlo. Bisogna capire il confronto con l'MLE. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo con una sigma diversa dal MC}
 
-The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. The charge diffusion model is necessary, but contrary to the likelihood method, some approximations can be considered and the diffusion process can be solved analytically. As said before, in the case of a two-pixel event the position can only be reconstructed along the line that connects the two centers. For this reason, the simplified uni-dimensional problem of a photon hitting the pixel exactly on this line can be considered. The charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel. Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected only by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel is the portion of the Gaussian that lies on the pixel
+\begin{figure}
+    \centering
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_dx}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_dy}
+    \caption{Residuals distributions of the eta algorithm for the $x$ and $y$ directions, calculated as the difference between the reconstructed and the Monte Carlo truth $x$ and $y$ components. The events are separated by cluster size, with each color representing a specific cluster size. The histograms are stacked on each other. The simulation is made with a 8 keV monochromatic source, 20 ENC of noise and ratio between the diffused charge cloud sigma and the pitch of 15\%.}
+    \label{fig:eta_dx_dy}
+\end{figure}
+
+The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. 
+
+Knowing the charge diffusion model is required, but contrary to the likelihood method there are some approximations that can be made, making possible to solve analytically the problem. 
+
+In the case of two-pixel events the position can only be reconstructed along the line connecting the two pixel centers, thus it is one-dimensional problem, as already seen. Considering a photon which impacts on this line, the charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel.
+
+Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel is given by the integral of the Gaussian
 
 \begin{equation}
 \eta(r) = \int ^{\infty}_{p/2} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = \Phi \left( \frac{r - p/2}{\sigma} \right),
@@ -747,41 +761,61 @@ where $\Phi(z)$ is the cumulative density function of the standard normal distri
 r(\eta) = \frac{p}{2} + \sigma \Phi^{-1}(\eta),
 \label{eq:eta_2pix_final}
 \end{equation}
-where $\Phi^{-1}(p)$ is the percent point function of the standard normal distribution. All the parameters in Eq. \ref{eq:eta_2pix_final} are known or can be calculated, but in the real case, where not all photons hit the central pixel exactly on the line connecting the centers, their value can change a bit. For this reason, a calibration is necessary and can be performed using Monte Carlo truth information. To perform it, the relevant quantity that has to be calculated is the projection of the true incident position onto the line that connects pixel centers. This quantity is calculated for each two-pixel event, then they are binned in $\eta$ and, for each value of $\eta$, the median of the $r$ distribution is computed. The choice to use the median has been made because these distributions have long tails, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
+where $\Phi^{-1}(p)$ is the percent point function of the standard normal distribution.
+
+The only unknown parameter in Eq. \ref{eq:eta_2pix_final} is $\sigma$, that could be estimated with Eq. \ref{eq:mean_diff_sigma}. However, this estimate would not take into account the presence events occuring far from the axis, as shown in Fig. \ref{fig:2pix_scatter}. For this reason Monte Carlo simulations can be used to estimate the parameter.
+
+To estimate $\sigma$ the projected distance $r$ of the Monte Carlo truth position onto the axis connecting the two pixel centers is calculated. A two-dimensional histogram is calculated using the resulting projected distance and $\eta$, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
+
+A profile of this histogram is then obtained by calculating the median of the $r$ distribution for each value of $\eta$. The choice to use the median has been made because these distributions have long tails, thus the mean would not be the ideal location estimator.
+
+The resulting profile is fitted using Eq. \ref{eq:eta_2pix_final} as fit model, with $\sigma$ being the only free parameter. The profile and the corresponding fit are shown in Fig. \ref{fig:eta_2pix_r_distr}.
+
+
+This quantity is calculated for each two-pixel event, then they are binned in $\eta$ and, for each value of $\eta$, the median of the $r$ distribution is computed. The choice to use the median has been made because these distributions have long tails, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
 
 \begin{figure}
     \centering
 %    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_r_distr}
 %    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_best_fit}
-    \caption{\fix{inserire figure.} The left panel shows an example of distribution of the projected distance $r$ for all data in the range $\eta \in (\fix{boh})$. The right panel shows the median of the latter distributions as a function of $\eta$, along with the best-fit curve found using Eq. \ref{eq:eta_2pix_final} as the fit model. The best-fit value is $\sigma = \fix{a} \pm \fix{b}$. All values are expressed in pitch normalized units. This simulation is performed with a monochromatic source of 8 keV.}
+    \caption{\fix{inserire figure.}}
     \label{fig:eta_2pix_r_distr}
 \end{figure}
 
-The data obtained for each value of $\eta$ can be fitted with Eq. \ref{eq:eta_2pix_final} as fit model, using a least-squares minimizer. For the fit, the pitch parameter $p$ has been fixed to the pixel size, thus $\sigma$ is the only free parameter. Data and best-fit curve are shown in Fig. \ref{fig:eta_2pix_r_distr}. \fix{aggiungere piccolo confronto tra valore di sigma dal fit e expected da media di z assorbimento.}
+\fix{magari un piccolo commento su discrepanze sigma fittato e teorico}
 
-A similar approach can be used for three-pixels events. As already said above, this case requires to separate between the radial and the angular coordinates, with both components that are approximable with   two-pixels problems. For the radial coordinate, where the outer pixels can be seen as a single pixel whose charge is the sum of their charges, the problem is almost identical to the one that has just been discussed. The only difference is the lower integration limit of Eq. \ref{eq:eta_2pix_int}, that this time corresponds to the vertex of the hexagon, which is located at $r=p/\sqrt{3}$. The calculation thus becomes
+A similar approach can be used for three-pixels events. As already said above, this case requires to separate between the radial and the angular coordinates into two independent one-dimensional two-pixel problems.
+
+The idea behind this model is the same already discussed for the unmodeled $\eta$ algorithm. The radial component can be described by the $\eta_+$ variable, considering the two outer pixels as a single one with total charge given by the sum of the two. The problem is reduced to the same of two-pixel events, with the only difference being in the lower integration limit, which now is the distance of the vertex from the center. $\eta_+$ is given by
+
 \begin{equation}
 \eta_+(r) = \int ^{\infty}_{p/\sqrt{3}} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = \Phi \left( \frac{r - p/\sqrt{3}}{\sigma} \right),
 \label{eq:eta_3pix_int}
 \end{equation}
 which leads to
+
 \begin{equation}
 r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}(\eta_+).
 \label{eq:eta_3pix_no_final}
 \end{equation}
-There is a small correction to apply, because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120$^{\circ}$. Indeed, if the charge would be equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$, thus the impact point would not be reconstructed on the vertex, but further from the central pixel. The solution is to normalize $\eta^+$ in order to correct this case, thus the model is
+
+A small correction needs to be applied because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120 degrees. Indeed, if the charge would be equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$. As a consequence the impact point would not be reconstructed on the vertex, but outside of the central pixel.
+
+The solution is to normalize $\eta^+$ in order to satisfy $\r(2/3) = 1/\sqrt{3}$, thus the final model is
 \begin{equation}
 r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}\left( \frac{3}{4}\eta_+ \right).
 \label{eq:eta_3pix_final}
 \end{equation}
 
-To find the model for the angular coordinate it is possible to only consider the two outer pixels, because $\eta_-$ is normalized with respect to the charge collected by these two pixels. The charge diffusion between these two pixels can still be modeled as a one-dimensional Gaussian distribution, centered in $y$, which is the distance from the midpoint of the pixels. Calculating the fraction of Gaussian that falls inside each pixel, it is possible to find the relation between $\eta_-$ and $y$, which is
+To find the model for the angular coordinate it is possible to consider only the two outer pixels, because $\eta_-$ is normalized with respect to the charge collected by these two pixels. The charge diffusion between these two pixels can still be modeled as a one-dimensional Gaussian distribution centered in $y$, which is the distance from the midpoint of the pixels.
+
+The relation between $\eta_-$ and $y$ can be found by calculating the fraction of Gaussian that falls inside each pixel, and is given by
 
 \begin{equation}
 \eta_-(y) = \frac{\eta_1}{\eta_+} - \frac{\eta_2}{\eta_+} = \left[1 - \Phi \left( - \frac{y}{\sigma} \right ) \right] - \Phi \left( - \frac{y}{\sigma} \right).
 \label{eq:eta_3pix_ang}
 \end{equation}
-Using the approximation of small incident angles, the relation between the angular coordinate $\theta$ and $y$ is $\theta = y / r$. Inverting Eq. \ref{eq:eta_3pix_ang}, it is possible to find the relation between $\theta$ and $\eta_-$
+Using the approximation of small angles, the relation between the angular coordinate $\theta$ and $y$ is $\theta = y / r$. Inverting Eq. \ref{eq:eta_3pix_ang}, it is possible to find the relation between $\theta$ and $\eta_-$
 
 \begin{equation}
 \theta(\eta_-) =  - \frac{\sigma}{r} \Phi^{-1} \left( \frac{1 - \eta_-}{2} \right) = \frac{\sigma}{r} \Phi^{-1} \left( \frac{1 + \eta_-}{2} \right),
@@ -799,7 +833,39 @@ To calibrate the radial and angular coordinates the strategy is identical to the
     \label{fig:eta_3pix_fit}
 \end{figure}
 
-The overall number of free parameters is four and after the calibration is concluded, they can be used to reconstruct the incident positions. \fix{distribuzioni ed eef per questo caso + discussione.}
+\fix{The overall number of free parameters is four and after the calibration is concluded, they can be used to reconstruct the incident positions.} \fix{distribuzioni ed eef per questo caso + discussione.}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_modeled_dx}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_modeled_dy}
+    \caption{Residuals distributions of the modeled eta algorithm for the $x$ and $y$ directions, calculated as the difference between the reconstructed and the Monte Carlo truth $x$ and $y$ components. The events are separated by cluster size, with each color representing a specific cluster size. The histograms are stacked on each other. The simulation is made with a 8 keV monochromatic source, 20 ENC of noise and ratio between the diffused charge cloud sigma and the pitch of 15\%.}
+    \label{fig:eta_modeled_dx_dy}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/eta_modeled_eef}
+    \caption{Encircled energy fraction of the modeled eta reconstruction for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
+    \label{fig:eta_modeled_eef}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{c cccc}
+$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+\midrule
+12.2 & 0.04 & 0.23 \\
+13.7 & 0.03 & 0.18 \\
+15.2 & 0.03 & 0.13 \\
+16.8 & 0.03 & 0.11 \\
+18.3 & 0.03 & 0.10 \\
+\bottomrule
+\end{tabular}
+\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
+\label{tab:eta_modeled_mle}
+\end{table}
+
 
 
 \subsection{Modulation transfer function}
