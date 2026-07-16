@@ -801,7 +801,7 @@ r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}(\eta_+).
 
 A small correction needs to be applied because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120 degrees. Indeed, if the charge would be equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$. As a consequence the impact point would not be reconstructed on the vertex, but outside of the central pixel.
 
-The solution is to normalize $\eta^+$ in order to satisfy $\r(2/3) = 1/\sqrt{3}$, thus the final model is
+The solution is to normalize $\eta_+$ in order to satisfy $r(2/3) = 1/\sqrt{3}$, thus the final model is
 \begin{equation}
 r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}\left( \frac{3}{4}\eta_+ \right).
 \label{eq:eta_3pix_final}
@@ -833,7 +833,9 @@ To calibrate the radial and angular coordinates the strategy is identical to the
     \label{fig:eta_3pix_fit}
 \end{figure}
 
-\fix{The overall number of free parameters is four and after the calibration is concluded, they can be used to reconstruct the incident positions.} \fix{distribuzioni ed eef per questo caso + discussione.}
+After estimating the free parameters from a Monte Carlo simulation that matches the working conditions and the $\langle \sigma \rangle / p$ ratio of the data that has to be analyzed, the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
+
+Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
 
 \begin{figure}
     \centering
@@ -863,7 +865,7 @@ $\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
 \bottomrule
 \end{tabular}
 \caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
-\label{tab:eta_modeled_mle}
+\label{tab:eta_modeled_eef}
 \end{table}
 
 
@@ -871,15 +873,19 @@ $\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
 \subsection{Modulation transfer function}
 \label{subsec:mtf}
 
-\fix{inserire citazioni \cite{samei1998}, \cite{med_imaging}.}
-
-To characterize the imaging response of the detector, a method that is commonly applied in medical physics is to produce the image of a linear object. This can be achieved using an absorber material plate, such as lead for X-rays, with a slit on it \cite{qualcuno}. The intensity profile of the image on the axis perpendicular to the slit as a function of the position is then calculated, and the result is called line spread function (LSF). More precisely, the LSF is the convolution of the PSF with the slit
+A method that is commonly applied in medical physics to characterize the imaging response of the detector is to produce the image of a linear object and study the detector response. This can be achieved using an absorber material plate, such as lead for X-rays, with a slit on it \cite{fujita1992}. The intensity profile of the image on the axis perpendicular to the slit as a function of the position is then calculated, and the result is called line spread function (LSF) \cite{med_imaging}. More precisely, the LSF is the convolution of the PSF with the slit
 
 \begin{equation}
 \operatorname{LSF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Slit}(x, y).
 \end{equation}
 
-It follows that in order to correctly characterize the resolution, the slit function should approach a Dirac $\delta$ function, thus the slit width must be smaller than the expected resolution. Another requirement for a better characterization is that the slit should be inclined with respect to the detector axes and the reason for this varies depending on the detector type. In case of energy integrating detectors, like the ones commonly used in radiography, the reason is that a slit aligned to an axis would produce a narrow LSF profile only few pixels wide, thus it would be under-sampled. Instead, using an inclined slit causes pixels in following rows to be hit in different positions, allowing to sample the LSF with sub-pixel sampling, which takes the name of presampled LSF. For single-photon driven readout detectors like ASIX, with which each photon is independently reconstructed with sub-pixel resolution, the reason of the inclined slit is not to increase the sampling, as the sub-pixel binning could be reduced to an arbitrary small dimension, but to uniformly sample the hexagonal pixel to estimate the average resolution of the detector on the entire pixel, and not only in a specific part of the pixel. The typical angle of the slit should be small, between 2 and 8 degrees, and should be far from all the possible main axes of the detector. An example of the geometry of the detector and the slits is shown if Fig. \ref{fig:hex_grid_slits}.
+To correctly characterize the LSF, the slit profile should approach a Dirac $\delta$ function, thus the slit width should be smaller than the expected resolution.
+
+Another requirement for a better characterization is that the slit should be inclined with respect to the detector principal axes and the reason for this varies depending on the detector type. In case of energy integrating detectors, like those commonly used in radiography, the reason is that a slit aligned to an axis would produce a narrow LSF profile only a few pixels wide, thus it would be under-sampled. Instead, using an inclined slit causes pixels in adjacent rows to be hit in different positions, allowing to sample the LSF with sub-pixel sampling, which is called presampled LSF.
+
+For single-photon driven readout detectors like ASIX, for which each photon is independently reconstructed with sub-pixel resolution, the reason to use an tilted slit is to uniformly sample the pixel. This enables to estimate the average resolution of the detector for the entire pixel, not only for a specific region of the pixel. An example of the geometry of the detector and the slits is shown if Fig. \ref{fig:hex_grid_slits}.
+
+The typical angle of the slit should be small, between 2 and 8 degrees, and should be far from all the possible main axes of the detector.
 
 \begin{figure}[htbp]
     \centering
@@ -903,50 +909,63 @@ It follows that in order to correctly characterize the resolution, the slit func
     \label{fig:hex_grid_slits}
 \end{figure}
 
-Producing a slit that matches the requirements of a high-resolution detector can not always be possible. The alternative method to measure the spatial resolution is to use the sharp edge of a slab of absorber material. The sharp edge is necessary to not introduce distorsions in the image. The process is similar to the calculation of the LSF, as the produced image is a linear region of transition between the free and the covered part of the detector. The profile of the transition takes the name of edge spread function (ESF). As for the slit method, the edge method requires the edge to be inclined with a small angle with respect to the main axes of the detector, for the reasons discussed above. Similarly to the LSF, the ESF can be computed as
+Producing a slit with a width small enough for high-resolution detectors is not always possible. An alternative method to characterize the spatial resolution consists of using the sharp edge of a slab of absorber material.
+
+The profile image of the transition region around the edge is called edge spread function (ESF). As for the slit method, the edge method requires the edge to be slightly tilted with respect to the main axes of the detector. Similarly to the LSF, the ESF can be computed as
 
 \begin{equation}
 \operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Edge}(x, y).
 \end{equation}
 
-As mentioned above, the ideal edge should be perfetcly sharp, thus it can be represented with a step function. Using the convolution properties, it is possible to show that the derivative of the ESF corresponds to the LSF
+The ideal edge should be perfectly sharp to not introduce distortions, thus it can be represented with a step function. Using the convolution properties, it is possible to show that the derivative of the ESF corresponds to the LSF
 
 \begin{equation}
-\frac{d}{dx} \operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \frac{d}{dx} \operatorname{Edge}(x, y) = \operatorname{PSF}(x, y) \ast \operatorname{Line}(x, y) = \operatorname{LSF}(y).
+\frac{d}{dx} \operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \frac{d}{dx} \operatorname{Edge}(x, y) = \operatorname{PSF}(x, y) \ast \operatorname{Line}(x, y) = \operatorname{LSF}(x).
 \label{eq:esf_lsf}
 \end{equation}
 
-Eq. \ref{eq:esf_lsf} is useful because once the LSF has been sampled, either with a slit or an edge, it is possible to characterize the profile to determine the spatial resolution, that can be defined as the full width at half maximum or alternatively, if the LSF can be described by a Gaussian curve, as its standard deviation. 
+This is true when the edge is not ideal as well.
 
-All the quantities that have been discussed above are defined in the spatial domain. There is another quantity that is commonly used to characterize the imaging properties of a detector, but defined in the frequency domain, the modulation transfer function (MTF). The MTF is defined as the Fourier transform of the LSF
+Eq. \ref{eq:esf_lsf} is useful because once the LSF has been sampled, either directly with a slit or indirectly with an edge, it is possible to characterize the profile to determine the spatial resolution, that can be defined as the full width at half maximum.
+
+The LSF and ESF are defined in the spatial domain. There is another quantity that is commonly used to characterize the imaging properties of a detector which is defined in the frequency domain, the modulation transfer function (MTF). The MTF is defined as the Fourier transform of the LSF
 
 \begin{equation}
 \operatorname{MTF}(f) = \mathcal{F}(\operatorname{LSF}(x)).
 \label{eq:mtf}
 \end{equation}
 
-By definition, the amplitude of MTF is normalized in order to have $\operatorname{MTF}(0) = 1$, which can be achieved either by normalizing the LSF area to 1 or by dividing the resulting MTF by $\operatorname{MTF}(0)$. The MTF measures how the contrast is transfered as a function of the spatial frequency of the incoming signal. A high value of the MTF for higher frequencies means that the detector has a high contrast, thus it can resolve well small objects. If the detector would ideally have infinite resolution, the LSF would be a Dirac $\delta$ function and the resulting MTF would have a constant value of 1. As for the LSF and the ESF, using an angled slit or edge to increase the sampling frequency allows to compute the presampled MTF.
+By definition, the amplitude of MTF is normalized in order to have $\operatorname{MTF}(0) = 1$, which can be achieved either by normalizing the LSF area to 1 or by dividing the resulting MTF by $\operatorname{MTF}(0)$.
 
-The usual metric used to determine the spatial resolution of a detector is related to the frequency $f_{10}$ for which the $\operatorname{MTF}(f_{10})$ decreases to 10\% of modulation. If the LSF can be described by a Gaussian curve $f_{10}$ can be related to the standard deviation of the curve, using that the Fourier transform of a Gaussian is still a Gaussian
+The MTF measures how the contrast is transfered as a function of the spatial frequency of the incoming signal. A high value of the MTF for higher frequencies means that the detector has high contrast, thus it can resolve small objects. For an ideal detector with infinite resolution the LSF is a Dirac $\delta$ function and the resulting MTF is a constant and equal to 1.
+
+As for the LSF and the ESF, using a tilted slit or edge to increase the sampling frequency enables to compute the presampled MTF \cite{samei1998}. The usual metric used to determine the spatial resolution of a detector is related to the frequency $f_{10}$ for which $\operatorname{MTF}(f_{10}) = 0.1$.
+
+If the LSF is described by a Gaussian curve $f_{10}$ can be related to its standard deviation. By considering that the Fourier transform of a Gaussian is still a Gaussian
 
 \begin{equation}
 \mathcal{F} \left( \frac{1}{\sqrt{2 \pi}\sigma} e^{-x^2/2\sigma^2 } \right) (f) = e^{-2 \pi^2 \sigma^2 f^2},
 \label{eq:mtf_gauss}
 \end{equation}
 and imposing that $\operatorname{MTF}(f_{10}) = 0.1$ it can be found that
+
 \begin{equation}
 \sigma = \sqrt{\frac{\ln 10}{2 \pi^2}} \frac{1}{f_{10}} \simeq \frac{1}{2.93 \cdot f_{10}}.
 \label{eq:mtf_sigma}
 \end{equation}
 
-It is possible to have cases where the LSF is not Gaussian. A simple example is to consider an ideal detector, without noise of any kind, composed by a grid of square pixels. If the detector does not have any method to reconstruct sub-pixel positions, the LSF can be represented by a constant function in the region occupied by the pixel, say from $-d/2$ and $d/2$ for a pixel of size $d$, and zero elsewhere. When calculating the MTF from this LSF, the result is
+In general the LSF is not Gaussian. A simple example is to consider an ideal detector without noise sources and composed by a grid of square pixels. If the detector is not capable of reconstructing sub-pixel positions the LSF can be represented by a constant function in the region occupied by the pixel and zero elsewhere. If the pixel has a width equal to $d$ and goes from $-d/2$ and $d/2$, the resulting MTF is \cite{med_imaging}
 
 \begin{equation}
 \operatorname{MTF}(f) = \frac{\sin (\pi d f)}{\pi df} = \operatorname{sinc}(df).
 \label{eq:mtf_square}
 \end{equation}
 
-When the MTF of a detector working as described above is described by Eq. \ref{eq:mtf_square}, it means that it has achieved the best spatial resolution possible. A similar discussion can also be made for hexagonal pixels to find the maximum theoretical resolution achievable by ASIX if no sub-pixel reconstruction algorithm would be employed, but all the signal would be assigned to the central pixel of the cluster. The two-dimensional $\operatorname{MTF}(f_x, f_y)$ of an hexagonal pixel has been calculated in \cite{barnard1991}, and for the directions orthogonal to the side and towards the vertex, considering a pixel with a pitch $p$ and with pointy-top orientation, they are equal to
+Eq. \ref{eq:mtf_square} describes the best spatial resolution achievable by a detector with square pixels and without sub-pixel reconstruction.
+
+Considering hexagonal instead of square pixels, it is possible to determine the intrinsic resolution achievable by ASIX assuming no sub-pixel reconstruction is employed and all the charge is assigned to the central pixel of the cluster.
+
+The two-dimensional $\operatorname{MTF}(f_x, f_y)$ of an hexagonal pixel has been calculated in \cite{barnard1991} and the projections along the axes orthogonal to the side (0 degrees) and towards the vertex (30 degrees) for an hexagon with pitch $p$ are equal to
 
 \begin{equation}
 \begin{split}
@@ -955,7 +974,9 @@ When the MTF of a detector working as described above is described by Eq. \ref{e
 \end{split}
 \end{equation}
 
-In Fig. \ref{fig:mtf_pixels}, where the comparison between the MTF of a square pixel and that of an hexagonal pixel with the same area is shown, is possible to see that the latter geometry has the best resolution between the two. This can be related to the highest degree of isotropy and symmetry of the hexagon, which is more similar to a circle than a square is. Even if this calculation is made for an ideal detector with no sources of noise or blurring, for the ASIX hexagonal geometry it can be interpreted as the worst case scenario resolution, as there is no sub-pixel reconstruction, which widely improves the performance.
+Fig. \ref{fig:mtf_pixels} shows the comparison between the MTF of a square pixel and that of an hexagonal pixel with the same area. It is possible to see that the hexagonal geometry has a slightly better resolution than the square. This can be related to the highest degree of isotropy and symmetry of an hexagon with respect to a square.
+
+Even if no noise sources have been considered for this estimate, it can be interpreted as a lower limit on the resolution of ASIX, as sub-pixel reconstruction algorithms using charge-sharing and diffusion models enable to improve the detector performance.
 
 \begin{figure}
     \centering
@@ -964,9 +985,17 @@ In Fig. \ref{fig:mtf_pixels}, where the comparison between the MTF of a square p
     \label{fig:mtf_pixels}
 \end{figure}
 
-A faster way to estimate the spatial resolution of a detector consists of using a line pair phantom, which is a plate with multiple sets of alternating slits with different widths and spatial frequencies, which are expressed as line pair or cycles per millimeter (lp/mm or cycles/mm). The phantom is made of an absorber material, usually lead, and when it's imaged the resolution can be estimated from the spatial frequency of the smallest set of slits that can be resolved. The only requirement for this method is to have a set of slits with a width smaller or comparable to the spatial resolution of the detector, but this may not be possible for high resolution detectors.
+An alternative and faster way to estimate the spatial resolution of a detector consists of using a line pair phantom, which is a plate with multiple sets of slits with different widths and spatial frequencies, which are expressed as line pair or cycles per millimeter (lp/mm or cycles/mm). The phantom is made of an high-$Z$ material, usually lead.
 
-Going back to the MTF calculation, in case the slit or the edge is tilted, for the reasons discussed above, it is first necessary to calculate the angle to then correctly reproject the LSF or the ESF. For the moment it can be assumed to be working with a slit image, but analyzing an edge image is essentially the same. To find the angle, the slit is the only reference in the image and its angle with respect to the detector $x$-axis has to be computed. The first step of the process is to detect the slit in the image, meaning that its edges have to be detected. To accomplish this task, the Canny edge detection algorithm \cite{canny1986} has been employed. This algorithm allows to detect the edges in an image, and returns a binary image of the same size where a value of 1 means that a pixel belongs to an edge and 0 if it does not. Before running this algorithm it is necessary to create an image binning the reconstructed positions along the slit, and this process requires to choose the bin size. Another important parameter to adjust is the width of the Gaussian filter applied by the algorithm to smooth the image. The bin size and the filter width have to be carefully chosen in order to not be influenced by the noise, that would mean detecting edges that do not correspond to the slit. The ideal filter width, which is expressed in pixels, should be of the same order of the slit width, as can be observed in Fig. \ref{fig:mtf_canny}.
+The resolution can be inferred from an image of the phantom by looking at which is the smallest set of slits that can be resolved. The only requirement to use this method is to have a set of slits with a frequency smaller or comparable to the spatial resolution of the detector, but this may not be possible for high resolution detectors.
+
+When using a tilted slit or edge to calculate the MTF, it is necessary to calculate the tilt angle to correctly project the LSF or ESF profile. The procedure to realign the image is described in the case of a slit, but it is the same for an edge.
+
+The angle is determined by the inclination of the slit with respect to the detector $x$-axis. The first step consists of detecting the slit edges in the image. This can be performed using the Canny edge detection algorithm \cite{canny1986}. This algorithm allows to detect the edges in an image and returns a binary image of the same size where a value of 1 means that a pixel is an edge and 0 if it is not.
+
+Before using this algorithm it is necessary to create an image by binning the reconstructed positions. The bin size can not be too large, otherwise the shape and orientation of the slit would be distorted.
+
+Another parameter to choose is the width of the Gaussian filter applied by the algorithm to smooth the image. This parameter can not be to small with respect to the slit width, otherwise quantization noise would lead to the detection of false edges. The ideal value should be of the order of the slit width. An example of how the filter width affects edge detection is shown in Fig. \ref{fig:mtf_canny}.
 
 \begin{figure}
     \centering
@@ -975,32 +1004,43 @@ Going back to the MTF calculation, in case the slit or the edge is tilted, for t
     \label{fig:mtf_canny}
 \end{figure}
 
-The second step of the process consists in calculating the angle from the detected edges, which are sets of straight lines. This can be performed with the use of the Hough transform \cite{hough1959, duda1972}, which is a technique used to detect parameterizable curves, such as lines. In this specific case, a line in the plane is represented by a set of two parameters $(\rho, \theta)$, which define the Hough space, where $\rho$ is the distance of the line from the origin of the axes and $\theta$ is the angle between the $x$-axis and the distance vector. Within this representation, each point $(x, y)$ on the line respects
+The second step of the process consists of calculating the angle from the detected edges, which are sets of straight lines. This can be performed with the use of the Hough transform \cite{hough1959, duda1972}, which is a technique used to detect parameterizable curves, such as lines.
+
+A line in the plane is represented by a set of two parameters $(\rho, \theta)$, which define the Hough space, where $\rho$ is the distance of the line from the origin of the axes and $\theta$ is the angle between the $x$-axis and the distance vector. Within this representation, each point $(x, y)$ on a straight line follows
 
 \begin{equation}
 \rho = x \cos \theta + y \sin \theta.
 \label{eq:hough}
 \end{equation}
 
-To find the lines, for each point tested, the algorithm scans a given range of $\theta$ values, and for each one evaluates Eq. \ref{eq:hough}. The results are accumulated in a two-dimensional histogram, named accumulator space, where for each point and angle value an entry is added at the calculated $(\rho, \theta)$. A straight line is detected when a peak is identified in the latter space, and the tilt angle can be calculated as $\theta_{peak} - \pi/2$. An example of the result of the Hough transform of a slit edge obtained with the Canny edge detection algorithm is shown in Fig. \ref{fig:mtf_hough}. During the analysis, if multiple lines are present and multiple peaks are produced by the Hough transform, only the highest one is considered to calculate the tilt angle.
+For each point of the edges, the algorithm scans a given range of $\theta$ values and for each one evaluates Eq. \ref{eq:hough}. The results are accumulated in a two-dimensional histogram, named accumulator space, where for each point and angle value an entry is added at the correspondent bin $(\rho, \theta)$.
+
+A straight line is detected when a peak is identified in the latter space, and the tilt angle can be calculated as $\theta_{peak} - \pi/2$. An example of the result of the Hough transform of the edges of a  slit is shown in Fig. \ref{fig:mtf_hough}. During the analysis, if multiple lines are present and multiple peaks are produced by the Hough transform, only the highest one is considered to calculate the tilt angle.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mtf_hough}
-    \caption{Accumulator space resulting from the Hough transform of the slit edge image from Fig. \ref{fig:mtf_canny}(e). The two nearly identical peaks that are visible correspond to the two long sides of the slits.}
+    \caption{Accumulator space resulting from the Hough transform of the slit edge image from Fig. \ref{fig:mtf_canny}(e). The two nearly identical peaks that are visible correspond to the two long edges of the slit.}
     \label{fig:mtf_hough}
 \end{figure}
 
-To calculate the presampled LSF, the slit image has to be rotated with the angle found with the Hough transform. Once it has been aligned, the presampled LSF is calculated projecting all the points on the short side of the slit and creating the histogram of the reconstructed positions. The bin size of this histogram must be smaller than the expected resolution of the detector, in order to not incur in aliasing effects, as stated by the Nyquist theorem, but large enough to not be sensitive to statistical fluctuations of the measured positions. A possible way to limit effects from statistical fluctuations and noise is to apply some smoothing algorithm on the LSF, but this should be performed with caution as, in frequency domain, the smoothing acts as a low-pass filter, with the possible consequence of underestimating the actual detector resolution.
+To calculate the presampled LSF, the slit image has to be rotated by the angle found with the Hough transform. Once it has been aligned, the presampled LSF is calculated projecting all the points on the short side of the slit and calculating the histogram of the reconstructed positions. The bin size of this histogram must be smaller than the expected resolution of the detector, in order to not incur in aliasing effects, as stated by the Nyquist theorem, but large enough to not be sensitive to noise.
 
-The presampled MTF is then obtained from Eq. \ref{eq:mtf} using a discrete fast Fourier transform algorithm.
+A possible way to limit distortions from noise is to apply some smoothing algorithm on the LSF, but remembering that in frequency domain a smoothing acts as a low-pass filter, with the possible consequence of underestimating the actual detector resolution.
+
+The presampled MTF is then calculated from the LSF using a discrete fast Fourier transform algorithm. The LSF and MTF calculated from the previous examples are shown in Fig. \ref{fig:slit_lsf_mtf}.
 
 In conclusion, the MTF represents the only available way to characterize the spatial resolution of ASIX, and this analysis can be performed both on real and simulated data, in order to verify the consistency between the difference of the various implemented reconstruction algorithm and also the consistency between data and simulations.
 
-\section{Energy reconstruction}
-\fix{Studiare quanta carica si perde in funzione della soglia, sia senza rumore che con rumore}
-The other important aspect of ASIX is the possibility to 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/mtf_lsf}
+	\includegraphics[width=0.49\linewidth]{figures/chapter4/position/mtf}
+    \caption{Line spread function (left panel) and modulation transfer function (right panel) calculated for the slit using the edges from Fig. \ref{fig:mtf_canny}(e) and the tilt angle from \ref{fig:mtf_hough}. The slit was simulated with a Gaussian profile with $\sigma = 5$ pix. The standard deviation estimated from an LSF fit is $\sigma_{\textrm{fit}} = 4.93 \pm 0.04$ pix, while from the MTF using Eq. \ref{eq:mtf_sigma} is $\sigma_{\operatorname{MTF}} = 4.7$ pix.}
+    \label{fig:slit_lsf_mtf}
+\end{figure}
 
+\section{Energy reconstruction}
 
 \subsection{Zero suppression}
 
@@ -1013,7 +1053,7 @@ The other important aspect of ASIX is the possibility to
 \section{Simulation and data comparison}
 
 \subsection{Experimental setup}
-\fix{dire che attualmente il nuovo ASIC è ancora in fase di sviluppo, quindi si utilizza XPOL III per effettuare le prove. Questo implica che il rumore del detector non è ancora quello di design ma piu alto, con conseguente degradazione di risoluzione energetica e spaziale. Ma comunque questo lavoro spiana la strada al nuovo ASIC, perchè nel momento in cui si raggiungeranno gli obiettivi di design si otterranno i risultati attesi. A questo punto poi bisogna parlare del setup per i dati raccolti con il test di huttner e per quelli con il target in oro.}
+\fix{dire che attualmente il nuovo ASIC è ancora in fase di sviluppo, quindi si utilizza XPOL III per effettuare le prove. Questo implica che il rumore del detector non è ancora quello di design ma piu alto, con conseguente degradazione di risoluzione energetica e spaziale. A questo punto poi bisogna parlare del setup per i dati raccolti con il test di huttner e per quelli con il target in oro.}
 
 
 
