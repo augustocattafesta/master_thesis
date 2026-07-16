@@ -31,18 +31,39 @@ plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter2/photoabs_eff.pdf", dpi=300, bbox_inches="tight")
 
-e = np.linspace(1e3, 3e5, 1000)
+e = np.logspace(3, 5.5, 1000)
 si_mu = xraydb.material_mu("Si", e, density=2.33)
 # Soluzione stabile che non rompe Python ad alte energie o grandi spessori
 arg_erfi = np.sqrt(D_semi * si_mu)
 exp_neg = np.exp(-D_semi * si_mu)
+mean_z_si = (1 / (1 - exp_neg)) * (np.sqrt(D_semi) - (np.sqrt(np.pi / si_mu) / 2) * exp_neg * erfi(arg_erfi))
 
-mean_z = (1 / (1 - exp_neg)) * (np.sqrt(D_semi) - (np.sqrt(np.pi / si_mu) / 2) * exp_neg * erfi(arg_erfi))
+cdte_mu = xraydb.material_mu("CdTe", e, density=5.85)
+D_cdte = 0.075
+
+# Argomento per la funzione di Dawson: x = sqrt(mu * D)
+x = np.sqrt(D_cdte * cdte_mu)
+from scipy.special import dawsn, expm1
+# Il termine dawsn(x) sostituisce in toto l'uso combinato di exp e erfi
+numeratore = np.sqrt(D_cdte) - (dawsn(x) / np.sqrt(cdte_mu))
+
+# expm1(x) calcola exp(x) - 1 in modo stabile per x vicini a zero. 
+# Quindi 1 - exp(-x) diventa -expm1(-x)
+denominatore = -expm1(-D_cdte * cdte_mu)
+
+mean_z_cdte = numeratore / denominatore
+
 plt.figure()
-plt.plot(e*1e-3, mean_z * 40 /50, "-k")
+plt.plot(e*1e-3, mean_z_si * 50, "-k", label=r"300 $\mu$m Si")
+plt.plot(e*1e-3, mean_z_cdte * 50, "--k", label=r"750 $\mu$m CdTe")
+plt.xscale("log")
 plt.xlabel("Energy [keV]")
-plt.ylabel("Mean depth of absorption")
+plt.ylabel(r"Mean diffusion sigma $\langle \sigma \rangle$ [$\mu$m]")
+plt.xlim(1, 200)
+plt.legend(frameon=False)
 plt.tight_layout()
+
+plt.savefig(FIGURES_DIR / "chapter4/design/mean_diffusion.pdf", dpi=300, bbox_inches="tight")
 
 
 
