@@ -1217,7 +1217,7 @@ When using the suppression algorithm, different thresholds can be adopted and it
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/spectrum_example}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/zsup_dependence}
-    \caption{Example of Au spectrum obtained from an X-ray tube  operated at 25 kV (left panel). The two dominant lines are gold fluorescence lines $L\alpha$ at 9.7 keV and $L\beta$ at 11.5 keV. The spectrum is obatined with a zero-suppression threshold of 2.5$\sigma$ of noise and shows all the events. The dependence of energy resolution on the threshold (right panel) shows that for laboratory data the best resolution is achieved at around 2.5--3.0$\sigma$, while for Monte Carlo simulations it is achieved with lower threshold values.}
+    \caption{Example of Au spectrum obtained from an X-ray tube  operated at 25 kV (left panel). The two dominant lines are gold fluorescence lines $L\alpha$ at 9.7 keV and $L\beta$ at 11.5 keV. The spectrum is obatined with a zero-suppression threshold of 2.5$\sigma$ of noise and shows all the events. The dependence of energy resolution on the threshold (right panel) shows that for laboratory data the best resolution is achieved at around 2.5--3.0$\sigma$, while for Monte Carlo simulations it is achieved with lower threshold values. The two dashed lines with the respective error bands show the energy resolution estimate with the MLE algorithm, which is indepenent from the suppression threshold.}
     \label{fig:spectrum_fit}
 \end{figure}
 
@@ -1229,8 +1229,17 @@ Using the distributions obtained from the calibration products it is possible to
 
 The energy reconstruction is performed with the same thresholds used for laboratory data, and the energy resolution is estimated by fitting the spectrum with the same fit model used in the previous case.
 
-The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to see that in the case of Monte Carlo simulations the best energy resolution is achieved with the smallest threshold and it becomes worse with higher thresholds. 
+The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to see that in the case of Monte Carlo simulations the best energy resolution is achieved with the smallest threshold and it becomes worse with higher thresholds.
 
+Both laboratory and simulated data sets have been analzyed using the MLE algorithm as well. When using this method, which is independent from the choice of a threshold, for laboratory data it is possible to observe that the estimated energy resolution is a bit worse than what is achievable with the suppression method. However, the results are good enough to not exclude the use of this method.
+
+The problem of this method, as already discussed for position reconstruction, is the necessity of calibrating the algorithm from Monte Carlo simulations. If the simulations differ a bit, it is possible that the final results are worse than what could be achieved.
+
+This is clear when analyzing the simulations, where an energy resolution of 12.3\% is achieved, better than all the suppression thresholds tested. This shows that when the Monte Carlo simulations are refined, the MLE reconstruction can perform better than the other method.
+
+With the current chips, the noise is dominated by the electronic component. Using the fit results the total noise standard deviation of each pixel is estimated to be around 400 eV, while the Fano limit is just about 60 eV. This means that the current electronic noise is about four or five times larger than the design goal.  
+
+This means that once the final ASIC is completed, the energy resolution will be approximately a factor 4 or 5 smaller then the current one, enabling to reach a relative energy resolution of about 3\% at 10 keV, or about 300 eV (FWHM).
 
 
 
