@@ -177,6 +177,7 @@ The simulation does not take into account some physical effects, such as the dis
 The second effect depends on energy and the sensor material, as fluorescence yield depends on the involved shell and on the atomic number $Z$. For silicon the fluorescence yield is smaller than 5\% for K-shell and almost 0\% for L-shell, while for cadmium and tellurium is between 83-88\% for K-shell and about 5-7\% for L-shell. If the photon is produced, given that the emission angle distribution is isotropic, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photo-electron can be produced even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV. \fix{All of this could be solved implementing the abosoprtion simulation with common physical simulation software.} Another effect which is not taken into account is pixel crosstalk, which is responsible for charge sharing between pixels. A simple way to partially solve this is to include this effect into the charge diffusion process, increasing the diffusion parameter calculated from Eq. \ref{eq:diff_sigma_dist}. The correct value of this parameter can be chosen comparing the cluster size distribution between laboratory data and simulation until they match.
 
 \subsection{Analysis}
+\label{sec:analysis}
 Simulated and laboratory data can then be analyzed to extract the relevant information. Raw signal data consists of a set of PHA values, one for each pixel inside the region of interest defined by the readout logic. Raw PHA values need to be corrected for two contributions, the pedestal and pixel equalization, to get the correct PHA value for each pixel. \fix{As mentioned in the previous section}, the pedestal subtraction may be performed offline, so a map of it is necessary to process all the pixels. Pixel equalization, instead, takes into account possible variations between pixels that may be introduced by the electronics \fix{(These may be corrected directly from the chip,ask)} and spatial inhomogeneities in the sensor, and a map is necessary for this correction too. Specific datasets are required to produce these maps, and the process to produce them is discussed in the Chap. \ref{sec:calibration}.
 
 The corrected PHA values can be used to analyze the event and reconstruct photon properties, such as energy and impact position. According to the algorithm used for the reconstruction, an additional processing can be performed. In some cases all the seven PHA values are necessary, while in others a further reduction of the pixels can be made. Particularly, as shown in Tab. \ref{tab:charge_distr}, about 99\% of all the charge is collected by the three pixels with most signal. This information can be used to create a cluster containing only pixels that have a high probability of having collected signal. Specifically, the first step is to choose a zero suppression threshold, expressed in terms of noise standard deviation, to suppress all the pixels that are dominated by noise. Given that each pixel can have a different noise distribution, a map of this quantity is also necessary. The second step uses a geometrical constraint, imposing that all the pixels above threshold must be adjacent. The choice of which pixels are suppressed is made by starting from the outer pixel with the highest signal, and then going into decreasing order: if the following pixel is not its neighbour it is suppressed. This is done until a maximum size of three neighbors pixels above threshold, for the reasons stated above. The consequence of this suppression is that the cluster size is constrained to be between one and three.
@@ -1070,27 +1071,74 @@ In conclusion, the MTF represents the only available way to characterize the spa
     \label{fig:slit_lsf_mtf}
 \end{figure}
 
+
 \section{Energy reconstruction}
+Using the calibration products it is possible to estimate the photon energy for each event and calculating the spectrum of a source. Depending on the calibration products, the energy can be expressed as ADC counts or eV, but the difference is only a scale factor, thus it is not relevant.
 
-\subsection{Zero suppression}
+As for position reconstruction, there are different algorthms that can be employed in the energy reconstruction. For ASIX, two algorithms have been developed and they will be explained in this section.
+
+Contrary to the position, to estimate the energy resolution the Monte Carlo truth is not necessary, thus the performances of these algorithms will be shown in Chap. \ref{sec:results}, where laboratory data will be analyzed and the results are compared to simulations. The metric to determine the goodness of these algorithms is the FWHM of a given spectral line.
+
+\subsection{Suppression algorithm}
+The first energy reconstruction method is based on the suppression algorithm described in Chap. \ref{sec:analysis}. This algorithm consists of suppressing some of the pixels in an event by using a charge and a geometrical constraint, in order to minimize the probability of including pixels with charge not produced by the photon.
+
+The charge constraint consists of selecting a threshold value, expressed in terms of noise $\sigma$ for each pixel. If a pixel has an amount of charge smaller than the threshold it is suppressed, thus its charge is put to zero. The geometrical constraint follows from the charge diffusion model and it consists of requiring that all the pixels that are above the threshold are adjacent. Furthermore, given the small charge diffusion width, if more than three pixels are above threshold only the three adjacent pixels with the most charge are kept.
+
+This is the same algorithm that is employed to determine an event cluster size and that is applied before position reconstruction when using charge barycentering and $\eta$ algorithms.
+
+After suppressing the pixels, the photon energy is calculated by summing the carge collected by all the unsuppressed pixels.
+
+This method has a free parameter that can be varied, which is the value of the zero-suppression threshold. The final energy resolution depends on this parameter, and it is important to find the best value. This dependence will be shown on laboratory data in the next section.
+
+\subsection{Likelihood estimator}
+The second method to estimate the photon energy is to use the likelihood estimator introduced in Chap. \ref{subsec:mle} for the position reconstruction. The likelihood which describes the charge diffusion after a photon hits the sensor depends both on the position and its energy, as shown in  Eq. \ref{eq:nll_multivariate}, thus the minimization performed to find the best-fit position enables to reconstruct the photon energy as well.
+
+This algorithm has been already explained in detail in the previous section, and contrary to the suppression method it does not require to arbitrarily choose a threshold because the likelihood weights the pixel charge using the best-fit position found during the minimization.
+
+\section{Results}
+\label{sec:results}
+To gauge the above discussed methods performances in position and energy reconstruction, thus the imaging and spectral resolution of the detector, different data sets have been used in order to measure each of these properties.
+
+These data sets have been collected in laboratory using ASIX prototypes. As already mentioned, at the moment the prototypes are using the XPOL-III ASIC, which differs in various aspects with respect to the design ASIC. The main difference is in the electronic noise, which at the moment is nearly four or five times larger than the design goal.
+
+Indeed, this represents the major improvement in the design, enabling to achieve a very high resolution both for imaging and spectroscopy, given that at the moment the total noise is largely dominated by the electronic noise. However, even in a high-noise regime it is possible to verify the goodness of the developed algorithms and how the choice of the algorithm affects the resolution.
+
+Another important thing that can be performed is to check how good the Monte Carlo simulations are in simulating the detector. Indeed, simulations are important not only to understand the limits of the detector depending on the construction properties, but are essential for the calibration of some of the reconstruction methods.
+
+In this section the experimental setups employed to collect data to estimate the imaging and spectral resolution of ASIX are described. Furthermore, simulations to match the experimental setups are made in order to calibrate the different reconstruction methods and to compare the final resolution results.
+
+ 
+\subsection{Imaging resolution}
+To estimate the detector imaging resolution a Huttner phantom similar to the one shown in Fig. \ref{fig:huttner} has been used. The phantom is made of a 50 $\mu$m thick lead slab with multiple sets of slits with different spatial frequencies, ranging from a minimum of 0.5 lp/mm up to a maximum of 10 lp/mm.
+
+The phantom portion with the highest frequencies is placed above the detector and it is irradiated with X-rays generated by an X-ray tube which is operated at 10 kV with a gold target \cite{minuti2025}. The X-ray tube is located 1 m from the phantom, in order to have a collimated photon beam. Operating the tube at a voltage of 10 kV with a gold target is not enough to observe fluorescence lines, thus the resulting spectrum is mainly due to Bremsstrahlung emission from accelerated electrons. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/results/huttner}
+%	\includegraphics[width=0.49\linewidth]{figures/chapter4/results/recon_slits}
+    \caption{}
+    \label{fig:huttner}
+\end{figure}
+
+The tested prototype is the one with the silicon sensor, which have pixels with 50 $\mu$m pitch. Given that the expected resolution is smaller than the pixel pitch, the avalaible Hutnner phantom does not have a frequency large enough to be used for a visual estimate of the resolution. The solution is to use the edge of a large slit to calculate the ESF, from which the MTF can then be calculated.
+
+Before the event reconstruction, the detector calibration is performed to estimate the noise level of the pixels. Given that for XPOL-III the pedestal subtraction is performed directly on the chip, the third noise calibration method described in \ref{sec:calibration} is adopted. Then, the normalized pixel gain is calibrated. The noise and normalized gain distributions are shown in Fig. \ref{fig:results_cal}.
+
+Once the noise and gain of the detector are characterized, a simulated data set with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods.
+
+After that, the laboratory data can be analyzed and the event positions can be estimated with the different alogirhtms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits.
+
+To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
+
+\fix{guardare analisi e scrivere i risultati}
 
 
+\subsection{Spectral resolution}
+
+\fix{A questo punto poi bisogna parlare del setup per i dati raccolti con il target in oro.}
 
 
-
-
-
-\section{Simulation and data comparison}
-
-\subsection{Experimental setup}
-\fix{dire che attualmente il nuovo ASIC è ancora in fase di sviluppo, quindi si utilizza XPOL III per effettuare le prove. Questo implica che il rumore del detector non è ancora quello di design ma piu alto, con conseguente degradazione di risoluzione energetica e spaziale. A questo punto poi bisogna parlare del setup per i dati raccolti con il test di huttner e per quelli con il target in oro.}
-
-
-
-\subsection{Simulated data}
-
-
-\subsection{Results}
 
 
 
