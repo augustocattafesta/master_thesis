@@ -743,7 +743,7 @@ A similar behaviour can be observed for $\eta_-$ projecting onto the axis perpen
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_uncorrected_hist}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_hist}
     \caption{$\eta_+$ distribution without weigthing the entries to correct for non-uniformity (left panel) and distribution with the correction applied (right panel). $\eta_-$ distribution is not shown, but the distorsion in the uncorrected distribution is of a similar magnitude.}
-    \label{fig:3pix_scatter}
+    \label{fig:3pix_rad_eta}
 \end{figure}
 
 After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions with the same iterative approach used for two-pixel events, the cumulative distributions can be calculated. The cumulative distributions are shown in Fig. \ref{fig:eta_3pix}.
@@ -760,15 +760,38 @@ The $\eta$ algorithm presented for three-pixel events could also be generalized 
 
 Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
 
-After analyzing the same dataset as the other algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. \fix{Discussione dei risultati. Bisogna implementarlo e testarlo. Una prima veloce implementazione mostra che questo metodo è comparabile alla eta con calibrazione da monte carlo. Bisogna capire il confronto con l'MLE. Una cosa interessante da vedere è quanto peggiora l'eta Monte Carlo con una sigma diversa dal MC}
+After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
 
 \begin{figure}
     \centering
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_dx}
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_dy}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_unmodeled_dx}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_unmodeled_dy}
     \caption{Residuals distributions of the eta algorithm for the $x$ and $y$ directions, calculated as the difference between the reconstructed and the Monte Carlo truth $x$ and $y$ components. The events are separated by cluster size, with each color representing a specific cluster size. The histograms are stacked on each other. The simulation is made with a 8 keV monochromatic source, 20 ENC of noise and ratio between the diffused charge cloud sigma and the pitch of 15\%.}
     \label{fig:eta_dx_dy}
 \end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/eta_unmodeled_eef}
+    \caption{Encircled energy fraction of the $\eta$ reconstruction algorithm for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
+    \label{fig:eta_unmodeled_eef}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{c cccc}
+$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+\midrule
+12.2 & 0.09 & 0.21 \\
+13.7 & 0.06 & 0.17 \\
+15.2 & 0.04 & 0.13 \\
+16.8 & 0.03 & 0.11 \\
+18.3 & 0.03 & 0.09 \\
+\bottomrule
+\end{tabular}
+\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with the $\eta$ algorithm reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_unmodeled_eef}}
+\label{tab:eef_eta_unmodeled}
+\end{table}
 
 The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. 
 
@@ -899,7 +922,7 @@ $\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
 \label{tab:eta_modeled_eef}
 \end{table}
 
-
+In conclusion, both the unmodeled and simulation modeled $\eta$ algorithms enable to achieve an optimal spatial resolution. The unmodeled algorithm is the perfect 
 
 \subsection{Modulation transfer function}
 \label{subsec:mtf}
@@ -1115,9 +1138,9 @@ The phantom portion with the highest frequencies is placed above the detector an
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/results/huttner}
-%	\includegraphics[width=0.49\linewidth]{figures/chapter4/results/recon_slits}
-    \caption{}
+    \includegraphics[width=0.4\linewidth]{figures/chapter4/results/huttner}
+	\includegraphics[width=0.59\linewidth]{figures/chapter4/results/slits_hist}
+    \caption{The left panel shows an example of Huttner phantom similar to the one employed in the experimental setup. The right panel shows the phantom reconstructed image using the centroid algorithm. It is possible to observe differnent slit sets with various frequencies.}
     \label{fig:huttner}
 \end{figure}
 
@@ -1125,13 +1148,53 @@ The tested prototype is the one with the silicon sensor, which have pixels with 
 
 Before the event reconstruction, the detector calibration is performed to estimate the noise level of the pixels. Given that for XPOL-III the pedestal subtraction is performed directly on the chip, the third noise calibration method described in \ref{sec:calibration} is adopted. Then, the normalized pixel gain is calibrated. The noise and normalized gain distributions are shown in Fig. \ref{fig:results_cal}.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/results/noise_hist}
+	\includegraphics[width=0.49\linewidth]{figures/chapter4/results/equalization_hist}
+    \caption{Calibration products obtained from the Huttner phantom laboratory data set. The noise distribution (left panel) has a mean of about 8 ADC counts and a standard deviation of 0.9 ADC counts. The normalized gain has a variation of 10\%.}
+    \label{fig:results_cal}
+\end{figure}
+
 Once the noise and gain of the detector are characterized, a simulated data set with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods.
 
 After that, the laboratory data can be analyzed and the event positions can be estimated with the different alogirhtms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits.
 
 To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
 
-\fix{recuperare analisi e commentare i risultati, mostrare anche confronto Monte Carlo}
+A new Monte Carlo data set with a slit of the same size of the one analyzed in the laboratory data is simulated to compare the obtained results with those expected from simulations. The data set is generated using the same distribution of noise and normalized gain.
+
+After the data set is generated, it is analyzed with the same method used for laboratory data. The MTFs obtained with the different algorithms for laboratory data and simulated data are shown in Fig. \ref{fig:results_mtf} and the values for which MTF is 10\% are reported in Tab. \ref{tab:results_mtf}. 
+
+From the analysis of laboratory data, the improvement in the spatial resolution obtained using more complex algorithms than charge barycentering is not as big as expected. Indeed, from Monte Carlo simulations the resolution achieved with the best algorithm, the $\eta$ unmodeled, is about 30\% better than charge barycentering. 
+
+This behavior can be associated to different factors. An example is the possibility of having defects in the Huttner phantom slit edges. Indeed, the Huttner phantom is designed to have a quick estimate of the resolution and is not ideal to carry on a detailed analysis with the slanted edge. These defects can transmiss unwanted photons, thus producing a degraded edge image.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/results/slits_mtf}
+    \caption{Modulation transfer function obtained with different reconstruction methods for laboratory data and simulated data. Solid lines represent MTF calculated from laboratory data. Dashed lines represent MTF calculated from simulated data}
+    \label{fig:results_mtf}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{X cc}
+Reconstruction Algorithm & MTF@10\% Lab. data [lp/mm] & MTF@10\% Sim. data [lp/mm]\\
+\midrule
+Charge barycentering & 47.1 & 53.9 \\
+MLE                  & 51.7 & 68.0 \\
+Unmodeled $\eta$     & 51.9 & 71.0 \\
+Modeled $\eta$       & 51.7 & 67.4 \\
+\bottomrule
+\end{tabularx}
+\caption{MTF@10\% for different reconstruction algorithm calculated for laboratory data and simulated data.}
+\label{tab:results_mtf}
+\end{table}
+
+
+
+
 
 
 \subsection{Spectral resolution}
