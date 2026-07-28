@@ -11,5 +11,8 @@ all:
 draft:
 	pdflatex -interaction=nonstopmode "\PassOptionsToPackage{draft}{graphicx}\input{$(MAIN).tex}"
 
+fast:
+	pdflatex -interaction=nonstopmode $(MAIN).tex
+
 clean:
 	rm -f *.aux *.log *.toc *.blg *.bbl *.bcf *.out *.run.xml *.synctex.gz $(MAIN).pdf
