@@ -1,9 +1,57 @@
 \chapter{$\mu$GPD}
 \label{chap:chapter5}
-\cite{sgro2026}
+
+In the context of X-ray polarimetry, the current Gas Pixel Detectors that are employed on board of IXPE do not match the requirements of the next generation of X-ray polarimeters, such as eXTP. The strictest requirements that have to be satisfied concern the ability to detect photons at a much higher rate than IXPE and to improve the detector stability over time.
+
+The current GPDs employ a finely pixelated ASIC to reconstruct the two-dimensional photoelectron track produced by the absorption of a X-ray photon. This is at the basis of how a photoelectric polarimeter works, and thanks to 50 $\mu$m wide pixels a GPD can perform it with good accuracy, which is translated into a high polarization sensitivity.
+
+As mentioned in Chap. \ref{chap:chapter3}, the main limitations of a GPD are the residual non-uniformities in the azimuthal response, which lead to the so-called spurious modulation, and rate-dependent gain variations. Both these problems can be attributed to the multiplication element of the GPD, the GEM.
+
+The spurious modulation is caused by the manufacturing process of the GEM, where small shape variations between the holes induce a position-dependent systematic effect which is difficult to characterize and correct.
+
+On the other hand, rate-dependent gain variations are attributed to the large dielectric surface inside a GEM hole, which leads to the trapping of part of the charge produced during the avalanche. The consequence of this dielectric charging phenomenon is a change in the configuration of the electric field inside the hole, which results in the decrease of the gain factor.
+
+If the detector is constantly exposed to radiation, charges accumulate with time and the gain keeps varying until a saturation level that depends on the event rate, or more precisely on the incoming energy flux. This means that when switching observations between sources with different fluxes the gain is not stable until a new equilibrium level.
+
+A new type of multiplication stage is under development to replace the GEM and overcome these limitations. The idea behind $\mu$GPD \cite{sgro2026} is to use a micro-gap-like \cite{angelini1993} structure built directly on top of the ASIC.
 
 \section{Detector design}
 
+$mu$GPD represents one of the possible successors of the current GPD generation. The basic working principles remain the same, that is a photoelectric polarimeter which employs a gas active volume to absorb X-ray photons and produce a photoelectron, which is emitted in a direction that depends on the photon polarization. The photoelectron track produced by primary ionization is used to measure the emission angle, and for this purpose the charges are multiplied and subsequently read by an ASIC which acts as collection anode.
 
-\section{Energy resolution}
+The fundamental difference is in the multiplication stage, which in $\mu$GPD consists of structures deposited directly on top of the ASIC. A comparison between the current and one of the proposed designs is shown in Fig. \ref{fig:mugpd}.
+
+The design and the idea behind these structures are similar to micro-gap chambers, which are based on two metal layers separated by a thin isolation layer. The upper-most layer is segmented in one-dimensional or two-dimensional structures only a few $\mu$m large an acts as the anode, while the bottom layer is usually a plane and acts as the catode
+
+Applying a potential difference between the two electrodes generates a strong electric field in a small volume just above the anode. The primary ionizations electrons are drifted toward the anode, where they are accelerating by the electric field and produce an avalanche. The electrons are collected by the anode, while the ions are collected by the bottom layer cathode. An example of the avalanche process is shown in Fig. \ref{fig:avalanche}.
+
+This design is a good candidate to solve the issues of the current generation of GPD. First, the deposition of the dielectric and the anode on top of the ASIC is made with photolitographic techniques, which allow to achieve sub-micron precision in the structure manufacturing. This way, gain non-uniformities across the sensor are strongly reduced. Furthermore, the surface of exposed dielectric is small and the amount of charge that can be accumulated is reduced, improving gain stability.
+
+
+
+
+
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter5/mugpd}
+    \caption{Comparison between the current GPD configuration (left panel) and the new proposed configuration with a hexagonal two-dimensional multiplication structure (right). X-rays are absorbed by the active gas volume and emit a photoelectron, which drifts toward the electron multiplier structure. In both cases the track shape is preserved by the multiplication structure. Image taken from \cite{sgro2026}.}
+    \label{fig:mugpd}
+\end{figure}
+
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter5/avalanche}
+    \caption{Schematic representation of how a micro-gap works. The avalanche is produced due to the strong electric field on top of the anode when a primary ionization electron is drifted toward it. Image taken from \cite{sgro2026}.}
+    \label{fig:avalanche}
+\end{figure}
+
+
+
+
+
+
+
+\section{Testing}
 
