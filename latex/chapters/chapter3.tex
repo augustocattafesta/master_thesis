@@ -8,7 +8,7 @@
     \label{fig:casa_combined_image}
 \end{figure}
 
-Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of doing imaging, spectroscopy and timing measurements as well. An demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the Cassiopeia A (Cas A) supernova remnant, the first official science target observed by IXPE after its commissioning. IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
+Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of performing imaging, spectroscopy and timing measurements. A demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the Cassiopeia A (Cas A) supernova remnant, the first official science target observed by IXPE after its commissioning. IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
 
 The large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD) \cite{baldini2021}, the detectors used on board of IXPE. GPD use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source on a statistical basis, by studying the distribution of the emission angle measured for all the events.
 
@@ -22,12 +22,12 @@ IXPE consists of three identical and independent X-ray telescopes. Using three i
 
 Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. To fit inside the launch vehicle fairing while maintaining this focal length, IXPE uses a deployable boom that was extended once in orbit. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV.
 
-A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information.
+A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information. Additionally, each DU is equipped with onboard calibration sources (such as $^{55}\text{Fe}$) that can be exposed to the detector during flight. These sources are used to perform periodic calibrations and continuously monitor detector performance, such as gain variations, energy resolution, and systematic effects over time.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe}
-    \caption{Schematic of the IXPE Observatory. Photons enter through the three Mirror Module Assemblies and are collcted by the Detector Units, where GPDs are located. Images courtesy of NASA.}
+    \caption{Schematic of the IXPE Observatory. Photons enter through the three Mirror Module Assemblies and are collected by the Detector Units, where GPDs are located. Images courtesy of NASA.}
     \label{fig:ixpe}
 \end{figure}
 
@@ -37,7 +37,7 @@ The Gas Pixel Detector (GPD) represents an important innovation for MicroPattern
 
 To solve this problem, the GPD puts the readout electronics directly inside the anode of the detector. This is done using a custom CMOS VLSI Application-Specific Integrated Circuit (ASIC). The top metal layer of the chip forms a grid of small hexagonal pixels that act directly as the charge collecting anode. Below each pixel, the silicon layers contain a complete electronic chain. This design allows gas detectors to have high spatial resolution and integration similar to solid-state detectors, while keeping the noise very low.
 
-The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon (Eq. \ref{eq:polarization_photo}). Photons pass through a thin beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the 2D shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
+The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon, as described by Eq. \ref{eq:polarization_photo}. Photons pass through a 50 $\mu$m thick beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the 2D shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
 
 By studying the 2D charge distribution of these tracks, the GPD can reconstruct the photon absorption point to improve imaging, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
 
@@ -59,27 +59,28 @@ DME therefore represents a good compromise to satisfy the design requirements. F
 
 A final important property of DME is that its transverse diffusion coefficient is low, about 68 $\mu$m cm$^{-\frac{1}{2}}$ with an electric field of 2 kV/cm, much lower than other typical gas mixtures (see Fig. \ref{fig:diffusion} for some examples), enabling to limit the track blurring, which represents a limiting factor in the reconstruction of the photoelectron emission direction.
 
-\subsection{The GEM}
-The GEM \cite{sauli1997} represents the amplification stage of the GPD. A GEM usually consists of a 50 $\mu$m thick Kapton foil with a copper coating on both sides. The GEM is then etched to create holes, which can be tens of micrometers wide. A voltage difference is applied to the copper coatings on the two opposite faces of the GEM to generate a strong electric field inside the holes, as shown in Fig. \ref{fig:gem}.
-
-\begin{figure}
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/gem_field}
     \includegraphics[width=0.4\linewidth]{figures/chapter3/gem}
-    \caption{Electric field produced by GEM holes (left panel) when applying a voltage difference between the two copper electrodes (taken from \cite{kolanosky2020}). Photograph of a GPD GEM (right panel), with the darker region representing the active area of the GEM (taken from \cite{baldini2021}).}
+    \caption{Electric field produced by GEM holes (left panel) when applying a voltage difference between the two copper electrodes. Photograph of a GPD GEM (right panel), with the darker region representing the active area of the GEM. Images taken from \cite{kolanoski2020, baldini2021}.}
     \label{fig:gem}
 \end{figure}
 
-The GEM employed inside the GPD is made of liquid crystal polymers (LPC) instead of Kapton, and holes have diameter of 30 $\mu$m. The hole pattern follows a hexagonal grid which matches the ASIC pixel pattern. The GPD GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the production process, which includes a step where the holes inside the LPC are made through laser drilling. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
+
+\subsection{The GEM}
+The GEM \cite{sauli1997} represents the amplification stage of the GPD. A GEM usually consists of a 50 $\mu$m thick Kapton foil with a copper coating on both sides. The GEM is then etched to create holes, which can be tens of micrometers wide. A voltage difference is applied to the copper coatings on the two opposite faces of the GEM to generate a strong electric field inside the holes, as shown in Fig. \ref{fig:gem}.
+
+The GEM employed inside the GPD is made of liquid crystal polymers (LCP) instead of Kapton, and holes have diameter of 30 $\mu$m. The hole pattern follows a hexagonal grid which matches the ASIC pixel pattern. The GPD GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the production process, which includes a step where the holes inside the LPC are made through laser drilling. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
 
 The production process of the GEM directly affects the GPD performances. In particular, it introduces spatially dependent spurious modulations, as shown in Fig. \ref{fig:spurious_mod}. The real cause behind this systematic effect is not known, but one hypothesis is that GEM holes pitch can very along one direction.
 
-In principle this systematic effect could be corrected by taking multiple acquisitions similar to that of Fig. \ref{fig:spurios_mod} by varying the source energy and for each GPD. However, the statistical accuracy required to correct this effect would have required to spend a prohibitive amount of time acquiring data for each detector. Instead of applying a direct correction, the solution adopted to mitigate this effect consists of exploiting the observatory dithering.
+In principle this systematic effect could be corrected by taking multiple acquisitions similar to that of Fig. \ref{fig:spurious_mod} by varying the source energy and for each GPD. However, the statistical accuracy required to correct this effect would have required to spend a prohibitive amount of time acquiring data for each detector. Instead of applying a direct correction, the solution adopted to mitigate this effect consists of exploiting the observatory dithering.
 
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/spurious_mod}
-    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurios modulation. Image taken from \cite{baldini2021}.}
+    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
     \label{fig:spurious_mod}
 \end{figure}
 
@@ -91,23 +92,23 @@ This charging effect is reversible because the charge trapping on the dielectric
 
 In general charging and discharging can be described as rate-dependent, and an example of these processes at play for GPD is shown in Fig. \ref{fig:rate_gain}.
 
-\begin{figure}
+These gain variations can be modeled using phenomenological models and can be applied to correct observations. However, limiting the charging and reducing the gain variations amplitude can improve the detector sensitivity to polarization.
+
+Reducing systematic effects, such as spurious modulation and gain variations, which have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative which is being developed, which aims on reducing these effects, will be presented in Chap. \ref{chap:chapter5}.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/rate_gain}
     \caption{Charging and discharging effects as a function of time for GPD. The different colors data points represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes almost 10\% of gain decrease. Then, the gain gradually recovers when using lower flux sources. Image taken from \cite{baldini2021}.}
     \label{fig:rate_gain}
 \end{figure}
 
-These gain variations can be modeled using phenomenological models and can be applied to correct observations. However, limiting the charging and reducing the gain variations amplitude can improve the detector sensitivity to polarization.
-
-Reducing systematic effects, such as spurious modulation and gain variations, which have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative which is being developed, which aims on reducing these effects, will be presented in Chap. \ref{chap:chapter5}.
-
-\subsection{The readout ASIC: XPOL-I}
+\subsection{XPOL-I}
 The GPD ASIC, named XPOL-I, which is the first generation of the XPOL familiy, is responsible for the collection of charges produced by the GEM during the multiplication stage, acting as the readout anode.
 
 The chip is organized as a matrix of \num{105600} hexagonal pixels, with 300 columns and 352 rows, with a horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m, as shown in Fig. \ref{fig:gpd_layout}. This is the layout that was replicated on the GEM in order to align each hole to the correspondent pixel.
 
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd_layout}
     \caption{Geometrical layout of the readout XPOL-I ASIC. The pixels have a hexagonal shape, with horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m. The total active area of the chip is $15 \times 15$ mm$^2$. The inset shows the morphology of a trigger mini-cluster. Image taken from \cite{baldini2021}.}
