@@ -1,29 +1,46 @@
 \chapter{The heritage of IXPE}
 \label{chap:chapter3}
 
-\fix{descrivere un po meglio il concetto di GPD dagli articoli di ronaldo e parlare un po piu di IXPE.}
-
-Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of doing imaging, spectroscopy and timing measurements as well. IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
-
-This large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD) \cite{baldini2021}, the class of detectors used on board of IXPE. GPD use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source by studying the distribution of events as a function of the emission angle.
-
-As of 2026, IXPE is still carrying on observational campaigns, even though the nominal lifetime is only two years. In five years of operations IXPE has observed and measured the polarization of about 100 sources. 
-
-IXPE consists of three identical and independent X-ray telescopes. Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV.
-
 \begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter3/casa_combined_image}
+    \caption{Composite X-ray (Chandra, blue) and optical (Hubble, gold) image of the Cassiopeia A (Cas A) supernova remnant, overlaid with IXPE magnetic field direction measurements. The white and green segments indicate the reconstructed magnetic field orientation across different regions of the remnant, with green line segments highlighting regions with higher statistical significance. Credits to NASA/CXC/SAO and NASA/MSFC/J. Vink et al.}
+    \label{fig:casa_combined_image}
+\end{figure}
+
+Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of doing imaging, spectroscopy and timing measurements as well. An demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the Cassiopeia A (Cas A) supernova remnant, the first official science target observed by IXPE after its commissioning. IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
+
+The large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD) \cite{baldini2021}, the detectors used on board of IXPE. GPD use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source on a statistical basis, by studying the distribution of the emission angle measured for all the events.
+
+As of 2026, IXPE is still carrying on observational campaigns, even though the predicted lifetime was of only two years. In five years of operations IXPE has observed and measured the polarization of about 100 sources, ranging from accreting stellar-mass and supermassive black holes in active galactic nuclei (AGN) to magnetars, supernova remnants (SNRs), and pulsar wind nebulae.
+
+These observations have led to important results in different fields of high-energy astrophysics. For example, IXPE allowed to map the magnetic field geometry and turbulence in supernova remnants, constrain the orientation of accretion disks around black holes, and perform phase-resolved polarimetry on accreting neutron stars, combining timing and polarization measurements to better understand the emission geometry.
+
+In the future, IXPE will continue its observational program by targeting fainter sources and monitoring variable sources over long time scales, providing new information on physics in extreme magnetic and gravitational fields.
+
+IXPE consists of three identical and independent X-ray telescopes. Using three independent telescopes provides redundancy and increases the total effective area while keeping the focal spot small to minimize background noise.
+
+Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. To fit inside the launch vehicle fairing while maintaining this focal length, IXPE uses a deployable boom that was extended once in orbit. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV.
+
+A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information.
+
+\begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe}
     \caption{Schematic of the IXPE Observatory. Photons enter through the three Mirror Module Assemblies and are collcted by the Detector Units, where GPDs are located. Images courtesy of NASA.}
     \label{fig:ixpe}
 \end{figure}
 
-A detector unit (DU) is located on the focal plane of each telescope. A detector unit has a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information.
-
-
 \section{Gas Pixel Detector}
 
-At the basis of the operations of a GPD is the dependence of the photoelectron emission direction on the incident photon polarization, described by Eq. \ref{eq:polarization_photo}. Photons enter the active gas volume after passing through a beryllium window and can be absorbed. The primary ionization electrons produced by the photoelectron are drifted toward the GEM, which multiply the charges preserving the track shape. The charges generated after the multiplication stage are collected by the pixelated readout ASIC. A schematic example of the GPD and a track are shown in Fig. \ref{fig:gpd}.
+The Gas Pixel Detector (GPD) represents an important innovation for MicroPattern Gas Detectors (MPGD) \cite{bellazzini2004, bellazzini2006}. In traditional gas detectors, reading out signals with high spatial resolution requires complex Printed Circuit Board (PCB) connections to external electronics. However, this PCB approach becomes a big problem when using thousands of channels, because it increases electronic noise and cross-talk between nearby pixels.
+
+To solve this problem, the GPD puts the readout electronics directly inside the anode of the detector. This is done using a custom CMOS VLSI Application-Specific Integrated Circuit (ASIC). The top metal layer of the chip forms a grid of small hexagonal pixels that act directly as the charge collecting anode. Below each pixel, the silicon layers contain a complete electronic chain. This design allows gas detectors to have high spatial resolution and integration similar to solid-state detectors, while keeping the noise very low.
+
+The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon (Eq. \ref{eq:polarization_photo}). Photons pass through a thin beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the 2D shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
+
+By studying the 2D charge distribution of these tracks, the GPD can reconstruct the photon absorption point to improve imaging, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
+
 
 \begin{figure}[!b]
     \centering
@@ -86,7 +103,7 @@ These gain variations can be modeled using phenomenological models and can be ap
 Reducing systematic effects, such as spurious modulation and gain variations, which have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative which is being developed, which aims on reducing these effects, will be presented in Chap. \ref{chap:chapter5}.
 
 \subsection{The readout ASIC: XPOL-I}
-The GPD ASIC \cite{bellazzini2004, bellazzini2006}, named XPOL-I, which is the first generation of the XPOL familiy, is responsible for the collection of charges produced by the GEM during the multiplication stage, acting as the readout anode.
+The GPD ASIC, named XPOL-I, which is the first generation of the XPOL familiy, is responsible for the collection of charges produced by the GEM during the multiplication stage, acting as the readout anode.
 
 The chip is organized as a matrix of \num{105600} hexagonal pixels, with 300 columns and 352 rows, with a horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m, as shown in Fig. \ref{fig:gpd_layout}. This is the layout that was replicated on the GEM in order to align each hole to the correspondent pixel.
 
