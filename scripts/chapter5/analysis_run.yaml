@@ -1,0 +1,3946 @@
+schema_version: 1
+run:
+  run_id: 260805_111504_FullFolderAnalysis
+  created_at: '2026-08-05T11:15:17.825112'
+  mode: folders
+  fig_format: png
+config:
+  pipeline:
+  - task: calibration
+    charge_conversion: true
+    show: false
+  - task: noise
+    subtract: false
+    nbins: 4
+    model: Exponential
+    freeze: {}
+  - task: fit_spec
+    subtasks:
+    - target: main
+      model: Fe55Forest
+      fit_pars:
+        xmin: -.inf
+        xmax: .inf
+        num_sigma_left: 1.5
+        num_sigma_right: 2.0
+        absolute_sigma: true
+        p0: null
+  - task: gain
+    target: main
+    xaxis: time
+    subtasks:
+    - target: gain_fit
+      model: StretchedExponential + Constant
+      fit_pars:
+        xmin: -.inf
+        xmax: .inf
+        num_sigma_left: 1.5
+        num_sigma_right: 1.5
+        absolute_sigma: true
+        p0: null
+    show: true
+  - task: resolution
+    target: main
+    xaxis: time
+    show: true
+  - task: plot
+    targets:
+    - main
+    task_labels:
+    - resolution
+    - gain
+    voltage: false
+    drift: false
+    xrange: null
+    xmin_factor: 0.5
+    xmax_factor: 1.0
+    show: false
+  source:
+    energy: 5.896500294312254
+    w: 26.0
+  style:
+    tasks:
+      plot:
+        xscale: linear
+        yscale: linear
+        title: $^{55}$Fe spectrum of 86.6 $\mu$m gap
+        label: Data
+        legend_label: Chip W8b
+        legend_loc: upper right
+        marker: .
+        linestyle: '-'
+        color: null
+        grayscale: false
+        fit_output: false
+        annotate_min: false
+      gain:
+        xscale: linear
+        yscale: linear
+        title: null
+        label: Gain data
+        legend_label: Chip W8b 86.6 $\mu$m
+        legend_loc: best
+        marker: .
+        linestyle: '-'
+        color: black
+        grayscale: false
+        fit_output: false
+        annotate_min: false
+      resolution:
+        xscale: linear
+        yscale: linear
+        title: null
+        label: Resolution data
+        legend_label: Chip W8b 86.6 $\mu$m
+        legend_loc: best
+        marker: .
+        linestyle: '-'
+        color: black
+        grayscale: false
+        fit_output: false
+        annotate_min: true
+    folders: {}
+inputs:
+  config_path: /home/augusto/results/251128/260324_144446_FullFolderAnalysis/config.yaml
+  raw_paths:
+  - 260119/trend
+  resolved_folders:
+  - /home/augusto/Thesis/muGPD/data/260119/trend
+  path_type: folder
+folders:
+  trend:
+    inputs:
+      config_path: null
+      raw_paths: null
+      resolved_sources:
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_0.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_1.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_2.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_3.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_4.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_5.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_6.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_7.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_8.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_9.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_10.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_11.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_12.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_13.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_14.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_15.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_16.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_17.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_18.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_19.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_20.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_21.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_22.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_23.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_24.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_25.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_26.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_27.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_28.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_29.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_30.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_31.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_32.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_33.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_34.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_35.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_36.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_37.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_38.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_39.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_40.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_41.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_42.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_43.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_44.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_45.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_46.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_47.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_48.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_49.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_50.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_51.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_52.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_53.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_54.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_55.mca
+      - /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip20012026_43p3_w1a_D1000B380.mca
+      path_type: null
+    calibration:
+      pulse_file: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_ci1-2-3-4mV.mca
+      pulse_voltages:
+      - 1
+      - 2
+      - 3
+      - 4
+      model:
+        name: Line
+        chisq: 1.843189635810535e-05
+        dof: 2
+        pars:
+          slope:
+            val: 0.009672392787036785
+            err: 1.3131664440130921e-05
+          intercept:
+            val: 0.06338858190996986
+            err: 0.003639668170725539
+    sources:
+      live_data_chip19012026_43p3_w1a_D1000B380_0:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_0.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 108.693333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_1:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_1.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 70.52
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_2:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_2.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.426667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_3:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_3.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 68.48
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_4:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_4.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 70.493333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_5:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_5.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.12
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_6:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_6.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 64.826667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_7:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_7.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.813333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_8:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_8.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 74.84
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_9:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_9.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 74.986667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_10:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_10.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.333333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_11:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_11.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 70.24
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_12:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_12.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.8
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_13:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_13.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.386667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_14:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_14.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.706667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_15:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_15.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.453333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_16:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_16.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.226667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_17:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_17.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 64.773333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_18:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_18.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.586667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_19:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_19.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.133333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_20:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_20.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.066667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_21:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_21.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 73.36
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_22:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_22.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 81.44
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_23:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_23.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.586667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_24:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_24.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 65.44
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_25:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_25.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.373333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_26:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_26.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 68.12
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_27:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_27.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 102.893333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_28:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_28.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 66.666667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_29:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_29.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.746667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_30:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_30.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.946667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_31:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_31.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 71.586667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_32:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_32.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 1122.2
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_33:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_33.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 67.066667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_34:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_34.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 980.666667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_35:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_35.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 76.8
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_36:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_36.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 1174.426667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_37:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_37.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 78.92
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_38:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_38.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 283.253333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_39:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_39.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 100.586667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_40:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_40.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T12:08:20'
+        real_time: 69.826667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_41:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_41.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T13:53:54'
+        real_time: 67.466667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_42:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_42.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T13:53:54'
+        real_time: 136.866667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_43:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_43.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T13:53:54'
+        real_time: 2249.92
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_44:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_44.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T14:33:56'
+        real_time: 72.386667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_45:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_45.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T14:35:18'
+        real_time: 91.8
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_46:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_46.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T14:36:57'
+        real_time: 2778.346667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_47:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_47.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T15:23:28'
+        real_time: 70.56
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_48:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_48.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T15:24:45'
+        real_time: 79.64
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_49:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_49.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T15:41:33'
+        real_time: 61.946667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_50:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_50.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T16:02:38'
+        real_time: 65.666667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_51:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_51.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T16:23:29'
+        real_time: 66.08
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_52:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_52.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T16:41:40'
+        real_time: 63.213333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_53:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_53.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T17:06:20'
+        real_time: 61.493333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_54:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_54.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T17:42:42'
+        real_time: 61.506667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip19012026_43p3_w1a_D1000B380_55:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip19012026_43p3_w1a_D1000B380_55.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-19T18:11:48'
+        real_time: 64.253333
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-19'
+      live_data_chip20012026_43p3_w1a_D1000B380:
+        path: /home/augusto/Thesis/muGPD/data/260119/trend/live_data_chip20012026_43p3_w1a_D1000B380.mca
+        voltage: 380.0
+        drift_voltage: 1000.0
+        pressure: 0.0
+        start_time: '2026-01-20T08:57:48'
+        real_time: 48.586667
+        structure: '43.3'
+        wafer: W1A
+        date: '2026-01-20'
+    fit:
+      live_data_chip19012026_43p3_w1a_D1000B380_0:
+        main:
+          target: main
+          line_val:
+            val: 2.3126522410258232
+            err: 0.002507186783815056
+          sigma:
+            val: 0.16986423225820707
+            err: 0.0027044391661393313
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 63.377238370227346
+            err: 0.06870837370950673
+          fwhm:
+            val: 0.3999996990554188
+            err: 0.006368467558991684
+          resolution:
+            val: 17.29614560976928
+            err: 0.28233647944083057
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 141.19742205634458
+            dof: 82
+            pars:
+              amplitude:
+                val: 86.71586799276385
+                err: 0.9983395632810806
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.549453780990743
+                err: 0.0027639074791513114
+              sigma:
+                val: 0.16986423225820707
+                err: 0.0027044391661393305
+      live_data_chip19012026_43p3_w1a_D1000B380_1:
+        main:
+          target: main
+          line_val:
+            val: 2.2445934525278863
+            err: 0.003182479510381476
+          sigma:
+            val: 0.17233982143890045
+            err: 0.0033761073883141974
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 61.51211659129989
+            err: 0.08721447996363889
+          fwhm:
+            val: 0.4058292660813773
+            err: 0.00795012535217936
+          resolution:
+            val: 18.080301607595256
+            err: 0.3643854163512038
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 144.77711424791215
+            dof: 82
+            pars:
+              amplitude:
+                val: 55.8052367060028
+                err: 0.8044903352437095
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.6267563034008936
+                err: 0.0037243261602336306
+              sigma:
+                val: 0.17233982143890045
+                err: 0.003376107388314197
+      live_data_chip19012026_43p3_w1a_D1000B380_2:
+        main:
+          target: main
+          line_val:
+            val: 2.212054410149197
+            err: 0.0032244155805840153
+          sigma:
+            val: 0.17722010583355605
+            err: 0.003429692392641084
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 60.620398152794685
+            err: 0.08836371990139884
+          fwhm:
+            val: 0.41732145759936407
+            err: 0.00807630839448138
+          resolution:
+            val: 18.8657862882865
+            err: 0.3744658321372722
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 100.65417852705863
+            dof: 84
+            pars:
+              amplitude:
+                val: 53.02012633911603
+                err: 0.7739557165931935
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.6653955585126545
+                err: 0.0038852312709197643
+              sigma:
+                val: 0.17722010583355605
+                err: 0.003429692392641085
+      live_data_chip19012026_43p3_w1a_D1000B380_3:
+        main:
+          target: main
+          line_val:
+            val: 2.1761209942472846
+            err: 0.003191263478280025
+          sigma:
+            val: 0.17759015142844603
+            err: 0.0034147503308765673
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 59.63565837018827
+            err: 0.08745520081974817
+          fwhm:
+            val: 0.4181928483837864
+            err: 0.008041122527924207
+          resolution:
+            val: 19.21735277998356
+            err: 0.37861712907111783
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 122.46964056078679
+            dof: 84
+            pars:
+              amplitude:
+                val: 53.09040310727943
+                err: 0.7722610905074851
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.709408169668164
+                err: 0.003973324719752694
+              sigma:
+                val: 0.17759015142844603
+                err: 0.003414750330876568
+      live_data_chip19012026_43p3_w1a_D1000B380_4:
+        main:
+          target: main
+          line_val:
+            val: 2.15039829312474
+            err: 0.003185211552726338
+          sigma:
+            val: 0.1803212583349863
+            err: 0.0033239103422102447
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 58.93073882731463
+            err: 0.08728935040713068
+          fwhm:
+            val: 0.4246241136724299
+            err: 0.007827210701722367
+          resolution:
+            val: 19.746300721593734
+            err: 0.37441955674652894
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 100.95137400690979
+            dof: 85
+            pars:
+              amplitude:
+                val: 55.357098712702516
+                err: 0.7888754810627725
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.7418176525021942
+                err: 0.004061233349254894
+              sigma:
+                val: 0.1803212583349863
+                err: 0.0033239103422102443
+      live_data_chip19012026_43p3_w1a_D1000B380_5:
+        main:
+          target: main
+          line_val:
+            val: 2.1193997597855976
+            err: 0.003220753734731713
+          sigma:
+            val: 0.17160329239611205
+            err: 0.0034427492238320954
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 58.081237375383914
+            err: 0.08826336859334682
+          fwhm:
+            val: 0.40409487272767175
+            err: 0.00810705488229456
+          resolution:
+            val: 19.066477235448527
+            err: 0.3937551809906745
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 81.16963513485649
+            dof: 80
+            pars:
+              amplitude:
+                val: 52.36435015033932
+                err: 0.7778996077290411
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.7819197264589905
+                err: 0.004227554668413767
+              sigma:
+                val: 0.17160329239611205
+                err: 0.0034427492238320945
+      live_data_chip19012026_43p3_w1a_D1000B380_6:
+        main:
+          target: main
+          line_val:
+            val: 2.0971781945003745
+            err: 0.00321520848818179
+          sigma:
+            val: 0.17846471107765471
+            err: 0.003382735652642661
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 57.47226495183593
+            err: 0.08811140350054916
+          fwhm:
+            val: 0.4202522789763182
+            err: 0.007965733721883788
+          resolution:
+            val: 20.038939946943227
+            err: 0.3891413575661647
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 134.3076704153333
+            dof: 84
+            pars:
+              amplitude:
+                val: 50.394876326959796
+                err: 0.7461034731204315
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.8113967689830215
+                err: 0.00431018536192369
+              sigma:
+                val: 0.17846471107765471
+                err: 0.0033827356526426604
+      live_data_chip19012026_43p3_w1a_D1000B380_7:
+        main:
+          target: main
+          line_val:
+            val: 2.075063023671772
+            err: 0.003217276660536982
+          sigma:
+            val: 0.17879163392707761
+            err: 0.003339677523751162
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 56.86620822253671
+            err: 0.08816808087297053
+          fwhm:
+            val: 0.4210221234553179
+            err: 0.007864339576868561
+          resolution:
+            val: 20.28960656386859
+            err: 0.3906270187460388
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 120.11813413473259
+            dof: 83
+            pars:
+              amplitude:
+                val: 54.022449329963734
+                err: 0.7837999009918842
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.841359482936174
+                err: 0.004405379231552414
+              sigma:
+                val: 0.17879163392707761
+                err: 0.003339677523751162
+      live_data_chip19012026_43p3_w1a_D1000B380_8:
+        main:
+          target: main
+          line_val:
+            val: 2.046310951752632
+            err: 0.0030928907795675273
+          sigma:
+            val: 0.17877402075482335
+            err: 0.0032871272499294456
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 56.0782700780412
+            err: 0.08475933939068218
+          fwhm:
+            val: 0.420980647604237
+            err: 0.007740593138701317
+          resolution:
+            val: 20.572662587945096
+            err: 0.3894842698639727
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 156.31684920383555
+            dof: 82
+            pars:
+              amplitude:
+                val: 58.100949781876245
+                err: 0.8144473670839284
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.881282531841103
+                err: 0.004354906163419485
+              sigma:
+                val: 0.17877402075482335
+                err: 0.0032871272499294464
+      live_data_chip19012026_43p3_w1a_D1000B380_9:
+        main:
+          target: main
+          line_val:
+            val: 2.0297604342517612
+            err: 0.002893458205604517
+          sigma:
+            val: 0.1771408165681701
+            err: 0.0030125259586926915
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 55.62471027592498
+            err: 0.07929397561716679
+          fwhm:
+            val: 0.41713474564787745
+            err: 0.007093956513705627
+          resolution:
+            val: 20.550934908810923
+            err: 0.35842454160066345
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 122.82688212971036
+            dof: 84
+            pars:
+              amplitude:
+                val: 60.120980284354204
+                err: 0.811857130375441
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.9047762979838883
+                err: 0.004140808281123732
+              sigma:
+                val: 0.1771408165681701
+                err: 0.003012525958692692
+      live_data_chip19012026_43p3_w1a_D1000B380_10:
+        main:
+          target: main
+          line_val:
+            val: 2.0048091218925985
+            err: 0.0031793481936850795
+          sigma:
+            val: 0.1761490155185419
+            err: 0.0034016058537589865
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 54.940930309796045
+            err: 0.08712866757855148
+          fwhm:
+            val: 0.4147992326555302
+            err: 0.008010169649726277
+          resolution:
+            val: 20.690210760012285
+            err: 0.41062404355367876
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 141.99519739818786
+            dof: 81
+            pars:
+              amplitude:
+                val: 52.27423522565812
+                err: 0.770542966802154
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.940928358523231
+                err: 0.004663902993219207
+              sigma:
+                val: 0.1761490155185419
+                err: 0.003401605853758986
+      live_data_chip19012026_43p3_w1a_D1000B380_11:
+        main:
+          target: main
+          line_val:
+            val: 1.9863475464737486
+            err: 0.003089842039069013
+          sigma:
+            val: 0.17201009496232167
+            err: 0.0032506325614402964
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 54.43499878872507
+            err: 0.08467578997072374
+          fwhm:
+            val: 0.4050528195649522
+            err: 0.007654654714709909
+          resolution:
+            val: 20.391840304282084
+            err: 0.39747817067294094
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 104.54897952408584
+            dof: 79
+            pars:
+              amplitude:
+                val: 54.962630129498514
+                err: 0.7934856513506099
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.968262029707157
+                err: 0.004617248788432352
+              sigma:
+                val: 0.17201009496232167
+                err: 0.0032506325614402977
+      live_data_chip19012026_43p3_w1a_D1000B380_12:
+        main:
+          target: main
+          line_val:
+            val: 1.975947896990334
+            err: 0.003194209763480269
+          sigma:
+            val: 0.17534865113427708
+            err: 0.0032885263441805664
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 54.15000087482132
+            err: 0.08753594249639546
+          fwhm:
+            val: 0.4129145185601346
+            err: 0.0077438877538887445
+          resolution:
+            val: 20.897034744138022
+            err: 0.40426840052043833
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 116.1003378225807
+            dof: 81
+            pars:
+              amplitude:
+                val: 51.56038803800217
+                err: 0.7626914533819806
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.9838843468395577
+                err: 0.004823584937785168
+              sigma:
+                val: 0.17534865113427708
+                err: 0.003288526344180566
+      live_data_chip19012026_43p3_w1a_D1000B380_13:
+        main:
+          target: main
+          line_val:
+            val: 1.9581094442674831
+            err: 0.003078650012013334
+          sigma:
+            val: 0.17388563297030993
+            err: 0.0032345483227538873
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 53.66114576279175
+            err: 0.08436907729080989
+          fwhm:
+            val: 0.40946937406138034
+            err: 0.00761677922704209
+          resolution:
+            val: 20.91146515125258
+            err: 0.39895052716814694
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 148.11756894495207
+            dof: 80
+            pars:
+              amplitude:
+                val: 52.26408067554736
+                err: 0.7641676210933539
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.011067648573473
+                err: 0.004734170237313545
+              sigma:
+                val: 0.17388563297030993
+                err: 0.0032345483227538873
+      live_data_chip19012026_43p3_w1a_D1000B380_14:
+        main:
+          target: main
+          line_val:
+            val: 1.9431432527665629
+            err: 0.0031836758488842723
+          sigma:
+            val: 0.17521648743127144
+            err: 0.0032635961111172587
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 53.251003732173444
+            err: 0.08724726510492307
+          fwhm:
+            val: 0.4126032968230714
+            err: 0.007685181541343974
+          resolution:
+            val: 21.233807452725102
+            err: 0.4090524819819584
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 90.37617107399171
+            dof: 80
+            pars:
+              amplitude:
+                val: 52.95690034769528
+                err: 0.7770107603605204
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.0342590499210655
+                err: 0.004971376784876053
+              sigma:
+                val: 0.17521648743127144
+                err: 0.0032635961111172587
+      live_data_chip19012026_43p3_w1a_D1000B380_15:
+        main:
+          target: main
+          line_val:
+            val: 1.931537456074681
+            err: 0.003115937486464784
+          sigma:
+            val: 0.1752252260504137
+            err: 0.0032641015029223385
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 52.93295187363221
+            err: 0.08539092446463534
+          fwhm:
+            val: 0.4126238746985935
+            err: 0.0076863716480971706
+          resolution:
+            val: 21.362457839007593
+            err: 0.4110915220862651
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 119.49071778490203
+            dof: 79
+            pars:
+              amplitude:
+                val: 55.47495950618634
+                err: 0.7987810781565874
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.052490637164241
+                err: 0.004924248283930291
+              sigma:
+                val: 0.1752252260504137
+                err: 0.003264101502922337
+      live_data_chip19012026_43p3_w1a_D1000B380_16:
+        main:
+          target: main
+          line_val:
+            val: 1.9165227079729332
+            err: 0.0031539910522063526
+          sigma:
+            val: 0.1828872972615112
+            err: 0.0033032768721797394
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 52.52147917028651
+            err: 0.08643376604023284
+          fwhm:
+            val: 0.4306666735729404
+            err: 0.0077786225928959864
+          resolution:
+            val: 22.471253368474184
+            err: 0.41729297022266487
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 139.3309408649904
+            dof: 84
+            pars:
+              amplitude:
+                val: 53.356194464402016
+                err: 0.7697264609468267
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.076404978387174
+                err: 0.0050627909256858415
+              sigma:
+                val: 0.1828872972615112
+                err: 0.003303276872179739
+      live_data_chip19012026_43p3_w1a_D1000B380_17:
+        main:
+          target: main
+          line_val:
+            val: 1.9026533039027738
+            err: 0.00327034417449855
+          sigma:
+            val: 0.1735191489954832
+            err: 0.0034413069844227337
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 52.141394126710054
+            err: 0.08962237323149903
+          fwhm:
+            val: 0.4086063702512758
+            err: 0.008103658668023662
+          resolution:
+            val: 21.475608268365622
+            err: 0.44087424019990923
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 104.0180537190962
+            dof: 77
+            pars:
+              amplitude:
+                val: 51.37875183618805
+                err: 0.7774151786949676
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.0988304531918485
+                err: 0.005326373490938696
+              sigma:
+                val: 0.1735191489954832
+                err: 0.003441306984422732
+      live_data_chip19012026_43p3_w1a_D1000B380_18:
+        main:
+          target: main
+          line_val:
+            val: 1.8925875862693282
+            err: 0.0032550958632620378
+          sigma:
+            val: 0.1805916505496549
+            err: 0.003355185193888424
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 51.865547471296225
+            err: 0.08920449983106457
+          fwhm:
+            val: 0.42526083867955183
+            err: 0.007900857349359513
+          resolution:
+            val: 22.46981020930327
+            err: 0.43384935031451666
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 86.88490233209457
+            dof: 80
+            pars:
+              amplitude:
+                val: 56.04678306925704
+                err: 0.8118739176821856
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.1153115674937957
+                err: 0.005358081110587162
+              sigma:
+                val: 0.1805916505496549
+                err: 0.0033551851938884245
+      live_data_chip19012026_43p3_w1a_D1000B380_19:
+        main:
+          target: main
+          line_val:
+            val: 1.8823226489781177
+            err: 0.0030219287983300463
+          sigma:
+            val: 0.1709089169287291
+            err: 0.003172830618942185
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 51.58424128698556
+            err: 0.08281465686542859
+          fwhm:
+            val: 0.4024597434583006
+            err: 0.007471445140973011
+          resolution:
+            val: 21.381017950179235
+            err: 0.4083855255923944
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 122.5899742276967
+            dof: 78
+            pars:
+              amplitude:
+                val: 53.32767616619713
+                err: 0.7755170220882248
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.1323004072659075
+                err: 0.005028674978158763
+              sigma:
+                val: 0.1709089169287291
+                err: 0.0031728306189421854
+      live_data_chip19012026_43p3_w1a_D1000B380_20:
+        main:
+          target: main
+          line_val:
+            val: 1.870776377773201
+            err: 0.0031473984752273683
+          sigma:
+            val: 0.1764641211453284
+            err: 0.0032489606741987727
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 51.26782069877092
+            err: 0.08625309930821878
+          fwhm:
+            val: 0.4155412497017891
+            err: 0.007650717721120539
+          resolution:
+            val: 22.21223523232696
+            err: 0.4224083192319776
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 107.22897800974839
+            dof: 80
+            pars:
+              amplitude:
+                val: 52.584562127876445
+                err: 0.7707331254716254
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.151632696484041
+                err: 0.0053023140880139675
+              sigma:
+                val: 0.1764641211453284
+                err: 0.0032489606741987706
+      live_data_chip19012026_43p3_w1a_D1000B380_21:
+        main:
+          target: main
+          line_val:
+            val: 1.8596160672910087
+            err: 0.0030257682370483196
+          sigma:
+            val: 0.16962088853672583
+            err: 0.003182083455585247
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 50.96197719788991
+            err: 0.08291987502946523
+          fwhm:
+            val: 0.39942666838224233
+            err: 0.00749323390617349
+          resolution:
+            val: 21.47898565772806
+            err: 0.4167841437692079
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 109.65504124333927
+            dof: 76
+            pars:
+              amplitude:
+                val: 56.46922161465797
+                err: 0.8119383946264058
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.170546922940381
+                err: 0.005158774621408475
+              sigma:
+                val: 0.16962088853672583
+                err: 0.0031820834555852462
+      live_data_chip19012026_43p3_w1a_D1000B380_22:
+        main:
+          target: main
+          line_val:
+            val: 1.846929792544554
+            err: 0.002769134584661092
+          sigma:
+            val: 0.17525825142876372
+            err: 0.0028894902760984316
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 50.61431530373516
+            err: 0.07588694034407004
+          fwhm:
+            val: 0.41270164352152683
+            err: 0.006804229622078598
+          resolution:
+            val: 22.345280540032824
+            err: 0.3783933481988855
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 158.63116198650178
+            dof: 80
+            pars:
+              amplitude:
+                val: 63.369235136438405
+                err: 0.8383517392028276
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.1923249187923686
+                err: 0.004786309351761735
+              sigma:
+                val: 0.17525825142876372
+                err: 0.0028894902760984316
+      live_data_chip19012026_43p3_w1a_D1000B380_23:
+        main:
+          target: main
+          line_val:
+            val: 1.840674780447121
+            err: 0.0029931525414130266
+          sigma:
+            val: 0.1707031296237046
+            err: 0.0031445111051605205
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 50.442899391876395
+            err: 0.08202605594148515
+          fwhm:
+            val: 0.401975151387416
+            err: 0.007404757782254417
+          resolution:
+            val: 21.838466830613694
+            err: 0.41490166447748067
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 113.43275366724782
+            dof: 77
+            pars:
+              amplitude:
+                val: 55.043861306885546
+                err: 0.7914291454573774
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.2031731311969156
+                err: 0.005208734264234902
+              sigma:
+                val: 0.1707031296237046
+                err: 0.0031445111051605214
+      live_data_chip19012026_43p3_w1a_D1000B380_24:
+        main:
+          target: main
+          line_val:
+            val: 1.83210189191145
+            err: 0.00296469942615629
+          sigma:
+            val: 0.1671484419995103
+            err: 0.0030985332206114793
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 50.20796307477339
+            err: 0.0812463105755317
+          fwhm:
+            val: 0.39360450171613987
+            err: 0.007296488138090217
+          resolution:
+            val: 21.48376700301796
+            err: 0.4090088185755134
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 118.66259870247418
+            dof: 77
+            pars:
+              amplitude:
+                val: 51.44200158788342
+                err: 0.7568606734813034
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.218161624105221
+                err: 0.005207615341911385
+              sigma:
+                val: 0.1671484419995103
+                err: 0.0030985332206114793
+      live_data_chip19012026_43p3_w1a_D1000B380_25:
+        main:
+          target: main
+          line_val:
+            val: 1.8158920046219853
+            err: 0.00288438368627105
+          sigma:
+            val: 0.1723668013740614
+            err: 0.002997927044033066
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 49.76373809685659
+            err: 0.07904529232415372
+          fwhm:
+            val: 0.405892798973508
+            err: 0.007059578696829444
+          resolution:
+            val: 22.352254315806782
+            err: 0.3981495092399085
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 142.42882364543044
+            dof: 80
+            pars:
+              amplitude:
+                val: 53.87546577486574
+                err: 0.7637521807905825
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.24688912390876
+                err: 0.0051573959223874125
+              sigma:
+                val: 0.1723668013740614
+                err: 0.002997927044033066
+      live_data_chip19012026_43p3_w1a_D1000B380_26:
+        main:
+          target: main
+          line_val:
+            val: 1.8140188567255255
+            err: 0.0030055150643505998
+          sigma:
+            val: 0.1730975022211807
+            err: 0.003118496905058617
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 49.71240528570987
+            err: 0.08236484555679041
+          fwhm:
+            val: 0.4076134679752256
+            err: 0.00734349902239901
+          resolution:
+            val: 22.470189130834406
+            err: 0.4164291470008187
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 148.05697833656188
+            dof: 79
+            pars:
+              amplitude:
+                val: 52.75648123727406
+                err: 0.7652807637948178
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.2502418473437666
+                err: 0.005385087811384582
+              sigma:
+                val: 0.1730975022211807
+                err: 0.0031184969050586184
+      live_data_chip19012026_43p3_w1a_D1000B380_27:
+        main:
+          target: main
+          line_val:
+            val: 1.813264354676162
+            err: 0.002455395868455778
+          sigma:
+            val: 0.17471060252350226
+            err: 0.002566686728943588
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 49.69172848208802
+            err: 0.06728906598571283
+          fwhm:
+            val: 0.41141202890177786
+            err: 0.00604408535863128
+          resolution:
+            val: 22.68902644232774
+            err: 0.3432447449097718
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 160.86458183778487
+            dof: 79
+            pars:
+              amplitude:
+                val: 81.63077224284866
+                err: 0.9562820839378106
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.251594277908248
+                err: 0.004403081732280699
+              sigma:
+                val: 0.17471060252350226
+                err: 0.002566686728943588
+      live_data_chip19012026_43p3_w1a_D1000B380_28:
+        main:
+          target: main
+          line_val:
+            val: 1.7958001452273076
+            err: 0.0028958856598135588
+          sigma:
+            val: 0.16556920737523204
+            err: 0.002939319251722021
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 49.21312934575757
+            err: 0.07936049895401359
+          fwhm:
+            val: 0.3898856883670825
+            err: 0.006921567892700386
+          resolution:
+            val: 21.710973206193376
+            err: 0.3962823594277513
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 142.6181427573719
+            dof: 77
+            pars:
+              amplitude:
+                val: 51.745780057419736
+                err: 0.7537306050315027
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.2832161282923273
+                err: 0.005294474738327225
+              sigma:
+                val: 0.16556920737523204
+                err: 0.002939319251722021
+      live_data_chip19012026_43p3_w1a_D1000B380_29:
+        main:
+          target: main
+          line_val:
+            val: 1.7933141204323781
+            err: 0.0029197436341945877
+          sigma:
+            val: 0.16672119755026654
+            err: 0.0030568731735297
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 49.14500090723685
+            err: 0.08001431646386391
+          fwhm:
+            val: 0.39259841792293243
+            err: 0.007198386224145109
+          resolution:
+            val: 21.892339632516514
+            err: 0.4122959059508575
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 132.47974816620155
+            dof: 76
+            pars:
+              amplitude:
+                val: 52.38928668700426
+                err: 0.7638641660732263
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.2877675655497773
+                err: 0.005352904051137973
+              sigma:
+                val: 0.16672119755026654
+                err: 0.0030568731735297013
+      live_data_chip19012026_43p3_w1a_D1000B380_30:
+        main:
+          target: main
+          line_val:
+            val: 1.7836975996517805
+            err: 0.002951389545335088
+          sigma:
+            val: 0.17042265609530965
+            err: 0.003122733556705135
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 48.881464298060436
+            err: 0.08088155902554921
+          fwhm:
+            val: 0.40131468670065107
+            err: 0.0073534755746200425
+          resolution:
+            val: 22.499031605973855
+            err: 0.42492177599454967
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 131.3437944314928
+            dof: 77
+            pars:
+              amplitude:
+                val: 54.97966710690651
+                err: 0.7888113273358438
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.305493039375641
+                err: 0.0054694235169098935
+              sigma:
+                val: 0.17042265609530965
+                err: 0.0031227335567051355
+      live_data_chip19012026_43p3_w1a_D1000B380_31:
+        main:
+          target: main
+          line_val:
+            val: 1.775403296117928
+            err: 0.0028215954892624215
+          sigma:
+            val: 0.1670174479722666
+            err: 0.002968694266102866
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 48.65416248291731
+            err: 0.0773246088344097
+          fwhm:
+            val: 0.3932960343550071
+            err: 0.006990740765387472
+          resolution:
+            val: 22.15248981541167
+            err: 0.4036380228255341
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 162.2905296059105
+            dof: 76
+            pars:
+              amplitude:
+                val: 55.28288169574518
+                err: 0.7833623528633824
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.3209355941222545
+                err: 0.005277863859437131
+              sigma:
+                val: 0.1670174479722666
+                err: 0.002968694266102866
+      live_data_chip19012026_43p3_w1a_D1000B380_32:
+        main:
+          target: main
+          line_val:
+            val: 1.7199202559542643
+            err: 0.0007031094220745813
+          sigma:
+            val: 0.16838831741409402
+            err: 0.0007320838041583622
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 47.13367366943377
+            err: 0.019268410811046778
+          fwhm:
+            val: 0.3965241851957427
+            err: 0.0017239256166746229
+          resolution:
+            val: 23.05480058293394
+            err: 0.10312424700626963
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 1017.0320217709719
+            dof: 76
+            pars:
+              amplitude:
+                val: 903.4901451001906
+                err: 3.167471752725548
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.4280659115376944
+                err: 0.0014014053462946918
+              sigma:
+                val: 0.16838831741409402
+                err: 0.0007320838041583622
+      live_data_chip19012026_43p3_w1a_D1000B380_33:
+        main:
+          target: main
+          line_val:
+            val: 1.6733948925389928
+            err: 0.0026883535650011163
+          sigma:
+            val: 0.15460689548165676
+            err: 0.0027547862693475494
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 45.858666128255344
+            err: 0.07367317130090886
+          fwhm:
+            val: 0.36407141658021025
+            err: 0.006487025926835638
+          resolution:
+            val: 21.756455586392725
+            err: 0.3986610086846044
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 115.32204428384789
+            dof: 71
+            pars:
+              amplitude:
+                val: 52.52229499497101
+                err: 0.7596199868580189
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.5233763568228493
+                err: 0.005660398171368649
+              sigma:
+                val: 0.15460689548165676
+                err: 0.002754786269347549
+      live_data_chip19012026_43p3_w1a_D1000B380_34:
+        main:
+          target: main
+          line_val:
+            val: 1.6449561192890414
+            err: 0.0006949862590643609
+          sigma:
+            val: 0.15618733019465586
+            err: 0.0007285327371923017
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 45.07931379881927
+            err: 0.01904579902822612
+          fwhm:
+            val: 0.36779305592224326
+            err: 0.0017155634930016968
+          resolution:
+            val: 22.358836908136208
+            err: 0.10704870889196602
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 996.9719566096398
+            dof: 71
+            pars:
+              amplitude:
+                val: 791.9397234335762
+                err: 2.9572666999066035
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.584290140546899
+                err: 0.0015143458034957182
+              sigma:
+                val: 0.15618733019465586
+                err: 0.0007285327371923018
+      live_data_chip19012026_43p3_w1a_D1000B380_35:
+        main:
+          target: main
+          line_val:
+            val: 1.6112101569717694
+            err: 0.0024966448041076083
+          sigma:
+            val: 0.15065907415659952
+            err: 0.002647039782584675
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 44.15452023934066
+            err: 0.0684194752971295
+          fwhm:
+            val: 0.3547750077897648
+            err: 0.006233302340024758
+          resolution:
+            val: 22.019164058433933
+            err: 0.3973784551539523
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 149.4166825328973
+            dof: 68
+            pars:
+              amplitude:
+                val: 58.912189290137
+                err: 0.8126595241120261
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.659361241292936
+                err: 0.005670349823636855
+              sigma:
+                val: 0.15065907415659952
+                err: 0.002647039782584675
+      live_data_chip19012026_43p3_w1a_D1000B380_36:
+        main:
+          target: main
+          line_val:
+            val: 1.5877265018144473
+            err: 0.0006163276575640591
+          sigma:
+            val: 0.1485755703746578
+            err: 0.0006532042586631122
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 43.510960786558584
+            err: 0.01689019394038893
+          fwhm:
+            val: 0.34986873132015067
+            err: 0.0015381784817994776
+          resolution:
+            val: 22.03583116615627
+            err: 0.09961900229022001
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 1198.1409370600365
+            dof: 67
+            pars:
+              amplitude:
+                val: 948.4107530017764
+                err: 3.265435068301852
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.713485914143321
+                err: 0.0014415102804201726
+              sigma:
+                val: 0.1485755703746578
+                err: 0.0006532042586631123
+      live_data_chip19012026_43p3_w1a_D1000B380_37:
+        main:
+          target: main
+          line_val:
+            val: 1.5687348105474535
+            err: 0.0024195440806241276
+          sigma:
+            val: 0.14648656985521744
+            err: 0.0025672078075423457
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.99050166904417
+            err: 0.06630656318520638
+          fwhm:
+            val: 0.34494951102289245
+            err: 0.00604531240496067
+          resolution:
+            val: 21.989026360836142
+            err: 0.39708918581493924
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 126.74708601231508
+            dof: 65
+            pars:
+              amplitude:
+                val: 62.187458010187605
+                err: 0.8444891016697484
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.7584427656975543
+                err: 0.0057968484443426
+              sigma:
+                val: 0.14648656985521744
+                err: 0.002567207807542345
+      live_data_chip19012026_43p3_w1a_D1000B380_38:
+        main:
+          target: main
+          line_val:
+            val: 1.559563440735926
+            err: 0.001206193056061106
+          sigma:
+            val: 0.1447615587432973
+            err: 0.0012608281298092823
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.739164230403226
+            err: 0.03305520107103908
+          fwhm:
+            val: 0.3408874202786418
+            err: 0.002969023353413781
+          resolution:
+            val: 21.857874541979772
+            err: 0.1953133980212876
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 290.95974680681513
+            dof: 66
+            pars:
+              amplitude:
+                val: 227.01476611546425
+                err: 1.581813974461497
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.780545148723029
+                err: 0.0029239383197925037
+              sigma:
+                val: 0.1447615587432973
+                err: 0.0012608281298092821
+      live_data_chip19012026_43p3_w1a_D1000B380_39:
+        main:
+          target: main
+          line_val:
+            val: 1.552820396573976
+            err: 0.0019513098770635481
+          sigma:
+            val: 0.13866540897038862
+            err: 0.0020393344435929686
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.55437401006153
+            err: 0.053474806552834694
+          fwhm:
+            val: 0.32653208459588556
+            err: 0.004802265626294761
+          resolution:
+            val: 21.02832274204544
+            err: 0.31648620632335767
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 175.20730456377137
+            dof: 65
+            pars:
+              amplitude:
+                val: 78.72213460763626
+                err: 0.9263467026393004
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.7969619751314982
+                err: 0.00477134987488287
+              sigma:
+                val: 0.13866540897038862
+                err: 0.002039334443592968
+      live_data_chip19012026_43p3_w1a_D1000B380_40:
+        main:
+          target: main
+          line_val:
+            val: 1.5499772794264743
+            err: 0.0024176584397523366
+          sigma:
+            val: 0.1412736806595618
+            err: 0.0025511698073197283
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.47645960945464
+            err: 0.06625488800945273
+          fwhm:
+            val: 0.3326740950524373
+            err: 0.006007545800554241
+          resolution:
+            val: 21.463159458410512
+            err: 0.39783895550207626
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 147.44165715724745
+            dof: 65
+            pars:
+              amplitude:
+                val: 55.0167427845019
+                err: 0.7821582304109582
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.8039267273528354
+                err: 0.0059333744298413265
+              sigma:
+                val: 0.1412736806595618
+                err: 0.0025511698073197287
+      live_data_chip19012026_43p3_w1a_D1000B380_41:
+        main:
+          target: main
+          line_val:
+            val: 1.5485640512083152
+            err: 0.0024084565051503645
+          sigma:
+            val: 0.139435987610595
+            err: 0.0025509425647442636
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.43773069895745
+            err: 0.066002712955897
+          fwhm:
+            val: 0.3283466586241162
+            err: 0.006007010685182452
+          resolution:
+            val: 21.203298524714786
+            err: 0.3976673864289704
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 142.1510605034046
+            dof: 64
+            pars:
+              amplitude:
+                val: 53.85723941431611
+                err: 0.7729261859436732
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.8073982121691787
+                err: 0.005921584570326029
+              sigma:
+                val: 0.139435987610595
+                err: 0.002550942564744263
+      live_data_chip19012026_43p3_w1a_D1000B380_42:
+        main:
+          target: main
+          line_val:
+            val: 1.5471469640534399
+            err: 0.0016951365947562758
+          sigma:
+            val: 0.13952758236711715
+            err: 0.0017926303982303449
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.398896035962004
+            err: 0.04645448811115237
+          fwhm:
+            val: 0.3285623477927943
+            err: 0.004221321995084629
+          resolution:
+            val: 21.236660474191737
+            err: 0.2799870386153077
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 188.79381220634323
+            dof: 64
+            pars:
+              amplitude:
+                val: 109.87907386058401
+                err: 1.1062174036799024
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.810885544158523
+                err: 0.004175409120414798
+              sigma:
+                val: 0.13952758236711715
+                err: 0.001792630398230345
+      live_data_chip19012026_43p3_w1a_D1000B380_43:
+        main:
+          target: main
+          line_val:
+            val: 1.5162668907378707
+            err: 0.00042313353812450146
+          sigma:
+            val: 0.13731460913793547
+            err: 0.0004493677679408696
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 41.5526409299445
+            err: 0.011595792325550414
+          fwhm:
+            val: 0.3233511940736004
+            err: 0.0010581802275379758
+          resolution:
+            val: 21.325480101741583
+            err: 0.07187176862873682
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 2205.8977456460007
+            dof: 62
+            pars:
+              amplitude:
+                val: 1800.2654583029373
+                err: 4.537196829652527
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.888497490788572
+                err: 0.0010851346232752768
+              sigma:
+                val: 0.13731460913793547
+                err: 0.00044936776794086953
+      live_data_chip19012026_43p3_w1a_D1000B380_44:
+        main:
+          target: main
+          line_val:
+            val: 1.486426780575134
+            err: 0.0022687167802193046
+          sigma:
+            val: 0.12941656288897915
+            err: 0.0024569705444484106
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 40.73488556611222
+            err: 0.062173205994306716
+          fwhm:
+            val: 0.3047527164499766
+            err: 0.005785723488117722
+          resolution:
+            val: 20.502369873345557
+            err: 0.4000994390700688
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 144.78307482430847
+            dof: 59
+            pars:
+              amplitude:
+                val: 56.129666909574915
+                err: 0.8005742807393929
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.9665593200081446
+                err: 0.006054115686448966
+              sigma:
+                val: 0.12941656288897915
+                err: 0.0024569705444484106
+      live_data_chip19012026_43p3_w1a_D1000B380_45:
+        main:
+          target: main
+          line_val:
+            val: 1.4891382171447316
+            err: 0.0019812592477474714
+          sigma:
+            val: 0.1304014405079031
+            err: 0.002100878417171254
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 40.809191317209894
+            err: 0.054295556154180434
+          fwhm:
+            val: 0.307071926008921
+            err: 0.004947190608927762
+          resolution:
+            val: 20.620780695407824
+            err: 0.34162311049824523
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 109.43147358073318
+            dof: 59
+            pars:
+              amplitude:
+                val: 74.09542638177862
+                err: 0.9172303672480164
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.959336972295943
+                err: 0.005267793748756769
+              sigma:
+                val: 0.1304014405079031
+                err: 0.0021008784171712546
+      live_data_chip19012026_43p3_w1a_D1000B380_46:
+        main:
+          target: main
+          line_val:
+            val: 1.4659882602324137
+            err: 0.00036590019063775873
+          sigma:
+            val: 0.127565468389633
+            err: 0.0003925725175844994
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 40.17477672107431
+            err: 0.010027337093913694
+          fwhm:
+            val: 0.30039372201766973
+            err: 0.000924437633536244
+          resolution:
+            val: 20.490868185400483
+            err: 0.06505792895243571
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 2382.1746061804147
+            dof: 57
+            pars:
+              amplitude:
+                val: 2235.395007867632
+                err: 5.132802008909108
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 4.021860310849464
+                err: 0.0010038275846935838
+              sigma:
+                val: 0.127565468389633
+                err: 0.00039257251758449923
+      live_data_chip19012026_43p3_w1a_D1000B380_47:
+        main:
+          target: main
+          line_val:
+            val: 1.4482148506622654
+            err: 0.0022386554780329205
+          sigma:
+            val: 0.12137690633790484
+            err: 0.002429983232964732
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 39.68770408862382
+            err: 0.06134938895835634
+          fwhm:
+            val: 0.2858207720483424
+            err: 0.005722173226074461
+          resolution:
+            val: 19.73607520442407
+            err: 0.40665541375276604
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 132.7841069459901
+            dof: 55
+            pars:
+              amplitude:
+                val: 54.103589772210526
+                err: 0.7968495098296038
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 4.071219126985041
+                err: 0.006293304475319825
+              sigma:
+                val: 0.12137690633790484
+                err: 0.002429983232964732
+      live_data_chip19012026_43p3_w1a_D1000B380_48:
+        main:
+          target: main
+          line_val:
+            val: 1.4483270523646319
+            err: 0.0019709896245717414
+          sigma:
+            val: 0.1211288657114169
+            err: 0.002118927208059402
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 39.69077892794046
+            err: 0.054014121555223206
+          fwhm:
+            val: 0.28523668100910654
+            err: 0.004989692263499744
+          resolution:
+            val: 19.69421758320476
+            err: 0.353249770597128
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 113.32659307415845
+            dof: 56
+            pars:
+              amplitude:
+                val: 64.32802195265036
+                err: 0.8508300517241608
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 4.070903730185672
+                err: 0.005539984219535451
+              sigma:
+                val: 0.1211288657114169
+                err: 0.002118927208059401
+      live_data_chip19012026_43p3_w1a_D1000B380_49:
+        main:
+          target: main
+          line_val:
+            val: 1.5500534956080385
+            err: 0.0022717046207455334
+          sigma:
+            val: 0.11830155191533759
+            err: 0.0024879980097807734
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 42.478548281076336
+            err: 0.0622550864767605
+          fwhm:
+            val: 0.27857886580850644
+            err: 0.005858787585428873
+          resolution:
+            val: 17.9722097719749
+            err: 0.38710215796122466
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 109.7948082305163
+            dof: 56
+            pars:
+              amplitude:
+                val: 48.88240609121779
+                err: 0.7445505249129701
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.8037396881500403
+                err: 0.005574628908077799
+              sigma:
+                val: 0.11830155191533759
+                err: 0.0024879980097807725
+      live_data_chip19012026_43p3_w1a_D1000B380_50:
+        main:
+          target: main
+          line_val:
+            val: 1.605905958076914
+            err: 0.002254320647638474
+          sigma:
+            val: 0.12132940388986602
+            err: 0.0024386455459544463
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 44.009160953686354
+            err: 0.06177868618281098
+          fwhm:
+            val: 0.2857089123315125
+            err: 0.005742571414338974
+          resolution:
+            val: 17.79113595628298
+            err: 0.36563941424736696
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 94.81138775023557
+            dof: 58
+            pars:
+              amplitude:
+                val: 50.947479639823825
+                err: 0.7552000027982975
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.6714478642700286
+                err: 0.0051538638894293816
+              sigma:
+                val: 0.12132940388986602
+                err: 0.002438645545954446
+      live_data_chip19012026_43p3_w1a_D1000B380_51:
+        main:
+          target: main
+          line_val:
+            val: 1.6339541312609327
+            err: 0.00229497427423951
+          sigma:
+            val: 0.11725339422605353
+            err: 0.002537269639807942
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 44.777809056586804
+            err: 0.06289278130615093
+          fwhm:
+            val: 0.276110643071427
+            err: 0.005974813407468199
+          resolution:
+            val: 16.89831053325534
+            err: 0.3754650578291977
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 97.82489657360651
+            dof: 55
+            pars:
+              amplitude:
+                val: 53.77122194016588
+                err: 0.8033700847910862
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.6084244270982193
+                err: 0.00506822136086352
+              sigma:
+                val: 0.11725339422605353
+                err: 0.0025372696398079427
+      live_data_chip19012026_43p3_w1a_D1000B380_52:
+        main:
+          target: main
+          line_val:
+            val: 1.6587620895362751
+            err: 0.00219491234751042
+          sigma:
+            val: 0.11683372012635651
+            err: 0.0023902447839914682
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 45.45766046580587
+            err: 0.060150627311012964
+          fwhm:
+            val: 0.2751223860890802
+            err: 0.005628596329873781
+          resolution:
+            val: 16.586006385399948
+            err: 0.3459707440368177
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 73.73968525130773
+            dof: 57
+            pars:
+              amplitude:
+                val: 50.6857037871417
+                err: 0.7514575345234357
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.5544578919381324
+                err: 0.004703340861800093
+              sigma:
+                val: 0.11683372012635651
+                err: 0.0023902447839914682
+      live_data_chip19012026_43p3_w1a_D1000B380_53:
+        main:
+          target: main
+          line_val:
+            val: 1.6878844447715904
+            err: 0.0023233833916518343
+          sigma:
+            val: 0.11575191943028908
+            err: 0.002592856723892866
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 46.255746065062375
+            err: 0.06367132093013261
+          fwhm:
+            val: 0.27257494012525213
+            err: 0.006105710987316198
+          resolution:
+            val: 16.148910013927985
+            err: 0.36977424753282456
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 99.7350427333436
+            dof: 56
+            pars:
+              amplitude:
+                val: 48.5714677925988
+                err: 0.7498592699718212
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.49313012408137
+                err: 0.004808315249488322
+              sigma:
+                val: 0.11575191943028908
+                err: 0.002592856723892867
+      live_data_chip19012026_43p3_w1a_D1000B380_54:
+        main:
+          target: main
+          line_val:
+            val: 1.7333498711178932
+            err: 0.0023828184263702374
+          sigma:
+            val: 0.11957436643880419
+            err: 0.0026202376312291476
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 47.501706487488676
+            err: 0.06530011245186185
+          fwhm:
+            val: 0.2815761149619721
+            err: 0.006170188096762809
+          resolution:
+            val: 16.24462087278286
+            err: 0.36368110134152054
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 82.95542359952184
+            dof: 58
+            pars:
+              amplitude:
+                val: 48.22161529908138
+                err: 0.7438984545020759
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.401506007669115
+                err: 0.004676015689351709
+              sigma:
+                val: 0.11957436643880419
+                err: 0.0026202376312291476
+      live_data_chip19012026_43p3_w1a_D1000B380_55:
+        main:
+          target: main
+          line_val:
+            val: 1.7555261909396662
+            err: 0.002352471942392566
+          sigma:
+            val: 0.12201328754164806
+            err: 0.002611101402773801
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 48.10943897860263
+            err: 0.06446848013177811
+          fwhm:
+            val: 0.28731933526319786
+            err: 0.006148673922860177
+          resolution:
+            val: 16.366565007464047
+            err: 0.35810076981343786
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 95.07081853293313
+            dof: 59
+            pars:
+              amplitude:
+                val: 52.06214475842673
+                err: 0.7754828042702585
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 3.3585371898348586
+                err: 0.004500567720006189
+              sigma:
+                val: 0.12201328754164806
+                err: 0.0026111014027738015
+      live_data_chip20012026_43p3_w1a_D1000B380:
+        main:
+          target: main
+          line_val:
+            val: 2.3370447012815405
+            err: 0.003277844993779681
+          sigma:
+            val: 0.1481482311345906
+            err: 0.003569598254779658
+          voltage: 380.0
+          energy: 5.896500294312254
+          gain:
+            val: 64.04570323521594
+            err: 0.08982792995253089
+          fwhm:
+            val: 0.34886242431161213
+            err: 0.008405761523062633
+          resolution:
+            val: 14.927503274554832
+            err: 0.36589895860397975
+          resolution_escape: null
+          time_from_start: null
+          gain_trend: null
+          model:
+            name: Fe55Forest
+            chisq: 93.48085215461158
+            dof: 76
+            pars:
+              amplitude:
+                val: 38.38131714784819
+                err: 0.6549362981076495
+              intensity1:
+                val: 0.16
+                err: null
+              energy_scale:
+                val: 2.522844341302874
+                err: 0.0035384401033024208
+              sigma:
+                val: 0.1481482311345906
+                err: 0.0035695982547796585
+    tasks:
+      gain:
+        main:
+          voltages:
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          drifts:
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          pressures:
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          times:
+          - 0.01509629625
+          - 0.009794444444444444
+          - 0.028814814861111107
+          - 0.047551851944444445
+          - 0.06685370375000001
+          - 0.08582777777777778
+          - 0.10401481486111111
+          - 0.12243703708333334
+          - 0.14225000000000002
+          - 0.16305925930555557
+          - 0.18282592597222222
+          - 0.20193333333333335
+          - 0.22096666666666667
+          - 0.2394648148611111
+          - 0.2579500001388889
+          - 0.27686111125
+          - 0.2958444445833333
+          - 0.3141777779166666
+          - 0.33283888902777775
+          - 0.35210555569444446
+          - 0.3710222223611111
+          - 0.3905259261111111
+          - 0.4120259261111111
+          - 0.43300185208333336
+          - 0.4517555558333333
+          - 0.47047962986111114
+          - 0.48957592611111117
+          - 0.5133277779166667
+          - 0.5368777779166667
+          - 0.5555462965277778
+          - 0.5743925929166667
+          - 0.593772222638889
+          - 0.7595759263888889
+          - 0.9247518523611111
+          - 1.070270370972222
+          - 1.2171407413888888
+          - 1.3909222229166667
+          - 1.5649981488888887
+          - 1.6153000006944442
+          - 1.6686111118055553
+          - 1.6922796304166665
+          - 1.768814814861111
+          - 1.7971944445833332
+          - 2.128692592777778
+          - 2.436720370416667
+          - 2.462194444444444
+          - 2.862825925972222
+          - 3.262022222222222
+          - 3.284672222222222
+          - 3.562214814861111
+          - 3.9141203704166663
+          - 4.261677777777778
+          - 4.564335185138889
+          - 4.975207407361111
+          - 5.581320370416667
+          - 6.066701851805556
+          - 20.83119259263889
+          gain_vals:
+          - val: 0.9895626899039024
+            err: 0.0017542032306357845
+          - val: 0.9604409583167332
+            err: 0.001915459968960042
+          - val: 0.9465178004238413
+            err: 0.0019146669287734121
+          - val: 0.9311422212223789
+            err: 0.0018895012012598994
+          - val: 0.9201357132559548
+            err: 0.0018769832145998182
+          - val: 0.9068717250566088
+            err: 0.0018753882491619395
+          - val: 0.8973633210140854
+            err: 0.0018646176865724454
+          - val: 0.8879004421840506
+            err: 0.0018563410095648878
+          - val: 0.8755976942291768
+            err: 0.001805440495478915
+          - val: 0.8685158795374017
+            err: 0.0017368739090571057
+          - val: 0.857839441750191
+            err: 0.0018161351453404005
+          - val: 0.8499399028972429
+            err: 0.0017801883497172715
+          - val: 0.84548998823463
+            err: 0.0018095053263955927
+          - val: 0.8378570778700705
+            err: 0.0017653082130656777
+          - val: 0.8314531817474531
+            err: 0.0017932382957314577
+          - val: 0.8264871677531475
+            err: 0.001766742123911308
+          - val: 0.8200624947062373
+            err: 0.0017732038937337891
+          - val: 0.8141279038691197
+            err: 0.001806109778893053
+          - val: 0.8098208755833853
+            err: 0.0017972355098884558
+          - val: 0.8054286030326798
+            err: 0.0017170115386998567
+          - val: 0.8004880594484749
+            err: 0.0017533523856561426
+          - val: 0.7957126649187629
+            err: 0.001709320749393026
+          - val: 0.7902843242714924
+            err: 0.001622515057542426
+          - val: 0.7876078619453747
+            err: 0.0016913281518331383
+          - val: 0.7839396015432651
+            err: 0.0016787534219404466
+          - val: 0.777003539395812
+            err: 0.0016464822413089215
+          - val: 0.7762020365852613
+            err: 0.0016849572948373262
+          - val: 0.775879192076147
+            err: 0.0015126346228157565
+          - val: 0.7684064169772036
+            err: 0.0016422364103501777
+          - val: 0.7673426697610864
+            err: 0.0016489785969464777
+          - val: 0.7632278486901312
+            err: 0.0016555237380726428
+          - val: 0.7596787922560354
+            err: 0.0016102598865124923
+          - val: 0.7359381080777487
+            err: 0.0010751484898103357
+          - val: 0.7160303316497845
+            err: 0.0015270263139328753
+          - val: 0.7038616413229127
+            err: 0.0010310254939256392
+          - val: 0.6894220534541967
+            err: 0.0014409197855973586
+          - val: 0.6793736127271346
+            err: 0.0009886834594634976
+          - val: 0.6712472421632427
+            err: 0.0013993580077668064
+          - val: 0.6673228971104938
+            err: 0.0010688313334510722
+          - val: 0.6644376103385923
+            err: 0.00125123949157922
+          - val: 0.6632210665788847
+            err: 0.0013912092069916805
+          - val: 0.6626163591818099
+            err: 0.0013877157167852465
+          - val: 0.6620100005810959
+            err: 0.00117823462043859
+          - val: 0.6487967003397117
+            err: 0.00092781331754395
+          - val: 0.6360283907963069
+            err: 0.00131839527053092
+          - val: 0.63718858964407
+            err: 0.0012318248633444403
+          - val: 0.6272829353364637
+            err: 0.0008936240725461792
+          - val: 0.619677856340584
+            err: 0.0012934329545750017
+          - val: 0.619725866420282
+            err: 0.0012111083344893063
+          - val: 0.6632536787841723
+            err: 0.0013454498875220264
+          - val: 0.6871524353797342
+            err: 0.0013635675415093686
+          - val: 0.6991539915196909
+            err: 0.0013877707671937451
+          - val: 0.7097690894088066
+            err: 0.001368602199501083
+          - val: 0.7222302781996522
+            err: 0.0014193145036483787
+          - val: 0.7416845172740575
+            err: 0.0014566023325780597
+          - val: 0.7511735611976129
+            err: 0.0014571365532148285
+          - val: 1.0
+            err: 0.0
+          gain_fit:
+            model:
+              name: StretchedExponential + Constant
+              chisq: 17179.08350582943
+              dof: 52
+              pars:
+                prefactor:
+                  val: 0.30201169799298155
+                  err: 0.0013466939402569382
+                scale:
+                  val: 0.47541078129186753
+                  err: 0.00279451146549557
+                stretch:
+                  val: 0.9786277615203806
+                  err: 0.008550530069492412
+                value:
+                  val: 0.6631774666223257
+                  err: 0.0003604736264780596
+      resolution:
+        main:
+          voltages:
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          - 380.0
+          drifts:
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          - 1000.0
+          pressures:
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
+          times:
+          - 0.01509629625
+          - 0.009794444444444444
+          - 0.028814814861111107
+          - 0.047551851944444445
+          - 0.06685370375000001
+          - 0.08582777777777778
+          - 0.10401481486111111
+          - 0.12243703708333334
+          - 0.14225000000000002
+          - 0.16305925930555557
+          - 0.18282592597222222
+          - 0.20193333333333335
+          - 0.22096666666666667
+          - 0.2394648148611111
+          - 0.2579500001388889
+          - 0.27686111125
+          - 0.2958444445833333
+          - 0.3141777779166666
+          - 0.33283888902777775
+          - 0.35210555569444446
+          - 0.3710222223611111
+          - 0.3905259261111111
+          - 0.4120259261111111
+          - 0.43300185208333336
+          - 0.4517555558333333
+          - 0.47047962986111114
+          - 0.48957592611111117
+          - 0.5133277779166667
+          - 0.5368777779166667
+          - 0.5555462965277778
+          - 0.5743925929166667
+          - 0.593772222638889
+          - 0.7595759263888889
+          - 0.9247518523611111
+          - 1.070270370972222
+          - 1.2171407413888888
+          - 1.3909222229166667
+          - 1.5649981488888887
+          - 1.6153000006944442
+          - 1.6686111118055553
+          - 1.6922796304166665
+          - 1.768814814861111
+          - 1.7971944445833332
+          - 2.128692592777778
+          - 2.436720370416667
+          - 2.462194444444444
+          - 2.862825925972222
+          - 3.262022222222222
+          - 3.284672222222222
+          - 3.562214814861111
+          - 3.9141203704166663
+          - 4.261677777777778
+          - 4.564335185138889
+          - 4.975207407361111
+          - 5.581320370416667
+          - 6.066701851805556
+          - 20.83119259263889
+          res_vals:
+          - val: 17.29614560976928
+            err: 0.28233647944083057
+          - val: 18.080301607595256
+            err: 0.3643854163512038
+          - val: 18.8657862882865
+            err: 0.3744658321372722
+          - val: 19.21735277998356
+            err: 0.37861712907111783
+          - val: 19.746300721593734
+            err: 0.37441955674652894
+          - val: 19.066477235448527
+            err: 0.3937551809906745
+          - val: 20.038939946943227
+            err: 0.3891413575661647
+          - val: 20.28960656386859
+            err: 0.3906270187460388
+          - val: 20.572662587945096
+            err: 0.3894842698639727
+          - val: 20.550934908810923
+            err: 0.35842454160066345
+          - val: 20.690210760012285
+            err: 0.41062404355367876
+          - val: 20.391840304282084
+            err: 0.39747817067294094
+          - val: 20.897034744138022
+            err: 0.40426840052043833
+          - val: 20.91146515125258
+            err: 0.39895052716814694
+          - val: 21.233807452725102
+            err: 0.4090524819819584
+          - val: 21.362457839007593
+            err: 0.4110915220862651
+          - val: 22.471253368474184
+            err: 0.41729297022266487
+          - val: 21.475608268365622
+            err: 0.44087424019990923
+          - val: 22.46981020930327
+            err: 0.43384935031451666
+          - val: 21.381017950179235
+            err: 0.4083855255923944
+          - val: 22.21223523232696
+            err: 0.4224083192319776
+          - val: 21.47898565772806
+            err: 0.4167841437692079
+          - val: 22.345280540032824
+            err: 0.3783933481988855
+          - val: 21.838466830613694
+            err: 0.41490166447748067
+          - val: 21.48376700301796
+            err: 0.4090088185755134
+          - val: 22.352254315806782
+            err: 0.3981495092399085
+          - val: 22.470189130834406
+            err: 0.4164291470008187
+          - val: 22.68902644232774
+            err: 0.3432447449097718
+          - val: 21.710973206193376
+            err: 0.3962823594277513
+          - val: 21.892339632516514
+            err: 0.4122959059508575
+          - val: 22.499031605973855
+            err: 0.42492177599454967
+          - val: 22.15248981541167
+            err: 0.4036380228255341
+          - val: 23.05480058293394
+            err: 0.10312424700626963
+          - val: 21.756455586392725
+            err: 0.3986610086846044
+          - val: 22.358836908136208
+            err: 0.10704870889196602
+          - val: 22.019164058433933
+            err: 0.3973784551539523
+          - val: 22.03583116615627
+            err: 0.09961900229022001
+          - val: 21.989026360836142
+            err: 0.39708918581493924
+          - val: 21.857874541979772
+            err: 0.1953133980212876
+          - val: 21.02832274204544
+            err: 0.31648620632335767
+          - val: 21.463159458410512
+            err: 0.39783895550207626
+          - val: 21.203298524714786
+            err: 0.3976673864289704
+          - val: 21.236660474191737
+            err: 0.2799870386153077
+          - val: 21.325480101741583
+            err: 0.07187176862873682
+          - val: 20.502369873345557
+            err: 0.4000994390700688
+          - val: 20.620780695407824
+            err: 0.34162311049824523
+          - val: 20.490868185400483
+            err: 0.06505792895243571
+          - val: 19.73607520442407
+            err: 0.40665541375276604
+          - val: 19.69421758320476
+            err: 0.353249770597128
+          - val: 17.9722097719749
+            err: 0.38710215796122466
+          - val: 17.79113595628298
+            err: 0.36563941424736696
+          - val: 16.89831053325534
+            err: 0.3754650578291977
+          - val: 16.586006385399948
+            err: 0.3459707440368177
+          - val: 16.148910013927985
+            err: 0.36977424753282456
+          - val: 16.24462087278286
+            err: 0.36368110134152054
+          - val: 16.366565007464047
+            err: 0.35810076981343786
+          - val: 14.927503274554832
+            err: 0.36589895860397975
+folder_tasks: {}
+artifacts:
+  figures:
+  - name: trend:pulse
+    file: pulse.png
+    folder: trend
+  - name: trend:calibration
+    file: calibration.png
+    folder: trend
+  - name: trend:gain
+    file: gain.png
+    folder: trend
+  - name: trend:resolution
+    file: resolution.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_0
+    file: live_data_chip19012026_43p3_w1a_D1000B380_0.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_1
+    file: live_data_chip19012026_43p3_w1a_D1000B380_1.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_2
+    file: live_data_chip19012026_43p3_w1a_D1000B380_2.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_3
+    file: live_data_chip19012026_43p3_w1a_D1000B380_3.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_4
+    file: live_data_chip19012026_43p3_w1a_D1000B380_4.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_5
+    file: live_data_chip19012026_43p3_w1a_D1000B380_5.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_6
+    file: live_data_chip19012026_43p3_w1a_D1000B380_6.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_7
+    file: live_data_chip19012026_43p3_w1a_D1000B380_7.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_8
+    file: live_data_chip19012026_43p3_w1a_D1000B380_8.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_9
+    file: live_data_chip19012026_43p3_w1a_D1000B380_9.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_10
+    file: live_data_chip19012026_43p3_w1a_D1000B380_10.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_11
+    file: live_data_chip19012026_43p3_w1a_D1000B380_11.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_12
+    file: live_data_chip19012026_43p3_w1a_D1000B380_12.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_13
+    file: live_data_chip19012026_43p3_w1a_D1000B380_13.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_14
+    file: live_data_chip19012026_43p3_w1a_D1000B380_14.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_15
+    file: live_data_chip19012026_43p3_w1a_D1000B380_15.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_16
+    file: live_data_chip19012026_43p3_w1a_D1000B380_16.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_17
+    file: live_data_chip19012026_43p3_w1a_D1000B380_17.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_18
+    file: live_data_chip19012026_43p3_w1a_D1000B380_18.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_19
+    file: live_data_chip19012026_43p3_w1a_D1000B380_19.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_20
+    file: live_data_chip19012026_43p3_w1a_D1000B380_20.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_21
+    file: live_data_chip19012026_43p3_w1a_D1000B380_21.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_22
+    file: live_data_chip19012026_43p3_w1a_D1000B380_22.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_23
+    file: live_data_chip19012026_43p3_w1a_D1000B380_23.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_24
+    file: live_data_chip19012026_43p3_w1a_D1000B380_24.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_25
+    file: live_data_chip19012026_43p3_w1a_D1000B380_25.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_26
+    file: live_data_chip19012026_43p3_w1a_D1000B380_26.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_27
+    file: live_data_chip19012026_43p3_w1a_D1000B380_27.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_28
+    file: live_data_chip19012026_43p3_w1a_D1000B380_28.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_29
+    file: live_data_chip19012026_43p3_w1a_D1000B380_29.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_30
+    file: live_data_chip19012026_43p3_w1a_D1000B380_30.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_31
+    file: live_data_chip19012026_43p3_w1a_D1000B380_31.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_32
+    file: live_data_chip19012026_43p3_w1a_D1000B380_32.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_33
+    file: live_data_chip19012026_43p3_w1a_D1000B380_33.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_34
+    file: live_data_chip19012026_43p3_w1a_D1000B380_34.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_35
+    file: live_data_chip19012026_43p3_w1a_D1000B380_35.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_36
+    file: live_data_chip19012026_43p3_w1a_D1000B380_36.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_37
+    file: live_data_chip19012026_43p3_w1a_D1000B380_37.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_38
+    file: live_data_chip19012026_43p3_w1a_D1000B380_38.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_39
+    file: live_data_chip19012026_43p3_w1a_D1000B380_39.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_40
+    file: live_data_chip19012026_43p3_w1a_D1000B380_40.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_41
+    file: live_data_chip19012026_43p3_w1a_D1000B380_41.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_42
+    file: live_data_chip19012026_43p3_w1a_D1000B380_42.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_43
+    file: live_data_chip19012026_43p3_w1a_D1000B380_43.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_44
+    file: live_data_chip19012026_43p3_w1a_D1000B380_44.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_45
+    file: live_data_chip19012026_43p3_w1a_D1000B380_45.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_46
+    file: live_data_chip19012026_43p3_w1a_D1000B380_46.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_47
+    file: live_data_chip19012026_43p3_w1a_D1000B380_47.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_48
+    file: live_data_chip19012026_43p3_w1a_D1000B380_48.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_49
+    file: live_data_chip19012026_43p3_w1a_D1000B380_49.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_50
+    file: live_data_chip19012026_43p3_w1a_D1000B380_50.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_51
+    file: live_data_chip19012026_43p3_w1a_D1000B380_51.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_52
+    file: live_data_chip19012026_43p3_w1a_D1000B380_52.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_53
+    file: live_data_chip19012026_43p3_w1a_D1000B380_53.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_54
+    file: live_data_chip19012026_43p3_w1a_D1000B380_54.png
+    folder: trend
+  - name: trend:live_data_chip19012026_43p3_w1a_D1000B380_55
+    file: live_data_chip19012026_43p3_w1a_D1000B380_55.png
+    folder: trend
+  - name: trend:live_data_chip20012026_43p3_w1a_D1000B380
+    file: live_data_chip20012026_43p3_w1a_D1000B380.png
+    folder: trend
