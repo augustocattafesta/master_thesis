@@ -161,6 +161,7 @@ Another important property of photoelectric effect is its dependence on the phot
 
 \begin{equation}
 \frac{d \sigma}{d \Omega} \propto \frac{\sin^2 \theta \cos^2 \phi}{(1 - \beta \cos \theta)^4},
+\label{eq:polarization_photo}
 \end{equation}
 where $\phi$ is the angle between the polarization vector and the direction of emission of the photoelectron, and $\theta$ is the polar angle, which measures the angle between the incidence direction of the photon and that of emission of the photoelectron. This dependence can be exploited to measure the degree of polarization of a source, which can be inferred by tracking photoelectrons and studying counts distribution as a function of $\phi$, which is equal to
 
@@ -324,6 +325,7 @@ Material & $w$ [eV] & Fano factor \\
 \toprule
 Argon & 26 & 0.2 \\
 Xenon & 22 & 0.15 \\
+Dimethyl-ether & 28 & 0.3 \\
 Silicon & 3.6 & 0.12 \\
 Germanium & 3.0 & 0.08--0.13\\
 Cadmium-telluride & 4.4 & 0.15 \\
@@ -371,13 +373,14 @@ The minimal dispersion is obtained when the gas is in thermal equilibrium and th
     \centering
     \includegraphics[width=0.8\linewidth]{figures/chapter2/diff_coeff}
     \caption{Dependence of transverse and longitudinal diffusion widths on the drift field for various gases, for a drift distance of 1 cm. It can be seen that $\sigma_T > \sigma_L$. Image taken from \cite{kolanoski2020}.}
-    \label{fig:fig:diffusion}
+    \label{fig:diffusion}
 \end{figure}
 
 The multiplication region is where charges are multiplied and it is achieved by accelerating charges in a small region with a strong electric field, with typical peak values of the order of 100 kV/cm. The kinetic energy acquired by the charges is used to start a ionization avalanche, producing new electron-ion pairs that are accelerated by the electric field and in turn continue to ionize the gas. The induced current produced by the charges generates an amplified signal that exceeds electronic noise and can be read and processed. Depending on the voltage applied to the electrodes and the resulting intensity of the electric field, charge multiplication has different working regimes. At low voltages multiplication does not take place and recombination is the dominant process. At higher voltages recombination is not favored, and in a specific voltages interval multiplication occurs and the number of final electron-ion pairs is proportional to the number of primary ionization pairs. The ratio between the initial and final number of pairs represents the gain of the detector. The proportional regime is essential for spectroscopy, as it is possible to directly measure the photon energy. In this voltage interval, which is called proportional counting region, gain grows exponentially with voltage
 
 \begin{equation}
 G = e^{a V}.
+\label{eq:exp_gain}
 \end{equation}
 When the voltage becomes too high the response becomes non-linear and even few primary ionization electrons can produce a large pulse. This regime is called Geiger-Muller region. Detectors working in this regime are able to detect radiation but can not measure the released energy.
 
@@ -412,7 +415,6 @@ The $pn$ junction  consists of two differently doped semiconductor materials, on
 
 \begin{equation}
 d \simeq \sqrt{\frac{2\varepsilon \varepsilon_0}{eN_D} V_{bi}},
-\label{eq:dep_zone}
 \end{equation}
 where $\varepsilon$ and $\varepsilon_0$ are the dielectric constant of the material and vacuum, $e$ is the electron charge and $N_D$ is the doping donors concentration. For silicon the typical value of the built-in voltage is 0.6 V. The resulting depletion zone width is of the order of some micrometers and when radiation interacts within this region the produced electron-hole pairs are separated by the electric field and recombination is avoided. The current induced by moving charges is then read and represent the relevant signal. However, due to the very small width of the depletion region, sensitivity to high energy radiation is limited. By applying an external voltage difference $V_{ext}$ to the junction it is possible to extend the depletion zone, thus increasing sensitivity. Specifically, a voltage with the same direction of the built-in voltage (negative at $p$, positive at $n$) must be applied, which is usually called reverse bias. The reverse bias causes a weakening of the diffusion current, thus charge carriers are pushed away from the interface and consequently the depletion zone becomes larger. Under reverse bias, the depletion zone width is given by
 

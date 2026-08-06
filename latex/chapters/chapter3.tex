@@ -1,15 +1,166 @@
 \chapter{The heritage of IXPE}
 \label{chap:chapter3}
 
-Imaging X-ray Polarimetry Explorer (IXPE) is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of doing imaging, spectroscopy and timing measurements as well. IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions. This large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD), the class of detectors used on board of IXPE. GPD use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source by studying the distribution of events as a function of the emission angle.
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter3/casa_combined_image}
+    \caption{Composite X-ray (Chandra, blue) and optical (Hubble, gold) image of the supernova remnant Cassiopeia A, overlaid with IXPE magnetic field direction measurements. The white and green segments indicate the reconstructed magnetic field orientation across different regions of the remnant, with green line segments highlighting regions with higher statistical significance. Credits to NASA/CXC/SAO and NASA/MSFC/J. Vink et al.}
+    \label{fig:casa_combined_image}
+\end{figure}
 
-As of 2026, IXPE is still carrying on observational campaigns, even though the nominal lifetime is only two years. In five years of operations IXPE has observed and measured the polarization of more than \fix{N} sources. 
+Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of performing imaging, spectroscopy and timing measurements. A demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the supernova remnant Cassiopeia A, the first official science target observed by IXPE after its commissioning.
 
-IXPE consists of three identical and independent X-ray telescopes. Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV. On the focal plane 
+IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
+The large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD) \cite{baldini2021}, the detectors used on board of IXPE.
+
+GPDs use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source on a statistical basis, by studying the distribution of the emission angle measured for all the events.
+
+As of 2026, IXPE is still carrying on observational campaigns, even though the predicted lifetime was of only two years. In five years of operations IXPE has observed and measured the polarization of about 100 sources, ranging from accreting stellar-mass and supermassive black holes in AGN to magnetars, supernova remnants and pulsar wind nebulae.
+
+These observations have led to important results in different fields of high-energy astrophysics. For example, IXPE allowed to map the magnetic field geometry and turbulence in supernova remnants, constrain the orientation of accretion disks around black holes, and perform phase-resolved polarimetry on accreting neutron stars, combining timing and polarization measurements to better understand the emission geometry.
+
+Beyond its polarimetric capabilities, the observatory provides valuable spatial and spectral diagnostics. Each telescope delivers an angular resolution characterized by a half-power diameter (HPD, the diameter enclosing 50\% of the focused photons) of $\lesssim 30$ arcsec over a $12.9 \times 12.9$ arcmin$^2$ square field of view. Furthermore, the GPD enables imaging spectroscopy with an energy resolution of about 17\% FWHM at 5.9 keV, providing the necessary energy discrimination to isolate different emission components in complex extended structures.
+
+In the future, IXPE will continue its observational program by targeting fainter sources and monitoring variable sources over long time scales, providing new information on physics in extreme magnetic and gravitational fields.
+
+IXPE consists of three identical and independent X-ray telescopes. Using three independent telescopes provides redundancy and increases the total effective area while keeping the focal spot small to minimize background noise.
+
+Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. To fit inside the launch vehicle fairing while maintaining this focal length, IXPE uses a deployable boom that was extended once in orbit. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV.
+
+A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information. Additionally, each DU is equipped with onboard calibration sources (such as $^{55}\text{Fe}$) that can be exposed to the detector during flight. These sources are used to perform periodic calibrations and continuously monitor detector performance, such as gain variations, energy resolution, and systematic effects over time.
+
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe}
+    \caption{Schematic of the IXPE Observatory. Photons enter through the three Mirror Module Assemblies and are collected by the Detector Units, where GPDs are located. Images courtesy of NASA.}
+    \label{fig:ixpe}
+\end{figure}
 
 \section{Gas Pixel Detector}
-\cite{baldini2021}
+
+The Gas Pixel Detector (GPD) represents an important innovation for MicroPattern Gas Detectors (MPGD) \cite{bellazzini2004, bellazzini2006}. In traditional gas detectors, reading out signals with high spatial resolution requires complex printed circuit board (PCB) connections to external electronics. However, this PCB approach becomes a big problem when using thousands of channels, because it increases electronic noise and cross-talk between nearby pixels.
+
+To solve this problem, the GPD puts the readout electronics directly inside the anode of the detector. This is done using a custom CMOS Application-Specific Integrated Circuit (ASIC). The top metal layer of the chip forms a grid of small hexagonal pixels that act directly as the charge collecting anode. Below each pixel, the silicon layers contain a complete electronic chain. This design allows gas detectors to have high spatial resolution and integration similar to solid-state detectors, while keeping the noise low.
+
+The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon, as described by Eq. \ref{eq:polarization_photo}. Photons pass through a 50 $\mu$m thick beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the 2D shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
+
+By studying the 2D charge distribution of these tracks, the GPD can reconstruct the photon absorption point for imaging purposes, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
+
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd}
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/track}
+    \caption{The left panel shows the design of the GPD. A photon is aboserbed by the gas volume, producing a photoelectron which is drifted toward the GEM. The produced track is used to reconstruct the photoelectron emission direction. The signal is amplified by the GEM and is read with the dedicated pixelated readout ASIC. The right panel shows an example of a real track from a 5.9 keV photon. Images taken from \cite{baldini2021}.}
+    \label{fig:gpd}
+\end{figure}
+
+\subsection{Gas cell}
+The GPD active gas volume consists of pure dimethyl-ether (DME). The choice of the gas was made because in order to work as a polarimeter it has to satisfy different requirements. The first is that a light-gas mixture enables to produce long and straight tracks, allowing for a higher efficiency in the polarization level estimate than high-$Z$ gases.
+
+On the other hand, employing a gas mixture with low-$Z$ elements reduces the detector quantum efficiency.  However, there is another constraint which limits the maximum $Z$ that can be used, which is the $K$-edge energy. Indeed, the modulation described by Eq. \ref{eq:polarization_photo} holds only for absorption by spherical shells, thus it is fundamental that the $K$-edge energy is below the design sensitivity range of 2--8 keV.
+
+DME therefore represents a good compromise to satisfy the design requirements. Furthermore, its quenching properties help suppress accidental electrical discharges, ensuring detector stability and safety.
+
+Another important property of DME is that its transverse diffusion coefficient is low, about 68 $\mu$m cm$^{-\frac{1}{2}}$ with an electric field of 2 kV/cm, much lower than other typical gas mixtures (see Fig. \ref{fig:diffusion} for some examples), enabling to limit the track blurring, which represents a limiting factor in the reconstruction of the photoelectron emission direction.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/gem_field}
+    \includegraphics[width=0.4\linewidth]{figures/chapter3/gem}
+    \caption{Electric field produced by GEM holes (left panel) when applying a voltage difference between the two copper electrodes. Photograph of a GPD GEM (right panel), with the darker region representing its active area. Images taken from \cite{kolanoski2020, baldini2021}.}
+    \label{fig:gem}
+\end{figure}
+
+
+\subsection{GEM}
+The GEM \cite{sauli1997} represents the amplification stage of the GPD. A GEM usually consists of a 50 $\mu$m thick Kapton foil with a copper coating on both sides. The GEM is then etched to create holes, which can be tens of micrometers wide. A voltage difference is applied to the copper coatings on the two opposite faces of the GEM to generate a strong electric field inside the holes, as shown in Fig. \ref{fig:gem}.
+
+The GEM employed inside the GPD is made of liquid crystal polymers (LCP) instead of Kapton, and holes have diameter of 30 $\mu$m. The holes pattern follows a hexagonal grid to match the ASIC pixel pattern. The GPD GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the production process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
+
+The GEM production process affects the GPD performances. In particular, it introduces spatially dependent spurious modulations, as shown in Fig. \ref{fig:spurious_mod}. The real cause behind this systematic effect is not known, but one hypothesis is that GEM holes pitch can vary along one direction.
+
+In principle this systematic effect could be corrected by taking multiple acquisitions similar to that of Fig. \ref{fig:spurious_mod} by varying the source energy. However, the statistical accuracy required to correct this effect would require to spend a prohibitive amount of time acquiring data for each detector. Instead of applying a direct correction, the solution adopted to mitigate this effect consists of exploiting the observatory dithering.
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/spurious_mod}
+    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
+    \label{fig:spurious_mod}
+\end{figure}
+
+Another important effect that depends on the GEM is rate-dependent gain variations. When the detector is operating and is irradiated by a source, part of the charge that is produced by the avalanche inside the GEM holes is temporarily deposited onto the dielectric substrate. This charging phenomenon has the effect of modifying the electric field configuration, with a consequent decrease of the gain.
+
+When the detector is constantly illuminated by a fixed rate source, the gain does not decrease indefinitely but reaches a saturation level after it remains approximately constant. The asymptotic gain value and time scale of the charging process depend on the input energy flux.
+
+This charging effect is reversible because the charge trapping on the dielectric substrate is not permanent. This phenomenon, which consists of a discharging of the dielectric, is a competing process of charging and is continuously at play, but on much longer time scales. When the incoming flux is sufficiently low, discharging dominates over charging and the gain increases.
+
+In general charging and discharging can be described as rate-dependent, and an example of these processes at play for GPD is shown in Fig. \ref{fig:rate_gain}.
+
+These gain variations can be modeled using phenomenological models and can be applied to correct observations. However, limiting the charging and reducing the gain variations amplitude can improve the detector sensitivity to polarization.
+
+Reducing the systematic effects that have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative which is being developed will be presented in Chap. \ref{chap:chapter5}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/rate_gain}
+    \caption{Charging and discharging effects as a function of time for GPD. The different colors data points represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes almost 10\% of gain decrease. Then, the gain gradually recovers when using lower flux sources. Image taken from \cite{baldini2021}.}
+    \label{fig:rate_gain}
+\end{figure}
+
+\subsection{XPOL-I}
+The GPD ASIC, named XPOL-I, which is the first generation of the XPOL family, acts as the readout anode and is responsible for the collection of charges produced by the GEM during the multiplication stage.
+
+The chip is organized as a matrix of \num{105600} hexagonal pixels, with 300 columns and 352 rows, with a horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m, as shown in Fig. \ref{fig:gpd_layout}. This is the layout that was replicated on the GEM in order to align each hole to the correspondent pixel.
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd_layout}
+    \caption{Geometrical layout of the readout XPOL-I ASIC. The pixels have a hexagonal shape, with horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m. The total active area of the chip is $15 \times 15$ mm$^2$. The inset shows the morphology of a trigger mini-cluster. Image taken from \cite{baldini2021}.}
+    \label{fig:gpd_layout}
+\end{figure}
+
+A pixel consists of a hexagonal metal electrode, which is connected to its own charge-sensitive amplifier and shaping circuit. The ASIC is self-triggering and has an on-chip signal processing to localize the position of an event. After an event triggers the chip, the maximum of the shaped pulse is stored inside each pixel for readout.
+
+The data acquisition (DAQ) is performed through a dedicated board with an analog-to-digital converter (ADC) and a Field Programmable Gate Array (FPGA). The ADC is responsible for the serial readout, with a resolution of 14 bits and a full dynamic range of 2.4 V. Considering the GEM gain, this corresponds to a  resolution of 2.3 electrons/ADC count. The FPGA controls various aspects of the detector, including the ASIC configuration, readout and data formatting.
+
+The trigger logic is based on the so-called mini-clusters, which are sets of four adjacent pixels that are logically OR-ed together. An example of mini-cluster is shown in the inset of Fig. \ref{fig:gpd_layout}. When the OR-ed shaped signal exceeds the trigger threshold, the event is triggered. The trigger region consists of the smallest rectangle that contains all triggered mini-clusters.
+
+Given that the shape of a photoelectron track is elongated and the portion that triggers the event is usually limited to its end, which corresponds to the Bragg peak, the chip automatically extends the readout region with a padding of 4 or 5 additional mini-clusters along each side of the $x$ and $y$ coordinates, respectively. This extended region, usually called region of interest (ROI), allows to have a high probability of including the entire track in the ROI.
+
+The ASIC calculates the coordinates of the upper-left and lower-right points of the ROI and then the DAQ board serially reads all the pixels inside it, which are typically around 500--800 pixels. The ability of the ASIC to limit the readout to a small region allows the total readout time to be reduced of more than two orders of magnitude with respect to a full chip readout.
+
+A peculiar feature of XPOL-I is that the ROI is sequentially read two times in close succession. The first readout is used to read the pixel values, while the second one is used to perform online pedestal subtraction. Furthermore, the resulting data are zero-suppressed, allowing for a compression of the event size.
+
+The choice of performing online pedestal subtraction has been made because of a systematic effect induced by the ASIC digital activity during the readout, which consists of a tiny shift of the pixel baseline with an amplitude of about 10 electrons. This effect is manifested as vertical structures in the ROI, with the amplitude that changes across even and odd columns. The reason behind this could be related to the intrinsic asymmetries in the ASIC layout, such as the horizontal readout or how the bias voltage is distributed across the chip.
+
+This effect contributes to the spurious modulation already described above and even though the online pedestal subtraction can reduce its magnitude, there is still a residual effect.
+
+A limiting aspect of the entire readout process of XPOL-I is the 1 ms dead time for a typical event. The dead time required for an event can be factored in two terms, one constant and one which scales linearly with the ROI number of pixels. Reducing the dead time is essential for the next generation of X-ray polarimetry observatories, which with a larger mirror effective area than IXPE will observe much higher rates even from moderately bright sources and the current GPDs would not be able to take advantage of it.
 
 \section{XPOL-III}
 \label{sec:xpol3}
-\cite{minuti2023}
+XPOL-III \cite{minuti2023} is the new generation of ASIC designed for high-throughput X-ray polarimetry. As mentioned above, GPDs present a few aspects that need to be improved to meet the requirements of the next polarimetry observatories, such as the enhanced X-ray Timing and Polarimetry (e-XTP) mission.
+
+In this regard, the new ASIC needs to be capable of analyzing higher rates than the current XPOL-I on board of the IXPE mission. This has been achieved with XPOL-III by improving many different aspects.
+
+There are two major aspects that have been improved in order to speed up the readout. The first is reducing the average size of the ROI and the second is modifying the readout electronics design to increase the clock frequency and reduce unnecessary delays. 
+
+The chip has a layout similar to XPOL-I, with hexagonal pixels over a grid of 304 columns and 352 rows. The pixels act as anodes and are responsible for charge collection. The trigger logic is the same as that of XPOL-I, with mini-clusters representing the smallest building block of the event trigger. The smallest rectangle that contains all the triggered mini-clusters takes the name of region of trigger (ROT).
+
+The first difference with respect to XPOL-I is that the chip calculates and stores the upper-left and lower-right coordinates of the ROT, instead of the ROI. The second difference is that XPOL-III allows to choose a custom padding on each side of the ROT for each event, instead of a fixed one for all events as in the previous generation. By using the coordinates of the ROT and the padding information it is possible to define the ROI.
+
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.54\linewidth]{figures/chapter3/track}
+    \includegraphics[width=0.45\linewidth]{figures/chapter3/track_xpol3}
+    \caption{Comparison between the real photoelectron tracks produced by a 5.9 keV source read with XPOL-I (left panel) and XPOL-III (right panel). It is evident that the size of the ROI is noticeably reduced with the new ASIC generation, going from ~1000 pixels to ~300 pixels. Images taken from \cite{baldini2021, minuti2023}.}
+    \label{fig:xpol_tracks}
+\end{figure}
+
+Another important change is the transition from a DC-coupled trigger to an AC-coupled trigger. Variations of the DC offsets across different mini-cluster amplifiers made it necessary to set a high trigger threshold for XPOL-1. With the AC coupling this issue is overcome, allowing the threshold to be lowered. The consequence is that the chip is more sensitive to the low density ionization portion of the photoelectron track, the ROT includes almost the entire track and the necessary padding is reduced. 
+
+As a result of these changes, the average ROI size is about three times smaller than XPOL-I, allowing to reduce the amount of time required for the readout. A comparison between the XPOL-I and XPOL-III ROIs is shown in Fig. \ref{fig:xpol_tracks}. 
+
+The ROI average size reduction, combined with a deep renovation of the readout electronics to increase of up to a factor two the maximum serial readout clock with respect to XPOL-I and to improve the overall readout logic, enables to reduce the average readout time from about 1 ms to about 150 $\mu$s.
