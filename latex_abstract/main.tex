@@ -1,0 +1,72 @@
+\documentclass[12pt, a4paper]{article}
+
+
+% List of essential packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[a4paper, top=3cm, bottom=3cm, inner=2.5cm, outer=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{siunitx}
+
+\newcommand{\fix}[1]{{\color{red}\textbf{#1}}}
+
+\title{Abstract}
+\author{Candidate: Augusto Cattafesta\\Supervisor: Prof. Luca Baldini}
+\date{Academic Year 2025/2026}
+
+\begin{document}
+
+\maketitle
+
+%Questo lavoro di tesi è focalizzato sulla caratterizzazione, lo studio delle prestazioni e lo sviluppo di algoritmi di ricostruzione per prototipi di rivelatori a gas e a stato solido per raggi X, dedicati a polarimetria, imaging e spettroscopia.
+%
+%Lo sviluppo di questi detector si basa sull'esperienza acquisita nel corso degli ultimi venti anni nella realizzazione dei Gas Pixel Detectors (GPDs), una classe di polarimetri fotoelettrici per raggi X, impiegati a bordo della missione Imaging X-ray Polarimetry Explorer (IXPE) finanziata dalla NASA e dall'Agenzia Spaziale Italiana (ASI). IXPE è dedicata allo studio della polarizzazione, combinata con imaging, spettroscopia e timing di sorgenti astrofisiche nel range di energie tra i 2 e 8 keV.
+%
+%I GPD hanno rivoluzionato la polarimetria a raggi X grazie all'utilizzo di Micro-Pattern Gaseous Detector (MPGD), in cui viene impiegato un Gas Electron Multiplier (GEM) combinato con un Application Specific Integrated Circuit (ASIC) finemente pixelato per la lettura del segnale per tracciare il fotoelettrone rilasciato in seguito all'assorbimento di un fotone X nel gas. Questo approccio ha permesso di incrementare di due ordini di grandezza la sensibilità di IXPE rispetto alla precedente tecnologia, basata sui cristalli di Bragg e ferma agli anni 70.
+%
+%L'ASIC dei GPD, chiamato XPOL, permette di effettuare una lettura event-driven in cui è possibile leggere la regione del chip interessata dal segnale rilasciato dal fotoelettrone, che solitamente comprende circa un migliaio di pixel. Questo permette di ridurre notevolmente i tempi di lettura richiesti rispetto alla lettura dell'intero chip, composto da piu di centomila pixel.
+%
+%Nonostante ciò, i GPD non soddisfano i requisiti di velocità richiesti dalla prossima generazione di polarimetri X, che impiegheranno specchi più grandi e dunque devono essere in grado di rivelare eventi ad un rate maggiore rispetto a IXPE. Per questo motivo negli ultimi anni sono in corso degli upgrade per migliorare le prestazioni dei GPD.
+%
+%Il primo miglioramento riguarda proprio l'ASIC di lettura, la cui elettronica è stata riprogettata per incrementare la velocità di lettura degli eventi e anche per definire in modo più intelligente la regione di interesse di ciascun evento. Questo redesign, chiamato XPOL-III, è stato testato negli scorsi anni e ha dimostrato di possedere la stessa sensibilità dei GPD a bordo di IXPE ma con una velocità di lettura migliore di circa un ordine di grandezza.
+%
+%Oltre alla velocità di lettura, i GPD attuali presentano anche alcuni problemi dovuti alla GEM. Infatti, lo stadio di amplificazione introduce degli effetti sistematici che comportano la comparsa di variazioni nella risposta azimutale del detector (modulazione spuria), la cui conseguenza è la rivelazione di polarizzazione anche per sorgenti non polarizzate. Inoltre, la GEM presenta anche variazioni nel tempo del fattore di moltiplicazione della carica che causano la degradazione della risoluzione energetica.
+%
+%Per ridurre questi effetti sistematici e migliorare la stabilità del detector nel tempo una delle possibili soluzioni consiste nel sostituire la GEM con delle strutture a micro-gap costruite direttamente sull'ASIC, creando un detector monolitico con lo stadio di guadagno implementato nel chip di lettura. Questa è l'idea dietro $\mu$GPD e in questo lavoro di tesi mi sono dedicato alla caratterizzazione dei prototipi del detector, e in particolare allo studio del gain e della sua variazione nel tempo e della risoluzione energetica.
+%
+%I risultati ottenuti da XPOL-III hanno aperto la strada allo sviluppo di una nuova classe di detector per raggi X pensati per applicazioni diverse dalla polarimetria dove è richiesto energy-resolved imaging come ad esempio diffrazione X, synchrotron based material science, ma anche astrofisica soft-x. Questo è il progetto Analog Spectral Imager for X-rays (ASIX), che consiste nello sviluppo di Hybrid Pixel Detectors (HPD) in cui un sensore a stato solido pixelato viene accoppiato ad un ASIC della famiglia XPOL, ereditando il paradigma di readout event-driven dei GPD.
+%
+%L'approccio event-driven permette di sfruttare il charge sharing, tipico di detector con pixel piccoli come quelli dei chip XPOL (50 $\mu$m), per ottenere una migliore risoluzione spaziale attraverso analisi offline. Ottimizzando alcuni parametri di design del sensore che definiscono la geometria del charge sharing è possibile allo stesso tempo avere anche una risoluzione energetica elevata facendo in modo che il rapporto segnale-rumore, che dipende dal numero di pixel coinvolti nell'evento, sia grande.
+%
+%Il mio lavoro nel progetto ASIX si è focalizzato sullo sviluppo del software di simulazione Monte Carlo del detector, sulla calibrazione e sullo sviluppo di diversi algoritmi per la ricostruzione offline della posizione di incidenza e dell'energia dei fotoni. Le prestazioni di questi algoritmi sono state valutate e confrontate sia attraverso simulazioni dedicate sia analizzando i dati acquisiti in laboratorio con un prototipo di detector. Da queste analisi è possibile stabilire la risoluzione spaziale ed energetica del detector.
+%
+%Infine, utilizzando le simulazioni e i dati acquisiti in laboratorio è stato effettuato un confronto per verificare la validità del software di simulazione Monte Carlo.
+%
+%\newpage
+
+This thesis is focused on the characterization, performance study and the development of reconstruction algorithms for gas and solid-state X-rays prototypes for applications in polarimetry, imaging and spectroscopy.
+
+The development of these new detectors relies on the experience acquired in the last two decades during the realization of Gas Pixel Detectors (GPDs), a class of X-ray photoelectric polarimeters employed on board the Imaging X-ray Polarimetry Explorer (IXPE) mission funded by NASA and Agenzia Spaziale Italiana (ASI). IXPE was launched in 2021 and is dedicated to the study of polarization, combined with imaging, spectroscopy and timing of astrophysical sources in the energy range between 2 and 8 keV.
+
+GPDs represented a breakthrough in X-ray polarimetry thanks to the use of Micro-Pattern Gaseous Detectors (MPGD), in which a Gas Electron Multiplier (GEM) is combined with a finely pixelated Application Specific Integrated Circuit (ASIC) to track a photoelectron released after an X-ray photon is absorbed in the active gas volume. This approach allowed increasing the sensitivity of IXPE by two orders of magnitude with respect to previous missions, which relied on technology dating back to the 1970s based on Bragg crystals.
+
+The ASIC employed in GPDs, named XPOL, is capable of performing an event-driven and self-triggering readout, in which only the region of interest where the photoelectron track is located, which can have up to \num{1000} pixels, is read. This allows significantly reducing the required readout time with respect to a full-chip readout, as the chip consists of more than \num{100000} pixels.
+
+Despite this feature, GPDs do not meet the speed requirements of the next generation of X-ray polarimetry observatories, which will employ larger mirrors and will therefore need to be capable of detecting events with a much higher rate than IXPE. For this reason some upgrades are under study in recent years to improve GPD performance.
+
+The first improvement concerns the readout XPOL ASIC, whose electronics has been redesigned to increase the event readout speed and to define more efficiently and dynamically the region of interest of each event, thus further reducing the number of pixels to read. This new version, called XPOL-III, has already been tested in recent years and demonstrated to have the same sensitivity as the previous generation of ASICs while improving the readout speed by about an order of magnitude.
+
+Beyond the readout speed, current GPDs also show some issues related to the GEM. Indeed, the multiplication stage introduces some systematic effects which involve the appearance of variations in the detector azimuthal response (spurious modulation), whose consequence is the detection of a false polarization even when observing unpolarized sources. Furthermore, the GEM shows rate-dependent variations in the charge multiplication factor over time caused by charge accumulation on the exposed dielectric, which leads to a degradation of the energy resolution.
+
+A possible solution to reduce these systematic effects and improve detector stability over time is replacing the GEM with micro-gap-like structures fabricated directly on the ASIC, creating a monolithic detector with the multiplication stage implemented in the readout chip. This is the idea behind $\mu$GPD. In this thesis, I focused on the characterization of detector prototypes, studying the gain, its variation over time, and the energy resolution.
+
+The results obtained by XPOL-III have paved the way to the development of a new class of X-ray detectors for non-polarimetric applications requiring energy-resolved imaging, such as X-ray diffraction, synchrotron-based material science and X-ray astrophysics. This is the Analog Spectral Imager for X-rays (ASIX) project, which consists of the development of Hybrid Pixel Detectors (HPDs) in which a solid-state sensor is coupled to an XPOL-family ASIC, inheriting GPDs' event-driven and self-triggering readout.
+
+The event-driven approach enables taking advantage of charge sharing, typical of detectors with small pixel pitches like the 50 $\mu$m hexagonal pixels of XPOL, to achieve better spatial resolution through offline analysis. At the same time, optimizing sensor design parameters that influence the charge sharing geometry allows for high energy resolution by maximizing the signal-to-noise ratio, which depends on the number of pixels involved in the event.
+
+My work in the ASIX project was focused on the development of the Monte Carlo simulation and analysis software, the calibration of the detector and the development of different algorithms for offline reconstruction of incidence position and energy of the photons. These algorithms were evaluated using both dedicated simulations and experimental data collected with a prototype. Through these analyses, the spatial and energy resolutions of the detector were determined. Finally, a comparison between simulations and laboratory measurements was carried out to verify the validity of the Monte Carlo simulation software.
+
+\end{document}
