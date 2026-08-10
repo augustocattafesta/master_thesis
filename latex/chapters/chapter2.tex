@@ -410,8 +410,8 @@ A two-dimensional concept similar to GEMs with an independent amplification stag
 
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter2/msgc}
-    \includegraphics[width=0.49\linewidth]{figures/chapter2/micromegas}
+    \includegraphics[width=0.45\linewidth]{figures/chapter2/msgc}
+    \includegraphics[width=0.42\linewidth]{figures/chapter2/micromegas}
 	\caption{Electric field lines configuration of an MSGC detector (left panel) and a Micromegas detector (right panel). Unlike the MSGC, where the drift and multiplication fields are inherently coupled, the Micromegas features a metallic mesh that physically separates the low-field drift region from the high-field amplification gap. Images taken from \cite{kolanoski2020}}
 	\label{fig:mpgd}
 \end{figure}
@@ -446,29 +446,37 @@ In the past it was technologically impossible to achieve such high purity levels
 
 Another type of junction is the Schottky. This junction is obtained at the contact interface between a semiconductor and a metal which have a difference between the vacuum energy and the Fermi energy larger than that of the semiconductor. At thermal equilibrium semiconductor electrons flow towards the metal, a depletion zone is formed on the interface and a potential barrier is established. As for $pn$ junctions, when operating in reverse bias by applying negative voltage to the metal, the depletion zone becomes larger because the external electric field pulls electrons far from the semiconductor. The width of the depletion zone still follows Eq. \ref{eq:dep_zone}. This junction is useful for compound materials, where it is difficult to grow crystals with few impurities or crystal imperfections, posing a technical limit to $N_D$ and resulting in a very high voltage required to achieve a large depletion zone. Some examples of common materials for which a Schottky junction is ideal are GaAs or CdTe and CdZnTe, which are all high-$Z$ materials with a large interaction cross section for high energy photons in the hard X-ray and $\gamma$-ray regions.
 
-Finally, another important junction is obtained with a layer of semiconductor, one of oxide and one of metal, forming a Metal-Oxide-Semiconductor (MOS) junction. When a voltage below a specific thershold is applied a depletion zone is formed, but its width is usually smaller than what it is possible to obtain with other junctions. MOS are commonly employed in CCDs, but due to the small depletion zone they are typically suited for energies below 10 keV and loose efficient for higher energies. $pn$CCDs, which were developed later, allow to obtain larger depletion zones and thus to increase sensitivity to high energy photons up to a few tens of keV. Overall, CCDs allowed to obtain many progresses in X-ray astrophysics because it became possible to achieve high resolution for both imaging and spectroscopy at the same time as well as an higher quantum efficiency with respect to gas detectors. As mentioned above, CCDs work by moving the accumulated charge inside each pixel towards a readout circuit to digitalize the signals. On a large CCD, which can have up to thousands of pixels per side, this process can take from tens of milliseconds up to a few seconds to read the entire array. Due to the absence of a shutter on X-ray telescopes, while charges are moving the CCD is still exposed to radiation and image deterioration can occur. A solution is to move the frame in auxiliars arrays which are not exposed, enabling to reduce this effect. However, to correctly perform spectroscopy it is necessary that event pile-up does not occur, but this is limited by readout speed. The consequence of this problem is that it is difficult to perform spectroscopy of bright sources with rates much larger than the readout rate.
+Finally, another important junction is obtained with a layer of semiconductor, one of oxide and one of metal, forming a Metal-Oxide-Semiconductor (MOS) junction. When a voltage below a specific thershold is applied a depletion zone is formed, but its width is usually smaller than what it is possible to obtain with other junctions. MOS are commonly employed in CCDs, but due to the small depletion zone they are typically suited for energies below 10 keV and loose efficient for higher energies. $pn$CCDs, which were developed later, allow to obtain larger depletion zones and thus to increase sensitivity to high energy photons up to a few tens of keV. Overall, CCDs allowed to obtain many progresses in X-ray astrophysics because it became possible to achieve high resolution for both imaging and spectroscopy at the same time as well as an higher quantum efficiency with respect to gas detectors.
 
-A different approach to CCDs is to separate the active part of the detector, where the interaction between radiation and matter takes place and electron-hole pairs are generated, from the passive part, which is responsible for the readout of the signal. Detectors that adopt this approach are called hybrid pixel detectors, in contrast to monolithic detectors like CCD. This design allows for the construction of highly-optimized detectors, where the readout chip can be designed to satisfy the requirements needed for the specific application without the contraints imposed by the active sensor.  
+As mentioned above, CCDs work by moving the accumulated charge inside each pixel towards a readout circuit to digitalize the signals. On a large CCD, which can have up to thousands of pixels per side, this process can take from tens of milliseconds up to a few seconds to read the entire array. Due to the absence of a shutter on X-ray telescopes, while charges are moving the CCD is still exposed to radiation and image deterioration can occur. A solution is to move the frame in auxiliars arrays which are not exposed, enabling to reduce this effect. However, to correctly perform spectroscopy it is necessary that event pile-up does not occur, but this is limited by readout speed. The consequence of this problem is that it is difficult to perform spectroscopy of bright sources with rates much larger than the readout rate.
 
-\fix{specificare la diffusione nei semiconduttori con relazione einstein}
+To overcome the readout speed limitations and pile-up issues of CCDs while preserving high energy resolution, Silicon Drift Detectors (SDDs) were developed \cite{gatti1984}. An SDD is built on a high-resistivity silicon substrate with reverse-biased $pn$ junctions on its surfaces that shape an internal electric field to guide primary electrons laterally toward a microscopic $n$ collecting anode. By decoupling the anode size from the total active area, the readout capacitance is kept small, which drastically reduces electronic noise. Consequently, SDDs achieve an energy resolution close to the Fano limit and can process high count rates exceeding $10^5$ counts/s per channel with microsecond time resolution and minimal pile-up. Their primary trade-off compared to CCDs is a lower intrinsic spatial resolution. A comparison between the design of a CCD and a SDD is shown in Fig. \ref{fig:ccd_sdd}
+
+SDDs have gained increasing importance in X-ray astrophysics, as they achieve high timing and energy resolution simultaneously. They are currently employed in operating missions like NICER and are planned for next-generation large X-ray observatories, such as eXTP \cite{zhang2019}.
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter2/ccd}
+    \includegraphics[width=0.49\linewidth]{figures/chapter2/sdd}
+	\caption{Comparison of charge collection principles in a CCD (left panel) and an SDD (right panel). In a CCD, charges are stored in potential wells under gate contacts before serial transfer to the readout node. In an SDD, $p^+$ strips generate an internal electric field $E$ that guides primary electrons laterally toward microscopic $n^+$ anodes, drastically reducing readout capacitance and time. Images taken from \cite{kolanoski2020}.}
+	\label{fig:ccd_sdd}
+\end{figure}
+
+A different approach to CCDs and SDDs is to separate the active part of the detector, where the interaction between radiation and matter takes place and electron-hole pairs are generated, from the passive readout stage. Detectors that adopt this approach are called Hybrid Pixel Detectors (HPDs), in contrast to monolithic detectors like CCDs. This design allows for the construction of highly-optimized detectors, where the readout chip can be designed to satisfy the requirements needed for the specific application without the contraints imposed by the active sensor.  
+
+As in gas detectors, charge carriers drifting inside the depleted semiconductor volume undergo thermal diffusion due to collisions with the crystal lattice. The general principles described for gases remain valid, with the key difference that in low-field conditions charge carrier transport in semiconductors obeys the Einstein relation
+
 \begin{equation}
-\sigma = \sqrt{\frac{2D}{\mu_c \mathcal{E}}d} = \sqrt{\frac{2kT}{e\mathcal{E}}d}= \mathcal{D} \sqrt{d},
+D = \mu_c \frac{k T}{e},
+\end{equation}
+where $D$ is the diffusion coefficient, $\mu_c$ is the charge carrier mobility, $k$ is the Boltzmann constant, $T$ is the absolute temperature, and $e$ is the elementary charge. 
+
+Considering that the drift time $t_d$ required to traverse a depletion width $d$ under a uniform electric field $\mathcal{E}$ is $t_d = d / v_d = d / (\mu_c \mathcal{E})$, Eq. \ref{eq:diffusion_sigma} can be rewritten for semiconductors as
+
+\begin{equation}
+\sigma = \sqrt{\frac{2 D d}{\mu_c \mathcal{E}}} = \sqrt{\frac{2 k T}{e \mathcal{E}} d} = \mathcal{D} \sqrt{d},
 \label{eq:diff_sigma_dist}
 \end{equation}
+where $\mathcal{D} \equiv \sqrt{2 k T / (e \mathcal{E})}$ is a parameter depending only on the operational temperature and internal electric field.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+This thermal diffusion sets a physical limit on the minimum size of the charge cloud reaching the electrodes. In pixelated or strip detectors, this spatial spread causes charge sharing among neighboring elements, which can either reduce the single-pixel signal-to-noise ratio or be exploited using algorithms to achieve sub-pixel spatial resolution.
