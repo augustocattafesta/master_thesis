@@ -4,43 +4,81 @@
 \begin{figure}[!b]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/chapter3/casa_combined_image}
-    \caption{Composite X-ray (Chandra, blue) and optical (Hubble, gold) image of the supernova remnant Cassiopeia A, overlaid with IXPE magnetic field direction measurements. The white and green segments indicate the reconstructed magnetic field orientation across different regions of the remnant, with green line segments highlighting regions with higher statistical significance. Credits to NASA/CXC/SAO and NASA/MSFC/J. Vink et al.}
+    \caption{Composite X-ray (Chandra, blue) and optical (Hubble, gold) image of the supernova remnant Cassiopeia A, overlaid with IXPE magnetic field direction measurements. The white and green segments indicate the reconstructed magnetic field orientation across different regions of the remnant, with green line segments highlighting regions with higher statistical significance. Credits to NASA/CXC/SAO and NASA/MSFC/J. Vink et al. \fix{Add real reference.}}
     \label{fig:casa_combined_image}
 \end{figure}
 
-Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of performing imaging, spectroscopy and timing measurements. A demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the supernova remnant Cassiopeia A, the first official science target observed by IXPE after its commissioning.
+The Imaging X-ray Polarimetry Explorer (IXPE) \cite{weisskopf2021} is a mission launched in 2021 by NASA and ASI to study polarization of bright X-ray sources, capable of performing imaging, spectroscopy and timing measurements. A demonstration of its capabilities is shown in Fig. \ref{fig:casa_combined_image}, which displays the polarimetric map of the supernova remnant Cassiopeia A, the first official science target observed by IXPE after its commissioning.
 
-IXPE is the first mission ever entirely dedicated to soft X-ray polarimetry, and it has a sensitivity more than an order of magnitude higher than Bragg crystal polarimeters used on board of older missions.
-The large increase in sensitivity was achievable thanks to the innovations brought by the Gas Pixel Detectors (GPD) \cite{baldini2021}, the detectors used on board of IXPE.
+In five years of operations IXPE has observed and measured the polarization of about 100 sources, ranging from accreting stellar-mass and supermassive black holes in AGN to magnetars, supernova remnants, and pulsar wind nebulae. A map of the sources observed by IXPE during the first year of observations is shwon in Fig. \ref{fig:ixpe_sources}.
+
+Accreting systems usually exhibit a low polarization degree, typically in the 1--10\% range, which is produced by Compton scattering of photons off the accreting material. Other sources, such as pulsar wind nebulae and magnetars, have a much higher polarization level, often exceeding 20\%, which is driven by the extreme environments around these objects, where strong magnetic fields generate highly polarized synchrotron radiation.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe_year1_artl_gal}
+    \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe_year1_artl}
+	\caption{Sky distribution in Galactic coordinates of the sources observed by IXPE, categorized by source class.}
+    \label{fig:ixpe_sources}
+\end{figure}
+
+Unlike imaging or spectroscopic observations, measuring polarization requires accumulating a very large number of photons from a source to statistically infer its polarization degree from the azimuthal emission angle distribution of photoelectrons, described by Eq. \ref{eq:polarization_photo}. The instrumental polarimetric sensitivity is typically quantified by the Minimum Detectable Polarization at a 99\% confidence level ($\operatorname{MDP}_{99}$), which is calculated from the instrumental modulation factor $\mu$ as
+
+\begin{equation}
+\operatorname{MDP}_{99} = \frac{4.29}{\mu R} \sqrt{\frac{R + B}{T}},
+\label{eq:mdp}
+\end{equation} 
+where $R$ is the source rate, $B$ is the background rate, and $T$ is the total observation time. This relation is essential to estimate the required exposure time based on the source flux. Crucially, as $\operatorname{MDP}_{99}$ scales inversely with the square root of time ($1/\sqrt{T}$), detecting increasingly smaller polarization levels requires significantly longer observations. An example of IXPE sensitivity is shown in Fig. \ref{fig:mdp_flux}, where it can be seen that detecting a polarization degree of a few percent requires exposure times of the order of $1000$ ks.
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.55\linewidth]{figures/chapter3/ixpe_sensitivity_v11}
+    \caption{Dependence of IXPE Minimum Detectable Polarization ($\operatorname{MDP}_{99}$) on the source flux in the 2--8 keV energy range for different exposure times. The different colors correspond to different power-law spectral indices.}
+    \label{fig:mdp_flux}
+\end{figure}
+
+IXPE observations have led to important results in different fields of high-energy astrophysics. For example, they enabled the mapping of magnetic field geometries and turbulence in supernova remnants, constrained the orientation of accretion disks around black holes, and performed phase-resolved polarimetry on accreting neutron stars, combining timing and polarization measurements to better understand the emission geometry. Overall, these findings have provided useful observational tests for theoretical models, demonstrating the crucial role of X-ray polarimetry in modern high-energy astrophysics.
+
+IXPE represents a major breakthrough in X-ray astrophysics, as it is the first mission entirely dedicated to soft X-ray polarimetry. Its polarimetric sensitivity is more than an order of magnitude superior to that of the Bragg crystal polarimeters flown on board earlier missions. This major leap in performance was made possible by the innovations introduced by the Gas Pixel Detectors (GPDs) \cite{baldini2021}, the focal-plane detectors employed on board IXPE.
 
 GPDs use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source on a statistical basis, by studying the distribution of the emission angle measured for all the events.
 
-As of 2026, IXPE is still carrying on observational campaigns, even though the predicted lifetime was of only two years. In five years of operations IXPE has observed and measured the polarization of about 100 sources, ranging from accreting stellar-mass and supermassive black holes in AGN to magnetars, supernova remnants and pulsar wind nebulae.
-
-These observations have led to important results in different fields of high-energy astrophysics. For example, IXPE allowed to map the magnetic field geometry and turbulence in supernova remnants, constrain the orientation of accretion disks around black holes, and perform phase-resolved polarimetry on accreting neutron stars, combining timing and polarization measurements to better understand the emission geometry.
-
-Beyond its polarimetric capabilities, the observatory provides valuable spatial and spectral diagnostics. Each telescope delivers an angular resolution characterized by a half-power diameter (HPD, the diameter enclosing 50\% of the focused photons) of $\lesssim 30$ arcsec over a $12.9 \times 12.9$ arcmin$^2$ square field of view. Furthermore, the GPD enables imaging spectroscopy with an energy resolution of about 17\% FWHM at 5.9 keV, providing the necessary energy discrimination to isolate different emission components in complex extended structures.
+Beyond its polarimetric capabilities, the observatory provides valuable spatial and spectral information. Each telescope has an angular resolution characterized by a half-power diameter (HPD, the diameter enclosing 50\% of the focused photons) of $\lesssim 30$ arcsec over a $12.9 \times 12.9$ arcmin$^2$ square field of view. Furthermore, the GPD enables imaging spectroscopy with an energy resolution of about 17\% FWHM at 5.9 keV, providing the necessary energy discrimination to isolate different emission components in complex extended structures.
 
 In the future, IXPE will continue its observational program by targeting fainter sources and monitoring variable sources over long time scales, providing new information on physics in extreme magnetic and gravitational fields.
 
+\section{Optics and Mirror Module Assembly}
+
 IXPE consists of three identical and independent X-ray telescopes. Using three independent telescopes provides redundancy and increases the total effective area while keeping the focal spot small to minimize background noise.
 
-Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. To fit inside the launch vehicle fairing while maintaining this focal length, IXPE uses a deployable boom that was extended once in orbit. The mirrors are made of 24 concentric and nested foils of nickel and cobalt, and the layout is optimized for high sensitivity in the range 2--8 keV.
+Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. 
+The mirrors, shown in Fig. \ref{fig:ixpe}, are made of 24 concentric and nested foils of nickel and cobalt separated by 2 mm. Each nested foil is 600 mm long, and it includes both the parabolic and hyperbolic segment of the Wolter-1 configuration. The entire layout and materials are optimized for high sensitivity in the energy range 2--8 keV.
 
 A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information. Additionally, each DU is equipped with onboard calibration sources (such as $^{55}\text{Fe}$) that can be exposed to the detector during flight. These sources are used to perform periodic calibrations and continuously monitor detector performance, such as gain variations, energy resolution, and systematic effects over time.
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.6\linewidth]{figures/chapter3/ixpe}
-    \caption{Schematic of the IXPE Observatory. Photons enter through the three Mirror Module Assemblies and are collected by the Detector Units, where GPDs are located. Images courtesy of NASA.}
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/ixpe}
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/MMAendview}
+    \caption{Schematic of the IXPE Observatory (left panel). Photons enter through the three Mirror Module Assemblies and are collected by the Detector Units, where GPDs are located. The MMA (right panel) is made of concentric and nested foils of nickel. Images courtesy of NASA.}
     \label{fig:ixpe}
 \end{figure}
+
+The optics calibration has been performed in a dedicated facility housing a 100 m vacuum beam tube with an X-ray source at the end of it. At the other extremity of the tube, a MMA is placed and its response is characterized by placing a SDD and a CCD which allow to measure the optics effective area and the point spread function, respectively. The effective area achieves a peak of about 200 cm$^2$ for each MMA.
+
+The ground calibration of the optics was performed in a dedicated facility housing a 100-meter vacuum beam tube with an X-ray source at one end. At the opposite end, each MMA was mounted and characterized using an SDD and a CCD on the focal plane to measure the optics effective area and point spread function, respectively. These measurements confirmed that the effective area reaches a peak of about 200~cm$^2$ for each MMA.
+
+After calibrating the response of the MMAs, a DU was placed on the focal plane in place of the calibration detectors to characterize the response of the final assembly. This step was performed using polarized X-ray sources with a known degree of polarization, allowing for the end-to-end validation of the telescope polarimetric response prior to launch.
+
+This ground calibration phase was essential, as IXPE is the first mission of its kind in soft X-ray polarimetry, meaning there are no pre-existing celestial sources with known polarization properties that can be used as standard calibration sources in orbit.
+
+To fit inside the launch vehicle fairing while maintaining this focal length, IXPE uses a deployable boom that was extended once in orbit, as shown in Fig. \ref{fig:ixpe}.
 
 \section{Gas Pixel Detector}
 
 The Gas Pixel Detector (GPD) represents an important innovation for MicroPattern Gas Detectors (MPGD) \cite{bellazzini2004, bellazzini2006}. In traditional gas detectors, reading out signals with high spatial resolution requires complex printed circuit board (PCB) connections to external electronics. However, this PCB approach becomes a big problem when using thousands of channels, because it increases electronic noise and cross-talk between nearby pixels.
 
-To solve this problem, the GPD puts the readout electronics directly inside the anode of the detector. This is done using a custom CMOS Application-Specific Integrated Circuit (ASIC). The top metal layer of the chip forms a grid of small hexagonal pixels that act directly as the charge collecting anode. Below each pixel, the silicon layers contain a complete electronic chain. This design allows gas detectors to have high spatial resolution and integration similar to solid-state detectors, while keeping the noise low.
+To solve this problem, the GPD puts the readout electronics directly inside the anode of the detector. This is done using a custom CMOS Application-Specific Integrated Circuit (ASIC). The top metal layer of the chip forms a grid of small hexagonal pixels that act directly as the charge collecting anode. Beneath each pixel, the ASIC substrate and metal layers incorporate a complete electronic chain. This design allows gas detectors to have high spatial resolution and integration similar to solid-state detectors, while keeping the noise low.
 
 The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon, as described by Eq. \ref{eq:polarization_photo}. Photons pass through a 50 $\mu$m thick beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the 2D shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
 
@@ -56,56 +94,48 @@ By studying the 2D charge distribution of these tracks, the GPD can reconstruct 
 \end{figure}
 
 \subsection{Gas cell}
-The GPD active gas volume consists of pure dimethyl-ether (DME). The choice of the gas was made because in order to work as a polarimeter it has to satisfy different requirements. The first is that a light-gas mixture enables to produce long and straight tracks, allowing for a higher efficiency in the polarization level estimate than high-$Z$ gases.
 
-On the other hand, employing a gas mixture with low-$Z$ elements reduces the detector quantum efficiency.  However, there is another constraint which limits the maximum $Z$ that can be used, which is the $K$-edge energy. Indeed, the modulation described by Eq. \ref{eq:polarization_photo} holds only for absorption by spherical shells, thus it is fundamental that the $K$-edge energy is below the design sensitivity range of 2--8 keV.
+The GPD active gas volume consists of pure dimethyl-ether (DME, (CH$_3$)$_2$O). The choice of the gas is a complex trade-off between two competing requirements: photon absorption efficiency and polarimetric sensitivity. Heavy elements are usually preferred to increase the quantum efficiency, because the photoelectric cross section scales as $Z^5$ and allows more photons to be absorbed. However, polarimetry also requires a high modulation factor $\mu$, which depends on how well the direction of the photoelectron can be reconstructed. Light gas mixtures are much better for this purpose because they produce longer and straighter tracks.
 
-DME therefore represents a good compromise to satisfy the design requirements. Furthermore, its quenching properties help suppress accidental electrical discharges, ensuring detector stability and safety.
+The shape of the photoelectron track depends on two physical processes. First, the energy loss by ionization is described by the Bethe-Bloch formula (Eq.~\ref{eq:bethe_bloch}). Second, the elastic Coulomb scattering off atomic nuclei scales as $Z^2$. In low-$Z$ materials this scattering is weak, so the electron does not change direction too much near the interaction point. This keeps the track straight, maximizing the modulation factor and thus increasing the overall sensitivity to polarization.
 
-Another important property of DME is that its transverse diffusion coefficient is low, about 68 $\mu$m cm$^{-\frac{1}{2}}$ with an electric field of 2 kV/cm, much lower than other typical gas mixtures (see Fig. \ref{fig:diffusion} for some examples), enabling to limit the track blurring, which represents a limiting factor in the reconstruction of the photoelectron emission direction.
+On the other hand, using low-$Z$ elements reduces the total quantum efficiency and brings another physical limit, which is the $K$-edge energy. The full modulation of Eq.~\ref{eq:polarization_photo} works only for photoelectrons emitted from $s$-orbitals, so the $K$-edge of the gas must be below the 2--8~keV energy range. As shown in Tab. \ref{tab:k_edge}, oxygen has a $K$-edge of about 525~eV and is the heaviest suitable element, which excludes heavier noble gases traditionally employed in proportional counters, such as argon or xenon.
 
-\begin{figure}[!t]
+DME is therefore a good compromise: its heaviest element is oxygen, and its low average $Z$ optimizes the track length and straightness needed for high polarimetric sensitivity. Furthermore, its quenching properties help prevent electrical discharges inside the detector. Finally, DME has a very low transverse diffusion coefficient (about $68~\mu\text{m cm}^{-1/2}$ at 2~kV/cm), which limits the blurring of the track while electrons drift toward the GEM and preserves the track shape needed to measure the photoelectron emission direction.
+
+\begin{table}[hbtp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{X c c}
+Material & $K$-edge energy [eV] & Fluorescence yield [\%]\\
+\toprule
+He & 24.6 & 0.0 \\
+O & 525 & 0.5 \\
+Ne & 870 & 1.6 \\
+Ar & 3.20 $\cdot 10^3$ & 10.9\\
+Kr & 14.3$\cdot 10^3$& 62.1\\
+Xe & 34.6$\cdot 10^3$& 90.2\\
+\bottomrule
+\end{tabularx}
+\caption{$K$-edge energy and fluorescence yield for some noble gases and oxygen.}
+\label{tab:k_edge}
+\end{table}
+
+
+\subsection{Gas Electron Multiplier}
+The GEM is the amplification stage of the GPD, where the primary ionization electrons arrive under the influence of the drift electric field inside the active volume. The strong electric field inside the holes, generated by the voltage difference between the two sides of the GEM, causes charges to produce an avalanche.
+
+The GEM employed inside the GPD is made of liquid crystal polymers (LCP) with a 50 $\mu$m thickness, while the coating is made of copper each side is 5 $\mu$m thick, for a total thickness of 60 $\mu$m. The holes have a diameter of 30 $\mu$m and follow hexagonal grid pattern to match the ASIC pixel pattern, with 50 $\mu$m pitch on the horizontal direction and 43.3 $\mu$m on the vertical one. The voltage difference between the two opposite sides is of 470 V, ensuring an effective gain of about 200.
+
+The GPD GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the production process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
+
+These non-uniformities that are introduced during the production process cause the appearance of systematic effects that affect the GPD performance, and will be discussed in Chap. \ref{subsec:sys_eff}.
+
+\begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter3/gem_field}
     \includegraphics[width=0.4\linewidth]{figures/chapter3/gem}
-    \caption{Electric field produced by GEM holes (left panel) when applying a voltage difference between the two copper electrodes. Photograph of a GPD GEM (right panel), with the darker region representing its active area. Images taken from \cite{kolanoski2020, baldini2021}.}
+	\caption{Photograph of a GPD GEM, with the darker region representing its active area. Image taken from \cite{baldini2021}.}
     \label{fig:gem}
-\end{figure}
-
-
-\subsection{GEM}
-The GEM \cite{sauli1997} represents the amplification stage of the GPD. A GEM usually consists of a 50 $\mu$m thick Kapton foil with a copper coating on both sides. The GEM is then etched to create holes, which can be tens of micrometers wide. A voltage difference is applied to the copper coatings on the two opposite faces of the GEM to generate a strong electric field inside the holes, as shown in Fig. \ref{fig:gem}.
-
-The GEM employed inside the GPD is made of liquid crystal polymers (LCP) instead of Kapton, and holes have diameter of 30 $\mu$m. The holes pattern follows a hexagonal grid to match the ASIC pixel pattern. The GPD GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the production process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
-
-The GEM production process affects the GPD performances. In particular, it introduces spatially dependent spurious modulations, as shown in Fig. \ref{fig:spurious_mod}. The real cause behind this systematic effect is not known, but one hypothesis is that GEM holes pitch can vary along one direction.
-
-In principle this systematic effect could be corrected by taking multiple acquisitions similar to that of Fig. \ref{fig:spurious_mod} by varying the source energy. However, the statistical accuracy required to correct this effect would require to spend a prohibitive amount of time acquiring data for each detector. Instead of applying a direct correction, the solution adopted to mitigate this effect consists of exploiting the observatory dithering.
-
-\begin{figure}[!b]
-    \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter3/spurious_mod}
-    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
-    \label{fig:spurious_mod}
-\end{figure}
-
-Another important effect that depends on the GEM is rate-dependent gain variations. When the detector is operating and is irradiated by a source, part of the charge that is produced by the avalanche inside the GEM holes is temporarily deposited onto the dielectric substrate. This charging phenomenon has the effect of modifying the electric field configuration, with a consequent decrease of the gain.
-
-When the detector is constantly illuminated by a fixed rate source, the gain does not decrease indefinitely but reaches a saturation level after it remains approximately constant. The asymptotic gain value and time scale of the charging process depend on the input energy flux.
-
-This charging effect is reversible because the charge trapping on the dielectric substrate is not permanent. This phenomenon, which consists of a discharging of the dielectric, is a competing process of charging and is continuously at play, but on much longer time scales. When the incoming flux is sufficiently low, discharging dominates over charging and the gain increases.
-
-In general charging and discharging can be described as rate-dependent, and an example of these processes at play for GPD is shown in Fig. \ref{fig:rate_gain}.
-
-These gain variations can be modeled using phenomenological models and can be applied to correct observations. However, limiting the charging and reducing the gain variations amplitude can improve the detector sensitivity to polarization.
-
-Reducing the systematic effects that have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative which is being developed will be presented in Chap. \ref{chap:chapter5}.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter3/rate_gain}
-    \caption{Charging and discharging effects as a function of time for GPD. The different colors data points represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes almost 10\% of gain decrease. Then, the gain gradually recovers when using lower flux sources. Image taken from \cite{baldini2021}.}
-    \label{fig:rate_gain}
 \end{figure}
 
 \subsection{XPOL-I}
@@ -126,7 +156,7 @@ The data acquisition (DAQ) is performed through a dedicated board with an analog
 
 The trigger logic is based on the so-called mini-clusters, which are sets of four adjacent pixels that are logically OR-ed together. An example of mini-cluster is shown in the inset of Fig. \ref{fig:gpd_layout}. When the OR-ed shaped signal exceeds the trigger threshold, the event is triggered. The trigger region consists of the smallest rectangle that contains all triggered mini-clusters.
 
-Given that the shape of a photoelectron track is elongated and the portion that triggers the event is usually limited to its end, which corresponds to the Bragg peak, the chip automatically extends the readout region with a padding of 4 or 5 additional mini-clusters along each side of the $x$ and $y$ coordinates, respectively. This extended region, usually called region of interest (ROI), allows to have a high probability of including the entire track in the ROI.
+Given that the shape of a photoelectron track is elongated and the portion that triggers the event is usually limited to its end, which corresponds to the Bragg peak, the chip automatically extends the readout region with a padding of 4 or 5 additional mini-clusters along each side of the $x$ and $y$ coordinates, respectively. This extended region, usually called region of interest (ROI), allows to be certain of including the entire track in the ROI.
 
 The ASIC calculates the coordinates of the upper-left and lower-right points of the ROI and then the DAQ board serially reads all the pixels inside it, which are typically around 500--800 pixels. The ability of the ASIC to limit the readout to a small region allows the total readout time to be reduced of more than two orders of magnitude with respect to a full chip readout.
 
@@ -137,6 +167,67 @@ The choice of performing online pedestal subtraction has been made because of a 
 This effect contributes to the spurious modulation already described above and even though the online pedestal subtraction can reduce its magnitude, there is still a residual effect.
 
 A limiting aspect of the entire readout process of XPOL-I is the 1 ms dead time for a typical event. The dead time required for an event can be factored in two terms, one constant and one which scales linearly with the ROI number of pixels. Reducing the dead time is essential for the next generation of X-ray polarimetry observatories, which with a larger mirror effective area than IXPE will observe much higher rates even from moderately bright sources and the current GPDs would not be able to take advantage of it.
+
+\subsection{Systematic effects}
+\label{subsec:sys_eff}
+
+The GEM manufacturing process directly affects the GPD performance by introducing a spatially dependent systematic effect known as spurious modulation, as shown in Fig. \ref{fig:spurious_mod}. The primary origin of this feature lies in the laser drilling sweeps used during GEM production because microscopic spatial non-uniformities in the hole geometry or pitch along the boundaries of adjacent sweeps create a regular pattern of artificial modulation across the active area.
+
+In principle, this systematic effect could be calibrated out by acquiring high-statistics response maps at multiple energies. However, mapping the detector at the spatial scale of the point spread function with the required statistical precision would require a prohibitively long calibration time for each flight unit.
+
+To overcome this limitation without compromising spatial resolution, the adopted solution relies on spacecraft dithering during sky observations. By slowly moving the pointing direction along the line of sight, the image of a celestial source is broadened over a larger area of the detector plane in detector coordinates. This spatial averaging smooths out the localized non-uniformities caused by the GEM holes pattern, effectively mitigating the spurious modulation while preserving the intrinsic angular resolution of the telescope.
+
+As a result, it is no longer necessary to calibrate the spurious modulation at the fine spatial scale of the PSF. Instead, it is sufficient to apply the correction on spatial scales comparable to the region covered by the dithering pattern, which is of the order of some mm$^2$, reducing the calibration time required.
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/spurious_mod}
+    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
+    \label{fig:spurious_mod}
+\end{figure}
+
+Another important effect that depends on the GEM is rate-dependent gain variations. When the detector is operating and is irradiated by a source, part of the charge that is produced by the avalanche inside the GEM holes is temporarily deposited onto the dielectric substrate. This charging phenomenon has the effect of modifying the electric field configuration, with a consequent decrease of the gain.
+
+When the detector is constantly illuminated by a fixed rate source, the gain does not decrease indefinitely but reaches a saturation level after which it remains approximately constant. The asymptotic gain value and time scale of the charging process depend on the input energy flux.
+
+This charging effect is reversible because the charge trapping on the dielectric substrate is not permanent. This phenomenon, which consists of a discharging of the dielectric, is a competing process of charging and is continuously at play, but on much longer time scales. When the incoming flux is sufficiently low, discharging dominates over charging and the gain increases.
+
+In general charging and discharging can be described as rate-dependent, and an example of these processes at play for GPD is shown in Fig. \ref{fig:rate_gain}.
+
+A possible phenomenological model to describe gain variations as a function of time and input energy flux considers the two competing processes of charging and discharging, which act simultaneously but on different time scales:
+
+\begin{equation}
+\frac{dg(t)}{dt} = - \frac{F(t)}{k_c}(\delta_{\textrm{max}} + g(t)) + \frac{g(t)}{\tau_d},
+\label{eq:diff_gain}
+\end{equation}
+where $g(t)$ is the relative gain variation, $F(t)$ is the input energy flux, $k_c$ and $\tau_d$ are two constants describing the characteristic time scales of the two processes, and $\delta_{\textrm{max}}$ is the maximum relative gain decrease observed for the detector.
+
+If the input energy flux $F$ is constant, Eq. \ref{eq:diff_gain} can be solved analytically, yielding an effective time constant for the overall process given by
+
+\begin{equation}
+\tau_{\textrm{eff}} (F) = \left( \frac{1}{\tau_c} + \frac{1}{\tau_d} \right)^{-1},
+\label{eq:tau}
+\end{equation}
+where $\tau_c = k_c / F$ represents the charging time scale. Under these conditions, the asymptotic relative gain variation is expressed as[cite: 4]
+
+\begin{equation}
+\delta(F) = - \frac{\delta_{\textrm{max}}}{1 + \frac{\tau_c}{\tau_d}}.
+\label{eq:delta}
+\end{equation}
+
+Typical values for the charging parameters are $\delta_{\textrm{max}} \approx 0.1$, $k_c \approx 10^5$~keV~mm$^{-2}$, and $\tau_d \approx 10^5$~s[cite: 4]. Fig.~\ref{fig:rate_gain} shows how the asymptotic gain variation and the effective time constant vary as a function of the incoming energy flux.
+
+Reducing the systematic effects that have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative currently being developed will be presented in Chap. \ref{chap:chapter5}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/rate_gain}
+        \includegraphics[width=0.49\linewidth]{figures/chapter3/charging}
+    \caption{Charging and discharging effects as a function of time for GPD (left panel). The different colors data points represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes a gain decrease of nearly 10\%. When using a lower flux source the gain gradually recovers. The asymptotic gain variation and the time required to reach it (right panel) can be calculated from Eqs. \ref{eq:tau} and \ref{eq:delta}. Images taken from \cite{baldini2021}.}
+    \label{fig:rate_gain}
+\end{figure}
+
+
 
 \section{XPOL-III}
 \label{sec:xpol3}

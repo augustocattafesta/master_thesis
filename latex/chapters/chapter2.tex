@@ -284,6 +284,7 @@ Various detectors have been devoleped across the years and used on board of X-ra
 
 \begin{equation}
 - \frac{dE}{dx} = 2 \pi N_A r_e^2 m_e c^2 \rho \frac{Z}{A} \frac{1}{\beta^2} \left[ \ln \left( \frac{2 m_e \gamma^2 v^2 W_{\textrm{max}}}{I} \right) - 2\beta^2 \right].
+\label{eq:bethe_bloch}
 \end{equation}
 
 In ionization detectors, the energy transfered by the photoelectron ionizes atoms and molecules releasing charge carriers, which in turn induce a current during their motion. Alternatively, in scintillators molecules are excited by the photoelectron and the signal is represented by the luminous emission produced by the de-excitation which is collected, converted and amplified to generate an electric signal. 
@@ -404,21 +405,22 @@ A major step forward in the development of gas detectors was made with Micro-Pat
 
 The micro-structures adopted in MPGDs can have different geometries, ranging from one-dimensional to two-dimensional patterns. The first realization was the Micro-Strip Gas Chamber (MSGC) \cite{oed1988}, which consists of an active gas volume enclosed between a drift plane and an insulating substrate. On top of the substrate, alternating thin strips spaced by a few tens of micrometers act as anodes and cathodes, as shown in Fig. \ref{fig:mpgd}.
 
-Another example of an MPGD is the Gas Electron Multiplier (GEM) \cite{sauli1997}, which typically consists of a thin insulating foil (commonly around $50\,\mu\text{m}$ thick, such as Kapton) with a metal coating on both sides, perforated with a dense pattern of micro-holes (usually a few tens of micrometers in diameter). When a voltage difference is applied between the two faces, primary charges drifting near the holes are accelerated by the strong electric field inside them, generating an avalanche that multiplies the initial charge. Unlike MSGCs, a GEM is an independent multiplication stage that must be coupled to readout electrodes to collect the signal.
+Another example of an MPGD is the Gas Electron Multiplier (GEM) \cite{sauli1997}, which typically consists of a thin insulating foil (commonly around $50\,\mu\text{m}$ thick, such as Kapton) with a metal coating on both sides, perforated with a dense pattern of micro-holes (usually a few tens of micrometers in diameter). When a voltage difference is applied between the two faces, primary charges drifting near the holes are accelerated by the strong electric field inside them, generating an avalanche that multiplies the initial charge. Unlike MSGCs, a GEM is an independent multiplication stage that must be coupled to readout electrodes to collect the signal. The electric field configuration which forms inside the holes is shown in Fig. \ref{fig:mpgd}.
 
 A two-dimensional concept similar to GEMs with an independent amplification stage is the Micro-Mesh Gaseous Structure (Micromegas) \cite{giomataris1996}. It consists of a thin metallic mesh placed at a very short distance (typically 50--150~$\mu$m) above the readout anode plane. Primary electrons produced in the drift volume pass through the mesh holes and enter this narrow region, where a strong electric field between the mesh and the anode triggers the electron avalanche. An example of Micromegas is shown in Fig. \ref{fig:mpgd}
 
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=0.45\linewidth]{figures/chapter2/msgc}
-    \includegraphics[width=0.42\linewidth]{figures/chapter2/micromegas}
-	\caption{Electric field lines configuration of an MSGC detector (left panel) and a Micromegas detector (right panel). Unlike the MSGC, where the drift and multiplication fields are inherently coupled, the Micromegas features a metallic mesh that physically separates the low-field drift region from the high-field amplification gap. Images taken from \cite{kolanoski2020}}
+    \includegraphics[width=0.31\linewidth]{figures/chapter2/msgc}
+    \includegraphics[width=0.38\linewidth]{figures/chapter3/gem_field}
+    \includegraphics[width=0.38\linewidth]{figures/chapter2/micromegas}
+	\caption{Electric field lines configuration of an MSGC detector (left panel), a GEM (center panel) and a Micromegas detector (right panel). Unlike the MSGC, where the drift and multiplication fields are inherently coupled, the GEM and Micromegas physically separate the low-field drift region from the high-field amplification gap. Images taken from \cite{kolanoski2020}}
 	\label{fig:mpgd}
 \end{figure}
 
 Despite the developments in gas detectors, X-ray astrophysics has increasingly replaced their use in favor of other detector technologies, such as semiconductor detectors. In recent missions, gas detectors were mainly chosen to cover large detection areas at limited costs compared to other alternatives, or to serve highly specialized purposes, such as X-ray polarimetry.
 
-\subsection{Semiconductor ionizaztion detectors}
+\subsection{Semiconductor ionization detectors}
 \label{sec:semiconductors}
 
 For a long time gas detectors have been the main type of detectors employed on board of high energy astrophysics observatories. One of the negative aspects of these detectors is their limited lifetime due to various instrumental reasons. An example is the presence of consumables like gas, which needs periodical refills due to the unavoidable presence of small leaks in order to maintain to maintain the ideal working conditions. Another issue, which particularly affected traditional gas detectos, is the aging of the electrodes, which can be deteriorated by the polimerization of molecules, with a consequent worsening of the overall performances over the years. An alternative to gas detectors is to use solid state detectors, which do not rely on the use of consumable materials, meaning that ideally the lifetime can be very long. In practice, these detectors are sensitive to other effects, such as radiation damage, but their lifetime is usually much longer than an average gas detector. Currently, there are observatories with solid state detectors that have been operating for more than 25 years, such as Chandra and XMM-Newton.
