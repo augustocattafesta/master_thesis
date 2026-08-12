@@ -1,21 +1,25 @@
 \chapter{Analog Spectral Imager for X-rays}
 \label{chap:chapter4}
 
-The Analog Spectral Imager for X-rays (ASIX) is a new class of solid-state hybrid pixel detectors (HPDs), with the ability to perform single photon event-driven readout, designed for both imaging and spectral study of photons at X-ray energies between 1 keV and 50 keV. The intended applications for this detector are X-ray spectral imaging, material science and also micro-tomography. 
+The Analog Spectral Imager for X-rays (ASIX) is a projects which aims to develop a new class of solid-state Hybrid Pixel Detectors (HPDs) capable of performing single photon event-driven readout, designed for both imaging and spectral study of photons at X-ray energies between 1 keV and 50 keV. Contrary to GPDs, these detectors are intended for applications which require energy-resolved imaging different from polarimetry, such as other fields of X-ray astrophysics or synchrotron-based material science.
 
-The design and the current state of the detector prototypes will be illustrated in this section. The simulation and analysis software will be briefly described, as they are essential to evaluate the goodness of the calibration procedure and algorithms developed to reconstruct photon energy and incidence position. The algorithms developed will be described and, using Monte Carlo simulations, will be compared with each other to determine which one performs the best. A comparison between simulations and laboratory data is performed to verify the goodness of the simulations and to have a real benchmark of event reconstruction algorithms performances. 
+An example of application in material science is X-ray Diffraction analysis (XRD), which is one of the most common nondestructive techniques that provides information about crystallographic structure of a material, its chemical composition and relevant physical properties. Currently, the detectors employed in this field have good spatial resolution, but they have limited energy resolution. A detector capable of selecting photons in a narrow energy band would allow to reduce unwanted background that deteriorates measurements.
+
+The idea behind ASIX is to use the experience gained over the years in the development of the XPOL-family ASICs to test a new design where an XPOL chip is coupled to a solid state sensor. While proving the validity of the sensor design using the recently developed XPOL-III ASIC, a new dedicated ASIC is being developed to match the requirements needed in terms of event readout time.
+
+This section illustrates the design and the current state of the prototypes and the dedicated simulation and analysis software that is being employed to evaluate different design concepts and to test the goodness of the detector calibration and analysis pipeline. Furthermore, in the context of the event analysis different algorithms to reconstruct the position and energy of the photons have been developed and tested using both Monte Carlo simulations and laboratory data, in order to determine their performance.
 
 \section{Detector design}
 \label{sec:asix_design}
 
 ASIX is a solid-state HPD and it consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of electron-hole pairs, and the analog readout ASIC, which processes the collected charge by amplifying and shaping the signal and then triggers the digital readout electronics to save the events.
 
-A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}. The detector is placed inside a simple metal housing with a square entrance window of a material suited for X-ray detection, such as beryllium or plastic materials. The detector itself is composed of the semiconductor sensor soldered on top of the readout ASIC, which is wire bonded to the electronic board.
+A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}.
 
 \begin{figure}[h]
     \centering
     	\includegraphics[width=0.7\linewidth]{figures/chapter4/design/detector}
-    \caption{Exploded view of the ASIX detector with its housing. The detector is placed inside a metal housing with an entrance window to screen low energy photons. The main components are the active sensor and the readout ASIC, which is soldered on an electronic readout board.}
+    \caption{Exploded view of the detector with its housing. The detector is placed inside a simple metal housing with a square entrance window of a material suited for X-ray detection, such as beryllium or plastic materials. The detector itself is composed of the semiconductor sensor bump-bonded on top of the readout ASIC, which is wire bonded to the electronic board.}
     \label{fig:detector}
 \end{figure}
 
@@ -23,7 +27,7 @@ A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}
 \subsection{Active sensor}
 \label{subsec:sensor}
 
-The active sensor is the part of the detector where the physical signal is produced by interaction mechanisms between radiation and the sensor material, which is ionized during the passage of charged particles or electromagnetic radiation \cite{rossi2006}. In solid state detectors the active sensor is made of a semiconductor material. 
+The active sensor is the component of the detector where the physical signal is generated by interaction mechanisms between radiation and the sensor material, which is ionized by charged particles or by the photoelectron generated by the absorption of electromagnetic radiation \cite{rossi2006}. In solid state detectors the active sensor is made of a semiconductor material. 
 
 There are various choices for the sensor material, depending on the required properties of the detector and the type or radiation that has to be detected. ASIX, which is designed to work with soft and hard X-rays, currently employs silicon and cadmium-telluride (CdTe) in the two prototypes currently available. CdTe is best suited for the harder region of the electromagnetic spectrum, as cadmium and tellurium are high-$Z$ materials, thus they have a cross section higher than silicon and a higher photoabsorption efficiency, as shown in Figs. \ref{fig:photo_cross_section} and \ref{fig:photoabs}.
 
@@ -32,130 +36,111 @@ The two ASIX active sensor prototypes consist of an hexagonally pixelated n-on-p
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/design/asix}
-    \caption{ASIX hybrid pixel detector with the CdTe sensor. The plate visible on top is a platinum electrode positioned on the back side of the CdTe sensor to apply the reverse bias voltage. Image taken from \cite{minuti2025}.}
+    \caption{ASIX hybrid pixel detector with the CdTe sensor. The metallic layer visible on top is a platinum electrode positioned on the back side of the CdTe sensor to apply the reverse bias voltage. Image taken from \cite{minuti2025}.}
     \label{fig:cdte_proto}
 \end{figure}
 
-% TUTTO QUESTO VA SPOSTATO NEL CAPITOLO 2 NELLA SEZIONE DEI SEMICONDUTTORI (E ANCHE RIDOTTO)
+When a photon is absorbed in the active sensor, the distance traveled by the primary photoelectron depends on its kinetic energy and the sensor material, but it is typically very small (e.g., in Silicon for $E_{\gamma} < 10~\text{keV}$, the photoelectron range is less than $1~\mu\text{m}$ \cite{nist_estar}). Consequently, the region where electron-hole pairs are generated via ionization can be approximated as point-like and coincident with the photon absorption point, on the spatial scale of the sensor thickness (which is typically hundreds of micrometers).
 
-%Besides defining the sensitive energy range of the detector, the sensor material, thickness and working conditions also define how the collected charge diffuses inside it. Once electron-hole pairs are produced by the photon interaction and consequent collision ionizations, which happen in a very short region about 1 $\mu$m wide, approximable as point-like, they start to drift towards opposite poles of the junction under the action of the electric field. Thermal agitation and collisions with the crystal lattice make the charge spread durign the drift in the direction transverse to it. This process is governed by Fick's diffusion laws and in absence of external fields, which is true for the transverse, the charge is distributed on the plane according to a two-dimensional Gaussian distribution, with standard deviation along the $x$ and $y$ axes given by
+Once electron-hole pairs are generated they start to diffuse in the plane perpendicular to the electric field, as described in Chap. \ref{sec:semiconductors}. Knowing the sensor material properties, the electric field and the working conditions of the detector, such as the sensor temperature, the transverse diffusion sigma can be calculated using Eq. \ref{eq:diff_sigma_dist}.
 
-%\begin{equation}
-%\sigma = \sigma_x = \sigma_y = \sqrt{2Dt_d},
-%\label{eq:diff_sigma}
-%\end{equation}
-%where $D$ is the diffusion coefficient and $t_d$ is the drift time. Using the mobility of the charge carriers $\mu_c$ and the value of the electric field $\mathcal{E}$ it is possible to make explicit the dependence of Eq. \ref{eq:diff_sigma} on the drift distance $d$
-
-%\begin{equation}
-%\sigma = \sqrt{\frac{2D}{\mu_c \mathcal{E}}d} = \sqrt{\frac{2kT}{e\mathcal{E}}d}= \mathcal{D} \sqrt{d},
-%\label{eq:diff_sigma_dist}
-%\end{equation}
-%where it has been used that in a semiconductor $D/\mu_c = kT/e$ and the transverse diffusion parameter $\mathcal{D}$ has been defined to isolate the dependence on the drift distance $d$. As clearly visible in Eq. \ref{eq:diff_sigma_dist}, there is also a dependence on the sensor working conditions, specifically the temperature and the electric field. This has to be taken into account during the analysis, because a wrong estimate of $\mathcal{D}$ can lead to errors, as will be clear in the following sections. The mean charge diffusion standard deviation can be calculated from Eqs. \ref{eq:mean_z} and \ref{eq:diff_sigma_dist}, and is useful to have an idea of how the charge cloud dimension varies as a function of the energy
-%
-%\begin{equation}
-%\langle \sigma \rangle = \mathcal{D} \sqrt{t - \langle z \rangle},
-%\label{eq:mean_diff_sigma}
-%\end{equation}
-%where $t$ is the sensor thickness. Fig. \ref{fig:mean_sigma} shows $\langle \sigma \rangle$ as a function of the photon energy for the two sensors.
-%
-
-
-As described in Chap. \ref{sec:semiconductors}, once the electron-hole pairs are produced inside the sensor, they begin to diffuse according to a bivariate Gaussian distribution in the plane perpendicular to the electric field.
-
-The standard deviation of the Gaussian is determined by Eq. \ref{eq:diff_sigma_dist}. Knowing the sensor material and the energy of the incoming photons, the average value $\langle \sigma \rangle$ can be calculate using the relation found in Eq. \ref{eq:z_average}. The dependence of $\langle \sigma \rangle$ from the photon energy is shown in Fig. \ref{fig:mean_sigma}
+The absorption depth depends on the energy of the photon and is distributed according to Eq. \ref{eq:pdf_truncated}, and by fixing the sensor thickness it allows to calculate the mean transverse diffusion sigma $\langle \sigma \rangle$ from Eq. \ref{eq:z_average}. The dependence of $\langle \sigma \rangle$ on the photon energy for different Si sensor thicknesses is shown in Fig. \ref{fig:mean_sigma}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/design/mean_diffusion}
-    \caption{Mean diffusion sigma as a function of the photon energy for the Si and CdTe sensors. }
+    \caption{Mean diffusion sigma as a function of the photon energy for different thickness of Si sensors, assuming $\mathcal{D} = 50 \mu$m cm$^{-0.5}$. }
     \label{fig:mean_sigma}
 \end{figure}
 
-Once the sensor working conditions like the temperature and the electric field are chosen, meaning that $\mathcal{D}$ is determined, Eq. \ref{eq:mean_diff_sigma} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector.
+Once the sensor working conditions like the temperature and the electric field are determined, meaning that $\mathcal{D}$ is fixed, Eq. \ref{eq:z_average} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector.
 
-If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for a spectroscope the smaller the number of pixels involved in the event, the better the energy resolution is, as the total readout noise on the final measurement goes as $\sqrt{N}$, where $N$ is the number of pixels.
+If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for spectroscopic applications, the smaller the number of pixels involved in the event, the better the energy resolution, as the total readout noise on the final measurement scales as $\sqrt{N}$, where $N$ is the number of pixels.
 
-ASIX's goal is to find a compromise between an imaging detector and a spectroscope, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch in the range between 10-20\%.
+ASIX's goal is to find a compromise between an imaging and a spectroscpy detector, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch $\langle \sigma \rangle / p$ in the range between 10-20\%.
 
-The relevant metric to gauge how this ratio affects the detector readout design and the event analysis is the cluster size, that is defined as the number of pixels that have a signal above a certain threshold. Tab. \ref{tab:cluster_size} shows how the cluster size distribution vary as a function of the ratio $\langle \sigma \rangle / p$ for a simulation without electronic noise and with zero threshold.
+The relevant metric to gauge how this ratio affects the detector readout design and the event analysis is the cluster size, which is defined as the number of pixels that have a signal above a certain threshold.
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c ccccccc}
-\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{7}{c}{ Cluster size occurrences [\%]} \\
-\cmidrule(lr){2-8}
- & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
-\midrule
-19.6 & 0.0 & 0.0 & 1.5 & 45.0 & 38.1 & 10.7 & 4.6 \\
-19.4 & 0.0 & 0.0 & 1.1 & 44.9 & 38.5 & 10.5 & 4.9 \\
-19.2 & 0.0 & 0.0 & 1.4 & 43.5 & 38.8 & 10.8 & 5.5 \\
-18.7 & 0.0 & 0.0 & 2.3 & 43.6 & 38.3 & 10.4 & 5.3 \\
-18.1 & 0.2 & 0.3 & 4.8 & 44.5 & 35.4 & 9.7 & 5.1 \\
-17.4 & 0.8 & 0.9 & 8.7 & 44.4 & 31.7 & 8.8 & 4.7 \\
-16.6 & 1.8 & 1.9 & 12.9 & 43.4 & 27.8 & 7.8 & 4.3 \\
-15.9 & 2.7 & 2.9 & 16.2 & 41.5 & 25.8 & 7.2 & 3.8 \\
-15.3 & 3.7 & 3.6 & 18.4 & 40.2 & 23.9 & 6.7 & 3.6 \\
-14.9 & 4.4 & 4.5 & 20.4 & 38.7 & 22.3 & 6.2 & 3.5 \\
-14.5 & 5.1 & 5.0 & 21.4 & 37.7 & 21.3 & 6.0 & 3.5 \\
-14.3 & 5.6 & 5.4 & 22.2 & 36.4 & 20.7 & 6.3 & 3.5 \\
-\bottomrule
-\end{tabular}
-\caption{Mean relative abundance of event cluster size for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The cluster sizes are calculated from a simulation without electronic noise and without applying any threshold on the collected signal.}
-\label{tab:cluster_size}
-\end{table}
+Simulations of charge diffusion show that in this range of $\langle \sigma \rangle / p$ the cluster size is always smaller than eight. This means that, given the hexagonal geometry of the pixels, all the charge is contained inside a circular set of seven pixels, with the pixel with the most charge at the center of the set and the other six pixels arranged in a circular corona around it. As will be discussed in Chap. \ref{subsec:readout} this feature defines the readout logic of the chip under development.
 
-The most frequent cluster size is 4, with a skewed distribution towards higher values. For a ratio of about 15\% the distribution becomes symmetric, and is expected to become skewed towards small cluster sizes below this ratio. 
+Another important property of diffusion and detector geometry is how the charge is distributed across the pixels. This is essential to determine the imaging and spectroscopy performance of the detector. As shown in Fig. \ref{fig:charge_distr}, the pixel charge distribution is highly asymmetrical, and more than 90-95\% of the charge is always collected by two pixels and the third pixel collects almost all of the remaining charge, while the other four pixels always have less than 1\% of the total charge.
 
-The important feature is that for none of the ratio values there are occurrences of cluster sizes bigger than seven pixels. This means that, given the hexagonal geometry of the pixels, all the charge is contained inside a circular set of seven pixels, with the pixel with the most charge at the center of the set and the other six pixels arranged in a circular corona around it. As will be discussed in Chap. \ref{subsec:readout} this feature defines the readout logic.
+In real working conditions, even with low-noise readout electronics, is highly probable that the charge collected by each one of these four pixels is comparable to the electronic noise or even smaller. 
 
-Another important property of diffusion and detector geometry is how the charge is distributed across the pixels. This is essential to determine the imaging and spectroscopy performance of the detector. As shown in Tab. \ref{tab:charge_distr}, the pixel charge distribution is highly asymmetrical, and more than 90-95\% of the charge is always collected by two pixels and the third pixel collects almost all of the remaining charge, while the other four pixels always have less than 1\% of the total charge.
-
-In real working conditions, even with low-noise readout electronics, is highly probable that the charge collected by each one of these four pixels is comparable to the electronic noise or even smaller. This is the reason why during the event analysis if a cluster has more than three pixels above threshold some pixels are suppressed in order to reduce it to a three-pixel cluster.
-
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{4}{c}{Pixel charge [\%]} \\
-\cmidrule(lr){2-5}
- & 1 & 2 & 3 & 4--7 \\
-\midrule
-19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
-19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
-19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
-18.7 & 71.5 & 19.9 & 7.8 & 0.9 \\
-18.1 & 72.5 & 19.4 & 7.3 & 0.7 \\
-17.4 & 73.8 & 18.8 & 6.8 & 0.6 \\
-16.6 & 74.9 & 18.2 & 6.3 & 0.5 \\
-15.9 & 75.8 & 17.8 & 5.9 & 0.5 \\
-15.3 & 76.7 & 17.2 & 5.6 & 0.4 \\
-14.9 & 77.3 & 16.9 & 5.4 & 0.4 \\
-14.5 & 77.9 & 16.5 & 5.2 & 0.4 \\
-14.3 & 78.3 & 16.3 & 5.1 & 0.3 \\
-\bottomrule
-\end{tabular}
-\caption{Average charge fraction collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It can be observed that the majority of the charge is collected by the first three pixels.}
-\label{tab:charge_distr}
-\end{table}
-
-\subsection{Readout}
-\label{subsec:readout}
-\fix{da ricontrollare}
-The goal of ASIX to be a detector suitable for different application fields under various working conditions makes it necessary to have high-performance readout electronics. One of the property which is particularly important is the readout rate, which should be high enough to be able to work in environments with high intensity sources. The current design goal is to have a maximum rate capability of 100 kHz with a 30\% deadtime and a readout frequency of 20 MHz. Another important property, which is essential to do high resolution spectroscopy, is the equivalent noise charge introduced by the electronics. The goal is to have no more than 20 ENC for each pixel and a final energy resolution of about 350 eV at the energy of 8 keV when using the silicon sensor, which is enough to resolve the Cu-K$_{\alpha}$ and Cu-K$_{\beta}$ lines. All of this is achievable with a dedicated analog front-end ASIC. The proposed ASIC design employs the same 180 nm CMOS fabrication process used for XPOL-III, with 50 $\mu$m pitch hexagonal pixels arranged with a honeycomb layout over a rectangular matrix, with a design goal dimension up to $31 \times 25$ mm$^2$ with more than $\num{350000}$ pixels. Unlike in GPDs, where the readout pixels are physically separated from the GEM, in the ASIX architecture they are directly connected to the pixelated sensor through micro-bump soldering, aligning each ASIC pixel to the corresponding one on the sensor. Like XPOL-III, each pixel has its own analog signal processing electronics, with a charge-sensitive amplifier, a shaping circuit and a sample-and-hold system. Thus, the general structure of the ASIC is very similar to the previously developed XPOL-III, apart from some aspects to modify to achieve the goal designs mentioned above.
-
-The important aspect that drives one of the major difference between XPOL and ASIX is the event topology of the detector. While in GPDs the electrons tracks produced by X-ray absorption can be tens of pixels long and can significantly vary, as discussed in \fix{Chap. \ref{chap:chapter3}}, in the proposed design of ASIX the number of pixels that are involved in an event is small, with an average of about two pixels and always less than eight pixels when applying a suppression threshold, and with an axial symmetrical charge distribution around the impact point. This event geometry is translated into an event that is fully contained by a region composed by a central pixel, which is the pixel with the most charge collected, and the six pixels that surround it. The limited dimension of the event and its fixed geometry  make possible to modify the trigger logic and the event readout strategy of the previous XPOL versions. The new chip is designed to be triggered by a single pixel, which is the one with the highest signal. The following readout consists in reading the pixel and all of its six neighbors, independently from their signal. The true advantage of this event geometry is the possibility to perform a parallel readout of the seven pixels using an external ADC with seven independent channels, with the outcome of drastically reducing the readout time, thus increasing the maximum acceptable rate of events. This can be done connecting each pixel to a single ADC channel, and the hexagonal honeycomb arrangement is ideal for this scope as it allows to map the entire chip with seven channels with no adjacent repetitions of the same channel, thus making possible to read a seven-pixels cluster on every point of the chip. A possible configuration of the ADC routing is shown in Fig. \ref{fig:adc_routing}.
-
+\fix{SOSTITUIRE QUESTA TABELLA CON GRAFICO}
 \begin{figure}
     \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/design/charge_distr}
+    \caption{Average charge fraction collected by the first, second, third and the remaining pixels as a function of $\langle \sigma \rangle / p$. The data set used is simulated without electronic noise and no clustering threshold has been used. \fix{fare plot in cui su asse x c'è s/p, su y mettiamo occorrenza, plottiamo 1 pixel, 2 pixel, 3 pixel, sum(4-7) pixel, magari anche sum(1-2)}}
+    \label{fig:charge_distr}
+\end{figure}
+
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{4}{c}{Pixel charge [\%]} \\
+%\cmidrule(lr){2-5}
+% & 1 & 2 & 3 & 4--7 \\
+%\midrule
+%19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
+%19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
+%19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
+%18.7 & 71.5 & 19.9 & 7.8 & 0.9 \\
+%18.1 & 72.5 & 19.4 & 7.3 & 0.7 \\
+%17.4 & 73.8 & 18.8 & 6.8 & 0.6 \\
+%16.6 & 74.9 & 18.2 & 6.3 & 0.5 \\
+%15.9 & 75.8 & 17.8 & 5.9 & 0.5 \\
+%15.3 & 76.7 & 17.2 & 5.6 & 0.4 \\
+%14.9 & 77.3 & 16.9 & 5.4 & 0.4 \\
+%14.5 & 77.9 & 16.5 & 5.2 & 0.4 \\
+%14.3 & 78.3 & 16.3 & 5.1 & 0.3 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Average charge fraction collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It can be observed that the majority of the charge is collected by the first three pixels. \fix{Sostituire con grafico in cui su asse x c'è s/p, su y mettiamo occorrenza, plottiamo 1 pixel, 2 pixel, 3 pixel, sum(4-7) pixel, magari anche sum(1-2)}}
+%\label{tab:charge_distr}
+%\end{table}
+
+\subsection{Readout strategy}
+\label{subsec:readout}
+
+The major difference between a GPD and the detectors developed under the ASIX project lies in the track topology. In a GPD, a photoelectron track can extend over tens of pixels due to the low density of the gaseous active medium, and its morphology varies significantly with photon energy. In a solid-state detector, instead, the generated charge is confined within a few pixels (typically no more than three, and strictly fewer than eight), as shown in Fig. \ref{fig:charge_distr}.
+
+Furthermore, the charge distribution is axially symmetric around the impact point. As previously mentioned, this topology results in an event that is fully contained within a region composed of a central pixel (which collects most of the charge) and its six immediate neighbors.
+
+Given this fixed maximum dimension and geometry, the readout can be performed differently from that of a GPD. The core idea is that when a pixel triggers, it is read out together with all six surrounding neighbors, regardless of the charge they have collected; therefore, the readout process always involves a fixed 7-pixel cluster.
+
+This represents a remarkable difference with respect to GPDs, requiring a completely new chip design to fully exploit the advantages offered by this compact event topology. An example of the readout strategy is shown in Fig. \ref{fig:adc_routing}.
+
+\begin{figure}[htbp]
+    \centering
     \includegraphics[width=0.4\linewidth]{figures/chapter4/design/adc_routing}
-    \caption{Example of pixel routing using seven independent ADC channels. Each pixel is labeled with the corresponding ADC channel. The light gray area represents the smallest repeated region to not incur in adjacent pixels connected to the same ADC channel. The seven darker pixels represent an example of readout after the pixel connected to channel 3 has triggered the event.}
+    \caption{Example of pixel routing using seven independent ADC channels. Each pixel is labeled with its corresponding ADC channel. The light gray area highlights the minimal unit cell needed to avoid adjacent pixels sharing the same channel. The seven darker pixels illustrate a cluster read out after the pixel connected to channel 3 triggers the event.}
     \label{fig:adc_routing}
 \end{figure}
 
-Another improvement of the rate capability can be achieved dividing the chip into independent regions, each with its own multi-channel ADC. This configuration with independent regions would cause problems for events at the borders of the region, because they would be truncated and thus they should be rejected, but with an optimal shape and size of the regions the fraction of events should be smaller than 1\%. 
 
-To not exclude other possible uses of the chip other than for ASIX, such as for X-ray polarimetry, it is designed to support additional triggering and readout logics similar to XPOL-III, with a sequential readout of the pixels inside a rectangular ROI, as already described in Chap. \ref{sec:xpol3}. This would still allow to analyze larger tracks, but obviously the speed is slower and the maximum rate capability is smaller.
+\subsection{ASIC}
+\label{subsec:asic}
 
-\fix{bisogna accennare anche del pedestal da qualche parte}
+The goal of developing a detector suitable for different applications under diverse operating conditions requires a readout chip capable of handling event rates significantly higher than those typical of astrophysical sources. 
+
+As a reference, the brightest extrasolar source in the 2--8~keV energy range yields a flux of about 30~ph~cm$^{-2}$~s$^{-1}$, whereas an XRD laboratory setup with a Copper source can easily exceed a flux of $2 \times 10^8$~ph~cm$^{-2}$~s$^{-1}$ \cite{bolze2019}.
+
+The key to speeding up the readout with respect to GPDs is exploiting the fixed event geometry. While reducing the number of pixels to read is essential to lower the dead time, the main architectural breakthrough is the ability to read all seven pixels in parallel. 
+
+This parallel readout can be implemented using an external ADC with seven independent channels. Each pixel in a cluster is routed to a different channel, and the hexagonal honeycomb arrangement of the pixels is ideal for this purpose, as it allows the entire chip matrix to be mapped using seven channels without any adjacent repetition of the same channel. This configuration enables a 7-pixel cluster to be read out in parallel at any location on the chip, as illustrated in Fig. \ref{fig:adc_routing}.
+
+A further increase in rate capability can be achieved by segmenting the chip into independent readout regions, each equipped with its own 7-channel ADC. Although this approach can truncate events occurring at the boundaries between regions, leading to their rejection, selecting an optimal region size and shape ensures that the fraction of rejected events remains negligible.
+
+The current design goal is to achieve a maximum rate capability of at least 100~kHz per region at a readout clock frequency of 20~MHz, which translates into a global detector rate of about 1~MHz, depending on the final number of independent regions.
+
+This performance estimate assumes that pedestal subtraction is performed offline, unlike in previous XPOL chips. Indeed, since all seven pixels are sampled simultaneously by their dedicated ADC channels, systematic effects induced by time-dependent digital transients during serial readout are naturally avoided. This eliminates the need for a second pedestal readout pass, saving time at the cost of requiring an accurate offline pedestal calibration.
+
+Another critical property, essential for high-resolution spectroscopy, is the Equivalent Noise Charge (ENC) introduced by the front-end electronics. The design target is to maintain the noise below 20~$e^-$ ENC per pixel. When coupled with a silicon sensor, this noise level yields an energy resolution of approximately 350~eV FWHM at 8~keV, which is sufficient to resolve the Cu-K$_{\alpha}$ and Cu-K$_{\beta}$ fluorescence lines commonly used in XRD setups.
+
+All these requirements are achievable with a dedicated analog front-end ASIC. The proposed design features $50~\mu\text{m}$ pitch hexagonal pixels in a honeycomb array over a rectangular matrix, similar to the other XPOL family chips. However, unlike in GPDs—where the readout pixels are physically separated from the GEM—in the ASIX architecture the ASIC pixels are directly connected to the pixelated sensor via micro-bump soldering, aligning each ASIC pixel to the corresponding electrode on the sensor.
+
+Finally, to preserve detector versatility for applications such as X-ray polarimetry, the chip is designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
 
 \section{Simulations and analysis framework}
 \fix{da ricontrollare}
