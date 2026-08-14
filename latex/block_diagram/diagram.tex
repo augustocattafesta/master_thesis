@@ -1,84 +1,187 @@
-\documentclass[tikz, border=15pt]{standalone}
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{amsmath}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
+% Definizione palette colori
+\definecolor{primary}{HTML}{2B4C7E}
+\definecolor{accent}{HTML}{C05A46}
+\definecolor{boxbg}{HTML}{F4F6F9}
+\definecolor{innerbg}{HTML}{FFFFFF}
+\definecolor{bordercolor}{HTML}{333333}
 
 \begin{document}
 
 \begin{tikzpicture}[
-    node distance=0.7cm and 1.2cm,
-    % Stili dei nodi
-    proc/.style={rectangle, draw=black, thick, fill=gray!12, text width=3.6cm, minimum height=0.8cm, align=center, font=\small\sffamily},
-    subcmd/.style={ellipse, draw=black, thick, fill=white, inner sep=3pt, font=\small\sffamily, align=center},
-    io/.style={rectangle, draw=black, dashed, fill=white, inner sep=4pt, font=\small\sffamily\itshape, align=center},
-    group/.style={rectangle, draw=black, thick, inner sep=12pt, font=\small\sffamily\bfseries},
-    arrow/.style={-Stealth, thick}
+    auto,
+    >=Stealth,
+    node distance=1.0cm and 1.2cm,
+    % Stili
+    subbox/.style={
+        draw=bordercolor,
+        fill=innerbg,
+        thick,
+        rounded corners=8pt,
+        align=left,
+        inner sep=8pt,
+        minimum width=4.8cm,
+        font=\small
+    },
+    subsubbox/.style={
+        draw=bordercolor!70,
+        fill=boxbg!60,
+        thick,
+        rounded corners=4pt,
+        align=left,
+        inner sep=6pt,
+        font=\footnotesize
+    },
+    ovalbox/.style={
+        draw=bordercolor,
+        fill=innerbg,
+        thick,
+        ellipse,
+        align=center,
+        inner sep=6pt,
+        minimum width=2.6cm,
+        minimum height=1.1cm,
+        font=\small\bfseries
+    },
+    labelstyle/.style={
+        font=\footnotesize\bfseries,
+        text=primary,
+        fill=white,
+        inner sep=2pt,
+        rounded corners=2pt
+    }
 ]
 
-    % ==================== INPUT / SOURCING ====================
-    \node [io] (mdat) {.mdat Binary File};
-    \node [proc, right=1.0cm of mdat] (convert) {\textbf{convert}};
+% ===================================================================
+% 1. BLOCCO PRINCIPALE: SIMULATE
+% ===================================================================
 
-    % ==================== SIMULATE CONTAINER ====================
-    \node [proc, right=2.5cm of convert] (source) {Source \\ \scriptsize (spectrum, beamshape)};
-    \node [proc, below=of source] (sensor) {Sensor \\ \scriptsize (material, thickness, etc.)};
-    \node [proc, below=of sensor] (readout) {Readout \\ \scriptsize (digitization, PHA)};
+\node [subbox] (source) {
+    \textbf{\large Source}\\[4pt]
+    \textbullet~spectrum \\
+    \textbullet~beam shape
+};
 
-    \node[group, fit=(source) (sensor) (readout), label={above:\Large simulate}] (sim_box) {};
+\node [subbox, below=of source] (sensor) {
+    \textbf{\large Sensor}\\[4pt]
+    \textbullet~material \\
+    \textbullet~thickness \\
+    \textbullet~diff. coeff. $D$
+};
 
-    % Connessioni interne simulate
-    \draw [arrow] (source) -- node[right, font=\scriptsize\sffamily] {$(E, x, y)$} (sensor);
-    \draw [arrow] (sensor) -- node[right, font=\scriptsize\sffamily] {$(E, x, y, z)$} (readout);
+\node [subbox, below=of sensor] (readout) {
+    \textbf{\large Readout}\\[4pt]
+    \textbullet~chip layout\\[6pt]
+    \begin{tikzpicture}[baseline=(sub.north)]
+        \node[subsubbox] (sub) {
+            \textbullet~ENC \\
+            \textbullet~pedestal \\
+            \textbullet~gain
+        };
+    \end{tikzpicture}
+};
 
-    % ==================== DATA HDF5 FILE ====================
-    % Nodalizziamo il file hdf generato da convert o simulate
-    \node [io, below=1.5cm of convert] (hdf_data) {Raw Data File \\ \textbf{.hdf}};
+% Frecce interne simulate
+\draw [->, thick] (source) -- node[labelstyle, right=2pt] {$(E, x, y)$} (sensor);
+\draw [->, thick] (sensor) -- node[labelstyle, right=2pt] {$(E, x, y, z)$} (readout);
 
-    % Frecce che creano il file Raw .hdf
-    \draw [arrow] (convert) -- (hdf_data);
-    \draw [arrow] (readout.south) |- (hdf_data.east);
-    \draw [arrow] (mdat) -- (convert);
+% Contenitore esterno simulate
+\begin{scope}[on background layer]
+    \node [
+        draw=primary,
+        fill=boxbg,
+        ultra thick,
+        fit=(source) (sensor) (readout),
+        inner sep=14pt,
+        yshift=-8pt
+    ] (simulate) {};
+    \node[anchor=north west, primary, font=\bfseries\Large] at (simulate.north west) {simulate};
+\end{scope}
 
+% ===================================================================
+% 2. BLOCCO PRINCIPALE: CONVERT
+% ===================================================================
+\node [
+    draw=primary,
+    fill=boxbg,
+    ultra thick,
+    minimum width=3.8cm,
+    minimum height=1.6cm,
+    font=\bfseries\Large,
+    text=primary,
+    anchor=south west
+] (convert) at ($(simulate.south east) + (4.0,0)$) {convert};
 
-    % ==================== CALIBGEN CONTAINER ====================
-    \node [subcmd, below=1.8cm of hdf_data] (cal_noise) {noise};
-    \node [subcmd, right=0.8cm of cal_noise] (cal_pedestal) {pedestal};
-    \node [subcmd, right=0.8cm of cal_pedestal] (cal_eq) {equalization};
-    
-    \node [subcmd, below=0.8cm of cal_pedestal] (cal_gain) {gain / ENC};
-    \node [subcmd, below=0.8cm of cal_eq] (cal_synth) {synthesize};
+% ===================================================================
+% 3. BLOCCO PRINCIPALE: CALIBGEN (con nodi ovali interni)
+% ===================================================================
 
-    \node[group, fit=(cal_noise) (cal_pedestal) (cal_eq) (cal_gain) (cal_synth), label={above:\Large calibgen}] (calib_box) {};
+% Disposizione multilivello dei nodi ovali
+\node [ovalbox, below=3.2cm of simulate.south, xshift=-1.0cm] (noise) {noise};
+\node [ovalbox, right=1.5cm of noise] (pedestal) {pedestal};
+\node [ovalbox, below=1.8cm of noise, xshift=1.2cm] (equalization) {equalization};
+\node [ovalbox, below=1.8cm of equalization] (position) {position};
 
-    % Flusso interno calibgen
-    \draw [arrow] (cal_noise) -- (cal_pedestal);
-    \draw [arrow] (cal_pedestal) -- (cal_eq);
-    \draw [arrow] (cal_pedestal) -- (cal_gain);
-    \draw [arrow] (cal_eq) -- (cal_synth);
-    \draw [arrow] (cal_gain) -- (cal_synth);
+% Ovale speciale synthesize
+\node [ovalbox, right=1.2cm of pedestal] (synthesize) {synthesize};
 
-    % File prodotti da calibgen
-    \node [io, right=1.2cm of calib_box] (calib_files) {Calibration Files \\ \textbf{.hdf} \\ \scriptsize (noise, pedestal, eq)};
-    \node [io, below=0.8cm of cal_synth] (sim_config_files) {Readout Config Files \\ \scriptsize (pedestal, ENC, gain)};
+% Contenitore esterno calibgen
+\begin{scope}[on background layer]
+    \node [
+        draw=primary,
+        fill=boxbg,
+        ultra thick,
+        fit=(noise) (pedestal) (equalization) (position) (synthesize),
+        inner sep=16pt,
+        yshift=-6pt
+    ] (calibgen) {};
+    \node[anchor=north west, primary, font=\bfseries\Large] at (calibgen.north west) {calibgen};
+\end{scope}
 
-    % Frecce di output da calibgen
-    \draw [arrow] (cal_eq) -- (calib_files);
-    \draw [arrow] (cal_synth) -- (sim_config_files);
+% ===================================================================
+% 4. COLLEGAMENTI E FRECCE
+% ===================================================================
 
-    % Loopback di calibgen verso il readout di simulate
-    \draw [arrow] (sim_config_files.east) -| (sim_box.south);
+% Punto di unione per l'ingresso in calibgen
+\coordinate (merge) at ($(calibgen.north) + (-1.0cm, 1.2cm)$);
 
+% Percorso da simulate a merge
+\draw [thick] (readout.south) -- (simulate.south |- simulate.south) 
+      -- node[labelstyle, left=2pt] {$(E, x, y, z, \text{PHA})$} (simulate.south |- merge)
+      -- (merge);
 
-    % ==================== RECONSTRUCT CONTAINER ====================
-    \node [proc, left=2.2cm of calib_box] (recon) {\textbf{reconstruct} \\[2pt] \scriptsize (noise, pedestal, eq, position, recon\_algorithm)};
+% Percorso da convert a merge
+\draw [thick] (convert.south) |- (merge);
 
-    \node [io, below=1.5cm of recon] (final_hdf) {Final Reconstructed \\ \textbf{.hdf} File};
+% Freccia principale .hdf verso calibgen
+\draw [thick, primary] (merge) -- node[labelstyle, right=4pt] {.hdf} (calibgen.north |- merge) -- (calibgen.north |- noise.north);
 
-    % Connessioni in ingresso a Reconstruct
-    \draw [arrow] (hdf_data.south) -- (recon.north);
-    \draw [arrow] (calib_files.south) |- (recon.east);
-    
-    % Connessione in uscita da Reconstruct
-    \draw [arrow] (recon) -- (final_hdf);
+% Ramificazione dell'ingresso .hdf ai 4 blocchi ovali
+\draw [->, thick, primary] (calibgen.north |- noise.north) -- (noise.north);
+\draw [->, thick, primary] (calibgen.north |- noise.north) -| (pedestal.north);
+\draw [->, thick, primary] (calibgen.north |- noise.north) -| (equalization.north);
+\draw [->, thick, primary] (calibgen.north |- noise.north) -| (position.north);
+
+% Frecce interne tra blocchi ovali in calibgen
+% Noise -> Equalization & Position
+\draw [->, thick] (noise.south) -- node[labelstyle, left=1pt] {.hdf} (equalization.north west);
+\draw [->, thick] (noise.south) .. controls ($(noise.south)+(0,-2.5)$) and ($(position.west)+(-1.0,0)$) .. node[labelstyle, left=1pt] {.hdf} (position.west);
+
+% Pedestal -> Equalization & Position
+\draw [->, thick] (pedestal.south) -- node[labelstyle, right=1pt] {.hdf} (equalization.north east);
+\draw [->, thick] (pedestal.south) .. controls ($(pedestal.south)+(0,-2.5)$) and ($(position.east)+(1.0,0)$) .. node[labelstyle, right=1pt] {.hdf} (position.east);
+
+% Equalization -> Position
+\draw [->, thick] (equalization.south) -- (position.north);
+
+% Freccia da Synthesize verso Readout (sottoblocco ENC, pedestal, gain)
+\draw [->, thick, accent, dashed] (synthesize.north) .. controls ($(synthesize.north)+(0,2.5)$) and ($(readout.east)+(3.0,0)$) .. node[labelstyle, text=accent, above right] {sintesi parametri} (readout.east);
 
 \end{tikzpicture}
 
