@@ -44,7 +44,7 @@ When a photon is absorbed in the active sensor, the distance traveled by the pri
 
 Once electron-hole pairs are generated they start to diffuse in the plane perpendicular to the electric field, as described in Chap. \ref{sec:semiconductors}. Knowing the sensor material properties, the electric field and the working conditions of the detector, such as the sensor temperature, the transverse diffusion sigma can be calculated using Eq. \ref{eq:diff_sigma_dist}.
 
-The absorption depth depends on the energy of the photon and is distributed according to Eq. \ref{eq:pdf_truncated}, and by fixing the sensor thickness it allows to calculate the mean transverse diffusion sigma $\langle \sigma \rangle$ from Eq. \ref{eq:z_average}. The dependence of $\langle \sigma \rangle$ on the photon energy for different Si sensor thicknesses is shown in Fig. \ref{fig:mean_sigma}.
+The absorption depth depends on the energy of the photon and is distributed according to Eq. \ref{eq:pdf_truncated}, and by fixing the sensor thickness it allows to calculate the mean transverse diffusion sigma $\langle \sigma \rangle$ from Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist}. The dependence of $\langle \sigma \rangle$ on the photon energy for different Si sensor thicknesses is shown in Fig. \ref{fig:mean_sigma}.
 
 \begin{figure}
     \centering
@@ -765,13 +765,13 @@ The angular coordinate can be parametrized as a two-pixel event problem as well.
 
 As in the case of two-pixel events, the uniformity of the events along the relevant axes has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the radial axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
 
-Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical propertie. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
+Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical properties. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
-    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel).}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
     \label{fig:3pix_scatter}
 \end{figure}
 
@@ -922,9 +922,9 @@ To calibrate the radial and angular coordinates the strategy is identical to the
 
 As can be observed from Figs. \ref{fig:eta_2pix_r_distr} and \ref{fig:eta_3pix_fit}, the models describe very well the data, and the shape of the profiles are compatible with the cumulative distributions in Figs. \ref{fig:eta_2pix} and \ref{fig:eta_3pix} obtained with the unmodeled $\eta$ algorithm. This validates both the unmodeled and modeled algorithms, which converge to very similar results.
 
-However, one thing that can be noted is that the best-fit values of $\sigma$ for the three fits are very different. The simulation has been perfomed with an average $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained with two-pixel events is compatible with the expected one. These variations can be attributed to the spatial distribution of the events around the axes along which the positions are projected. Indeed, when the distribution is broad, as in the case of three-pixel events (Fig. \ref{fig:3pix_scatter}), the difference with respect to the expected value is larger than the case of two-pixel events (Fig. \ref{fig:2pix_scatter}).
+However, it can be noted that the best-fit values of $\sigma$ for the three fits are different. The simulation was performed with an average ratio $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained from two-pixel events is compatible with the expected value. These discrepancies can be attributed to the spatial distribution of the events around the projection axes. Indeed, when this distribution is broad, as in the case of three-pixel events (Fig.~\ref{fig:3pix_scatter}), the deviation from the expected value is larger than for two-pixel events (Fig.~\ref{fig:2pix_scatter}).
 
-This must be taken into account, because the calibration with Monte Carlo simulations is necessary, and the expected value of $\sigma/p$ that can be calculated with Eq. \ref{eq:mean_diff_sigma} can not be used.
+This must be taken into account, as calibration via Monte Carlo simulations becomes necessary, and the nominal value of $\langle \sigma \rangle /p$ estimated through Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist} cannot be directly used.
 
 Once the best-fit parameters have been estimated from simulations, a separate dataset can be analyzed and the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
 
