@@ -47,13 +47,13 @@
 %
 %\newpage
 
-This thesis is focused on the characterization, performance study and the development of reconstruction algorithms for gas and solid-state X-rays prototypes for applications in polarimetry, imaging and spectroscopy.
+This thesis is focused on the characterization, performance study and development of reconstruction algorithms for gas and solid-state X-rays prototypes for applications in polarimetry, imaging and spectroscopy.
 
 The development of these new detectors relies on the experience acquired in the last two decades during the realization of Gas Pixel Detectors (GPDs), a class of X-ray photoelectric polarimeters employed on board the Imaging X-ray Polarimetry Explorer (IXPE) mission funded by NASA and Agenzia Spaziale Italiana (ASI). IXPE was launched in 2021 and is dedicated to the study of polarization, combined with imaging, spectroscopy and timing of astrophysical sources in the energy range between 2 and 8 keV.
 
 GPDs represented a breakthrough in X-ray polarimetry thanks to the use of Micro-Pattern Gaseous Detectors (MPGD), in which a Gas Electron Multiplier (GEM) is combined with a finely pixelated Application Specific Integrated Circuit (ASIC) to track a photoelectron released after an X-ray photon is absorbed in the active gas volume. This approach allowed increasing the sensitivity of IXPE by two orders of magnitude with respect to previous missions, which relied on technology dating back to the 1970s based on Bragg crystals.
 
-The ASIC employed in GPDs, named XPOL, is capable of performing an event-driven and self-triggering readout, in which only the region of interest where the photoelectron track is located, which can have up to \num{1000} pixels, is read. This allows significantly reducing the required readout time with respect to a full-chip readout, as the chip consists of more than \num{100000} pixels.
+The ASIC employed in GPDs, named XPOL, is capable of performing an event-driven and self-triggering readout, in which only the region of interest where the photoelectron track is located is read. This allows significantly reducing the required readout time with respect to a full-chip readout, as the region of interest has a size up to 1000 pixels, while the entire chip consists of more than \num{100000} pixels.
 
 Despite this feature, GPDs do not meet the speed requirements of the next generation of X-ray polarimetry observatories, which will employ larger mirrors and will therefore need to be capable of detecting events with a much higher rate than IXPE. For this reason some upgrades are under study in recent years to improve GPD performance.
 
@@ -65,7 +65,7 @@ A possible solution to reduce these systematic effects and improve detector stab
 
 The results obtained by XPOL-III have paved the way to the development of a new class of X-ray detectors for non-polarimetric applications requiring energy-resolved imaging, such as X-ray diffraction, synchrotron-based material science and X-ray astrophysics. This is the Analog Spectral Imager for X-rays (ASIX) project, which consists of the development of Hybrid Pixel Detectors (HPDs) in which a solid-state sensor is coupled to an XPOL-family ASIC, inheriting GPDs' event-driven and self-triggering readout.
 
-The event-driven approach enables taking advantage of charge sharing, typical of detectors with small pixel pitches like the 50 $\mu$m hexagonal pixels of XPOL, to achieve better spatial resolution through offline analysis. At the same time, optimizing sensor design parameters that influence the charge sharing geometry allows for high energy resolution by maximizing the signal-to-noise ratio, which depends on the number of pixels involved in the event.
+The event-driven approach enables taking advantage of charge sharing, typical of detectors with small pixel pitches such as the 50 $\mu$m hexagonal pixels of XPOL, to achieve better spatial resolution through offline analysis. At the same time, optimizing sensor design parameters that influence the charge sharing geometry allows for high energy resolution by maximizing the signal-to-noise ratio, which depends on the number of pixels involved in the event.
 
 My work in the ASIX project was focused on the development of the Monte Carlo simulation and analysis software, the calibration of the detector and the development of different algorithms for offline reconstruction of incidence position and energy of the photons. These algorithms were evaluated using both dedicated simulations and experimental data collected with a prototype. Through these analyses, the spatial and energy resolutions of the detector were determined. Finally, a comparison between simulations and laboratory measurements was carried out to verify the validity of the Monte Carlo simulation software.
 

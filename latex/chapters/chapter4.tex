@@ -151,6 +151,13 @@ The framework provides a suite of command-line tools that can be executed direct
 
 The core pipeline modules, illustrated in Fig.~\ref{fig:block_diagram}, are responsible for running Monte Carlo simulations, converting raw binary data collected with prototypes into HDF5 files, performing detector calibration, and executing event reconstruction.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/calibration/block_diagram}
+    \caption{Block diagram representing the main steps of the simulation and analysis software available at \cite{hexsample}. A dataset can be generated with the Monte Carlo simulation framework or obtained by converting a binary laboratory acquisition. The dataset is used to generate the calibration products, which are subsequently employed to reconstruct the events.}
+    \label{fig:block_diagram}
+\end{figure}
+
 This section illustrates in details the Monte Carlo simulation software and the calibration and analysis pipeline.
 
 \subsection{Monte Carlo simulations}
@@ -284,7 +291,7 @@ Fig. \ref{fig:methods} shows the possible cases of application of the three meth
     \label{fig:methods}
 \end{figure}
 
-For the first two methods the relative error on the calibration of pedestals and noise scales as $1/\sqrt{N}$, thus to achieve a 1\% uncertainty it is necessary to collect about $10^4$ events for each pixel. Considering that with the ROI described above about $10^2$ pixels can be used for calibration, and considering that an XPOL-III chip has more than $10^5$ pixels, the total number of events required is of the order of $10^7$.
+For the first two methods the relative error on the noise calibration scales as $1/\sqrt{N}$, thus to achieve a 1\% uncertainty it is necessary to collect about $10^4$ events for each pixel. Considering that with the ROI described above about $10^2$ pixels can be used for calibration, and considering that an XPOL-III chip has more than $10^5$ pixels, the total number of events required is of the order of $10^7$. The relative error on pedestal calibration depends on the noise level.
 
 
 \subsection{Normalized gain}
@@ -321,27 +328,25 @@ and minimize it with respect to all the fit parameters. In practice, this is not
 
 For this reason the detector can be virtually divided into smaller square sub-regions and all the pixels inside the same sub-region are fitted simultaneously. In order to include an event inside a sub-region fit, all the charge must be collected by pixels inside. To not exclude events that involve pixels on the borders of sub-regions, an two-pixels overlap is guaranteed between adjacent sub-regions. In this way all the events are considered for the analysis and pixels that lie on the borders do not have reduced statistics. For each sub-region the negative log-likelihood is calculated from Eq. \ref{eq:total_likelihood} and then minimized with \textit{iminuit} \cite{iminuit}.
 
-\fix{devo specificare meglio che il fattore di calibrazione in questo caso puo essere calcolato se lo spettro è generato correttamente. Inoltre devo dire che con questo prodotto posso calcolare il gain assoluto e di conseguenza anche la mappa degli ENC.}
+If the spectrum used for the calibration is accurately simulated, it is also possible to estimate the conversion factor from ADC counts to eV, allowing the absolute gain calibration product to be obtained. Knowing the sensor material and the mean energy required to generate an electron-hole pair, it is then possible to combine the ADC noise and absolute gain maps to estimate the ENC map, thus measuring the intrinsic noise level of each pixel.
 
-\subsection{Simulation results}
+\subsection{Calibration performance}
 
-To test the calibration procedure and gauge the algorithms performances, a dataset has been simulated. The dataset has a monochromatic source of 10 keV with a beam that uniformly illuminates the entire detector. Noise, pedestal and gain are distributed according to Gaussian distributions with a mean of 100 electrons, 1000 ADC and 0.1 ADC/electron, respectively, and a standard deviation of 10\% of the mean. A total of $10^7$ events have been generated.
+To test the calibration procedure and gauge the algorithms performances, a dataset with a monochromatic source of 10 keV with a beam that uniformly illuminates the entire detector has been simulated. Noise, pedestal and gain are distributed according to Gaussian distributions with a mean of 100 electrons, 1000 ADC and 0.1 ADC/electron, respectively, and a standard deviation of 10\% of the mean. A total of $10^7$ events have been generated.
 
-The first calibration step is the ADC noise and pedestal calibration. In this case the second method, the one which calculates the mean and standard deviation of the PHA distributions, has been used because the pedestal is much bigger than the noise level. The matrices of the noise values and of the number of entries contained in the calibration products are shown in Fig. \ref{fig:noise_matrix}
+The first calibration step is the ADC noise and pedestal calibration. In this case the method that calculates the sample mean and standard deviation of the PHA distributions has been used because the pedestal is much bigger than the noise level. The scatter plots showing the correlation between the Monte Carlo truth values of noise and pedestal with their calibrated values are shown in Fig. \ref{fig:noise_pedestal}.
 
 \begin{figure}[!b]
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_matrix_values}
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_matrix_entries}
-    \caption{The left panel shows the chip matrix with the ADC noise values obtained from the noise calibration.  All the 107008 pixels of the chip have been successfully calibrated. The right panel shows the matrix of the number of events used for the pixel calibration. The average number of events per pixel is about 11000. The modulation pattern that is visible for the entries is caused by the odd number of rows in the ROI and the fact that the upper-right pixel coordinates of the triggered minicluster have a fixed parity, so an aliasing effect is produced.}
-    \label{fig:noise_matrix}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_correlation}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/pedestal_correlation}
+    \caption{Scatter plots showing the correlation between the Monte Carlo truth and the calibrated values of noise and pedestals.}
+    \label{fig:noise_pedestal}
 \end{figure}
 
 Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it's the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}. The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
 
-Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC.
-
-With these two calibration files it is now possible to analyze again the same dataset to calibrate the pixel equalization.
+Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC, compatible with the expected value estimated from Eq. \ref{eq:noise_uncertainty}.
 
 \begin{figure}
     \centering
@@ -350,6 +355,8 @@ With these two calibration files it is now possible to analyze again the same da
     \caption{The left panel shows the calibrated values distribution of ADC noise, which is not a Gaussian distribution, but a distribution with a positive skewness. The residuals distribution is visible in the right panel.}
     \label{fig:noise_distribution}
 \end{figure}
+
+With these two calibration files it is now possible to analyze again the same dataset to calibrate the normalized gain. 
 
 \fix{qui bisogna mostrare i risultati della calibrazione del gain e mettere un paio di grafici.}
 
@@ -391,7 +398,8 @@ Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ an
 \end{figure}
 
 By calculating the distance between the truth and the reconstructed positions, the EEF can be calculated. 
-Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm varies as a function of the ratio between the diffusion widths of the charge cloud and the pixel pitch. It can be observed that a broader diffusion implies a better resolution. Tab. \ref{tab:eef_barycenter} shows the distance at which EEF contains 50\% and 90\% of the events.
+Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm varies as a function of the ratio between the diffusion widths of the charge cloud and the pixel pitch. It can be observed that a broader diffusion implies a better resolution. 
+%Tab. \ref{tab:eef_barycenter} shows the distance at which EEF contains 50\% and 90\% of the events.
 
 \begin{figure}[htbp]
     \centering
@@ -400,21 +408,21 @@ Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm vari
     \label{fig:barycenter_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ [\%] & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.19 & 0.27 \\
-13.7 & 0.17 & 0.24 \\
-15.2 & 0.15 & 0.22 \\
-16.8 & 0.13 & 0.20 \\
-18.3 & 0.11 & 0.18 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with charge barycenter reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:barycenter_eef}}
-\label{tab:eef_barycenter}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ [\%] & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.19 & 0.27 \\
+%13.7 & 0.17 & 0.24 \\
+%15.2 & 0.15 & 0.22 \\
+%16.8 & 0.13 & 0.20 \\
+%18.3 & 0.11 & 0.18 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with charge barycenter reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:barycenter_eef}}
+%\label{tab:eef_barycenter}
+%\end{table}
 
 This algorithm does not require any specific position-calibration models, as it neglects the physical details of charge diffusion. Consequently, it represents a fast, straightforward approach that provides a robust first estimate of the interaction position, relying exclusively on basic noise and gain-corrected pixel data.
 
@@ -540,45 +548,17 @@ This equation can now be minimized with respect to the unknown parameters $(x, y
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.6\linewidth]{figures/chapter4/position/calibration_matrices}
-    \caption{The seven charge fraction matrices used for the position reconstruction with the MLE. Each matrix represents the charge fraction that is collected by that pixel as a function of impact position on the central pixel. The matrices are obtained using a simulated dataset with a 6 keV monochromatic source, with a 300 $\mu$m thick silicon sensor and with a transverse diffusion sigma of 40 $\mu$m cm$^{-0.5}$, thus the ratio between the $\sigma$ of the cloud and the pixel pitch is about 13\%. The grid is composed by 100 bins on the x-axis and 116 on the y-axis.}
-    \label{fig:mle_cal_matrices}
+    \includegraphics[width=0.48\linewidth]{figures/chapter4/position/calibration_matrices}
+    \includegraphics[width=0.48\linewidth]{figures/chapter4/position/nll}
+    \caption{Left panel: the seven charge fraction calibration matrices evaluated as a function of the impact position on the central pixel, simulated for a 6 keV monochromatic source with $\langle \sigma \rangle / p \approx 13\%$. The grid is composed of $100 \times 116$ bins. Right panel: two-dimensional map of the $\operatorname{NLL}$ evaluated across the central pixel for a fixed charge $Q$, where the minimum identifies the best-fit reconstructed position $(\hat{x}, \hat{y})$. In the actual fit, $Q$ is free and the minimization is performed in the 3D space $(x, y, Q)$.}
+    \label{fig:mle_calibration_and_nll}
 \end{figure}
-
 
 In order to be correctly used, this position reconstruction method requires a prior calibration of the diffusion model. Indeed, the charge fractions depend on the charge cloud diffusion width. The charge fractions $f_i$ could be calculated with Eq. \ref{eq:mle_charge_fraction}, but the hexagonal geometry of the pixels makes the analytical calculation complex. For this reason, the reference charge-sharing model is evaluated through Monte Carlo simulations and tabulated for a certain value of the $\langle \sigma \rangle / p$ ratio, which is specific to a combination of sensor thickness, pixel pitch, diffusion coefficient and photon energy.
 
-The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_cal_matrices}.
+The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_calibration_and_nll}.
 
-During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of $\operatorname{NLL}$ evaluated across the pixel with fixed charge $Q$ is shown in Fig. \ref{fig:mle_nll}.
-
-Performing the minimization on discrete matrices could lead to numerical problems, due to the possibility of having non-physical zero gradients in case of small steps. To avoid these problems, a bilinear interpolation is performed when the $\operatorname{NLL}$ is evaluated in $(x, y)$, enabling to smooth the function. The interpolation is performed as following:
-
-\begin{itemize}[label=-]
-\item calculate the fractional coordinates $(w_x, w_y)$ of $(x, y)$ with respect to the associated bin center and get the grid coordinates $(i_x, i_y)$ of the nearest lower-left bin;
-\item get the values $(v_{00}, v_{10}, v_{01}, v_{11})$ of the four bins with grid coordinates $(i_x, i_y)$, $(i_x + 1, i_y)$, $(i_x, i_y + 1)$, $(i_x + 1, i_y + 1)$;
-\item weight each bin value with the distance from $(x, y)$ to get the interpolated value:
-\begin{equation}
-f_i (x, y) = v_{00} (1 - w_x) (1 - w_y) + v_{10} w_x (1 - w_y) + v_{01} (1 - w_x) w_y + v_{11} w_x w_y.
-\end{equation}
-\end{itemize}
-
-To speed up the minimizer, the gradient of the $\operatorname{NLL}$ with resepect to $(x, y, Q)$ can be pre-computed as well. For this purpose, the gradients of the charge fraction matrices have to be calculated with respect to $x$ and $y$ and have to be interpolated. This time the interpolation is linear, and the interpolated gradients are
-
-\begin{equation}
-\begin{split}
-\frac{\partial f_i}{\partial x} = [(v_{10} - v_{00}) (1 - w_y) + (v_{11} - v_{01}) w_y] / dx,\\
-\frac{\partial f_i}{\partial y} = [(v_{01} - v_{00}) (1 - w_x) + (v_{11} - v_{10}) w_x] / dy,
-\end{split}
-\end{equation}
-where $dx = dy$ is the square bin size. The detailed derivation of the gradients of Eq.~\ref{eq:nll_multivariate} is reported in Appendix~\ref{app:nll_derivative}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/nll}
-	\caption{Two-dimensional map of the $\operatorname{NLL}$ in Eq. \ref{eq:nll_multivariate} as a function of the incident position $(x, y)$ within the central hexagonal pixel, with coordinates normalized to the pixel pitch. The total charge $Q$ is kept fixed to the sum of the cluster charges. The global minimum corresponding to the lowest $\operatorname{NLL}$ values indicates the best-fit reconstructed position $(\hat{x}, \hat{y})$ evaluated by the numerical minimization algorithm. In the actual fitting procedure, the total charge $Q$ is left as a free parameter, so the minimization is performed in a three-dimensional parameter space $(x, y, Q)$.}
-\label{fig:mle_nll}
-\end{figure}
+During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further numerical details on the continuous interpolation of these discrete calibration matrices and the analytical computation of the likelihood gradients are provided in Appendix \ref{appendix:mle}.
 
 Contrary to charge barycenter, this algorithm does not implement any type of suppression. Indeed, while charge barycenter applies a zero-suppression threshold and a position-suppression to suppress pixels that have high probability of having only noise signal, this algorithm weights each pixel by considering the diffusion model. 
 
@@ -586,7 +566,8 @@ As a consequence, defining the cluster size becomes ambiguous. For plotting purp
 
 Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. With this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch.
 
-This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
+This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. This algorithm is generally better than the charge barycentering, indeed the EEF@50\% is always about three times smaller, but due to the long tails the EEF@90\% can be worse in some cases. 
+%Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
 
 Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution. It must be noted that for the position reconstruction a set of calibration matrices has been produced for each diffusion width.
 
@@ -607,21 +588,21 @@ Furthermore, the same dependence on the diffusion width as the charge barycenter
     \label{fig:mle_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.07 & 0.35 \\
-13.7 & 0.05 & 0.26 \\
-15.2 & 0.04 & 0.19 \\
-16.8 & 0.03 & 0.14 \\
-18.3 & 0.03 & 0.12 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with maximum likelihood estimator reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:mle_eef}}
-\label{tab:eef_mle}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.07 & 0.35 \\
+%13.7 & 0.05 & 0.26 \\
+%15.2 & 0.04 & 0.19 \\
+%16.8 & 0.03 & 0.14 \\
+%18.3 & 0.03 & 0.12 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with maximum likelihood estimator reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:mle_eef}}
+%\label{tab:eef_mle}
+%\end{table}
 
 
 \subsection{$\eta$ algorithm}
@@ -799,7 +780,8 @@ The $\eta$ algorithm presented for three-pixel events could also be generalized 
 
 Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
 
-After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
+After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. 
+%Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
 
 \begin{figure}
     \centering
@@ -816,21 +798,21 @@ After analyzing the same dataset as the previous algorithms, the residuals for t
     \label{fig:eta_unmodeled_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.09 & 0.21 \\
-13.7 & 0.06 & 0.17 \\
-15.2 & 0.04 & 0.13 \\
-16.8 & 0.03 & 0.11 \\
-18.3 & 0.03 & 0.09 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with the $\eta$ algorithm reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_unmodeled_eef}}
-\label{tab:eef_eta_unmodeled}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.09 & 0.21 \\
+%13.7 & 0.06 & 0.17 \\
+%15.2 & 0.04 & 0.13 \\
+%16.8 & 0.03 & 0.11 \\
+%18.3 & 0.03 & 0.09 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with the $\eta$ algorithm reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_unmodeled_eef}}
+%\label{tab:eef_eta_unmodeled}
+%\end{table}
 
 The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. 
 
@@ -928,7 +910,8 @@ This must be taken into account, as calibration via Monte Carlo simulations beco
 
 Once the best-fit parameters have been estimated from simulations, a separate dataset can be analyzed and the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
 
-Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
+Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. 
+%The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
 
 \begin{figure}
     \centering
@@ -945,23 +928,39 @@ Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less rel
     \label{fig:eta_modeled_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.04 & 0.23 \\
-13.7 & 0.03 & 0.18 \\
-15.2 & 0.03 & 0.13 \\
-16.8 & 0.03 & 0.11 \\
-18.3 & 0.03 & 0.10 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
-\label{tab:eta_modeled_eef}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.04 & 0.23 \\
+%13.7 & 0.03 & 0.18 \\
+%15.2 & 0.03 & 0.13 \\
+%16.8 & 0.03 & 0.11 \\
+%18.3 & 0.03 & 0.10 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
+%\label{tab:eta_modeled_eef}
+%\end{table}
 
-In conclusion, both the unmodeled and simulation modeled $\eta$ algorithms enable to achieve an optimal spatial resolution. The unmodeled algorithm is the perfect 
+\subsection{Algorithms comparison}
+\label{subsec:position_comparison}
+
+To summarize and compare the results of the different reconstruction algorithms, Fig. \ref{fig:eef} shows the values of EEF@50\% and EEF@90\% as a function of the $\langle \sigma \rangle / p$ ratio for all the discussed methods.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eef50}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eef90}
+    \caption{EEF at 50\% (left panel) and 90\% (right panel) as a function of the ratio between the diffusion cloud sigma and the pixel pitch for all the position reconstruction algorithms. All the values are normalized to the pixel pitch.}
+    \label{fig:eef}
+\end{figure}
+
+As visible in the left panel, the charge barycenter gives the worst core resolution for all diffusion regimes, with values of the EEF@50\% between 0.11 and 0.19 pitch. On the other hand, the MLE and the modeled $\eta$ algorithms achieve the best core containment, improving the EEF@50\% by up to a factor of four with respect to the charge barycenter. The unmodeled $\eta$ algorithm shows slightly worse results than the modeled one for small diffusion widths, but reaches identical values for broader diffusions.
+
+Considering the tails of the distributions, shown in the right panel with the EEF@90\%, the situation is different. For small values of $\langle \sigma \rangle / p$, the MLE has very long tails and its EEF@90\% is even worse than the charge barycenter. This does not happen for the $\eta$ algorithms, which maintain better tail containment across all diffusion regimes. Between the two, the modeled $\eta$ algorithm achieves the best overall performance, combining the narrow core of the MLE with the best EEF@90\% containment.
+
 
 \subsection{Modulation transfer function}
 \label{subsec:mtf}

@@ -1,4 +1,50 @@
-\chapter{Appendix}
+\appendix
 
-\section{Computation of the gradient of the NLL}
+\chapter{Numerical Implementation of the MLE}
+\label{appendix:mle}
+The fit procedure described in Sec. \ref{subsec:mle} employs a set of seven discrete matrices to evaluate the charge fractions $\vec{f}(x, y)$ needed for the calculation of the negative log-likelihood in Eq. \ref{eq:nll_multivariate}. Performing the minimization on discrete matrices could lead to numerical problems, due to the possibility of having non-physical zero gradients in case of small steps of the minimizer. This can prevent the algorithm from finding the global minimum, leading to errors in the reconstructed position and energy.
 
+To avoid these problems, a bilinear interpolation of the seven charge fraction matrices is performed on the $(x, y)$ coordinates, making the evaluation of the $\operatorname{NLL}(x, y, Q)$ continuous and smooth across the pixel. For each pixel matrix, the interpolation is performed as follows:
+
+\begin{itemize}[label=-]
+\item calculate the fractional coordinates $(w_x, w_y)$ of $(x, y)$ with respect to the associated bin center and get the grid coordinates $(i_x, i_y)$ of the nearest lower-left bin;
+\item get the values $(v_{00}, v_{10}, v_{01}, v_{11})$ of the four bins with grid coordinates $(i_x, i_y)$, $(i_x + 1, i_y)$, $(i_x, i_y + 1)$, $(i_x + 1, i_y + 1)$;
+\item weight each bin value with the distance from $(x, y)$ to get the interpolated value:
+\begin{equation}
+f_i (x, y) = v_{00} (1 - w_x) (1 - w_y) + v_{10} w_x (1 - w_y) + v_{01} (1 - w_x) w_y + v_{11} w_x w_y.
+\end{equation}
+\end{itemize}
+
+To speed up the minimizer and improve its stability, the gradient of the $\operatorname{NLL}$ with respect to the fit parameters $(x, y, Q)$ can be computed analytically. Recalling Eq. \ref{eq:nll_multivariate}, the negative log-likelihood can be written as a function of the generic parameter vector $\vec{\theta} = (x, y, Q)$, up to an additive constant, as
+\begin{equation}
+\operatorname{NLL}(\vec{\theta}) = \frac{1}{2} \vec{r}^{\,T} V^{-1} \vec{r} + \frac{1}{2} \ln |V|,
+\end{equation}
+where $\vec{r} = \vec{q} - Q \vec{f}(x, y)$ is the vector of charge residuals and $V$ is the covariance matrix defined in Eq. \ref{eq:cov_matrix}. Both the residuals vector $\vec{r}$ and the covariance matrix $V$ depend on the parameter vector $\vec{\theta}$.
+
+The derivative with respect to a generic component $\theta_k$ is obtained by differentiating both the quadratic form and the log-determinant term
+\begin{equation}
+\frac{\partial \operatorname{NLL}}{\partial \theta_k} = \vec{r}^{\,T} V^{-1} \frac{\partial \vec{r}}{\partial \theta_k} - \frac{1}{2} \vec{r}^{\,T} V^{-1} \frac{\partial V}{\partial \theta_k} V^{-1} \vec{r} + \frac{1}{2} \operatorname{Tr} \left( V^{-1} \frac{\partial V}{\partial \theta_k} \right),
+\label{eq:generic_nll_derivative}
+\end{equation}
+where it has been used that $\frac{\partial V^{-1}}{\partial \theta_k} = - V^{-1} \frac{\partial V}{\partial \theta_k} V^{-1}$ and $\frac{\partial \ln |V|}{\partial \theta_k} = \operatorname{Tr} \left( V^{-1} \frac{\partial V}{\partial \theta_k} \right)$.
+
+Since the spatial dependence of the $\operatorname{NLL}$ is contained inside the charge fraction vector $\vec{f}(x, y)$, the spatial derivatives with respect to the coordinates $x$ and $y$ can be evaluated using the chain rule
+\begin{equation}
+\frac{\partial \operatorname{NLL}}{\partial x} = \sum_{i=0}^6 \frac{\partial \operatorname{NLL}}{\partial f_i} \frac{\partial f_i}{\partial x}, \quad \quad \frac{\partial \operatorname{NLL}}{\partial y} = \sum_{i=0}^6 \frac{\partial \operatorname{NLL}}{\partial f_i} \frac{\partial f_i}{\partial y},
+\label{eq:nll_chain_rule}
+\end{equation}
+where the terms $\frac{\partial \operatorname{NLL}}{\partial f_i}$ are obtained by applying Eq. \ref{eq:generic_nll_derivative} with respect to each component $f_i$.
+
+To avoid non-physical zero gradients and numerical issues during the minimization, the spatial derivatives of the charge fractions $\frac{\partial f_i}{\partial x}$ and $\frac{\partial f_i}{\partial y}$ are obtained by differentiating the bilinear interpolation formula
+\begin{equation}
+\begin{split}
+\frac{\partial f_i}{\partial x} &= \frac{1}{dx} \left[ (v_{10} - v_{00}) (1 - w_y) + (v_{11} - v_{01}) w_y \right], \\
+\frac{\partial f_i}{\partial y} &= \frac{1}{dy} \left[ (v_{01} - v_{00}) (1 - w_x) + (v_{11} - v_{10}) w_x \right],
+\end{split}
+\end{equation}
+where $dx = dy$ is the square bin size.
+
+Finally, the derivative with respect to the total charge $Q$ is evaluated directly from Eq. \ref{eq:generic_nll_derivative}, considering that $Q$ only enters the residuals $\vec{r}$ and the covariance matrix $V$
+\begin{equation}
+\frac{\partial \operatorname{NLL}}{\partial Q} = - \vec{f}^{\,T} V^{-1} \vec{r} - \frac{1}{2} \vec{r}^{\,T} V^{-1} \frac{\partial V}{\partial Q} V^{-1} \vec{r} + \frac{1}{2} \operatorname{Tr} \left( V^{-1} \frac{\partial V}{\partial Q} \right).
+\end{equation}
