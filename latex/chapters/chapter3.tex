@@ -1,6 +1,13 @@
 \chapter{From IXPE to Next-Generation Detectors}
 \label{chap:chapter3}
 
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/chapter3/ixpe_year1_artl_gal}
+%    \includegraphics[width=0.8\linewidth]{figures/chapter3/ixpe_year1_artl}
+	\caption{Sky distribution in galactic coordinates of the sources observed by IXPE during the first year of operations, categorized by source class.}
+    \label{fig:ixpe_sources}
+\end{figure}
 %\begin{figure}[!b]
 %    \centering
 %    \includegraphics[width=0.6\linewidth]{figures/chapter3/casa_combined_image}
@@ -16,13 +23,7 @@ In five years of operations IXPE has observed and measured the polarization of a
 
 Accreting systems usually exhibit a low polarization degree, typically in the 1--10\% range, which is produced by Compton scattering of photons off the accreting material. Other sources, such as pulsar wind nebulae and magnetars, have a much higher polarization level, often exceeding 20\%, which is driven by the extreme environments around these objects, where strong magnetic fields generate highly polarized synchrotron radiation.
 
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=1\linewidth]{figures/chapter3/ixpe_year1_artl_gal}
-%    \includegraphics[width=0.8\linewidth]{figures/chapter3/ixpe_year1_artl}
-	\caption{Sky distribution in galactic coordinates of the sources observed by IXPE during the first year of operations, categorized by source class.}
-    \label{fig:ixpe_sources}
-\end{figure}
+
 
 Unlike imaging or spectroscopy observations, measuring the polarization of a source requires accumulating a very large number of photons to statistically infer its polarization degree from the azimuthal emission angle distribution of photoelectrons, described by Eq. \ref{eq:polarization_photo}. The instrumental polarimetric sensitivity is typically quantified by the Minimum Detectable Polarization at a 99\% confidence level ($\operatorname{MDP}_{99}$), which is calculated from the instrumental modulation factor $\mu$ as
 
@@ -32,7 +33,7 @@ Unlike imaging or spectroscopy observations, measuring the polarization of a sou
 \end{equation} 
 where $R$ is the source rate, $B$ is the background rate, and $T$ is the total observation time. This relation is essential to estimate the required exposure time based on the source flux. Crucially, as $\operatorname{MDP}_{99}$ scales inversely with the square root of time, detecting increasingly smaller polarization levels requires significantly longer observations. An example of IXPE sensitivity is shown in Fig. \ref{fig:mdp_flux}, where it can be seen that detecting a polarization degree of a few percent requires exposure times of the order of $1000$ ks.
 
-\begin{figure}[htpb]
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.55\linewidth]{figures/chapter3/ixpe_sensitivity_v11}
     \caption{Dependence of IXPE Minimum Detectable Polarization ($\operatorname{MDP}_{99}$) on the source flux in the 2--8 keV energy range for different exposure times. The different colors correspond to different power-law spectral indices.}
@@ -86,7 +87,7 @@ The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where 
 By studying the two-dimensional charge distribution of these tracks, the GPD can reconstruct the photon absorption point for imaging purposes, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
 
 
-\begin{figure}[!b]
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd}
     \includegraphics[width=0.49\linewidth]{figures/chapter3/track}
@@ -146,18 +147,19 @@ The GPD's ASIC, named XPOL-I, the first generation of the XPOL family, acts as t
 
 The chip is organized as a matrix of \num{105600} hexagonal pixels, with 300 columns and 352 rows, with a horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m, as shown in Fig. \ref{fig:gpd_layout}. This is the layout that was replicated on the GEM in order to align each hole to the correspondent pixel.
 
-\begin{figure}[!b]
-    \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd_layout}
-    \caption{Geometrical layout of the readout XPOL-I ASIC. The pixels have a hexagonal shape, with horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m. The total active area of the chip is $15 \times 15$ mm$^2$. The inset shows the morphology of a trigger mini-cluster. Image taken from \cite{baldini2021}.}
-    \label{fig:gpd_layout}
-\end{figure}
 
 A pixel consists of a hexagonal metal electrode, which is connected to its own charge-sensitive amplifier and shaping circuit. The ASIC is self-triggering and has an on-chip signal processing to localize the position of an event. After an event triggers the chip, the maximum of the shaped pulse is stored inside each pixel for readout.
 
 The data acquisition (DAQ) is performed through a dedicated board with an Analog-to-Digital Converter (ADC) and a Field Programmable Gate Array (FPGA). The ADC is responsible for the serial readout, with a resolution of 14 bits and a full dynamic range of 2.4 V. Considering the GEM gain, this corresponds to a  resolution of 2.3 electrons/ADC count. The FPGA controls various aspects of the detector, including the ASIC configuration, readout and data formatting.
 
 The trigger logic is based on the so-called mini-clusters, which are sets of four adjacent pixels that are logically OR-ed together. An example of mini-cluster is shown in the inset of Fig. \ref{fig:gpd_layout}. When the OR-ed shaped signal exceeds the trigger threshold, the event is triggered. The trigger region consists of the smallest rectangle that contains all triggered mini-clusters.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd_layout}
+    \caption{Geometrical layout of the readout XPOL-I ASIC. The pixels have a hexagonal shape, with horizontal pitch of 50.00 $\mu$m and a vertical pitch of 43.30 $\mu$m. The total active area of the chip is $15 \times 15$ mm$^2$. The inset shows the morphology of a trigger mini-cluster. Image taken from \cite{baldini2021}.}
+    \label{fig:gpd_layout}
+\end{figure}
 
 Given that the shape of a photoelectron track is elongated and the portion that triggers the event is usually limited to its end, which corresponds to the Bragg peak, the chip automatically extends the readout region with a padding of 4 or 5 additional mini-clusters along each side of the $x$ and $y$ coordinates, respectively. This extended region, usually called Region Of Interest (ROI), allows to be certain of including the entire track in the ROI.
 
@@ -175,7 +177,7 @@ After the \textit{TrigOut} signal is asserted, the \textit{Track} signal is asse
 
 Once the ROI has been defined, the serial readout is driven by the readout clock and the output of each pixel is routed to the differential output buffer connected to the external ADC. One of the most important parameters is \textit{Tasu}, which is the time necessary for the output buffer to reach the target value for the ADC to sample. This time is of the order of 200 ns, limiting the maximum clock frequency for serial readout to 5 MHz. The serial readout timing is shown in Fig. \ref{fig:xpol_timing}
 
-\begin{figure}[hbtp]
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/chapter3/xpol_timing0}
     \includegraphics[width=0.75\linewidth]{figures/chapter3/xpol_timing1}
