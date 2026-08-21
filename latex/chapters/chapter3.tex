@@ -24,7 +24,7 @@ Accreting systems usually exhibit a low polarization degree, typically in the 1-
     \label{fig:ixpe_sources}
 \end{figure}
 
-Unlike imaging or spectroscpy observations, measuring the polarization of a source requires accumulating a very large number of photons to statistically infer its polarization degree from the azimuthal emission angle distribution of photoelectrons, described by Eq. \ref{eq:polarization_photo}. The instrumental polarimetric sensitivity is typically quantified by the Minimum Detectable Polarization at a 99\% confidence level ($\operatorname{MDP}_{99}$), which is calculated from the instrumental modulation factor $\mu$ as
+Unlike imaging or spectroscopy observations, measuring the polarization of a source requires accumulating a very large number of photons to statistically infer its polarization degree from the azimuthal emission angle distribution of photoelectrons, described by Eq. \ref{eq:polarization_photo}. The instrumental polarimetric sensitivity is typically quantified by the Minimum Detectable Polarization at a 99\% confidence level ($\operatorname{MDP}_{99}$), which is calculated from the instrumental modulation factor $\mu$ as
 
 \begin{equation}
 \operatorname{MDP}_{99} = \frac{4.29}{\mu R} \sqrt{\frac{R + B}{T}},
@@ -41,7 +41,7 @@ where $R$ is the source rate, $B$ is the background rate, and $T$ is the total o
 
 IXPE observations have led to important results in different fields of high-energy astrophysics. For example, they enabled the mapping of magnetic field geometries and turbulence in supernova remnants, constrained the orientation of accretion disks around black holes, and performed phase-resolved polarimetry on accreting neutron stars, combining timing and polarization measurements to better understand the emission geometry. Overall, these findings have provided useful observational tests for theoretical models, demonstrating the crucial role of X-ray polarimetry in modern high-energy astrophysics.
 
-IXPE represents a major breakthrough in X-ray astrophysics, as it is the first mission entirely dedicated to soft X-ray polarimetry. Its polarimetric sensitivity is more than an order of magnitude higher than Bragg crystal polarimeters that flown on board earlier missions. This major leap in performance was made possible by the innovations introduced by the Gas Pixel Detectors (GPDs) \cite{baldini2021}, the focal-plane detectors employed on board IXPE.
+IXPE represents a major breakthrough in X-ray astrophysics, as it is the first mission entirely dedicated to soft X-ray polarimetry. Its polarimetric sensitivity is more than an order of magnitude higher than Bragg crystal polarimeters flown on board earlier missions. This major leap in performance was made possible by the innovations introduced by the Gas Pixel Detectors (GPDs) \cite{baldini2021}, the focal-plane detectors employed on board IXPE.
 
 GPDs use photoelectric effect to infer the degree of polarization of a source, in particular they exploit the dependence of the emission angle of the photoelectron on the photon polarization. By collecting enough photons it is possible to measure the polarization of the source on a statistical basis, by studying the distribution of the emission angle measured for all the events.
 
@@ -69,7 +69,7 @@ To fit inside the launch vehicle fairing while maintaining this focal length, IX
 
 A detector unit (DU) is located on the focal plane of each telescope. Each detector unit houses a GPD to absorb and analyze X-ray photons, providing position, energy, timing and polarization information. Additionally, each DU is equipped with onboard calibration sources (such as $^{55}\text{Fe}$) that can be exposed to the detector during flight. These sources are used to perform periodic calibrations and continuously monitor detector performance, such as gain variations, energy resolution, and systematic effects over time.
 
-The ground calibration of the optics was performed in a dedicated facility housing a 100-meter vacuum beam tube with an X-ray source at one end. At the opposite end, each MMA was mounted and characterized using an SDD and a CCD on the focal plane to measure the optics effective area and point spread function, respectively. These measurements showed that the effective area reaches a peak of about 200~cm$^2$ for each MMA, and while mounting a GPD the angular resolution is characterized by a half-power diameter (HPD, the diameter enclosing 50\% of the focused photons) of $\lesssim 30$ arcsec over a $12.9 \times 12.9\text{ arcmin}^2$ square field of view.
+The ground calibration of the optics was performed in a dedicated facility housing a 100-meter vacuum beam tube with an X-ray source at one end. At the opposite end, each MMA was mounted and characterized using an SDD and a CCD on the focal plane to measure the optics effective area and point spread function, respectively. These measurements showed that the effective area reaches a peak of about 200~cm$^2$ for each MMA, and when coupled to a GPD the angular resolution is characterized by a half-power diameter (HPD, the diameter enclosing 50\% of the focused photons) of $\lesssim 30$ arcsec over a $12.9 \times 12.9\text{ arcmin}^2$ square field of view.
 
 After calibrating the response of the MMAs, a DU was placed on the focal plane in place of the calibration detectors to characterize the response of the final assembly. This step was performed using polarized X-ray sources with a known degree of polarization, allowing for the end-to-end validation of the telescope polarimetric response prior to launch.
 
@@ -83,14 +83,14 @@ To solve this problem, the GPD puts the readout electronics directly inside the 
 
 The GPD works as an X-ray polarimeter thanks to the photoelectric effect, where the emission angle of the photoelectron depends on the polarization of the incoming photon, as described by Eq. \ref{eq:polarization_photo}. Photons pass through a 50 $\mu$m thick beryllium window and are absorbed in the gas volume. The primary photoelectron creates an ionization track. An electric field drifts these primary electrons toward the GEM, which amplifies the signal without losing the two-dimensional shape of the track. Finally, the electrons are collected by the pixelated ASIC anode.
 
-By studying the two-diemensional charge distribution of these tracks, the GPD can reconstruct the photon absorption point for imaging purposes, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
+By studying the two-dimensional charge distribution of these tracks, the GPD can reconstruct the photon absorption point for imaging purposes, and measure the emission angle to calculate the polarization of the source. A schematic representation of the GPD and a reconstructed 5.9 keV photoelectron track are shown in Fig. \ref{fig:gpd}.
 
 
 \begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/gpd}
     \includegraphics[width=0.49\linewidth]{figures/chapter3/track}
-    \caption{The left panel shows the design of the GPD. A photon is aboserbed by the gas volume, producing a photoelectron which is drifted toward the GEM. The produced track is used to reconstruct the photoelectron emission direction. The signal is amplified by the GEM and is read with the dedicated pixelated readout ASIC. The right panel shows an example of a real track from a 5.9 keV photon. Images taken from \cite{baldini2021}.}
+    \caption{The left panel shows the design of the GPD. A photon is absorbed by the gas volume, producing a photoelectron which is drifted toward the GEM. The produced track is used to reconstruct the photoelectron emission direction. The signal is amplified by the GEM and is read with the dedicated pixelated readout ASIC. The right panel shows an example of a real track from a 5.9 keV photon. Images taken from \cite{baldini2021}.}
     \label{fig:gpd}
 \end{figure}
 
@@ -128,7 +128,7 @@ Xe & 34.6$\times 10^3$& 90.2\\
 \subsection{Gas Electron Multiplier}
 The GEM is the amplification stage of the GPD, where the primary ionization electrons arrive under the influence of the drift electric field inside the active volume. The strong electric field inside the holes, generated by the voltage difference between the two sides of the GEM, causes charges to produce an avalanche.
 
-The GEM employed inside the GPD is made of liquid crystal polymers (LCP) with a 50 $\mu$m thickness, while the coating is made of copper and each side is 5 $\mu$m thick, for a total thickness of 60 $\mu$m. The holes have a diameter of 30 $\mu$m and follow hexagonal grid pattern to match the ASIC pixel pattern, with 50 $\mu$m pitch on the horizontal direction and 43.3 $\mu$m on the vertical one. The voltage difference between the two opposite sides is of 470 V, ensuring an effective gain of about 200.
+The GEM employed inside the GPD is made of liquid crystal polymers (LCP) with a 50 $\mu$m thickness, while the coating is made of copper and each side is 5 $\mu$m thick, for a total thickness of 60 $\mu$m. The holes have a diameter of 30 $\mu$m and follow a hexagonal grid pattern to match the ASIC pixel pattern, with 50 $\mu$m pitch on the horizontal direction and 43.3 $\mu$m on the vertical one. The voltage difference between the two opposite sides is 470 V, ensuring an effective gain of about 200.
 
 The GPD's GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the manufacturing process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
 
@@ -161,7 +161,7 @@ The trigger logic is based on the so-called mini-clusters, which are sets of fou
 
 Given that the shape of a photoelectron track is elongated and the portion that triggers the event is usually limited to its end, which corresponds to the Bragg peak, the chip automatically extends the readout region with a padding of 4 or 5 additional mini-clusters along each side of the $x$ and $y$ coordinates, respectively. This extended region, usually called Region Of Interest (ROI), allows to be certain of including the entire track in the ROI.
 
-The ASIC calculates the coordinates of the upper-left and lower-right points of the ROI and then the DAQ board serially reads all the pixels inside it, which are typically around 500--800 pixels. The ability of the ASIC to limit the readout to a small region allows the total readout time to be reduced of more than two orders of magnitude with respect to a full chip readout.
+The ASIC calculates the coordinates of the upper-left and lower-right points of the ROI and then the DAQ board serially reads all the pixels inside it, which are typically around 500--800 pixels. The ability of the ASIC to limit the readout to a small region allows the total readout time to be reduced by more than two orders of magnitude with respect to a full chip readout.
 
 A peculiar feature of XPOL-I is that the ROI is sequentially read two times in close succession. The first readout is used to read the pixel values, while the second one is used to perform online pedestal subtraction. Furthermore, the resulting data are zero-suppressed, allowing for a compression of the event size.
 
@@ -173,21 +173,21 @@ The event readout capture timing of XPOL-I is shown in Fig. \ref{fig:xpol_timing
 
 After the \textit{TrigOut} signal is asserted, the \textit{Track} signal is asserted and after a period of peak detection of 10 $\mu$s the \textit{Hold} signal freezes the analog output data. At the same time the \textit{DataReady LVDS} output is asserted, and the serial readout sequence can start.
 
-Once the ROI has been defined, the serial readout is driven by the readout clock and the output of each pixel is routed to the differential output buffer connected to the external ADC. One of the most important parameter is \textit{Tasu}, which is the time necessary to the output buffer to reach the target value for the ADC to sample. This time is of the order of 200 ns, limiting the maximum clock frequency for serial readout to 5 MHz. The serial readout timing is shown in Fig. \ref{fig:xpol_timing}
+Once the ROI has been defined, the serial readout is driven by the readout clock and the output of each pixel is routed to the differential output buffer connected to the external ADC. One of the most important parameters is \textit{Tasu}, which is the time necessary for the output buffer to reach the target value for the ADC to sample. This time is of the order of 200 ns, limiting the maximum clock frequency for serial readout to 5 MHz. The serial readout timing is shown in Fig. \ref{fig:xpol_timing}
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/chapter3/xpol_timing0}
     \includegraphics[width=0.75\linewidth]{figures/chapter3/xpol_timing1}
-    \caption{XPOL event capture timing (top panel) and serial readout timing (bottom panel)}
+    \caption{XPOL event capture timing (top panel) and serial readout timing (bottom panel).}
     \label{fig:xpol_timing}
 \end{figure}
 
-At the end of the readout sequence, the reset of the analog signal of the pixels and all the trigger variables, such as the region of interest coordinates, is performed by a signal labeled \textit{AnaResetbar}, which also inibits the trigger for 150 $\mu$s.
+At the end of the readout sequence, the reset of the analog signal of the pixels and all the trigger variables, such as the region of interest coordinates, is performed by a signal labeled \textit{AnaResetbar}, which also inhibits the trigger for 150 $\mu$s.
 
 The most relevant steps that contribute to the deadtime budget are the signal serial readout ($\sim$ 120 $\mu$s), the pedestal delay (500 $\mu$s) which is necessary for the signal in the sample and hold to decay before starting the pedestal readout (which takes $\sim$ 120 $\mu$s) and finally the subtraction ($\sim$ 120 $\mu$s). Finally there is the analog reset delay (150 $\mu$s), for a total of more than 1 ms for the readout of an event.
 
-Some of these depend on the ROI size, while the delays are constant, thus the deadtime can be separeted into two independent contributes. The relatively long readout time is one of the limitations of XPOL-I. Reducing it is essential for the next generation of X-ray polarimetry observatories, which with a larger mirror effective area than IXPE will observe much higher rates even from moderately bright sources and the current GPDs would not be able to take advantage of it.
+Some of these depend on the ROI size, while the delays are constant, thus the deadtime can be separated into two independent contributions. The relatively long readout time is one of the limitations of XPOL-I. Reducing it is essential for the next generation of X-ray polarimetry observatories, which with a larger mirror effective area than IXPE will observe much higher rates even from moderately bright sources and the current GPDs would not be able to take advantage of it.
 
 \subsection{Systematic effects}
 \label{subsec:sys_eff}
@@ -197,7 +197,7 @@ The GEM manufacturing process directly affects the GPD performance by introducin
 \begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter3/spurious_mod}
-    \caption{Modulation amplitude map obtained from an un-polarize X-ray source at 2.7 keV. The dashed gray grid correspond to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
+    \caption{Modulation amplitude map obtained from an unpolarized X-ray source at 2.7 keV. The dashed gray grid corresponds to the coordinates of the laser sweep overlaps (visible in Fig. \ref{fig:gem}) during the GEM production, and it perfectly overlaps with the regions with high-spurious modulation. Image taken from \cite{baldini2021}.}
     \label{fig:spurious_mod}
 \end{figure}
 
@@ -205,7 +205,7 @@ In principle, this systematic effect could be calibrated out by acquiring high-s
 
 To overcome this limitation without compromising spatial resolution, the adopted solution relies on spacecraft dithering during sky observations. By slowly moving the pointing direction along the line of sight, the image of a celestial source is broadened over a larger area of the detector plane in detector coordinates. This spatial averaging smooths out the localized non-uniformities caused by the GEM holes pattern, effectively mitigating the spurious modulation while preserving the intrinsic angular resolution of the telescope.
 
-As a result, it is no longer necessary to calibrate the spurious modulation at the fine spatial scale of the PSF. Instead, it is sufficient to apply the correction on spatial scales comparable to the region covered by the dithering pattern, which is of the order of some mm$^2$, reducing the calibration time required.
+As a result, it is no longer necessary to calibrate the spurious modulation at the fine spatial scale of the PSF. Instead, it is sufficient to apply the correction on spatial scales comparable to the region covered by the dithering pattern, which is of the order of a few mm$^2$, reducing the calibration time required.
 
 Another important effect that depends on the GEM is rate-dependent gain variations. When the detector is operating and is irradiated by a source, part of the charge that is produced by the avalanche inside the GEM holes is temporarily deposited onto the dielectric substrate. This charging phenomenon has the effect of modifying the electric field configuration, with a consequent decrease of the gain.
 
@@ -238,17 +238,17 @@ where $\tau_c = k_c / F$ represents the charging time scale. Under these conditi
 
 Typical values for the charging parameters are $\delta_{\textrm{max}} \approx 0.1$, $k_c \approx 10^5$ keV mm$^{-2}$, and $\tau_d \approx 10^5$ s. Fig.~\ref{fig:rate_gain} shows how the asymptotic gain variation and the effective time constant vary as a function of the incoming energy flux.
 
-Reducing the systematic effects that have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternative currently being developed will be presented in Chap. \ref{chap:chapter5}.
+Reducing the systematic effects that have been observed with this type of GEM is the goal for the next generation of GPD, which is currently under study. One of the alternatives currently being developed will be presented in Chap. \ref{chap:chapter5}.
 
 \begin{figure}[h]
     \centering
 	$\vcenter{\hbox{\includegraphics[width=0.45\linewidth]{figures/chapter3/rate_gain}}}$\hfill
     $\vcenter{\hbox{\includegraphics[width=0.54\linewidth]{figures/chapter3/charging}}}$
-    \caption{Charging and discharging effects as a function of time for GPD (left panel). The different colors data points represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes a gain decrease of nearly 10\%. When using a lower flux source the gain gradually recovers. The asymptotic gain variation and the time required to reach it (right panel) can be calculated from Eqs. \ref{eq:tau} and \ref{eq:delta}. Images taken from \cite{baldini2021}.}
+    \caption{Charging and discharging effects as a function of time for GPD (left panel). Data points of different colors represent gain measurements taken with different input energy fluxes. First the charging is dominant with a high-flux source which causes a gain decrease of nearly 10\%. When using a lower flux source the gain gradually recovers. The asymptotic gain variation and the time required to reach it (right panel) can be calculated from Eqs. \ref{eq:tau} and \ref{eq:delta}. Images taken from \cite{baldini2021}.}
     \label{fig:rate_gain}
 \end{figure}
 
-Regarding the systematic effects introduced by the ASIC, it has been observed that its digital activity during the readout induces a tiny shift of the pixel baseline which is manifested as vertical structures in the ROI with an even-odd pattern and an amplitude of about 10 electrons. The reason behind this effect could be related to intrinsic asymmetries in the ASIC layout, such as the horizontal direction of the serial readout or how the bias voltage is distributed across the chip. This effect is partially canceled by the online pedestal subtraction, but the residual effect contributes to the spurious modulation.
+Regarding the systematic effects introduced by the ASIC, it has been observed that its digital activity during the readout induces a tiny shift of the pixel baseline which manifests as vertical structures in the ROI with an even-odd pattern and an amplitude of about 10 electrons. The reason behind this effect could be related to intrinsic asymmetries in the ASIC layout, such as the horizontal direction of the serial readout or how the bias voltage is distributed across the chip. This effect is partially canceled by the online pedestal subtraction, but the residual effect contributes to the spurious modulation.
 
 \section{XPOL-III}
 \label{sec:xpol3}
