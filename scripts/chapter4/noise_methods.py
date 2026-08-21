@@ -21,9 +21,9 @@ def conceptual_gaussian(x, mu, sigma, amp):
 
 # --- Method 1 ---
 y2 = conceptual_gaussian(x, mu2, sigma, amplitude)
-axs[0].plot(x, y2, color='black', linewidth=1.2)
-axs[0].plot([0, 0], [0, conceptual_gaussian(0, mu2, sigma, amplitude)], color='black', linewidth=1.2)
-axs[0].annotate("Method 1", xy=(0.1, 0.9), xycoords='axes fraction', fontsize=11)
+axs[2].plot(x, y2, color='black', linewidth=1.2)
+axs[2].plot([0, 0], [0, conceptual_gaussian(0, mu2, sigma, amplitude)], color='black', linewidth=1.2)
+axs[2].annotate("Method 3", xy=(0.1, 0.9), xycoords='axes fraction', fontsize=11)
 
 # --- Method 2 ---
 y1 = conceptual_gaussian(x, mu1, sigma, amplitude)
@@ -33,8 +33,8 @@ axs[1].annotate("Method 2", xy=(0.1, 0.9), xycoords='axes fraction', fontsize=11
 
 # --- Method 3 ---
 y3 = conceptual_gaussian(x, mu3, sigma, amplitude)
-axs[2].plot(x, y3, color='black', linewidth=1.2)
-axs[2].annotate("Method 3", xy=(0.1, 0.9), xycoords='axes fraction', fontsize=11)
+axs[0].plot(x, y3, color='black', linewidth=1.2)
+axs[0].annotate("Method 1", xy=(0.1, 0.9), xycoords='axes fraction', fontsize=11)
 
 # --- Formattazione estetica comune ---
 for ax in axs:

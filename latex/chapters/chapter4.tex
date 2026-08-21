@@ -1,21 +1,25 @@
 \chapter{Analog Spectral Imager for X-rays}
 \label{chap:chapter4}
 
-The Analog Spectral Imager for X-rays (ASIX) is a new class of solid-state hybrid pixel detectors (HPDs), with the ability to perform single photon event-driven readout, designed for both imaging and spectral study of photons at X-ray energies between 1 keV and 50 keV. The intended applications for this detector are X-ray spectral imaging, material science and also micro-tomography. 
+The Analog Spectral Imager for X-rays (ASIX) is a projects which aims to develop a new class of solid-state Hybrid Pixel Detectors (HPDs) capable of performing single photon event-driven readout, designed for both imaging and spectral study of photons at X-ray energies between 1 keV and 50 keV. Contrary to GPDs, these detectors are intended for applications which require energy-resolved imaging different from polarimetry, such as other fields of X-ray astrophysics or synchrotron-based material science.
 
-The design and the current state of the detector prototypes will be illustrated in this section. The simulation and analysis software will be briefly described, as they are essential to evaluate the goodness of the calibration procedure and algorithms developed to reconstruct photon energy and incidence position. The algorithms developed will be described and, using Monte Carlo simulations, will be compared with each other to determine which one performs the best. A comparison between simulations and laboratory data is performed to verify the goodness of the simulations and to have a real benchmark of event reconstruction algorithms performances. 
+An example of application in material science is X-ray Diffraction analysis (XRD), which is one of the most common nondestructive techniques that provides information about crystallographic structure of a material, its chemical composition and relevant physical properties. Currently, the detectors employed in this field have good spatial resolution, but they have limited energy resolution. A detector capable of selecting photons in a narrow energy band would allow to reduce unwanted background that deteriorates measurements.
+
+The idea behind ASIX is to use the experience gained over the years in the development of the XPOL-family ASICs to test a new design where an XPOL chip is coupled to a solid state sensor. While proving the validity of the sensor design using the recently developed XPOL-III ASIC, a new dedicated ASIC is being developed to match the requirements needed in terms of event readout time.
+
+This section illustrates the design and the current state of the prototypes and the dedicated simulation and analysis software that is being employed to evaluate different design concepts and to test the goodness of the detector calibration and analysis pipeline. Furthermore, in the context of the event analysis different algorithms to reconstruct the position and energy of the photons have been developed and tested using both Monte Carlo simulations and laboratory data, in order to determine their performance.
 
 \section{Detector design}
 \label{sec:asix_design}
 
 ASIX is a solid-state HPD and it consists of two main components: the pixelated semiconductor active sensor, which is responsible for the absorption of X-ray photons and the production of electron-hole pairs, and the analog readout ASIC, which processes the collected charge by amplifying and shaping the signal and then triggers the digital readout electronics to save the events.
 
-A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}. The detector is placed inside a simple metal housing with a square entrance window of a material suited for X-ray detection, such as beryllium or plastic materials. The detector itself is composed of the semiconductor sensor soldered on top of the readout ASIC, which is wire bonded to the electronic board.
+A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}.
 
 \begin{figure}[h]
     \centering
     	\includegraphics[width=0.7\linewidth]{figures/chapter4/design/detector}
-    \caption{Exploded view of the ASIX detector with its housing. The detector is placed inside a metal housing with an entrance window to screen low energy photons. The main components are the active sensor and the readout ASIC, which is soldered on an electronic readout board.}
+    \caption{Exploded view of the detector with its housing. The detector is placed inside a simple metal housing with a square entrance window of a material suited for X-ray detection, such as beryllium or plastic materials. The detector itself is composed of the semiconductor sensor bump-bonded on top of the readout ASIC, which is wire bonded to the electronic board.}
     \label{fig:detector}
 \end{figure}
 
@@ -23,7 +27,7 @@ A schematic of the detector with its housing is shown in Fig. \ref{fig:detector}
 \subsection{Active sensor}
 \label{subsec:sensor}
 
-The active sensor is the part of the detector where the physical signal is produced by interaction mechanisms between radiation and the sensor material, which is ionized during the passage of charged particles or electromagnetic radiation \cite{rossi2006}. In solid state detectors the active sensor is made of a semiconductor material. 
+The active sensor is the component of the detector where the physical signal is generated by interaction mechanisms between radiation and the sensor material, which is ionized by charged particles or by the photoelectron generated by the absorption of electromagnetic radiation \cite{rossi2006}. In solid state detectors the active sensor is made of a semiconductor material. 
 
 There are various choices for the sensor material, depending on the required properties of the detector and the type or radiation that has to be detected. ASIX, which is designed to work with soft and hard X-rays, currently employs silicon and cadmium-telluride (CdTe) in the two prototypes currently available. CdTe is best suited for the harder region of the electromagnetic spectrum, as cadmium and tellurium are high-$Z$ materials, thus they have a cross section higher than silicon and a higher photoabsorption efficiency, as shown in Figs. \ref{fig:photo_cross_section} and \ref{fig:photoabs}.
 
@@ -32,187 +36,204 @@ The two ASIX active sensor prototypes consist of an hexagonally pixelated n-on-p
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/design/asix}
-    \caption{ASIX hybrid pixel detector with the CdTe sensor. The plate visible on top is a platinum electrode positioned on the back side of the CdTe sensor to apply the reverse bias voltage. Image taken from \cite{minuti2025}.}
+    \caption{ASIX hybrid pixel detector with the CdTe sensor. The metallic layer visible on top is a platinum electrode positioned on the back side of the CdTe sensor to apply the reverse bias voltage. Image taken from \cite{minuti2025}.}
     \label{fig:cdte_proto}
 \end{figure}
 
-% TUTTO QUESTO VA SPOSTATO NEL CAPITOLO 2 NELLA SEZIONE DEI SEMICONDUTTORI (E ANCHE RIDOTTO)
+When a photon is absorbed in the active sensor, the distance traveled by the primary photoelectron depends on its kinetic energy and the sensor material, but it is typically very small (e.g., in Silicon for $E_{\gamma} < 10~\text{keV}$, the photoelectron range is less than $1~\mu\text{m}$ \cite{nist_estar}). Consequently, the region where electron-hole pairs are generated via ionization can be approximated as point-like and coincident with the photon absorption point, on the spatial scale of the sensor thickness (which is typically hundreds of micrometers).
 
-%Besides defining the sensitive energy range of the detector, the sensor material, thickness and working conditions also define how the collected charge diffuses inside it. Once electron-hole pairs are produced by the photon interaction and consequent collision ionizations, which happen in a very short region about 1 $\mu$m wide, approximable as point-like, they start to drift towards opposite poles of the junction under the action of the electric field. Thermal agitation and collisions with the crystal lattice make the charge spread durign the drift in the direction transverse to it. This process is governed by Fick's diffusion laws and in absence of external fields, which is true for the transverse, the charge is distributed on the plane according to a two-dimensional Gaussian distribution, with standard deviation along the $x$ and $y$ axes given by
+Once electron-hole pairs are generated they start to diffuse in the plane perpendicular to the electric field, as described in Chap. \ref{sec:semiconductors}. Knowing the sensor material properties, the electric field and the working conditions of the detector, such as the sensor temperature, the transverse diffusion sigma can be calculated using Eq. \ref{eq:diff_sigma_dist}.
 
-%\begin{equation}
-%\sigma = \sigma_x = \sigma_y = \sqrt{2Dt_d},
-%\label{eq:diff_sigma}
-%\end{equation}
-%where $D$ is the diffusion coefficient and $t_d$ is the drift time. Using the mobility of the charge carriers $\mu_c$ and the value of the electric field $\mathcal{E}$ it is possible to make explicit the dependence of Eq. \ref{eq:diff_sigma} on the drift distance $d$
-
-%\begin{equation}
-%\sigma = \sqrt{\frac{2D}{\mu_c \mathcal{E}}d} = \sqrt{\frac{2kT}{e\mathcal{E}}d}= \mathcal{D} \sqrt{d},
-%\label{eq:diff_sigma_dist}
-%\end{equation}
-%where it has been used that in a semiconductor $D/\mu_c = kT/e$ and the transverse diffusion parameter $\mathcal{D}$ has been defined to isolate the dependence on the drift distance $d$. As clearly visible in Eq. \ref{eq:diff_sigma_dist}, there is also a dependence on the sensor working conditions, specifically the temperature and the electric field. This has to be taken into account during the analysis, because a wrong estimate of $\mathcal{D}$ can lead to errors, as will be clear in the following sections. The mean charge diffusion standard deviation can be calculated from Eqs. \ref{eq:mean_z} and \ref{eq:diff_sigma_dist}, and is useful to have an idea of how the charge cloud dimension varies as a function of the energy
-%
-%\begin{equation}
-%\langle \sigma \rangle = \mathcal{D} \sqrt{t - \langle z \rangle},
-%\label{eq:mean_diff_sigma}
-%\end{equation}
-%where $t$ is the sensor thickness. Fig. \ref{fig:mean_sigma} shows $\langle \sigma \rangle$ as a function of the photon energy for the two sensors.
-%
-
-
-As described in Chap. \ref{sec:semiconductors}, once the electron-hole pairs are produced inside the sensor, they begin to diffuse according to a bivariate Gaussian distribution in the plane perpendicular to the electric field.
-
-The standard deviation of the Gaussian is determined by Eq. \ref{eq:diff_sigma_dist}. Knowing the sensor material and the energy of the incoming photons, the average value $\langle \sigma \rangle$ can be calculate using the relation found in Eq. \ref{eq:z_average}. The dependence of $\langle \sigma \rangle$ from the photon energy is shown in Fig. \ref{fig:mean_sigma}
+The absorption depth depends on the energy of the photon and is distributed according to Eq. \ref{eq:pdf_truncated}, and by fixing the sensor thickness it allows to calculate the mean transverse diffusion sigma $\langle \sigma \rangle$ from Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist}. The dependence of $\langle \sigma \rangle$ on the photon energy for different Si sensor thicknesses is shown in Fig. \ref{fig:mean_sigma}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/design/mean_diffusion}
-    \caption{Mean diffusion sigma as a function of the photon energy for the Si and CdTe sensors. }
+    \caption{Mean diffusion sigma as a function of the photon energy for different thickness of Si sensors, assuming $\mathcal{D} = 50 \mu$m cm$^{-0.5}$. }
     \label{fig:mean_sigma}
 \end{figure}
 
-Once the sensor working conditions like the temperature and the electric field are chosen, meaning that $\mathcal{D}$ is determined, Eq. \ref{eq:mean_diff_sigma} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector.
+Once the sensor working conditions like the temperature and the electric field are determined, meaning that $\mathcal{D}$ is fixed, Eq. \ref{eq:z_average} allows to find the best values of the sensor thickness and pixel pitch depending on the main intent of the detector.
 
-If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for a spectroscope the smaller the number of pixels involved in the event, the better the energy resolution is, as the total readout noise on the final measurement goes as $\sqrt{N}$, where $N$ is the number of pixels.
+If the goal is an imaging detector, the best choice would be to produce a large charge diffusion cloud in order to hit a lot of pixels and then reconstruct the position even with low effort algorithms. Conversely, for spectroscopic applications, the smaller the number of pixels involved in the event, the better the energy resolution, as the total readout noise on the final measurement scales as $\sqrt{N}$, where $N$ is the number of pixels.
 
-ASIX's goal is to find a compromise between an imaging detector and a spectroscope, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch in the range between 10-20\%.
+ASIX's goal is to find a compromise between an imaging and a spectroscpy detector, and thanks to a low noise readout and the pixel size and geometry, good performances for both tasks are achievable. For this reason the sensor thickness and pixel pitch are chosen in order to have a ratio between the charge diffusion sigma and the pixel pitch $\langle \sigma \rangle / p$ in the range between 10-20\%.
 
-The relevant metric to gauge how this ratio affects the detector readout design and the event analysis is the cluster size, that is defined as the number of pixels that have a signal above a certain threshold. Tab. \ref{tab:cluster_size} shows how the cluster size distribution vary as a function of the ratio $\langle \sigma \rangle / p$ for a simulation without electronic noise and with zero threshold.
+The relevant metric to gauge how this ratio affects the detector readout design and the event analysis is the cluster size, which is defined as the number of pixels that have a signal above a certain threshold.
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c ccccccc}
-\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{7}{c}{ Cluster size occurrences [\%]} \\
-\cmidrule(lr){2-8}
- & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
-\midrule
-19.6 & 0.0 & 0.0 & 1.5 & 45.0 & 38.1 & 10.7 & 4.6 \\
-19.4 & 0.0 & 0.0 & 1.1 & 44.9 & 38.5 & 10.5 & 4.9 \\
-19.2 & 0.0 & 0.0 & 1.4 & 43.5 & 38.8 & 10.8 & 5.5 \\
-18.7 & 0.0 & 0.0 & 2.3 & 43.6 & 38.3 & 10.4 & 5.3 \\
-18.1 & 0.2 & 0.3 & 4.8 & 44.5 & 35.4 & 9.7 & 5.1 \\
-17.4 & 0.8 & 0.9 & 8.7 & 44.4 & 31.7 & 8.8 & 4.7 \\
-16.6 & 1.8 & 1.9 & 12.9 & 43.4 & 27.8 & 7.8 & 4.3 \\
-15.9 & 2.7 & 2.9 & 16.2 & 41.5 & 25.8 & 7.2 & 3.8 \\
-15.3 & 3.7 & 3.6 & 18.4 & 40.2 & 23.9 & 6.7 & 3.6 \\
-14.9 & 4.4 & 4.5 & 20.4 & 38.7 & 22.3 & 6.2 & 3.5 \\
-14.5 & 5.1 & 5.0 & 21.4 & 37.7 & 21.3 & 6.0 & 3.5 \\
-14.3 & 5.6 & 5.4 & 22.2 & 36.4 & 20.7 & 6.3 & 3.5 \\
-\bottomrule
-\end{tabular}
-\caption{Mean relative abundance of event cluster size for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The cluster sizes are calculated from a simulation without electronic noise and without applying any threshold on the collected signal.}
-\label{tab:cluster_size}
-\end{table}
+Simulations of charge diffusion show that in this range of $\langle \sigma \rangle / p$ the cluster size is always smaller than eight. This means that, given the hexagonal geometry of the pixels, all the charge is contained inside a circular set of seven pixels, with the pixel with the most charge at the center of the set and the other six pixels arranged in a circular corona around it. As will be discussed in Chap. \ref{subsec:readout} this feature defines the readout logic of the chip under development.
 
-The most frequent cluster size is 4, with a skewed distribution towards higher values. For a ratio of about 15\% the distribution becomes symmetric, and is expected to become skewed towards small cluster sizes below this ratio. 
+Another important property of diffusion and detector geometry is how the charge is distributed across the pixels. This is essential to determine the imaging and spectroscopy performance of the detector. As shown in Fig. \ref{fig:charge_distr}, the pixel charge distribution is highly asymmetrical, and more than 90-95\% of the charge is always collected by two pixels and the third pixel collects almost all of the remaining charge, while the other four pixels always have less than 1\% of the total charge.
 
-The important feature is that for none of the ratio values there are occurrences of cluster sizes bigger than seven pixels. This means that, given the hexagonal geometry of the pixels, all the charge is contained inside a circular set of seven pixels, with the pixel with the most charge at the center of the set and the other six pixels arranged in a circular corona around it. As will be discussed in Chap. \ref{subsec:readout} this feature defines the readout logic.
-
-Another important property of diffusion and detector geometry is how the charge is distributed across the pixels. This is essential to determine the imaging and spectroscopy performance of the detector. As shown in Tab. \ref{tab:charge_distr}, the pixel charge distribution is highly asymmetrical, and more than 90-95\% of the charge is always collected by two pixels and the third pixel collects almost all of the remaining charge, while the other four pixels always have less than 1\% of the total charge.
-
-In real working conditions, even with low-noise readout electronics, is highly probable that the charge collected by each one of these four pixels is comparable to the electronic noise or even smaller. This is the reason why during the event analysis if a cluster has more than three pixels above threshold some pixels are suppressed in order to reduce it to a three-pixel cluster.
-
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{4}{c}{Pixel charge [\%]} \\
-\cmidrule(lr){2-5}
- & 1 & 2 & 3 & 4--7 \\
-\midrule
-19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
-19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
-19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
-18.7 & 71.5 & 19.9 & 7.8 & 0.9 \\
-18.1 & 72.5 & 19.4 & 7.3 & 0.7 \\
-17.4 & 73.8 & 18.8 & 6.8 & 0.6 \\
-16.6 & 74.9 & 18.2 & 6.3 & 0.5 \\
-15.9 & 75.8 & 17.8 & 5.9 & 0.5 \\
-15.3 & 76.7 & 17.2 & 5.6 & 0.4 \\
-14.9 & 77.3 & 16.9 & 5.4 & 0.4 \\
-14.5 & 77.9 & 16.5 & 5.2 & 0.4 \\
-14.3 & 78.3 & 16.3 & 5.1 & 0.3 \\
-\bottomrule
-\end{tabular}
-\caption{Average charge fraction collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It can be observed that the majority of the charge is collected by the first three pixels.}
-\label{tab:charge_distr}
-\end{table}
-
-\subsection{Readout}
-\label{subsec:readout}
-\fix{da ricontrollare}
-The goal of ASIX to be a detector suitable for different application fields under various working conditions makes it necessary to have high-performance readout electronics. One of the property which is particularly important is the readout rate, which should be high enough to be able to work in environments with high intensity sources. The current design goal is to have a maximum rate capability of 100 kHz with a 30\% deadtime and a readout frequency of 20 MHz. Another important property, which is essential to do high resolution spectroscopy, is the equivalent noise charge introduced by the electronics. The goal is to have no more than 20 ENC for each pixel and a final energy resolution of about 350 eV at the energy of 8 keV when using the silicon sensor, which is enough to resolve the Cu-K$_{\alpha}$ and Cu-K$_{\beta}$ lines. All of this is achievable with a dedicated analog front-end ASIC. The proposed ASIC design employs the same 180 nm CMOS fabrication process used for XPOL-III, with 50 $\mu$m pitch hexagonal pixels arranged with a honeycomb layout over a rectangular matrix, with a design goal dimension up to $31 \times 25$ mm$^2$ with more than $\num{350000}$ pixels. Unlike in GPDs, where the readout pixels are physically separated from the GEM, in the ASIX architecture they are directly connected to the pixelated sensor through micro-bump soldering, aligning each ASIC pixel to the corresponding one on the sensor. Like XPOL-III, each pixel has its own analog signal processing electronics, with a charge-sensitive amplifier, a shaping circuit and a sample-and-hold system. Thus, the general structure of the ASIC is very similar to the previously developed XPOL-III, apart from some aspects to modify to achieve the goal designs mentioned above.
-
-The important aspect that drives one of the major difference between XPOL and ASIX is the event topology of the detector. While in GPDs the electrons tracks produced by X-ray absorption can be tens of pixels long and can significantly vary, as discussed in \fix{Chap. \ref{chap:chapter3}}, in the proposed design of ASIX the number of pixels that are involved in an event is small, with an average of about two pixels and always less than eight pixels when applying a suppression threshold, and with an axial symmetrical charge distribution around the impact point. This event geometry is translated into an event that is fully contained by a region composed by a central pixel, which is the pixel with the most charge collected, and the six pixels that surround it. The limited dimension of the event and its fixed geometry  make possible to modify the trigger logic and the event readout strategy of the previous XPOL versions. The new chip is designed to be triggered by a single pixel, which is the one with the highest signal. The following readout consists in reading the pixel and all of its six neighbors, independently from their signal. The true advantage of this event geometry is the possibility to perform a parallel readout of the seven pixels using an external ADC with seven independent channels, with the outcome of drastically reducing the readout time, thus increasing the maximum acceptable rate of events. This can be done connecting each pixel to a single ADC channel, and the hexagonal honeycomb arrangement is ideal for this scope as it allows to map the entire chip with seven channels with no adjacent repetitions of the same channel, thus making possible to read a seven-pixels cluster on every point of the chip. A possible configuration of the ADC routing is shown in Fig. \ref{fig:adc_routing}.
+In real working conditions, even with low-noise readout electronics, is highly probable that the charge collected by each one of these four pixels is comparable to the electronic noise or even smaller. 
 
 \begin{figure}
     \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/design/charge_distr}
+    \caption{Average charge fraction collected by the first, second, third and the remaining pixels as a function of $\langle \sigma \rangle / p$. The data set used is simulated without electronic noise and no clustering threshold has been used.}
+    \label{fig:charge_distr}
+\end{figure}
+
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%\multirow{2}{*}{$\langle \sigma \rangle / p$ [\%]} & \multicolumn{4}{c}{Pixel charge [\%]} \\
+%\cmidrule(lr){2-5}
+% & 1 & 2 & 3 & 4--7 \\
+%\midrule
+%19.6 & 74.0 & 17.5 & 7.3 & 1.1 \\
+%19.4 & 71.2 & 19.9 & 7.9 & 1.0 \\
+%19.2 & 71.0 & 20.1 & 7.9 & 1.0 \\
+%18.7 & 71.5 & 19.9 & 7.8 & 0.9 \\
+%18.1 & 72.5 & 19.4 & 7.3 & 0.7 \\
+%17.4 & 73.8 & 18.8 & 6.8 & 0.6 \\
+%16.6 & 74.9 & 18.2 & 6.3 & 0.5 \\
+%15.9 & 75.8 & 17.8 & 5.9 & 0.5 \\
+%15.3 & 76.7 & 17.2 & 5.6 & 0.4 \\
+%14.9 & 77.3 & 16.9 & 5.4 & 0.4 \\
+%14.5 & 77.9 & 16.5 & 5.2 & 0.4 \\
+%14.3 & 78.3 & 16.3 & 5.1 & 0.3 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Average charge fraction collected by cluster pixels for different values of the ratio between the mean transverse diffusion sigma and the pixel pitch. The simulated data set is the same as Tab. \ref{tab:cluster_size}. It can be observed that the majority of the charge is collected by the first three pixels. \fix{Sostituire con grafico in cui su asse x c'è s/p, su y mettiamo occorrenza, plottiamo 1 pixel, 2 pixel, 3 pixel, sum(4-7) pixel, magari anche sum(1-2)}}
+%\label{tab:charge_distr}
+%\end{table}
+
+\subsection{Readout strategy}
+\label{subsec:readout}
+
+The major difference between a GPD and the detectors developed under the ASIX project lies in the track topology. In a GPD, a photoelectron track can extend over tens of pixels due to the low density of the gaseous active medium, and its morphology varies significantly with photon energy. In a solid-state detector, instead, the generated charge is confined within a few pixels (typically no more than three, and strictly fewer than eight), as shown in Fig. \ref{fig:charge_distr}.
+
+Furthermore, the charge distribution is axially symmetric around the impact point. As previously mentioned, this topology results in an event that is fully contained within a region composed of a central pixel (which collects most of the charge) and its six immediate neighbors.
+
+Given this fixed maximum dimension and geometry, the readout can be performed differently from that of a GPD. The core idea is that when a pixel triggers, it is read out together with all six surrounding neighbors, regardless of the charge they have collected; therefore, the readout process always involves a fixed seven-pixel cluster.
+
+This represents a remarkable difference with respect to GPDs, requiring a completely new chip design to fully exploit the advantages offered by this compact event topology. An example of the readout strategy is shown in Fig. \ref{fig:adc_routing}.
+
+\begin{figure}[htbp]
+    \centering
     \includegraphics[width=0.4\linewidth]{figures/chapter4/design/adc_routing}
-    \caption{Example of pixel routing using seven independent ADC channels. Each pixel is labeled with the corresponding ADC channel. The light gray area represents the smallest repeated region to not incur in adjacent pixels connected to the same ADC channel. The seven darker pixels represent an example of readout after the pixel connected to channel 3 has triggered the event.}
+    \caption{Example of pixel routing using seven independent ADC channels. Each pixel is labeled with its corresponding ADC channel. The light gray area highlights the minimal unit cell needed to avoid adjacent pixels sharing the same channel. The seven darker pixels illustrate a cluster read out after the pixel connected to channel 3 triggers the event.}
     \label{fig:adc_routing}
 \end{figure}
 
-Another improvement of the rate capability can be achieved dividing the chip into independent regions, each with its own multi-channel ADC. This configuration with independent regions would cause problems for events at the borders of the region, because they would be truncated and thus they should be rejected, but with an optimal shape and size of the regions the fraction of events should be smaller than 1\%. 
 
-To not exclude other possible uses of the chip other than for ASIX, such as for X-ray polarimetry, it is designed to support additional triggering and readout logics similar to XPOL-III, with a sequential readout of the pixels inside a rectangular ROI, as already described in Chap. \ref{sec:xpol3}. This would still allow to analyze larger tracks, but obviously the speed is slower and the maximum rate capability is smaller.
+\subsection{ASIC}
+\label{subsec:asic}
 
-\fix{bisogna accennare anche del pedestal da qualche parte}
+The goal of developing a detector suitable for different applications under diverse operating conditions requires a readout chip capable of handling event rates significantly higher than those typical of astrophysical sources. 
+
+As a reference, the brightest extrasolar source in the 2--8~keV energy range yields a flux of about 30~ph~cm$^{-2}$~s$^{-1}$, whereas an XRD laboratory setup with a Copper source can easily exceed a flux of $2 \times 10^8$~ph~cm$^{-2}$~s$^{-1}$ \cite{bolze2019}.
+
+The key to speeding up the readout with respect to GPDs is exploiting the fixed event geometry. While reducing the number of pixels to read is essential to lower the dead time, the main architectural breakthrough is the ability to read all seven pixels in parallel. 
+
+This parallel readout can be implemented using an external ADC with seven independent channels. Each pixel in a cluster is routed to a different channel, and the hexagonal honeycomb arrangement of the pixels is ideal for this purpose, as it allows the entire chip matrix to be mapped using seven channels without any adjacent repetition of the same channel. This configuration enables a 7-pixel cluster to be read out in parallel at any location on the chip, as illustrated in Fig. \ref{fig:adc_routing}.
+
+A further increase in rate capability can be achieved by segmenting the chip into independent readout regions, each equipped with its own 7-channel ADC. Although this approach can truncate events occurring at the boundaries between regions, leading to their rejection, selecting an optimal region size and shape ensures that the fraction of rejected events remains negligible.
+
+The current design goal is to achieve a maximum rate capability of at least 100~kHz per region at a readout clock frequency of 20~MHz, which translates into a global detector rate of about 1~MHz, depending on the final number of independent regions.
+
+The minimal event structure for readout requires to save the coordinates of the highest pixel (9 + 9 bit for a $304 \times 352$ pixels chip), the content of the pixels ($12 \times 7$ bit, assuming to use a 12 bit ADC) and the timestamp (16 bit), with a total event size of 118 bit. With a global rate of 1 MHz it would require a data bus with the capability of transferring around 100 MBit/s, which is feasible.
+
+This performance estimate assumes that pedestal subtraction is performed offline, unlike in previous XPOL chips. Indeed, since all seven pixels are sampled simultaneously by their dedicated ADC channels, systematic effects induced by time-dependent digital transients during serial readout are naturally avoided. This eliminates the need for a second pedestal readout pass, saving time at the cost of requiring an accurate offline pedestal calibration.
+
+Another critical property, essential for high-resolution spectroscopy, is the Equivalent Noise Charge (ENC) introduced by the front-end electronics. The design target is to maintain the noise below 20~$e^-$ ENC per pixel. When coupled with a silicon sensor, this noise level yields an energy resolution of approximately 350~eV FWHM at 8~keV, which is sufficient to resolve the Cu-K$_{\alpha}$ and Cu-K$_{\beta}$ fluorescence lines commonly used in XRD setups.
+
+All these requirements are achievable with a dedicated analog front-end ASIC. The proposed design features $50~\mu\text{m}$ pitch hexagonal pixels in a honeycomb array over a rectangular matrix, similar to the other XPOL family chips. However, unlike in GPDs—where the readout pixels are physically separated from the GEM—in the ASIX architecture the ASIC pixels are directly connected to the pixelated sensor via micro-bump soldering, aligning each ASIC pixel to the corresponding electrode on the sensor.
+
+Finally, to preserve detector versatility for applications such as X-ray polarimetry, the chip is designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
 
 \section{Simulations and analysis framework}
-\fix{da ricontrollare}
-To estimate the properties of different detector designs prior to the realization and then to characterize a prototype, a framework to generate Monte Carlo simulations of the detector and analyze the  data has been developed \cite{hexsample}. 
 
-In this section a description of the Monte Carlo simulation software and the analysis pipeline are given.
+To estimate the properties of different detector designs prior to the realization and then to characterize a prototype, a framework to generate Monte Carlo simulations of the detector and analyze collected data has been developed and is available at \cite{hexsample, tomaiuolo2024}. 
+
+The framework provides a suite of command-line tools that can be executed directly from the terminal or integrated into automated scripts. Data are stored using the Hierarchical Data Format (HDF5), which allows for efficient array storage and metadata tagging through file attributes.
+
+The core pipeline modules, illustrated in Fig.~\ref{fig:block_diagram}, are responsible for running Monte Carlo simulations, converting raw binary data collected with prototypes into HDF5 files, performing detector calibration, and executing event reconstruction.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/calibration/block_diagram}
+    \caption{Block diagram representing the main steps of the simulation and analysis software available at \cite{hexsample}. A dataset can be generated with the Monte Carlo simulation framework or obtained by converting a binary laboratory acquisition. The dataset is used to generate the calibration products, which are subsequently employed to reconstruct the events.}
+    \label{fig:block_diagram}
+\end{figure}
+
+This section illustrates in details the Monte Carlo simulation software and the calibration and analysis pipeline.
 
 \subsection{Monte Carlo simulations}
-Monte Carlo simulations of the detector are essential to understand its capabilities depending on the design. As mentioned in the previous section, designing a detector which has both imaging and spectroscopical high-resolution capabilities requires to carefully tune the active sensor thickness to achieve the correct trade-off between the two properties. 
+Monte Carlo simulations of the detector are essential to understand its capabilities depending on the design. As mentioned in the previous section, designing a detector which has both imaging and spectroscopical high-resolution capabilities requires to carefully tune the active sensor thickness, pixel pitch, working voltages and further properties to achieve the correct trade-off between energy and imaging resolution. 
 
 With the first prototypes it is also possible to validate the simulations with laboratory data, and if necessary finely tweaking the Monte Carlo to match the data, in order to have a software that can reliably simulate the real detector. The simulation consists of different steps, each representing a different stage of the detector.
 
-First, it is necessary to define the detector design, specifying the active sensor and the readout chip properties. The active sensor is described by three parameters, which are the material, the thickness and the transverse diffusion coefficient of the electrons, defined in Eq. \ref{eq:diff_sigma_dist} and that depends on the working conditions. The readout chip is described by the pixel pitch, the number of columns and rows and the readout logic, which allows to choose between the new chip seven-pixels parallel readout and the XPOL-III sequential rectangular readout with the additional option to choose the padding dimensions. The readout chip is also characterized by three other quantities, the ENC, the pedestal and the gain, which are provided in form of matrices with the same dimension of the chip to take into account spatial variations among the chip. The last thing to setup is the X-ray source, which is described by its energy spectrum and the beam shape, position and spatial distribution.
+First, it is necessary to define the detector design, specifying the active sensor and the readout chip properties. The active sensor is described by three parameters, which are the material, the thickness and the transverse diffusion coefficient of the electrons, defined in Eq. \ref{eq:diff_sigma_dist} and that depends on the working conditions.
 
-In the simulation, a photon with a given energy is sampled from the source spectrum and then its absorption depth is extracted from \fix{Eq. \ref{}}. It is assumed that photons are perpendicularly incident on the sensor surface and that all the electrons are produced in a point-like region located in the absorption point. The diffusion is modeled as discussed in Chap. \ref{subsec:sensor}, assuming a two-dimensional Gaussian distribution centered on the impact point and with a standard deviation which is determined by the absorption depth. Afterwards, the event readout is performed according to the chosen logic.
+The chip layout is described by the pixel pitch, the number of columns and rows and the readout logic, which allows to choose between the new chip seven-pixels parallel readout and the XPOL-III sequential rectangular readout with the additional option to choose the padding dimensions. The readout chip is also characterized by three other quantities, the ENC, the pedestal and the gain, which are provided in form of matrices with the same dimension of the chip to take into account spatial variations among the chip. The last thing to setup is the X-ray source, which is described by its energy spectrum and the beam shape, position and spatial distribution.
 
-The simulation does not take into account some physical effects, such as the distance travelled by primary photo-electrons or the possibility of having a fluorescence photon that can travel through the sensor before being absorbed, with the consequence that a point-like conversion region is no more a good approximation. The first effect is relevant at high energies for both Si and CdTe sensors, as shown in Fig. \ref{fig:range_si_cdte}, as an electron with an energy below 10 keV stops in less than 1 $\mu$m \cite{nist_estar}, thus the validity of the approximation gets worse with increasing energy.
+In the simulation, a photon with a given energy and incident position is generated according to spectrum and beam distribution and then its absorption depth is sampled from Eq. \ref{eq:pdf_truncated}.
 
-The second effect depends on energy and the sensor material, as fluorescence yield depends on the involved shell and on the atomic number $Z$. For silicon the fluorescence yield is smaller than 5\% for K-shell and almost 0\% for L-shell, while for cadmium and tellurium is between 83-88\% for K-shell and about 5-7\% for L-shell. If the photon is produced, given that the emission angle distribution is isotropic, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photo-electron can be produced even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV. \fix{All of this could be solved implementing the abosoprtion simulation with common physical simulation software.} Another effect which is not taken into account is pixel crosstalk, which is responsible for charge sharing between pixels. A simple way to partially solve this is to include this effect into the charge diffusion process, increasing the diffusion parameter calculated from Eq. \ref{eq:diff_sigma_dist}. The correct value of this parameter can be chosen comparing the cluster size distribution between laboratory data and simulation until they match.
+At the moment only on-axis photons generation is implemented. Furthermore the approximation that electron-hole pairs are produced in a point-like region located in the absorption point is adopted. This approximation is valid in the case of a silicon sensor and photon energies below 10 keV.
+
+The diffusion is modeled as discussed in Chap. \ref{subsec:sensor}, assuming a two-dimensional Gaussian distribution centered on the impact point and with a standard deviation which depends on the absorption depth. Afterwards, the event readout is performed according to the chosen logic, which can be the seven-pixel parallel readout or the XPOL-III rectangular ROI readout.
+
+The simulation does not take into account some physical effects, such as the distance travelled by primary photoelectrons or the possibility of having a fluorescence photon that can travel through the sensor before being absorbed, with the consequence that a point-like conversion region is no more a good approximation.
+
+As mentioned above, the first effect becomes relevant at high photon energies, while the second effect depends on energy and the sensor material, as fluorescence yield depends on the involved shell and on the atomic number $Z$. For silicon the fluorescence yield is smaller than 5\% for K-shell and almost 0\% for L-shell, while for cadmium and tellurium is between 83-88\% for K-shell and about 5-7\% for L-shell, as shown in Fig. \ref{fig:fluorescence_yield}.
+
+If fluorescence raditation is emitted, given the isotropic emission angle distribution, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photoelectron can be generated even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV.
+
+At the moment the goal of the simulation software is to validate and verify the feasibility of the silicon sensor design in the 6--8 keV energy range, thus all of these effects are negligible. In the future more detailed simulations will be performed by implementing this stage with Geant4 \cite{geant4}.
+Another effect which is not taken into account is pixel crosstalk, which is responsible for charge sharing between pixels. A simple way to partially solve this is to include this effect into the charge diffusion process, increasing the diffusion parameter calculated from Eq. \ref{eq:diff_sigma_dist}. The correct value of this parameter can be chosen comparing the cluster size distribution between laboratory data and simulation until they match.
 
 \subsection{Analysis}
 \label{sec:analysis}
-Simulated and laboratory data can then be analyzed to extract the relevant information. Raw signal data consists of a set of PHA values, one for each pixel inside the region of interest defined by the readout logic. Raw PHA values need to be corrected for two contributions, the pedestal and pixel equalization, to get the correct PHA value for each pixel. \fix{As mentioned in the previous section}, the pedestal subtraction may be performed offline, so a map of it is necessary to process all the pixels. Pixel equalization, instead, takes into account possible variations between pixels that may be introduced by the electronics \fix{(These may be corrected directly from the chip,ask)} and spatial inhomogeneities in the sensor, and a map is necessary for this correction too. Specific datasets are required to produce these maps, and the process to produce them is discussed in the Chap. \ref{sec:calibration}.
+After detector calibration, which requires more details and will be explained in the next section, data files generated with Monte Carlo simulations or by converting laboratory binary data files can be analyzed to extract the relevant information about the events.
 
-The corrected PHA values can be used to analyze the event and reconstruct photon properties, such as energy and impact position. According to the algorithm used for the reconstruction, an additional processing can be performed. In some cases all the seven PHA values are necessary, while in others a further reduction of the pixels can be made. Particularly, as shown in Tab. \ref{tab:charge_distr}, about 99\% of all the charge is collected by the three pixels with most signal. This information can be used to create a cluster containing only pixels that have a high probability of having collected signal. Specifically, the first step is to choose a zero suppression threshold, expressed in terms of noise standard deviation, to suppress all the pixels that are dominated by noise. Given that each pixel can have a different noise distribution, a map of this quantity is also necessary. The second step uses a geometrical constraint, imposing that all the pixels above threshold must be adjacent. The choice of which pixels are suppressed is made by starting from the outer pixel with the highest signal, and then going into decreasing order: if the following pixel is not its neighbour it is suppressed. This is done until a maximum size of three neighbors pixels above threshold, for the reasons stated above. The consequence of this suppression is that the cluster size is constrained to be between one and three.
+Each event contains information about the timestamp, a set of pixel content values expressed as pulse height analysis (PHA), and the information to localize the event, which depends on the readout mode. If using the seven-pixel parallel readout mode the coordinate of the central pixel is given, while in the XPOL-III readout mode the coordinates of two opposite vertices of the rectangular ROI and the padding information are stored.
 
+Detector calibration is necessary because raw PHA values need to be corrected for two contributions, which are pedestal and normalized gain variations over the chip. Further details will be given in the following.
+
+The corrected PHA values are used to analyze the event and reconstruct photon properties, such as energy and impact position. The reconstruction software contains different algorithms to infer the position and energy, and according to the one adopted an additional processing of the data can be required.
+
+For some algorithms all the PHA values of the seven-pixel cluster are necessary, while for others a data reduction can be made. Particularly, as shown in Fig. \ref{fig:charge_distr}, more than 99\% of all the charge is collected by the three pixels with most signal. This information can be used to create a smaller cluster containing only pixels that have a high probability of having collected physical signal and not only electronic noise.
+
+The first step to create the cluster is choosing a zero suppression threshold, which for each pixel is expressed in terms of noise standard deviation, which is characterized during the calibration step by producing a map of its distribution. The threshold is used to suppress all the pixels that are dominated by electronic noise.
+
+The second step applies a geometrical constraint, requiring all pixels above threshold to be adjacent. The central pixel is always kept as it triggered the event. The remaining pixels in the cluster are selected by evaluating the non-central pixels above threshold in descending order of signal amplitude, starting from the one with the highest PHA. A pixel is kept only if it is adjacent to a previously accepted pixel, otherwise it is suppressed. This process continues until a maximum of two neighboring pixels (plus the central one) is reached. Consequently, the final cluster size is strictly constrained to be between one and three pixels.
 
 \section{Detector calibration}
 \label{sec:calibration}
 
-Calibration is important because it enables to take into account possible variations in the detector and to compensate them during event reconstruction. This maximizes detector performances and improves spatial and spectral resolutions.
+Raw PHA values need to be corrected for two contributions, the pedestal and pixel equalization, to get the correct PHA value for each pixel. Furthermore, characterizing the pixel noise is important to correctly weight PHA values in clustering and event reconstruction.
 
-The calibration process consists of the characterization of noise, pedestal and gain of each pixel across the detector. The results of the calibration are employed in the event reconstruction to correctly apply noise-depending thresholds, subtract possible offsets and correct gain variations by normalizing the pixel response.
+Detector calibration is essential to take into account possible variations introduced by small imperfections in the electronics, inhomogeneities in the sensor and in the bump-bondings with the ASIC. By compensating these variations and correcting them it is possible to maximize detector performance and improving the spatial and energy distribution.
+
+The calibration process consists of the characterization of noise, pedestal and gain of each pixel across the detector. The results of the calibration are maps of the chip and are employed in the event reconstruction to correctly apply noise-depending thresholds, subtract possible offsets and correct gain variations by normalizing the pixel response.
 
 There are three main calibration products that can be directly estimated from the data, which are noise (expressed in ADC), pedestal level (in ADC) and normalized gain. In certain conditions it is also possible to estimate the absolute gain and the ENC noise, which can be both calculated from the latter products using some additional information.
 
-A calibration product consists of a file containing three different matrices with the same shape of the readout chip. Each element of a matrix is associated to the pixel in the correspondent position. The labels of the three matrices and their content are the following:
+In the analysis framework a calibration product has been designed as a HDF file containing three different matrices with the same shape of the readout chip. Each element of a matrix is associated to the pixel in the correspondent position. The labels of the three matrices and their content are the following:
 \begin{itemize}[label=-]
 \item \textit{values}, contains the central value of the calibrated quantity for each pixel;
 \item \textit{entries}, contains the number of events used for the calibration for each pixel;
 \item \textit{errors}, contains the estimated uncertainty associated to the value of the calibrated quantity for each pixel.
 \end{itemize}
 
-The calibration process has different steps and which follow a specific order. First, noise and pedestal levels are calibrated, then the normalized gain can be calibrated using the latter products. In case they are required, the absolute gain first and then the ENC can be calculated using ADC noise and normalized gain.
+The calibration products can either be generated by analyzing a data file or by synthesizing maps with the chosen size and values distribution. As said above, their main use is for event reconstruction but they are also used to define the readout chip characteristics in the Monte Carlo simulation software.
 
-In this section the methods developed to calibrate noise, pedestal and gain are described and the results obatined from the analysis of Monte Carlo simulations are presented to evalute their goodness.
+When analyzing a data file, the calibration process has different steps which follow a specific order. First, noise and pedestal levels are calibrated, then the normalized gain can be calibrated using the latter products. In case they are required, the absolute gain and the ENC maps can be calculated using ADC noise and normalized gain.
+
+In this section the methods developed to calibrate noise, pedestal and gain are described and finally the results obatined from the calibration of Monte Carlo simulations are presented to evalute their goodness.
 
 \subsection{Noise and pedestal}
 \label{sec:noise_calibration}
 
-Noise and pedestal variations are introduced by small imperfections in the manufacturing of the readout electronics and in the bonding of the active sensor onto the ASIC. Characterizing the noise of each pixel enables to apply pixel thresholds that take into account the possibility of having noisier pixels. Furthermore, in ASIX design the pedestal subtraction is performed offline, thus it is necessary to calibrate it. 
+Noise and pedestal variations are introduced by small non-uniformities in the manufacturing of the readout electronics and in the bonding of the active sensor onto the ASIC. Characterizing the noise of each pixel enables to apply pixel thresholds that take into account the possibility of having noisier pixels. 
 
-Given the fixed shape of the ASIX readout region and its small size, a method to scan the entire chip to characterize noise and pedestal levels without any source is under study. At the moment, to calibrate the prototypes, which are based on XPOL-III, it is also possible to use acquisitions with a source on that illuminates the entire chip. In this work, given the avalaibility of exclusively acquisitions with a source on, this is the only method which is described and used.
+The noise and pedestal level are estimated by sampling the PHA distribution of a pixel in the absence of source signal. The PHA distribution is a Gaussian distribution with a mean corresponding to the pedestal and a standard deviation equal to the noise of the pixel. During the readout the Gaussian is truncated before 0 ADC and digitized. In the optimal configuration to estimate both quantities the pedestal is much larger than the noise thus the Gaussian can be fully sampled. 
 
-The noise and pedestal levels of a pixel are estimated by sampling its PHA distribution in the absence of source signal. The PHA distribution is a Gaussian distribution with a mean corresponding to the pedestal and a standard deviation equal to the noise of the pixel. After the readout, the Gaussian is truncated before 0 ADC and digitized. In the optimal configuration the pedestal is much bigger than the noise and the Gaussian can be fully sampled. 
+To generate noise and pedestal maps from data files of the current prototypes, which are based on XPOL-III, it is possible to use data acquisitions with a source that illuminates the entire chip. As explained in Chap. \ref{sec:xpol3}, XPOL-III defines a ROT with triggered miniclusters and an additional padding can be added.
 
-In the acquisitions, the typical ROI of an event with a single triggered mini-cluster is a rectangle with a width of ten pixels and a height of 13 pixels, with a total of 130 pixels. The size of the ROI depends on which and how many mini-clusters triggered the event, thus it is possible that the number of pixels of the ROI is larger. To sample the PHA of a pixel without source signal, all the pixels in the region of trigger and their immediate neighbours are excluded from the analysis. With these conditions, the average number of pixels that can be sampled in an event is around 120. Fig. \ref{fig:noise_pedestal_roi} shows an example of event readout.
+In the acquisitions used in the following the padding is large and the resulting minimal ROI has a size of $10\times13$ pixels, as shown in Fig. \ref{fig:noise_pedestal_roi}. The true size depends on how many miniclusters have triggered, thus it can be larger. Once the ROI is defined pixels that belon to the ROT and all their neighbors are discarded in order to have the smallest probability of including pixels with source signal in the analysis. The number of pixels resulting from this selection is about 120, but it depends on the size of the ROT.
 
 \begin{figure}
     \centering
@@ -221,11 +242,26 @@ In the acquisitions, the typical ROI of an event with a single triggered mini-cl
     \label{fig:noise_pedestal_roi}
 \end{figure}
 
-Depending on the value of the pedestals with respect to the noise, different methods to calibrate the detector can be applied. Choosing the correct method can improve accuracy, numerical stability or computational time needed to calibrate the entire detector.
+Depending on the readout there are different methods that can be employed to calibrate noise and pedestals. However, in the current XPOL-III design pedestal subtraction is performed online, thus it is not possible to calibrate pedestal levels from data acquisitions. For this reason, it is assumed that they are exactly zero for all the pixels, thus only noise requires calibration.
 
-The first method that can be used is a least-squares minimization for each pixel using a Gaussian as the fit model. This method is not stable when the pedestal is absent or much smaller than the noise, thus the PHA distribution is a half-truncated digitized Gaussian, which is difficult to fit it's hard for the algorithm to converge to acceptable values.
+The first calibration method, is used exactly in the current working condition where pedestals are zero. In this case the PHA sampled distribution is a half-normal distribution defined only on the positive semi-axis, and the probability density function is
 
-The second method consists of calculating the mean and the standard deviation of the sampled distribution. This works only when the distribution core is not truncated, thus it is possible to use it only when the pedestal level is at least our or five times bigger than the noise. In practice, this method is performed using Welford algorithm \cite{welford1962} for online update of the mean and variance of each pixel distribution while looping on all the events of the acquisition. The mean and variance of the distribution after $n$ events are given by
+\begin{equation}
+p(x; \sigma^2) = \frac{2}{\sqrt{2 \pi \sigma^2}} \exp \left( -\frac{x^2}{2\sigma^2} \right), \quad \text{for } x > 0
+\label{eq:half_normal}
+\end{equation}
+
+Using the parity of the Gaussian it can be shown that the expectation value $\langle x^2 \rangle$ of the distribution defined in Eq. \ref{eq:half_normal} is equal to the variance of the untruncated Gaussian, which is exactly the square of the noise value to calibrate. The best-fit value of the pixel noise is thus given by
+
+\begin{equation}
+s = \sqrt{\frac{1}{N} \sum_i^{N} x_i^2}.
+\end{equation}
+
+The uncertainty related to this estimate is the uncertainty of the sample standard deviation, thus it is $s/\sqrt{2N}$.
+
+In case the pedestal subtraction is performed offline, there are two possible cases in which it is possible to use different methods. The first is when the pedestal level is much larger than the noise, which is the optimal case and allows to sample the entire Gaussian distribution. On the other hand, the second case is when the pedestal level is comparable to the noise (not much smaller, otherwise the first method can be employed), thus the distribution is truncated on the left tail.
+
+In the case where the pedestals are much larger (at least 4 or 5 times) than the noise it is possible to calculate the sample mean and the standard deviation of the distribution. In practice, this method is performed using Welford algorithm \cite{welford1962} for online update of the mean and variance of each pixel distribution while looping on all the events of the acquisition. The mean and variance of the distribution after $n$ events are given by
 
 \begin{equation}
 \begin{split}
@@ -236,13 +272,6 @@ s_n^2 &= \frac{M_{2,n}}{n-1}.
 \label{eq:welford}
 \end{equation}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=1\linewidth]{figures/chapter4/calibration/noise_methods}
-    \caption{Examples of applications of the different methods to estimate noise and pedestal levels of te detector. Method 1 is essential when the Gaussian is partly truncated, because the other methods can not converge to the correct values. Method 2 is perfect when the distribution is not truncated, thus the sample mean and standard deviation are correct. Method 3 can be applied when the pedestal is null and the distribution is a half-normal.}
-    \label{fig:methods}
-\end{figure}
-
 This method ensures very high numerical stability, is fast and the occupied space in memory only depends on the shape of the detector and not on the number of processed events. The error associated to the pedestal $\hat{p}$ is the uncertainty of the sample mean, and for the noise $\hat{n}$ is the one associated to the sample standard deviation, thus
 
 \begin{equation}
@@ -251,44 +280,40 @@ This method ensures very high numerical stability, is fast and the occupied spac
 \end{equation}
 where $N$ is the number of events collected for each pixel.
 
-The last method is a special case of the second one that can only be applied when the pedestal is exactly 0 ADC. In this case, the sample distribution is a half-normal distribution defined only on the positive semi-axis, and the probability density function is
+In the last case, when the pedestals are comparable to the noise, a least-squares minimization using a Gaussian curve as the fit model can be performed for each pixel. Furthermore this method is not stable in the limit where the PHA distribution is a half-truncated digitized Gaussian because the fit rarely converges to acceptable values.
 
-\begin{equation}
-p(x; \sigma^2) = \frac{2}{\sqrt{2 \pi \sigma^2}} \exp \left( -\frac{x^2}{2\sigma^2} \right), \quad \text{for } x > 0
-\label{eq:half_normal}
-\end{equation}
+Fig. \ref{fig:methods} shows the possible cases of application of the three methods described above. At the moment the method employed on real data is the first, but all of them can be used when the new chip, whose design phase is not completed, will be ready.
 
-Using the parity of the Gaussian it can be shown that the expectation value $\langle x^2 \rangle$ of the distribution defined in Eq. \ref{eq:half_normal} is equal to the variance of the untruncated Gaussian. The best-fit value of the pixel noise is thus given by the average of the 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/chapter4/calibration/noise_methods}
+    \caption{Examples of applications of the different methods to estimate noise and pedestal levels of te detector. Method 3 can be applied when the pedestal is null and the distribution is a half-normal. Method 2 is ideal when the distribution is not truncated, thus the sample mean and standard deviation are correct. Method 3 is essential when the Gaussian is partly truncated, because the other methods do not converge to the correct values.}
+    \label{fig:methods}
+\end{figure}
 
-\begin{equation}
-s = \sqrt{\frac{1}{N} \sum_i^{N} x_i^2},
-\end{equation}
-and the related error is $s/\sqrt{2N}$.
-
-Fig. \ref{fig:methods} shows the possible cases of application of the three methods described above.
+For the first two methods the relative error on the noise calibration scales as $1/\sqrt{N}$, thus to achieve a 1\% uncertainty it is necessary to collect about $10^4$ events for each pixel. Considering that with the ROI described above about $10^2$ pixels can be used for calibration, and considering that an XPOL-III chip has more than $10^5$ pixels, the total number of events required is of the order of $10^7$. The relative error on pedestal calibration depends on the noise level.
 
 
 \subsection{Normalized gain}
 
-The goodness of the estimate of the energy and incidence position of a photon is particularly sensible to variations in pixel response across the chip. This makes it necessary to compensate these variations to increase the detector performances at the best of its capacity. These variations can be attributed to imperfections introduced by the manufacturing process of the ASIC but also by differences in the bump bondings between the ASIC and active sensor pixels or directly to inhomogeneities in the sensor. While the former can be directly corrected with internal measurements of the ASIC, the latters require measurements with a reference source.
+The goodness of the estimate of the energy and incidence position of a photon is particularly sensible to variations in pixel response across the chip. This makes it necessary to compensate these variations to increase the detector performances at the best of its capacity. These variations can be attributed to imperfections introduced by the manufacturing process of the ASIC but also by differences in the bump bondings between the ASIC and active sensor pixels or directly to inhomogeneities in the sensor. While the former can be in principle directly corrected with internal measurements of the ASIC, the latters require measurements with a reference source.
 
-To calibrate this quantity it is necessary to illuminate the chip with a source. In principle, there is no constraint on how the source spectrum should be, but the best results are achievable with a monochromatic source, as it will be shown later. The calibration can be performed in two different ways, depending on the knowledge of the incoming spectrum and the ability to simulate it.
+To calibrate this quantity it is customary to illuminate the chip with a source. In principle, there is no constraint on how the source spectrum should be, but the best results are achievable with a monochromatic source, as it will be shown later. The calibration can be performed in two different ways, depending on the knowledge of the incoming spectrum and the ability to simulate it.
 
 The first method does not require any previous knowledge of the spectrum, as it only uses one-pixel events, which are events where all the charge is deposited in a single pixel. The idea is that when considering only one-pixel events, all the pixels have PHA distibutions with the same shape but can be shifted. Thus, by comparing the mean value of each pixel spectrum, it is possible to normalize their values by constraining the mean values distribution to have unit average.
 
-To identify one-pixel events it is necessary to apply a zero suppression to suppress noise. This threshold can be expressed as number of noise sigma, and the absolute value is determined using the noise calibration product. The choice of the threshold is arbitrary, but in this case a low threshold of about $1\sigma$ is optimal to avoid events where charge sharing spread charges across multiple pixels.
+To correctly identify one-pixel events, the clustering procedure described in Chap. \ref{sec:analysis} is applied. The zero-suppression threshold, which is determined for each pixel based on the noise calibration maps, should be set low enough to ensure that even small amounts of charge deposited into neighboring pixels due to charge diffusion are properly detected, thus preventing multi-pixel events from being misclassified as one-pixel events.
 
-The second method is based on the modeling of the source spectrum, which is then used as a probability density function $p(E)$ to calculate the likelihood of the total charge collected by an event. Contrary to the first method, this one requires to know exactly the source spectrum and being able to simulate the spectrum for the fully calibrated and equalized detector.
+The second method is based on the modeling of the source spectrum, which is then used as a probability density function $f(E)$ to calculate the likelihood of the total charge collected by an event. Contrary to the first method, this one requires to know exactly the source spectrum and being able to simulate the spectrum for the fully calibrated and equalized detector.
 
 After a spectrum dataset is simulated, the event reconstruction can performed, and the resulting ADC values distribution has to be transformed into a probability density function. This operation is performed using gaussian kernel density estimation (KDE). The resulting KDE is evaluated for a grid of values and the resulting values are then interpolated with a cubic spline. This step is necessary because KDE evaluation is slow, and given that this method relies on the numerical minimization of the negative log-likelihood, the cubic spline speeds up the minimiaztion. KDE and interpolation are performed using functions implemented in the scientific analysis library \cite{scipy2020}.
 
 The total energy released in an event can be expressed as the sum of the ADC counts of each pixel $p_i$ multiplied by a factor $q_i$, thus the likelihood can be calculated as
 
 \begin{equation}
-\mathcal{L}(p_1, ..., p_n) = p \left( \sum_{i=1}^n q_i p_i \right),
+\mathcal{L}(p_1, ..., p_n) = f \left( \sum_{i=1}^n q_i p_i \right),
 \label{eq:equalization_likelihood}
 \end{equation}
-
 where $n$ is the number of pixel involved in a single event. $q_i$ represents the inverse of the gain normalization, and the choice of fitting the inverse is to have more stability in the fit. Given that all events are independent, the total likelihood is the product of Eq. \ref{eq:equalization_likelihood} for each event.
 
 This method includes all the events in the analysis, guaranteeing a much larger statistics than the other one, thus allowing to have more accuracy and stability. It is still possible to suppress pixels below a certain threshold to avoid large noise contamination.
@@ -296,35 +321,32 @@ This method includes all the events in the analysis, guaranteeing a much larger 
 In theory it could be possible to calculate the total likelihood for all the $N$ events across all the $n_{pix}$ pixels of the detector
 
 \begin{equation}
-\mathcal{L}(p_1, ..., p_{n_{pix}}) = \prod_{i=1}^{N} p \left( \sum_{j=1}^{n_{pix}} q_j p_j \right)
+\mathcal{L}(p_1, ..., p_{n_{pix}}) = \prod_{i=1}^{N} f \left( \sum_{j=1}^{n_{pix}} q_j p_j \right)
 \label{eq:total_likelihood}
 \end{equation}
-
 and minimize it with respect to all the fit parameters. In practice, this is not feasible due to the large number of parameters, which are more than $10^5$, because the minimization would require too much space in memory.
 
 For this reason the detector can be virtually divided into smaller square sub-regions and all the pixels inside the same sub-region are fitted simultaneously. In order to include an event inside a sub-region fit, all the charge must be collected by pixels inside. To not exclude events that involve pixels on the borders of sub-regions, an two-pixels overlap is guaranteed between adjacent sub-regions. In this way all the events are considered for the analysis and pixels that lie on the borders do not have reduced statistics. For each sub-region the negative log-likelihood is calculated from Eq. \ref{eq:total_likelihood} and then minimized with \textit{iminuit} \cite{iminuit}.
 
-\fix{devo specificare meglio che il fattore di calibrazione in questo caso puo essere calcolato se lo spettro è generato correttamente. Inoltre devo dire che con questo prodotto posso calcolare il gain assoluto e di conseguenza anche la mappa degli ENC.}
+If the spectrum used for the calibration is accurately simulated, it is also possible to estimate the conversion factor from ADC counts to eV, allowing the absolute gain calibration product to be obtained. Knowing the sensor material and the mean energy required to generate an electron-hole pair, it is then possible to combine the ADC noise and absolute gain maps to estimate the ENC map, thus measuring the intrinsic noise level of each pixel.
 
-\subsection{Simulation results}
+\subsection{Calibration performance}
 
-To test the calibration procedure and gauge the algorithms performances, a dataset has been simulated. The dataset has a monochromatic source of 10 keV with a beam that uniformly illuminates the entire detector. Noise, pedestal and gain are distributed according to Gaussian distributions with a mean of 100 electrons, 1000 ADC and 0.1 ADC/electron, respectively, and a standard deviation of 10\% of the mean. A total of $10^7$ events have been generated.
+To test the calibration procedure and gauge the algorithms performances, a dataset with a monochromatic source of 10 keV with a beam that uniformly illuminates the entire detector has been simulated. Noise, pedestal and gain are distributed according to Gaussian distributions with a mean of 100 electrons, 1000 ADC and 0.1 ADC/electron, respectively, and a standard deviation of 10\% of the mean. A total of $10^7$ events have been generated.
 
-The first calibration step is the ADC noise and pedestal calibration. In this case the second method, the one which calculates the mean and standard deviation of the PHA distributions, has been used because the pedestal is much bigger than the noise level. The matrices of the noise values and of the number of entries contained in the calibration products are shown in Fig. \ref{fig:noise_matrix}
+The first calibration step is the ADC noise and pedestal calibration. In this case the method that calculates the sample mean and standard deviation of the PHA distributions has been used because the pedestal is much bigger than the noise level. The scatter plots showing the correlation between the Monte Carlo truth values of noise and pedestal with their calibrated values are shown in Fig. \ref{fig:noise_pedestal}.
 
 \begin{figure}[!b]
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_matrix_values}
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_matrix_entries}
-    \caption{The left panel shows the chip matrix with the ADC noise values obtained from the noise calibration.  All the 107008 pixels of the chip have been successfully calibrated. The right panel shows the matrix of the number of events used for the pixel calibration. The average number of events per pixel is about 11000. The modulation pattern that is visible for the entries is caused by the odd number of rows in the ROI and the fact that the upper-right pixel coordinates of the triggered minicluster have a fixed parity, so an aliasing effect is produced.}
-    \label{fig:noise_matrix}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_correlation}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/pedestal_correlation}
+    \caption{Scatter plots showing the correlation between the Monte Carlo truth and the calibrated values of noise and pedestals.}
+    \label{fig:noise_pedestal}
 \end{figure}
 
 Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it's the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}. The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
 
-Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC.
-
-With these two calibration files it is now possible to analyze again the same dataset to calibrate the pixel equalization.
+Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC, compatible with the expected value estimated from Eq. \ref{eq:noise_uncertainty}.
 
 \begin{figure}
     \centering
@@ -334,28 +356,34 @@ With these two calibration files it is now possible to analyze again the same da
     \label{fig:noise_distribution}
 \end{figure}
 
+With these two calibration files it is now possible to analyze again the same dataset to calibrate the normalized gain. 
+
 \fix{qui bisogna mostrare i risultati della calibrazione del gain e mettere un paio di grafici.}
 
 \section{Position reconstruction}
 
 With all the necessary calibration products, it is possible to reconstruct all the information about the events. The important thing to take into account is that one of the features of ASIX is that the size of the diffused charge cloud is a bit smaller than a pixel, meaning that the average cluster size is quite small, as shown in Chap. \ref{sec:asix_design}. While this feature is essential for spectroscopy, in order to minimize the contribution of noise, it introduces the need of a careful analysis to reconstruct the incident position.
 
-As a consequence, different algorithms have been developed and compared to find which one is able achieve the best spatial resolution. To estimate the resolution of the algorithms two methods can be used. The first one is based on Monte Carlo truths, while the second one consists of studying the spatial response of the detector to a slit or a sharp edge. Furthermore, the dependance of the spatial resolution on noise and on the cluster size is shown.
+As a consequence, different algorithms have been developed and compared to determine which one achieves the best spatial resolution. To estimate the performance of these algorithms, two distinct methods can be employed. 
 
-A metric that is used to gauge the spatial resolution from Monte Carlo truths is the encircled energy fraction (EEF). The EEF is the cumulative density function of the radial distance distribution between the true and the reconstructed positions \cite{longair2011}.
+The first approach is typical for space applications, where a source with a known spatial profile, such as a point-like source, is used to directly compare the true incidence position with the reconstructed one. In this work, this method is implemented using the Monte Carlo ground truth. 
 
-Usually, the EEF is calculated integrating the point spread function (PSF), which is the response of a detector to a point source. In this case, given the availability of the Monte Carlo truth positions, it can be calculated from the radial residuals distribution. Some common metrics of the EEF are the points where it is equal to 0.5 or 0.9, with the first value representing the distance at which 50\% of events are reconstructed, and it measures the "core" resolution, while the second value is more sensitive to the tails.
+The second approach is standard in medical and industrial imaging and relies on evaluating the spatial response of the detector to an illuminated slit or a sharp edge. This method has been adopted to analyze laboratory experimental data.
+
+A metric used to gauge the spatial resolution from Monte Carlo truths is the encircled energy fraction (EEF). The EEF is the cumulative density function of the radial distance distribution between the true and the reconstructed positions \cite{longair2011}.
+
+Usually, the EEF is calculated by integrating the Point Spread Function (PSF), which represents the response of a detector to a point-like source. In this case, given the availability of the Monte Carlo ground truth positions, it can be directly derived from the radial residuals distribution. Common metrics of the EEF are the radii corresponding to 50\% (Half-Energy Width, HEW) and 90\% encircled energy, which represent the customary standard for space telescopes. The HEW measures the core spatial resolution, while the latter is sensitive to the extended tails of the distribution.
 
 \subsection{Charge barycenter}
 \label{subsec:barycenter}
 
-The first algorithm consists of calculating the barycenter of the pixels centers by weighting their positions with the collected charge
+The simplest possible algorithm consists of calculating the barycenter of the pixels centers by weighting their positions with the collected charge
 
 \begin{equation}
 x = \frac{\sum_i x_i \cdot q_i}{\sum_i q_i}, \quad y = \frac{\sum_i y_i \cdot q_i}{\sum_i q_i}.
 \end{equation}
 
-This method assumes that the charge in each pixel is spread uniformly across it or, in a similar way, that it is concentrated in its center. This method does not consider how the charge diffuses inside the active sensor. If the charge would spread on a large number of pixels, this assumption would be valid and the charge barycenter would be a good estimator of the incident position. However, as said above, ASIX is designed to have a small diffusion and the cluster size is small, thus the charge barycenter is not ideal.
+This method assumes that the charge in each pixel is spread uniformly across it or, equivalently, that it is concentrated in its center. This method does not consider how the charge diffuses inside the active sensor. If the charge would spread on a large number of pixels, this assumption would be valid and the charge barycenter would be a good estimator of the incident position. However, as said above, the detectors are designed to have a small $\langle \sigma \rangle / p$ ratio and the cluster size is small, thus the charge barycenter is not ideal.
 
 It must be noted that for one-pixel events this is the only possible method that can be applied, as there is not enough information to reconstruct a position different from the pixel center. From this point on, it is assumed that every time a one-pixel event is analyzed, the incident position is reconstructed in the pixel center. While these events have the best energy resolution, as will be shown in the next section, they have the worst spatial resolution.
 
@@ -365,38 +393,38 @@ Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ an
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/barycenter_dx}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/barycenter_dy}
-    \caption{Residuals distributions for the $x$ and $y$ directions obtained with the charge barycenter algorithm. The residuals are calculated as the difference between the reconstructed and the Monte Carlo truth $x$ and $y$ components. The events are separated by cluster size, with each color representing a specific cluster size. The histograms are stacked on each other. The simulation is made with a 8 keV monochromatic source, 20 ENC of noise and ratio between the diffused charge cloud sigma and the pitch of 15\%.}
+    \caption{Residuals distributions for the $x$ and $y$ directions obtained with the charge barycenter algorithm. The residuals are calculated as the difference between the reconstructed and the Monte Carlo truth $x$ and $y$ components. The events are separated by cluster size, with each color representing a specific cluster size. The histograms are stacked on each other. The simulation is made with a 8 keV monochromatic source, 20 ENC of noise and a silicon sensor 300 $\mu$m thick, with a $\langle \sigma \rangle / p = 15$\% .}
     \label{fig:barycenter_dx_dy}
 \end{figure}
 
 By calculating the distance between the truth and the reconstructed positions, the EEF can be calculated. 
-Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm varies as a function of the ratio between the diffusion widths of the charge cloud and the pixel pitch. It can be observed that a broader diffusion implies a better resolution. Tab. \ref{tab:eef_barycenter} shows the distance at which EEF contains 50\% and 90\% of the events.
+Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm varies as a function of the ratio between the diffusion widths of the charge cloud and the pixel pitch. It can be observed that a broader diffusion implies a better resolution. 
+%Tab. \ref{tab:eef_barycenter} shows the distance at which EEF contains 50\% and 90\% of the events.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/barycenter_eef}
-    \caption{EEF for different values of the ratio between the diffusion cloud widths and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
+    \caption{EEF for different values of the ratio between the diffusion cloud widths and the pixel pitch as a function of the pitch normalized distance. The simulations are made with 20 ENC of noise and a silicon sensor 300 $\mu$m thick. To vary $\langle \sigma \rangle / p$ the diffusion coefficient is varied in the range 40--60 $\mu$m cm$^{-0.5}$.}
     \label{fig:barycenter_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.19 & 0.27 \\
-13.7 & 0.17 & 0.24 \\
-15.2 & 0.15 & 0.22 \\
-16.8 & 0.13 & 0.20 \\
-18.3 & 0.11 & 0.18 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with charge barycenter reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:barycenter_eef}}
-\label{tab:eef_barycenter}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ [\%] & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.19 & 0.27 \\
+%13.7 & 0.17 & 0.24 \\
+%15.2 & 0.15 & 0.22 \\
+%16.8 & 0.13 & 0.20 \\
+%18.3 & 0.11 & 0.18 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with charge barycenter reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:barycenter_eef}}
+%\label{tab:eef_barycenter}
+%\end{table}
 
-This algorithm does not require a calibration because it ignores the how the charge diffuse, thus it represent a fast and simple algorithm that can be used to have a first estimate of the incident position.
-
+This algorithm does not require any specific position-calibration models, as it neglects the physical details of charge diffusion. Consequently, it represents a fast, straightforward approach that provides a robust first estimate of the interaction position, relying exclusively on basic noise and gain-corrected pixel data.
 
 \subsection{Likelihood estimator}
 \label{subsec:mle}
@@ -413,52 +441,68 @@ This algorithm does not require a calibration because it ignores the how the cha
     \hexpix[xshift=0.5cm, yshift=+0.866cm]{\hexsize}
     \hexpix[xshift=-0.5cm, yshift=+0.866cm]{\hexsize}
     
-\begin{scope}
-    \clip (0.3,0.2) circle (0.75cm);
-    \fill[shading=paletteScienza, path fading=gaussianaPerfetta, opacity=0.3] (0.3,0.2) circle (0.75cm);
-\end{scope}
+    \begin{scope}
+        \clip (0.3,0.2) circle (0.75cm);
+        \fill[shading=paletteScienza, path fading=gaussianaPerfetta, opacity=0.3] (0.3,0.2) circle (0.75cm);
+    \end{scope}
     
-    \tikzset{labelStyle/.style={anchor=south, font=\small, text=black}}
-    \node[labelStyle] at (0, 0) {$q_0$};
-    \node[labelStyle] at (1, 0) {$q_2$};
-    \node[labelStyle] at (-1, 0) {$q_5$};
-    \node[labelStyle] at (0.5, -0.866) {$q_3$};
-    \node[labelStyle] at (-0.5, -0.866) {$q_4$};
-    \node[labelStyle] at (0.5, +0.866) {$q_1$};
-    \node[labelStyle] at (-0.5, 0.866) {$q_6$};
+    \tikzset{
+        labelStyle/.style={
+            anchor=center, 
+            font=\small, 
+            text=black, 
+            align=center,
+            fill=white, 
+            fill opacity=0.7, 
+            text opacity=1, 
+            inner sep=1.5pt, 
+            rounded corners=1.5pt
+        }
+    }
 
-	\fill[black] (0.3, 0.2) circle (0.025cm);
-	\node[anchor=south, font=\scriptsize, text=black, inner sep=1pt] 
-    at (0.3, 0.05) {$(x_0, y_0)$};
+    \node[labelStyle] at (0, -0.15) {$q_0$\\[-2pt]\footnotesize 64.8\%};
+    \node[labelStyle] at (1, -0.15) {$q_2$\\[-2pt]\footnotesize 21.5\%};
+    \node[labelStyle] at (0.5, 0.866-0.15) {$q_1$\\[-2pt]\footnotesize 10.9\%};
+    \node[labelStyle] at (0.5, -0.866-0.15) {$q_3$\\[-2pt]\footnotesize 1.9\%};
+    \node[labelStyle] at (-0.5, 0.866-0.15) {$q_6$\\[-2pt]\footnotesize 0.9\%};
+    \node[labelStyle] at (-0.5, -0.866-0.15) {$q_4$\\[-2pt]\footnotesize $<0.1\%$};
+    \node[labelStyle] at (-1, -0.15) {$q_5$\\[-2pt]\footnotesize $<0.1\%$};
+
+    \fill[black] (0.3, 0.2) circle (0.025cm);
+    \node[anchor=south west, font=\scriptsize, text=black, inner sep=1pt] 
+        at (0.3, 0.2) {$(x_0, y_0)$};
+        
     \end{tikzpicture}
     
-    \caption{Example of charge diffusion from a photon with a incident position $(x_0, y_0)$ and standard deviation of the bivariate Gaussian equal to 15\% of the pixel pitch. The charge cloud extends up to 5$\sigma$.}
-
+    \caption{Example of charge diffusion from a photon with incident position $(x_0, y_0)$ and standard deviation of the bivariate Gaussian equal to 15\% of the pixel pitch. The charge cloud extends up to $5\sigma$, and the calculated charge fractions collected by each pixel ($q_0\text{--}q_6$) are explicitly indicated.}
     \label{fig:mle_model}
 \end{figure}
 
-
-The previous algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Sec. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position and with a standard deviation $\sigma$ that depends can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
+The simple barycenter algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Sec. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position and with a standard deviation $\sigma$ that depends can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
 
 \begin{equation}
 f_i (x_0, y_0) = \int_{P_i} \frac{1}{2\pi \sigma^2} \exp \left[ - \frac{(x - x_0)^2 + (y - y_0)^2}{2\sigma^2} \right] \,dx\,dy.
 \label{eq:mle_charge_fraction}
 \end{equation}
 
-Defining $Q = \sum_{i=0}^6 q_i$ as the total charge collected by all the seven pixels of the cluster, in case the noise is negligible and the counts fluctuations are exclusively caused by statistical fluctuations, the single pixel charges would be distributed according to a multinomial distribution, and the likelihood of the event is the following
+The total charge of the event is defined as $Q = \sum_{i=0}^6 q_i$, where $q_i$ is the charge collected by the $i$-th pixel. Assuming that electronic noise is negligible and that charge fluctuations are purely statistical, the joint distribution of charges across the cluster follows a multinomial distribution. From this distribution, the likelihood of the photon incident position $(x, y)$ given the observed charges is defined as:
 
 \begin{equation}
 \mathcal{L}(x, y) = \frac{Q!}{\prod_i q_i!} \prod_i f_i(x,y) ^{q_i}.
 \label{eq:mle_multinomial}
 \end{equation}
 
-If electronic noise is present this model does no longer hold, particularly in high-noise conditions, because charge fluctuations are dominated by the signal independent electronic noise. This can be shown with an example considering a 8 keV photon absorbed by a silicon sensor, which generates about 2000 electron-hole pairs. Assuming that the central pixel of the cluster collects $f_0 =$40\% of the charge, and the detector has 20 ENC of noise, the two statistical fluctuations and the noise variance are
+If electronic noise is present, the pure multinomial model no longer holds, especially in high-noise conditions, because the observed charge fluctuations become dominated by signal-independent electronic noise rather than charge-partition statistics. 
+
+An example to illustrate this situaiton is the case of a $8\text{ keV}$ photon absorbed in a silicon sensor, which generates approximately $Q \approx 2200\text{ e}^-$ electron-hole pairs. If the central pixel collects an expected fraction $f_0 = 40\%$ of the total charge, the variance associated with the binomial charge-sharing partition among the pixels is
 
 \begin{equation}
-\sigma_s^2 = Q f_0 (1 - f_0) = 480 \sim \sigma_n^2 = 400.
+\sigma_{\text{s}}^2 = Q f_0 (1 - f_0) \approx 528.
 \end{equation}
 
-Therefore, the statistical variance is of the same order of the pixel electronic noise variance. For pixels that collect a small fraction of the charge the situation is worse, because the electronic noise overwhelms statistical fluctuations, thus $\sigma_n^2 > \sigma_s^2$.
+For the design goal electronics noise of $\sigma_n = 20\text{ ENC}$, the electronic noise variance is $\sigma_n^2 = 400$:
+
+Even for the pixel collecting the largest charge fraction, the statistical partition variance $\sigma_{\text{s}}^2$ and the electronic noise variance $\sigma_n^2$ are of comparable magnitude. For neighboring pixels collecting smaller fractions ($f_i \ll 1$), the partition variance scales as $\sigma_{\text{s}}^2 \approx Q f_i$ and becomes completely overwhelmed by the electronic noise
 
 To correct this model and adapt it to the presence of electronic noise it is necessary to consider how the noise affects the observations. As seen in Sec. \ref{sec:noise_calibration}, the noise is distributed according to a Gaussian distribution. As a consequence, each pixel charge distribution can be modeled with a Gaussian distribution for the following reasons:
 
@@ -500,46 +544,21 @@ In Eqns. \ref{eq:multivariate_gauss} and \ref{eq:cov_matrix}, the dependance fro
 \label{eq:nll_multivariate}
 \end{equation}
 
-This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \textit{iminuit} \cite{iminuit}.
+This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \textit{iminuit} \cite{iminuit}. 
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/nll}
-    \caption{Example of $\operatorname{NLL}(x, y, Q)$ calculated by fixing the total charge value $Q$ to the sum of all the pixels.}
-    \label{fig:mle_nll}
+    \includegraphics[width=0.48\linewidth]{figures/chapter4/position/calibration_matrices}
+    \includegraphics[width=0.48\linewidth]{figures/chapter4/position/nll}
+    \caption{Left panel: the seven charge fraction calibration matrices evaluated as a function of the impact position on the central pixel, simulated for a 6 keV monochromatic source with $\langle \sigma \rangle / p \approx 13\%$. The grid is composed of $100 \times 116$ bins. Right panel: two-dimensional map of the $\operatorname{NLL}$ evaluated across the central pixel for a fixed charge $Q$, where the minimum identifies the best-fit reconstructed position $(\hat{x}, \hat{y})$. In the actual fit, $Q$ is free and the minimization is performed in the 3D space $(x, y, Q)$.}
+    \label{fig:mle_calibration_and_nll}
 \end{figure}
 
-In order to be correctly used, this position reconstruction method requires a calibration. Indeed, the charge fractions depend on the charge cloud diffusion width. The charge fractions $f_i$ could be calculated with Eq. \ref{eq:mle_charge_fraction}, but the hexagonal geometry of the pixels makes the analytical calculation complex. For this reason, the computation is made using Monte Carlo simulation and it is performed for a specific value of the ratio $\langle \sigma \rangle / p$.
+In order to be correctly used, this position reconstruction method requires a prior calibration of the diffusion model. Indeed, the charge fractions depend on the charge cloud diffusion width. The charge fractions $f_i$ could be calculated with Eq. \ref{eq:mle_charge_fraction}, but the hexagonal geometry of the pixels makes the analytical calculation complex. For this reason, the reference charge-sharing model is evaluated through Monte Carlo simulations and tabulated for a certain value of the $\langle \sigma \rangle / p$ ratio, which is specific to a combination of sensor thickness, pixel pitch, diffusion coefficient and photon energy.
 
-The calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_cal_matrices}.
+The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_calibration_and_nll}.
 
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=0.6\linewidth]{figures/chapter4/position/calibration_matrices}
-    \caption{The seven charge fraction matrices used for the position reconstruction with the MLE. Each matrix represents the charge fraction that is collected by that pixel as a function of impact position on the central pixel. The matrices are obtained using a simulated dataset with a 6 keV monochromatic source, with a 300 $\mu$m thick silicon sensor and with a transverse diffusion sigma of 40 $\mu$m cm$^{-0.5}$, thus the ratio between the $\sigma$ of the cloud and the pixel pitch is about 13\%. The grid is composed by 100 bins on the x-axis and 116 on the y-axis.}
-    \label{fig:mle_cal_matrices}
-\end{figure}
-
-During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various pairs of $(x, y)$ coordinates. Performing the minimization on discrete matrices could lead to numerical problems, due to the possibility of having non-physical zero gradients in case of small steps. To avoid these problems, a bilinear interpolation is performed when the $\operatorname{NLL}$ is evaluated in $(x, y)$, enabling to smooth the function. The interpolation is performed as following:
-
-\begin{itemize}[label=-]
-\item calculate the fractional coordinates $(w_x, w_y)$ of $(x, y)$ with respect to the associated bin center and get the grid coordinates $(i_x, i_y)$ of the nearest lower-left bin;
-\item get the values $(v_{00}, v_{10}, v_{01}, v_{11})$ of the four bins with grid coordinates $(i_x, i_y)$, $(i_x + 1, i_y)$, $(i_x, i_y + 1)$, $(i_x + 1, i_y + 1)$;
-\item weight each bin value with the distance from $(x, y)$ to get the interpolated value:
-\begin{equation}
-f_i (x, y) = v_{00} (1 - w_x) (1 - w_y) + v_{10} w_x (1 - w_y) + v_{01} (1 - w_x) w_y + v_{11} w_x w_y.
-\end{equation}
-\end{itemize}
-
-To speed up the minimizer, the gradient of the $\operatorname{NLL}$ with resepect to $(x, y, Q)$ can be pre-computed as well. For this purpose, the gradients of the charge fraction matrices have to be calculated with respect to $x$ and $y$ and have to be interpolated. This time the interpolation is linear, and the interpolated gradients are
-
-\begin{equation}
-\begin{split}
-\frac{\partial f_i}{\partial x} = [(v_{10} - v_{00}) (1 - w_y) + (v_{11} - v_{01}) w_y] / dx,\\
-\frac{\partial f_i}{\partial y} = [(v_{01} - v_{00}) (1 - w_x) + (v_{11} - v_{10}) w_x] / dy,
-\end{split}
-\end{equation}
-where $dx = dy$ is the square bin size. \fix{devo mostrare il calcolo della derivata di Eq. \ref{eq:nll_multivariate}? sono molti calcoli}
+During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further numerical details on the continuous interpolation of these discrete calibration matrices and the analytical computation of the likelihood gradients are provided in Appendix \ref{appendix:mle}.
 
 Contrary to charge barycenter, this algorithm does not implement any type of suppression. Indeed, while charge barycenter applies a zero-suppression threshold and a position-suppression to suppress pixels that have high probability of having only noise signal, this algorithm weights each pixel by considering the diffusion model. 
 
@@ -547,7 +566,8 @@ As a consequence, defining the cluster size becomes ambiguous. For plotting purp
 
 Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. With this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch.
 
-This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
+This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. This algorithm is generally better than the charge barycentering, indeed the EEF@50\% is always about three times smaller, but due to the long tails the EEF@90\% can be worse in some cases. 
+%Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
 
 Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution. It must be noted that for the position reconstruction a set of calibration matrices has been produced for each diffusion width.
 
@@ -568,32 +588,32 @@ Furthermore, the same dependence on the diffusion width as the charge barycenter
     \label{fig:mle_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.07 & 0.35 \\
-13.7 & 0.05 & 0.26 \\
-15.2 & 0.04 & 0.19 \\
-16.8 & 0.03 & 0.14 \\
-18.3 & 0.03 & 0.12 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with maximum likelihood estimator reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:mle_eef}}
-\label{tab:eef_mle}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.07 & 0.35 \\
+%13.7 & 0.05 & 0.26 \\
+%15.2 & 0.04 & 0.19 \\
+%16.8 & 0.03 & 0.14 \\
+%18.3 & 0.03 & 0.12 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with maximum likelihood estimator reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:mle_eef}}
+%\label{tab:eef_mle}
+%\end{table}
 
 
 \subsection{$\eta$ algorithm}
 \label{subsec:eta}
-In the context of silicon microstrip detectors, a common and widely used algorithm to reconstruct the incident position of radiation is the so-called $\eta$ algorithm \cite{belau1983, turchetta1993}. This algorithm is based on the definition of the $\eta$ variable
+In the context of silicon microstrip detectors, a common and widely used algorithm to reconstruct the incident position of radiation is the so-called $\eta$ algorithm \cite{belau1983, turchetta1993}. This algorithm, adopted when two strips have collected signal, is based on the definition of the $\eta$ variable
 
 \begin{equation}
 \eta = \frac{q_R}{q_L + q_R},
 \label{eq:def_eta}
 \end{equation}
-that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, contrary to the charge baryecenter, that takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
+that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, that contrary to the charge baryecenter takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
 
 The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. Assuming that the events are uniformly distributed between the two strips, the cumulative distribution of $\eta$ gives the relation between the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
 
@@ -633,7 +653,7 @@ As said for other reconstruction methods, for one-pixel events there is nothing 
     \label{fig:two_pixel_event}
 \end{figure}
 
-The case of two-pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. Considering the readout deisgn of ASIX, where the pixel that triggering pixel is always located at the center of a seven pixel cluster, a small change in the definition of $\eta$ is necessary, which is now defined as
+The case of two-pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. Considering the readout design of ASIX, where the pixel that triggering pixel is always located at the center of a seven pixel cluster, a small change in the definition of $\eta$ is necessary, which is now defined as
 \begin{equation}
 \eta = \frac{q_1}{q_0 + q_1},
 \label{eq:eta_2pix}
@@ -726,13 +746,13 @@ The angular coordinate can be parametrized as a two-pixel event problem as well.
 
 As in the case of two-pixel events, the uniformity of the events along the relevant axes has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the radial axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
 
-Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical propertie. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
+Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical properties. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
-    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel).}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
     \label{fig:3pix_scatter}
 \end{figure}
 
@@ -760,7 +780,8 @@ The $\eta$ algorithm presented for three-pixel events could also be generalized 
 
 Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
 
-After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
+After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. 
+%Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
 
 \begin{figure}
     \centering
@@ -777,21 +798,21 @@ After analyzing the same dataset as the previous algorithms, the residuals for t
     \label{fig:eta_unmodeled_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.09 & 0.21 \\
-13.7 & 0.06 & 0.17 \\
-15.2 & 0.04 & 0.13 \\
-16.8 & 0.03 & 0.11 \\
-18.3 & 0.03 & 0.09 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with the $\eta$ algorithm reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_unmodeled_eef}}
-\label{tab:eef_eta_unmodeled}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.09 & 0.21 \\
+%13.7 & 0.06 & 0.17 \\
+%15.2 & 0.04 & 0.13 \\
+%16.8 & 0.03 & 0.11 \\
+%18.3 & 0.03 & 0.09 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with the $\eta$ algorithm reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_unmodeled_eef}}
+%\label{tab:eef_eta_unmodeled}
+%\end{table}
 
 The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. 
 
@@ -883,13 +904,14 @@ To calibrate the radial and angular coordinates the strategy is identical to the
 
 As can be observed from Figs. \ref{fig:eta_2pix_r_distr} and \ref{fig:eta_3pix_fit}, the models describe very well the data, and the shape of the profiles are compatible with the cumulative distributions in Figs. \ref{fig:eta_2pix} and \ref{fig:eta_3pix} obtained with the unmodeled $\eta$ algorithm. This validates both the unmodeled and modeled algorithms, which converge to very similar results.
 
-However, one thing that can be noted is that the best-fit values of $\sigma$ for the three fits are very different. The simulation has been perfomed with an average $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained with two-pixel events is compatible with the expected one. These variations can be attributed to the spatial distribution of the events around the axes along which the positions are projected. Indeed, when the distribution is broad, as in the case of three-pixel events (Fig. \ref{fig:3pix_scatter}), the difference with respect to the expected value is larger than the case of two-pixel events (Fig. \ref{fig:2pix_scatter}).
+However, it can be noted that the best-fit values of $\sigma$ for the three fits are different. The simulation was performed with an average ratio $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained from two-pixel events is compatible with the expected value. These discrepancies can be attributed to the spatial distribution of the events around the projection axes. Indeed, when this distribution is broad, as in the case of three-pixel events (Fig.~\ref{fig:3pix_scatter}), the deviation from the expected value is larger than for two-pixel events (Fig.~\ref{fig:2pix_scatter}).
 
-This must be taken into account, because the calibration with Monte Carlo simulations is necessary, and the expected value of $\sigma/p$ that can be calculated with Eq. \ref{eq:mean_diff_sigma} can not be used.
+This must be taken into account, as calibration via Monte Carlo simulations becomes necessary, and the nominal value of $\langle \sigma \rangle /p$ estimated through Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist} cannot be directly used.
 
 Once the best-fit parameters have been estimated from simulations, a separate dataset can be analyzed and the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
 
-Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
+Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. 
+%The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
 
 \begin{figure}
     \centering
@@ -906,23 +928,39 @@ Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less rel
     \label{fig:eta_modeled_eef}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c cccc}
-$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
-\midrule
-12.2 & 0.04 & 0.23 \\
-13.7 & 0.03 & 0.18 \\
-15.2 & 0.03 & 0.13 \\
-16.8 & 0.03 & 0.11 \\
-18.3 & 0.03 & 0.10 \\
-\bottomrule
-\end{tabular}
-\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
-\label{tab:eta_modeled_eef}
-\end{table}
+%\begin{table}[htbp]
+%\centering
+%\begin{tabular}{c cccc}
+%$\langle \sigma \rangle / p$ & EEF@50\% [pitch] & EEF@90\% [pitch]\\
+%\midrule
+%12.2 & 0.04 & 0.23 \\
+%13.7 & 0.03 & 0.18 \\
+%15.2 & 0.03 & 0.13 \\
+%16.8 & 0.03 & 0.11 \\
+%18.3 & 0.03 & 0.10 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Pitch distances at which EEF contains 50\% and 90\% of the events with modeled eta reconstruction, as a function of the ratio $\langle \sigma \rangle / p$. The values are extracted from Fig. \ref{fig:eta_modeled_eef}}
+%\label{tab:eta_modeled_eef}
+%\end{table}
 
-In conclusion, both the unmodeled and simulation modeled $\eta$ algorithms enable to achieve an optimal spatial resolution. The unmodeled algorithm is the perfect 
+\subsection{Algorithms comparison}
+\label{subsec:position_comparison}
+
+To summarize and compare the results of the different reconstruction algorithms, Fig. \ref{fig:eef} shows the values of EEF@50\% and EEF@90\% as a function of the $\langle \sigma \rangle / p$ ratio for all the discussed methods.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eef50}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eef90}
+    \caption{EEF at 50\% (left panel) and 90\% (right panel) as a function of the ratio between the diffusion cloud sigma and the pixel pitch for all the position reconstruction algorithms. All the values are normalized to the pixel pitch.}
+    \label{fig:eef}
+\end{figure}
+
+As visible in the left panel, the charge barycenter gives the worst core resolution for all diffusion regimes, with values of the EEF@50\% between 0.11 and 0.19 pitch. On the other hand, the MLE and the modeled $\eta$ algorithms achieve the best core containment, improving the EEF@50\% by up to a factor of four with respect to the charge barycenter. The unmodeled $\eta$ algorithm shows slightly worse results than the modeled one for small diffusion widths, but reaches identical values for broader diffusions.
+
+Considering the tails of the distributions, shown in the right panel with the EEF@90\%, the situation is different. For small values of $\langle \sigma \rangle / p$, the MLE has very long tails and its EEF@90\% is even worse than the charge barycenter. This does not happen for the $\eta$ algorithms, which maintain better tail containment across all diffusion regimes. Between the two, the modeled $\eta$ algorithm achieves the best overall performance, combining the narrow core of the MLE with the best EEF@90\% containment.
+
 
 \subsection{Modulation transfer function}
 \label{subsec:mtf}

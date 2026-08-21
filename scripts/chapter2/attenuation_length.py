@@ -1,8 +1,15 @@
 import numpy as np
 from aptapy.plotting import plt
 from thesis import FIGURES_DIR
-from scipy.special import erfi
+from scipy.special import dawsn, expm1
 import xraydb
+
+# Funzione per calcolare la profonda media di deriva / diffusione media
+def compute_mean_z(mu, thickness):
+    x = np.sqrt(thickness * mu)
+    numeratore = np.sqrt(thickness) - (dawsn(x) / np.sqrt(mu))
+    denominatore = -expm1(-thickness * mu)
+    return numeratore / denominatore
 
 e = np.logspace(3, 5, 1000)
 
@@ -33,43 +40,35 @@ plt.savefig(FIGURES_DIR / "chapter2/photoabs_eff.pdf", dpi=300, bbox_inches="tig
 
 e = np.logspace(3, 5.5, 1000)
 si_mu = xraydb.material_mu("Si", e, density=2.33)
-# Soluzione stabile che non rompe Python ad alte energie o grandi spessori
-arg_erfi = np.sqrt(D_semi * si_mu)
-exp_neg = np.exp(-D_semi * si_mu)
-mean_z_si = (1 / (1 - exp_neg)) * (np.sqrt(D_semi) - (np.sqrt(np.pi / si_mu) / 2) * exp_neg * erfi(arg_erfi))
-
 cdte_mu = xraydb.material_mu("CdTe", e, density=5.85)
+
+# Uso della funzione per calcolare mean_z
+mean_z_si = compute_mean_z(si_mu, D_semi)
+
 D_cdte = 0.075
-
-# Argomento per la funzione di Dawson: x = sqrt(mu * D)
-x = np.sqrt(D_cdte * cdte_mu)
-from scipy.special import dawsn, expm1
-# Il termine dawsn(x) sostituisce in toto l'uso combinato di exp e erfi
-numeratore = np.sqrt(D_cdte) - (dawsn(x) / np.sqrt(cdte_mu))
-
-# expm1(x) calcola exp(x) - 1 in modo stabile per x vicini a zero. 
-# Quindi 1 - exp(-x) diventa -expm1(-x)
-denominatore = -expm1(-D_cdte * cdte_mu)
-
-mean_z_cdte = numeratore / denominatore
+mean_z_cdte = compute_mean_z(cdte_mu, D_cdte)
 
 plt.figure()
 plt.plot(e*1e-3, mean_z_si * 50, "-k", label=r"300 $\mu$m Si")
-plt.plot(e*1e-3, mean_z_cdte * 50, "--k", label=r"750 $\mu$m CdTe")
+# plt.plot(e*1e-3, mean_z_cdte * 50, "--k", label=r"750 $\mu$m CdTe")
+
+D_semi_alt = 0.02
+mean_z_si_alt = compute_mean_z(si_mu, D_semi_alt)
+plt.plot(e*1e-3, mean_z_si_alt * 50, "--k", label=r"200 $\mu$m Si")
+
+D_semi_alt = 0.01
+mean_z_si_alt = compute_mean_z(si_mu, D_semi_alt)
+plt.plot(e*1e-3, mean_z_si_alt * 50, ":k", label=r"100 $\mu$m Si")
+
+
 plt.xscale("log")
 plt.xlabel("Energy [keV]")
 plt.ylabel(r"Mean diffusion sigma $\langle \sigma \rangle$ [$\mu$m]")
 plt.xlim(1, 200)
+plt.ylim(0)
 plt.legend(frameon=False)
 plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter4/design/mean_diffusion.pdf", dpi=300, bbox_inches="tight")
-
-
-
-
-
-
-
 
 plt.show()
