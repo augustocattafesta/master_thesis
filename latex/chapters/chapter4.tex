@@ -337,13 +337,13 @@ The first calibration step is the ADC noise and pedestal calibration. In this ca
 
 \begin{figure}[!b]
     \centering
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_correlation}
-%    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/pedestal_correlation}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_correlation}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/pedestal_correlation}
     \caption{Scatter plots showing the correlation between the Monte Carlo truth and the calibrated values of noise and pedestals.}
     \label{fig:noise_pedestal}
 \end{figure}
 
-Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it's the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}. The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
+Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it is the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}. The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
 
 Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC, compatible with the expected value estimated from Eq. \ref{eq:noise_uncertainty}.
 
@@ -357,7 +357,13 @@ Analogous results have been obtained for the pedestal calibration, whose residua
 
 With these two calibration files it is now possible to analyze again the same dataset to calibrate the normalized gain. 
 
-\fix{qui bisogna mostrare i risultati della calibrazione del gain e mettere un paio di grafici.}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/gain_residuals}
+    \caption{}
+    \label{fig:gain_results}
+\end{figure}
 
 \section{Position reconstruction}
 
