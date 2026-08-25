@@ -333,17 +333,19 @@ If the spectrum used for the calibration is accurately simulated, it is also pos
 
 To test the calibration procedure and gauge the algorithms performance, a dataset with a monochromatic source of 10 keV with a beam that uniformly illuminates the entire detector has been simulated. Noise, pedestal and gain are distributed according to Gaussian distributions with a mean of 100 electrons, 1000 ADC and 0.1 ADC/electron, respectively, and a standard deviation of 10\% of the mean. A total of $10^7$ events have been generated.
 
-The first calibration step is the ADC noise and pedestal calibration. In this case the method that calculates the sample mean and standard deviation of the PHA distributions has been used because the pedestal is much bigger than the noise level. The scatter plots showing the correlation between the Monte Carlo truth values of noise and pedestal with their calibrated values are shown in Fig. \ref{fig:noise_pedestal}.
+The first calibration step is the ADC noise and pedestal calibration. In this case the method that calculates the sample mean and standard deviation of the PHA distributions has been used because the pedestal is much bigger than the noise level. Fig. \ref{fig:noise_pedestal} shows the correlation between the calibrated and the Monte Carlo truth values of noise and pedestals.
 
 \begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/noise_correlation}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/pedestal_correlation}
-    \caption{Scatter plots showing the correlation between the Monte Carlo truth and the calibrated values of noise and pedestals.}
+    \caption{Two-dimensional correlation histograms between the true Monte Carlo values and the calibrated values for pixel noise (left) and pedestal levels (right). The red dashed line represents the ideal $y = x$ correlation.}
     \label{fig:noise_pedestal}
 \end{figure}
 
-Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it is the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}. The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
+Fig. \ref{fig:noise_distribution} shows the distribution of the calibrated values of the noise matrix and the residuals distribution. The ADC noise distribution is not a Gaussian because it is the product of two random variables, the ENC and gain, distributed according two different Gaussian distributions. The resulting distribution is a more complex skewed distribution, with mean equal to the product of the means of the parent distributions \cite{aroian1947}.
+
+The residuals distribution has a standard deviation of about 0.07 ADC, equal to a mean relative error on the calibrated pixel value of 0.7\%, which is compatible with the expected relative error estimated from Eq. \ref{eq:noise_uncertainty} using the average number of events per pixel, which is about 11000 events.
 
 Analogous results have been obtained for the pedestal calibration, whose residuals distribution has a standard deviation of 0.1 ADC, compatible with the expected value estimated from Eq. \ref{eq:noise_uncertainty}.
 
@@ -355,13 +357,19 @@ Analogous results have been obtained for the pedestal calibration, whose residua
     \label{fig:noise_distribution}
 \end{figure}
 
-With these two calibration files it is now possible to analyze again the same dataset to calibrate the normalized gain. 
+With these two calibration files, it is now possible to re-analyze the same dataset to calibrate the normalized gain. Both algorithms described above have been tested. The first one is straightforward, as it only requires using the noise and pedestal calibration products to remove offsets and correctly weight the pixel contents. However, with this method, only about 6\% of all events are classifiable as one-pixel events and can be used for the calibration, meaning that on average each pixel collects only about 6 events.
+
+The second method requires running a simulation of the source spectrum using the noise and pedestal calibration products and assuming a uniform gain across the chip (the exact value is relevant only for the absolute gain; thus, for the normalized gain, it can be set to 1). The simulated dataset is then reconstructed, and the resulting spectrum is used as the probability density function for the likelihood estimation of the normalized gain. This method exploits all events, resulting in an average of about 230 events per pixel.
+
+The correlation between the true and the calibrated values of the normalized gain for the two methods is shown in Fig. \ref{fig:gain_results}. In both cases, the reconstructed values are well aligned along the $y=x$ identity line, demonstrating that both calibration procedures are unbiased and correctly reconstruct the normalized gain.
+
+However, the two distributions show significant differences in terms of dispersion. The first method, being limited to one-pixel events with an average of only $\approx 6$ events per pixel, exhibits a broader distribution around the diagonal due to larger statistical fluctuations. In contrast, the second method exploits the full event statistics, resulting in a substantially narrower correlation band and thus a higher precision in the gain estimation. A very small fraction of outliers can be observed in the second method near the axes, corresponding to pixels where the likelihood minimization did not converge optimally. From the distribution of the residuals, the relative error on the normalized gain is found to be about 2\% for the first method and 1\% for the second method.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/}
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/gain_residuals}
-    \caption{}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/equalization_correlation_method1}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/calibration/equalization_correlation_method2}
+    \caption{Two-dimensional correlation histograms between the calibrated equalization factors and the Monte Carlo truth for the one-pixel method (left) and the spectrum likelihood method (right). The red dashed line indicates the ideal $y = x$ correlation.}
     \label{fig:gain_results}
 \end{figure}
 
