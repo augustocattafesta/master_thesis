@@ -230,28 +230,20 @@ Furthermore, it can be seen that the energy resolution improves with increasing 
 
 These results prove that these structures deposited directly on top of an XPOL-like substrate can work as multiplication stage while operating at voltage differences up to 400 V. Furthermore, sufficiently high effective gain is achieved even at relatively low voltages, which is essential to reduce the possibility of destructive discharges and the overall stress on the detector, improving reliability and stability.
 
-\subsection{Deposition on XPOL ASIC}
+\subsection{Printing on XPOL ASIC}
 After demonstrating that the structures can be successfully deposited on a substrate and operate as a multiplication stage, the next step is to fabricate them directly onto pre-existing chips via post-processing and verify that the ASIC survives the fabrication process.
 
-Unlike a dummy silicon wafer, the ASIC surface is not perfectly planar. The individual pixels are isolated from one another by narrow, raised dielectric ridges surrounding each pixel boundary. This morphology poses a challenge for layer deposition, requiring the photolithographic process to be carefully tuned to avoid defects in both the insulating layer and the anode lines. In fact, a single discontinuity along a metal strip would compromise the continuity of the entire downstream electrode. An example of dielectric deposited on the chip surface is shown in Fig.~\ref{fig:deposition}.
+Unlike a dummy silicon wafer, the ASIC surface is not perfectly planar. The individual pixels are isolated from one another by narrow, raised dielectric ridges surrounding each pixel boundary. This morphology poses a challenge for layer deposition, requiring the photolithographic process to be carefully tuned to avoid defects in both the insulating layer and the anode lines. In fact, a single discontinuity along a metal strip would compromise the continuity of the entire downstream electrode. An example of structures deposited on the chip surface is shown in Fig. \ref{fig:deposition_noise}.
 
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter5/deposition}
 %    \includegraphics[width=0.49\linewidth]{figures/chapter5/noise_acquisition}
-    \caption{Scanning Electron Microscope (SEM) image of the dielectric layer deposited on top of an XPOL ASIC. The raised dielectric ridges surrounding the pixel boundaries are clearly visible, along with corresponding localized micro-bumps in the deposited dielectric layer.}
-    \label{fig:deposition}
+	\caption{Scanning Electron Microscope (SEM) image (left panel) of the 43.3 $\mu$m one-dimensional structures deposited on top of an XPOL ASIC. The raised dielectric ridges surrounding the pixel boundaries are clearly visible, along with corresponding localized micro-bumps in the deposited anode (bright, on top) and dielectric (opaque, on bottom) layers of the structures. \fix{right panel noise acquisition}}
+	\label{fig:deposition_noise}
 \end{figure}
 
-After verifing that the deposition process .... accendo il chip per vedere il rumore... immagine...
-
-Before powering the detector with the radioactive source on, the first test to perform is to verify if the dielectric and anode deposition process has damaged the chip. This is performed by powering the chip outside the gas chamber and measuring the noise. The result is that the chip is not damaged and can still work properly.
-
-
-\subsection{Integration on XPOL ASICs}
-After proving that the structures can work as a multiplication stage, the successive step is to test detector prototypes with structures built directly on top of pre-existing chips to see if the results obtained on the silicon wafer are confirmed.
-
-The four designs described above are deposited on top of an XPOL chip, dividing the active area of $15 \times 15$ mm$^2$ into four different regions of $5 \times 5$ mm$^2$ each, one for each design. Fig. \ref{fig:mugpd_sem} shows pictures of the anode structures on top of a chip.
+Despite the morphological irregularities of the surface, all four designs described above were successfully deposited on top of a single XPOL chip, dividing the $15 \times 15\text{ mm}^2$ active area into four distinct regions of $5 \times 5\text{ mm}^2$ each, one for each specific geometry. Detailed images of the resulting fabricated structures on the chip are shown in Fig.~\ref{fig:mugpd_sem}.
 
 \begin{figure}[p]
     \centering
@@ -280,9 +272,18 @@ The four designs described above are deposited on top of an XPOL chip, dividing 
     
     \vfill
     
-    \caption{a) shows a scanning-electron-microscope (SEM) picture of the 86.6 $\mu$m pitch one-dimensional structure on top of the chip, with the hexagonal pixels below it. The other two pictures show the two-dimensional structure taken with a microscope (b) and a SEM (c). From the SEM picture it is possible to observe in detail the dielectric layer (bright and shiny) and the metal layer (dark and opaque). }
+    \caption{a) shows a SEM picture of the 86.6 $\mu$m pitch one-dimensional structure on top of the chip, with the hexagonal pixels below it. The other two pictures show the two-dimensional structure taken with a microscope (b) and a SEM (c). From the SEM picture it is possible to observe in detail the dielectric layer (bright and shiny) and the metal layer (dark and opaque). }
     \label{fig:mugpd_sem}
 \end{figure}
+
+Once the successful deposition of the layers on the irregular chip surface is confirmed via SEM inspection, the next step is to evaluate whether the post-processing damaged the underlying ASIC electronics.
+
+Before placing the device in the gas chamber and powering the multiplication structures, the first electrical test is performed by operating the ASIC stand-alone. Test charges are injected into the pixels to measure their readout noise and evaluate the impact of the post-processing deposition on the electronics.
+
+The measurements confirm that the chip survived the deposition process and is fully functional. Interestingly, mapping the pixel noise provides a sort of radiograph of the structures: pixels located under the dielectric and anode layers show a slight change in noise, which remains well within acceptable operational limits. This effect also serves as a useful diagnostic tool to inspect the structures and identify potential fabrication defects, such as disconnected segments or discontinuities along the strips. An example of noise acquisition is made shown in Fig. \ref{fig:deposition_noise}
+
+\subsection{Detector characterization with powered structures}
+After proving that the structures can work as a multiplication stage, the successive step is to test detector prototypes with structures built directly on top of pre-existing chips to see if the results obtained on the silicon wafer are confirmed.
 
 In this configuration the cathodic collection plane is represented by the pixels' uppermost metal electrode. An important thing that must be noted is that the current chips are designed to collect electrons, not ions, thus they are not able to read the signal produced by the avalanche generated by the micro-gaps.
 
