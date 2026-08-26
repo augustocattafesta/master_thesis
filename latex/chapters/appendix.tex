@@ -7,11 +7,13 @@ The fit procedure described in Sec. \ref{subsec:mle} employs a set of seven disc
 To avoid these problems, a bilinear interpolation of the seven charge fraction matrices is performed on the $(x, y)$ coordinates, making the evaluation of the $\operatorname{NLL}(x, y, Q)$ continuous and smooth across the pixel. For each pixel matrix, the interpolation is performed as follows:
 
 \begin{itemize}[label=-]
-\item calculate the fractional coordinates $(w_x, w_y)$ of $(x, y)$ with respect to the associated bin center and get the grid coordinates $(i_x, i_y)$ of the nearest lower-left bin;
-\item get the values $(v_{00}, v_{10}, v_{01}, v_{11})$ of the four bins with grid coordinates $(i_x, i_y)$, $(i_x + 1, i_y)$, $(i_x, i_y + 1)$, $(i_x + 1, i_y + 1)$;
-\item weight each bin value with the distance from $(x, y)$ to get the interpolated value:
+\item identify the four adjacent bin centers that surround the point $(x, y)$. Let $(i_x, i_y)$ be the grid coordinates of the bin center located immediately to the lower-left of $(x, y)$;
+\item calculate the fractional distances $(w_x, w_y)$ of the point $(x, y)$ from this lower-left bin center, normalized to the grid step size;
+\item retrieve the matrix values $v_{00}, v_{10}, v_{01},$ and $v_{11}$ corresponding to the four surrounding bin centers $(i_x, i_y)$, $(i_x + 1, i_y)$, $(i_x, i_y + 1)$, and $(i_x + 1, i_y + 1)$, respectively;
+\item compute the interpolated value by weighting the four grid values according to their distance from $(x, y)$:
 \begin{equation}
 f_i (x, y) = v_{00} (1 - w_x) (1 - w_y) + v_{10} w_x (1 - w_y) + v_{01} (1 - w_x) w_y + v_{11} w_x w_y.
+\label{eq:interpolation}
 \end{equation}
 \end{itemize}
 
@@ -35,7 +37,7 @@ Since the spatial dependence of the $\operatorname{NLL}$ is contained inside the
 \end{equation}
 where the terms $\frac{\partial \operatorname{NLL}}{\partial f_i}$ are obtained by applying Eq. \ref{eq:generic_nll_derivative} with respect to each component $f_i$.
 
-To avoid non-physical zero gradients and numerical issues during the minimization, the spatial derivatives of the charge fractions $\frac{\partial f_i}{\partial x}$ and $\frac{\partial f_i}{\partial y}$ are obtained by differentiating the bilinear interpolation formula
+To avoid non-physical zero gradients and numerical issues during the minimization, the spatial derivatives of the charge fractions $\frac{\partial f_i}{\partial x}$ and $\frac{\partial f_i}{\partial y}$ are obtained by differentiating the bilinear interpolation formula in Eq. \ref{eq:interpolation}
 \begin{equation}
 \begin{split}
 \frac{\partial f_i}{\partial x} &= \frac{1}{dx} \left[ (v_{10} - v_{00}) (1 - w_y) + (v_{11} - v_{01}) w_y \right], \\
@@ -46,5 +48,9 @@ where $dx = dy$ is the square bin size.
 
 Finally, the derivative with respect to the total charge $Q$ is evaluated directly from Eq. \ref{eq:generic_nll_derivative}, considering that $Q$ only enters the residuals $\vec{r}$ and the covariance matrix $V$
 \begin{equation}
-\frac{\partial \operatorname{NLL}}{\partial Q} = - \vec{f}^{\,T} V^{-1} \vec{r} - \frac{1}{2} \vec{r}^{\,T} V^{-1} \frac{\partial V}{\partial Q} V^{-1} \vec{r} + \frac{1}{2} \operatorname{Tr} \left( V^{-1} \frac{\partial V}{\partial Q} \right).
+\frac{\partial \operatorname{NLL}}{\partial Q} = - \vec{r}^{\,T} V^{-1} \vec{f} - \frac{1}{2} \vec{r}^{\,T} V^{-1} \frac{\partial V}{\partial Q} V^{-1} \vec{r} + \frac{1}{2} \operatorname{Tr} \left( V^{-1} \frac{\partial V}{\partial Q} \right),
+\end{equation}
+where the derivative of the covariance matrix is
+\begin{equation}
+\frac{\partial V_{ii}}{\partial Q} = f_i (1-f_i), \quad \quad \frac{\partial V_{ij}}{\partial Q} = - f_i f_j \quad \textrm{for } i \neq j.
 \end{equation}

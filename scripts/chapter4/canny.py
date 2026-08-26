@@ -59,6 +59,15 @@ for ax in axs:
         a.set_yticks([])
 plt.tight_layout()
 
+plt.rcParams.update(
+    {
+        "axes.labelsize": 20,
+        "xtick.labelsize": 11,
+        "ytick.labelsize": 11,
+        "legend.fontsize": 11,
+    }
+)
+
 test_angles = np.deg2rad(np.linspace(90, 100, 1000))
 hspace, angles, distances = transform.hough_line(edge3, theta=test_angles)
 _, peaks_angles, peaks_dist = transform.hough_line_peaks(hspace, angles, distances, num_peaks=1)
