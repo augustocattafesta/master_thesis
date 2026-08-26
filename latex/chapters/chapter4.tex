@@ -379,13 +379,11 @@ With all the necessary calibration products, it is possible to reconstruct all t
 
 As a consequence, different algorithms have been developed and compared to determine which one achieves the best spatial resolution. To estimate the performance of these algorithms, two distinct methods can be employed. 
 
-The first approach is typical for space applications, where a source with a known spatial profile, such as a point-like source, is used to directly compare the true incidence position with the reconstructed one. In this work, this method is implemented using the Monte Carlo ground truth. 
-
-The second approach is standard in medical and industrial imaging and relies on evaluating the spatial response of the detector to an illuminated slit or a sharp edge. This method has been adopted to analyze laboratory experimental data.
-
-A metric used to gauge the spatial resolution from Monte Carlo truths is the encircled energy fraction (EEF). The EEF is the cumulative density function of the radial distance distribution between the true and the reconstructed positions \cite{longair2011}.
+The first approach is typical for space applications, where a source with a known spatial profile, such as a point-like source, is used to directly compare the true incidence position with the reconstructed one. In this work, this method is implemented using the Monte Carlo ground truth. The metric used to gauge the spatial resolution is the encircled energy fraction (EEF). The EEF is the cumulative density function of the radial distance distribution between the true and the reconstructed positions \cite{longair2011}.
 
 Usually, the EEF is calculated by integrating the Point Spread Function (PSF), which represents the response of a detector to a point-like source. In this case, given the availability of the Monte Carlo ground truth positions, it can be directly derived from the radial residuals distribution. Common metrics of the EEF are the radii corresponding to 50\% (Half-Energy Width, HEW) and 90\% encircled energy, which represent the customary standard for space telescopes. The HEW measures the core spatial resolution, while the latter is sensitive to the extended tails of the distribution.
+
+The second approach is standard in medical and industrial imaging and relies on evaluating the spatial response of the detector to an illuminated slit or a sharp edge. This method has been adopted to analyze laboratory experimental data.
 
 \subsection{Charge barycenter}
 \label{subsec:barycenter}
@@ -393,16 +391,11 @@ Usually, the EEF is calculated by integrating the Point Spread Function (PSF), w
 The simplest possible algorithm consists of calculating the barycenter of the pixels centers by weighting their positions with the collected charge
 
 \begin{equation}
-x = \frac{\sum_i x_i \cdot q_i}{\sum_i q_i}, \quad y = \frac{\sum_i y_i \cdot q_i}{\sum_i q_i}.
+x = \frac{\sum_i x_i \cdot q_i}{\sum_i q_i}, \quad y = \frac{\sum_i y_i \cdot q_i}{\sum_i q_i},
 \end{equation}
+where $x_i$ and $y_i$ are the coordinates of the $i$-th pixel and $q_i$ is the charge collected by it.
 
-This method assumes that the charge in each pixel is spread uniformly across it or, equivalently, that it is concentrated in its center. This method does not consider how the charge diffuses inside the active sensor. If the charge would spread on a large number of pixels, this assumption would be valid and the charge barycenter would be a good estimator of the incident position. However, as said above, the detectors are designed to have a small $\langle \sigma \rangle / p$ ratio and the cluster size is small, thus the charge barycenter is not ideal.
-
-It must be noted that for one-pixel events this is the only possible method that can be applied, as there is not enough information to reconstruct a position different from the pixel center. From this point on, it is assumed that every time a one-pixel event is analyzed, the incident position is reconstructed in the pixel center. While these events have the best energy resolution, as will be shown in the next section, they have the worst spatial resolution.
-
-Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ and $y$ components between the reconstructed and the Monte Carlo truth positions. It is visible how the hexagonal geometry affects the reconstruction, in particular for two-pixels and three-pixels events. The overall distributions are not gaussians and are broad.
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/barycenter_dx}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/barycenter_dy}
@@ -410,16 +403,15 @@ Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ an
     \label{fig:barycenter_dx_dy}
 \end{figure}
 
+This method assumes that the charge in each pixel is spread uniformly across it or, equivalently, that it is concentrated in its center. This method does not consider how the charge diffuses inside the active sensor. If the charge would spread on a large number of pixels, this assumption would be valid and the charge barycenter would be a good estimator of the incident position. However, as said above, the detectors are designed to have a small $\langle \sigma \rangle / p$ ratio and the cluster size is small, thus the charge barycenter is not ideal.
+
+It must be noted that for one-pixel events this is the only possible method that can be applied, as there is not enough information to reconstruct a position different from the pixel center. From this point on, it is assumed that every time a one-pixel event is analyzed, the incident position is reconstructed in the pixel center. While these events have the best energy resolution, as will be shown in the next section, they have the worst spatial resolution.
+
+Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ and $y$ components between the reconstructed and the Monte Carlo truth positions. It is visible how the hexagonal geometry affects the reconstruction, in particular for two-pixels and three-pixels events. The overall distributions are not gaussians and are broad.
+
 By calculating the distance between the truth and the reconstructed positions, the EEF can be calculated. 
 Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm varies as a function of the ratio between the diffusion widths of the charge cloud and the pixel pitch. It can be observed that a broader diffusion implies a better resolution. 
 %Tab. \ref{tab:eef_barycenter} shows the distance at which EEF contains 50\% and 90\% of the events.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/barycenter_eef}
-    \caption{EEF for different values of the ratio between the diffusion cloud widths and the pixel pitch as a function of the pitch normalized distance. The simulations are made with 20 ENC of noise and a silicon sensor 300 $\mu$m thick. To vary $\langle \sigma \rangle / p$ the diffusion coefficient is varied in the range 40--60 $\mu$m cm$^{-0.5}$.}
-    \label{fig:barycenter_eef}
-\end{figure}
 
 %\begin{table}[htbp]
 %\centering
@@ -439,10 +431,17 @@ Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm vari
 
 This algorithm does not require any specific position-calibration models, as it neglects the physical details of charge diffusion. Consequently, it represents a fast, straightforward approach that provides a robust first estimate of the interaction position, relying exclusively on basic noise and gain-corrected pixel data.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/barycenter_eef}
+    \caption{EEF for different values of the ratio between the diffusion cloud widths and the pixel pitch as a function of the pitch normalized distance. The simulations are made with 20 ENC of noise and a silicon sensor 300 $\mu$m thick. To vary $\langle \sigma \rangle / p$ the diffusion coefficient is varied in the range 40--60 $\mu$m cm$^{-0.5}$.}
+    \label{fig:barycenter_eef}
+\end{figure}
+
 \subsection{Likelihood estimator}
 \label{subsec:mle}
 
-\begin{figure}[htbp]
+\begin{figure}[!b]
     \centering
     \begin{tikzpicture}[scale=2.5]
 
@@ -491,7 +490,7 @@ This algorithm does not require any specific position-calibration models, as it 
     \label{fig:mle_model}
 \end{figure}
 
-The simple barycenter algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Sec. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position and with a standard deviation $\sigma$ that depends can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
+The simple barycenter algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Chap. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position and with a standard deviation $\sigma$ that can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
 
 \begin{equation}
 f_i (x_0, y_0) = \int_{P_i} \frac{1}{2\pi \sigma^2} \exp \left[ - \frac{(x - x_0)^2 + (y - y_0)^2}{2\sigma^2} \right] \,dx\,dy.
@@ -522,7 +521,7 @@ To correct this model and adapt it to the presence of electronic noise it is nec
 \begin{itemize}[label=-]
 \item if a pixel collects many charges, its probability distribution converges to a Gaussian distribution. When the noise is added, the resulting variable is still distributed according to a Gaussian distribution with variance $\sigma^2 = \sigma^2_s + \sigma^2_n$;
 
-\item if a pixel collects a small fraction of charge, its charge distribution follows a binomial distribution with a small probability parameter $p$. This distribution is highly asymmetrical, peaked near zero and with a very low variance $\sigma^2_s$, negligible with respect to the electronic noise variance $\sigma^2_n$. This means that when summing the two variables, the noise dominates the signal charge, with the resulting distribution being a Gaussian distribution, whose variance can still be modeled as the sum of the two independent components $\sigma^2 = \sigma^2_s + \sigma^2_n$.
+\item if a pixel collects a small fraction of charge, its charge distribution follows a binomial distribution with a small probability parameter $f_i$. This distribution is highly asymmetrical, peaked near zero and with a very low variance $\sigma^2_s$, negligible with respect to the electronic noise variance $\sigma^2_n$. This means that when summing the two variables, the noise dominates the signal charge, with the resulting distribution being a Gaussian distribution, whose variance can still be modeled as the sum of the two independent components $\sigma^2 = \sigma^2_s + \sigma^2_n$.
 \end{itemize}
 
 Therefore, the charge probability density function of a single pixel is
@@ -532,16 +531,17 @@ p(q_i; \mu = f_i Q , \sigma^2) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left[- \frac{
 \label{eq:pdf_mle}
 \end{equation}
 
-where $\sigma$ is the standard deviation obtained from the squared sum of the two fluctuation components. 
-Eq. \ref{eq:pdf_mle} lacks an important characteristic which is included in Eq. \ref{eq:mle_multinomial}, which is the correlation between the pixels. Indeed, this probability density function does not take into account the fact that if the incident position varies a bit, some pixels loose some of the charge, while others increase it. Thus, the statement that the pixels are independent is not true. To take the pixel correlation into account, the model has to be slightly modified.
+where $\sigma$ is the standard deviation obtained from the squared sum of the two fluctuation components and $Q$ is the true total charge generated by the photon interaction. It is important to note that, unlike the electronic noise-free scenario, the true charge $Q$ is now an unknown parameter, because the independent electronic noise added to each pixel causes the sum of the measured charges $\sum_i q_i$ to deviate from the true value $Q$.
 
-The final probability density function is a generic multivariate Gaussian distribution, described by
+Eq. \ref{eq:pdf_mle} lacks an important characteristic which is included in Eq. \ref{eq:mle_multinomial}, which is the correlation between the pixels. Indeed, this probability density function does not take into account the fact that if the incident position varies a bit, some pixels loose some of the charge, while others increase it, thus it cannot be assumed that the pixels are independent. To take the pixel correlation into account, a model that takes into account all the pixels at once has to be considered.
+
+To this end, the probability density function is a generic multivariate Gaussian distribution, described by
 
 \begin{equation}
 p(\vec{q}; x, y, Q) = \frac{1}{(2 \pi)^{7/2} |V|^{1/2}} \exp{\left[ -\frac{1}{2}(\vec{q} - \vec{f}Q)^{T} V^{-1} (\vec{q} - \vec{f}Q) \right]},
 \label{eq:multivariate_gauss}
 \end{equation}
-where $\vec{q}$ is the seven-dimensional vector with all the cluster pixels charge, $\vec{f}$ is the vector with the charge fraction values, and $V$ is the covariance matrix, for which the diagonal elements are the squared sums of the multinomial variances and noise fluctuations and off-diagonal elements are the covariances obtained from the multinomial model, which describe the charge sharing mechanism of the cloud
+where $\vec{q}$ is the seven-dimensional vector with the observed pixels charge, $\vec{f}$ is the vector with the charge fraction values, and $V$ is the covariance matrix, for which the diagonal elements are the squared sums of the multinomial variances and noise fluctuations and off-diagonal elements are the covariances obtained from the multinomial model, which describe the charge sharing mechanism of the cloud
 
 \begin{equation}
 V_{ii} = \sigma^2_{s,i} + \sigma^2_{n,i}, \quad \quad V_{ij} = - Q f_i f_j \quad \textrm{for } i \neq j.
@@ -550,16 +550,14 @@ V_{ii} = \sigma^2_{s,i} + \sigma^2_{n,i}, \quad \quad V_{ij} = - Q f_i f_j \quad
 
 For the off-diagonal elements of the covariance matrix the assumption that electronic noise is uncorrelated is made.
 
-In Eqns. \ref{eq:multivariate_gauss} and \ref{eq:cov_matrix}, the dependance from the incident position is hidden inside $\vec{f}$, so both the mean vector and the covariance matrix depend on the unknown parameters. At this point, the negative log-likelihood can be computed from Eq. \ref{eq:multivariate_gauss}
+In Eqns. \ref{eq:multivariate_gauss} and \ref{eq:cov_matrix}, the dependance from the incident position is hidden inside $\vec{f}$, so both the mean vector and the covariance matrix depend on the unknown parameters $(x, y)$. At this point, the negative log-likelihood can be computed from Eq. \ref{eq:multivariate_gauss} as
 
 \begin{equation}
 \operatorname{NLL}(x, y, Q) = -\ln \mathcal{L} = \frac{1}{2}(\vec{q} - \vec{f}Q)^{T} V^{-1} (\vec{q} - \vec{f}Q) +  \frac{1}{2} \ln |V| + \textrm{const.}
 \label{eq:nll_multivariate}
 \end{equation}
 
-This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \textit{iminuit} \cite{iminuit}. 
-
-\begin{figure}[htbp]
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.48\linewidth]{figures/chapter4/position/calibration_matrices}
     \includegraphics[width=0.48\linewidth]{figures/chapter4/position/nll}
@@ -567,26 +565,15 @@ This equation can now be minimized with respect to the unknown parameters $(x, y
     \label{fig:mle_calibration_and_nll}
 \end{figure}
 
-In order to be correctly used, this position reconstruction method requires a prior calibration of the diffusion model. Indeed, the charge fractions depend on the charge cloud diffusion width. The charge fractions $f_i$ could be calculated with Eq. \ref{eq:mle_charge_fraction}, but the hexagonal geometry of the pixels makes the analytical calculation complex. For this reason, the reference charge-sharing model is evaluated through Monte Carlo simulations and tabulated for a certain value of the $\langle \sigma \rangle / p$ ratio, which is specific to a combination of sensor thickness, pixel pitch, diffusion coefficient and photon energy.
+This equation can now be minimized with respect to the unknown parameters $(x, y, Q)$ to find the best-fit incident position and total charge of the event. The minimization is performed with \textit{iminuit} \cite{iminuit}. 
 
-The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_calibration_and_nll}.
+In order to be correctly used, this position reconstruction method requires a prior calibration of the diffusion model. Indeed, the charge fractions depend on the charge cloud diffusion width. The charge fractions $f_i$ could be numerically calculated with Eq. \ref{eq:mle_charge_fraction}, but the hexagonal geometry of the pixels makes the calculation complex. For this reason, the charge-sharing model is evaluated through Monte Carlo simulations and tabulated for a certain value of the $\langle \sigma \rangle / p$ ratio, which is specific to a combination of sensor thickness, pixel pitch, diffusion coefficient and photon energy.
 
-During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further numerical details on the continuous interpolation of these discrete calibration matrices and the analytical computation of the likelihood gradients are provided in Appendix \ref{appendix:mle}.
+The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for numerical simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_calibration_and_nll}.
 
-Contrary to charge barycenter, this algorithm does not implement any type of suppression. Indeed, while charge barycenter applies a zero-suppression threshold and a position-suppression to suppress pixels that have high probability of having only noise signal, this algorithm weights each pixel by considering the diffusion model. 
+During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further details on how the evaluation and minimization of the $\operatorname{NLL}$ are perfomred are provided in Appendix \ref{appendix:mle}.
 
-As a consequence, defining the cluster size becomes ambiguous. For plotting purposes and to compare different algorithms, the cluster size used in Fig. \ref{fig:mle_dx_dy} to separate events is the cluster size that is obtained with the charge barycenter algorithm.
-
-Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. With this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch.
-
-This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. This algorithm is generally better than the charge barycentering, indeed the EEF@50\% is always about three times smaller, but due to the long tails the EEF@90\% can be worse in some cases. 
-%Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
-
-Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution. It must be noted that for the position reconstruction a set of calibration matrices has been produced for each diffusion width.
-
-\fix{C'è altro da dire? Sarebbe carino far vedere quanto peggiora la ricostruzione quando usiamo il file con la dimensione della nube sbagliata, in modo da quantificare in un certo senso i sistematici. Se c'è tempo, non ci vuole tanto.}
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/mle_dx}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/mle_dy}
@@ -594,7 +581,14 @@ Furthermore, the same dependence on the diffusion width as the charge barycenter
     \label{fig:mle_dx_dy}
 \end{figure}
 
-\begin{figure}[htbp]
+Contrary to charge barycenter, this algorithm does not implement any type of suppression. Indeed, while charge barycenter applies a zero-suppression threshold and a position-suppression to suppress pixels that have high probability of having only noise signal, this algorithm weights each pixel by considering their charge and the calibrated diffusion model. As a consequence, defining the cluster size becomes ambiguous. For plotting purposes and to compare different algorithms, the cluster size used in Fig. \ref{fig:mle_dx_dy} to separate events is the cluster size that is obtained with the charge barycenter algorithm. Fig. \ref{fig:mle_dx_dy} shows the residuals distributions for the $x$ and $y$ position components. With this algorithm the residuals distributions are regular and unimodal. Moreover, the width of the distribution is much smaller than the previous algorithm. 
+
+The only problem arises in the tails of the distributions, that show some residuals up to $\pm 0.6$ times the pixel pitch. This behaviour is well visible in Fig. \ref{fig:mle_eef}, where it is possible to see that the EEF has very long tails, particularly for small diffusion widths. This algorithm is generally better than the charge barycentering, indeed the EEF@50\% is always about three times smaller, but due to the long tails the EEF@90\% can be worse in some cases. 
+%Tab. \ref{tab:eef_mle} shows exactly this feature because while the EEF@50\% is about three times smaller than the charge barycenter, the EEF@90\% can be worse in particular cases. 
+
+Furthermore, the same dependence on the diffusion width as the charge barycenter can be observed, with broader diffusions that have a better spatial resolution. It must be noted that for the position reconstruction a set of calibration matrices has been produced for each diffusion width.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mle_eef}
     \caption{Encircled energy fraction of the maximum likelihood estimator reconstruction for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
@@ -620,7 +614,7 @@ Furthermore, the same dependence on the diffusion width as the charge barycenter
 
 \subsection{$\eta$ algorithm}
 \label{subsec:eta}
-In the context of silicon microstrip detectors, a common and widely used algorithm to reconstruct the incident position of radiation is the so-called $\eta$ algorithm \cite{belau1983, turchetta1993}. This algorithm, adopted when two strips have collected signal, is based on the definition of the $\eta$ variable
+In the context of silicon microstrip detectors, a common and widely used algorithm to reconstruct the incident position of radiation is the so-called $\eta$ algorithm \cite{belau1983, turchetta1993}. This algorithm, in the case when only two strips have collected signal, is based on the definition of the $\eta$ variable
 
 \begin{equation}
 \eta = \frac{q_R}{q_L + q_R},
@@ -628,7 +622,7 @@ In the context of silicon microstrip detectors, a common and widely used algorit
 \end{equation}
 that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, that contrary to the charge baryecenter takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
 
-The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. Assuming that the events are uniformly distributed between the two strips, the cumulative distribution of $\eta$ gives the relation between the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
+Assuming that the events are uniformly distributed between the two strips, the typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. The cumulative distribution of $\eta$ gives the relation between the distance from the left strip  of the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
 
 \begin{figure}
     \centering
@@ -638,13 +632,13 @@ The typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ a
     \label{fig:belau_eta}
 \end{figure}
 
-This methodology can also be applied to the case of hexagonal pixel detectors, but there are some things that need to be modified. The main difference is the two-dimensional nature of position reconstruction on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. The second difference is that, contrary to microstrips, the event distribution along any axis produced by a uniform source that illuminates an hexagonal pixel is not uniform. This is a fundamental requirement to use this method, as stated in \cite{belau1983}, thus it is necessary to apply geometrical corrections dependent on the pixel shape and on the event typology.
+This methodology can also be generalized to the case of hexagonal pixel detectors, but there are some things that need to be modified. The main difference is the two-dimensional nature of position reconstruction on hexagonal pixels. For this reason, the discussion has to be separated depending on the cluster size. The second difference is that, contrary to microstrips, projecting the events belonging to a specific cluster size onto the chosen reconstruction axis does not yield a uniform one-dimensional distribution. Even under a perfectly uniform 2D illumination of the sensor, this projection is inherently non-uniform due to the hexagonal geometry of the pixels. Given that the uniform event distribution is a fundamental requirement to use this method, as stated in \cite{belau1983}, it is necessary to apply geometrical corrections which depend on the pixel shape and on the event typology.
 
-These corrections can be calculated running a Monte Carlo simulation with a source that illuminates the detector with a uniform beam. Using Monte Carlo truth positions, the event distribution along the relevant axis for the event typology can be calculated. These distributions can be used to correctly weight the $\eta$ distributions as if the events were uniformly distributed along the axis. The approach that has been used for each event typology will be explained in a moment.
+These corrections can be calculated from a Monte Carlo simulation with a source that illuminates the detector with a uniform beam. Using Monte Carlo truth positions, the event distribution along the relevant axis for the event typology can be calculated. These distributions can be used to correctly weight the $\eta$ distributions as if the events were uniformly distributed along the axis. The approach that has been used for each event typology will be explained in the following paragraphs.
 
-As said for other reconstruction methods, for one-pixel events there is nothing that can be done, thus the reconstructed position must coincide with the pixel center.
+As said for other the charge barycenter algorithm, for one-pixel events there is nothing that can be done, thus the reconstructed position must coincide with the pixel center.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
     \centering
     \begin{tikzpicture}[scale=4]
     \hexpix{\hexsize}
@@ -662,18 +656,18 @@ As said for other reconstruction methods, for one-pixel events there is nothing 
     \end{tikzpicture}
     \caption{Illustration of the two-pixel event topology. Assuming that  $q_1 \leq q_0$, 
     the hatched triangle represents the portion of the phase space in terms of the 
-    true impact point originating this topology.}
+    true impact point originating this topology. The $r$ axis is where the event position is reconstructed.}
     \label{fig:two_pixel_event}
 \end{figure}
 
-The case of two-pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. Considering the readout design of ASIX, where the pixel that triggering pixel is always located at the center of a seven pixel cluster, a small change in the definition of $\eta$ is necessary, which is now defined as
+The case of two-pixel events is more interesting, and it can be treated in a similar way as a microstrip detector. Considering the readout design of ASIX, where the triggering pixel is always located at the center of a seven pixel cluster, a small change in the definition of $\eta$ is necessary, which is now defined as
 \begin{equation}
 \eta = \frac{q_1}{q_0 + q_1},
 \label{eq:eta_2pix}
 \end{equation}
-where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixel. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and does not have a double peak as in Fig. \ref{fig:belau_eta}. 
+where $q_0$ is always the central pixel of the cluster and $q_1$ is one of the outer pixels. This means that for ASIX the definition of left and right has no more sense as in microstrips detector. This change in the definition affects the shape of the $\eta$ variable distribution, because now it ranges in the interval $(0, 0.5)$ and does not have a double peak as in Fig. \ref{fig:belau_eta}. 
 
-Before calculating the $\eta$ distribution it is necessary to verify if two-pixel events are uniformly distributed along the axis that connects the two pixel centers shown if Fig. \ref{fig:two_pixel_event}. The scatter plot shown in Fig. \ref{fig:2pix_scatter} shows how the real impact position of two-pixel events are distributed. By observing the count distribution of these events projected onto the axes connecting the center of the central pixel with the outer ones, shown in Fig. \ref{fig:2pix_scatter} as well, it is possible to see that the events are not uniformly distributed.
+Before calculating the $\eta$ distribution it is necessary to verify if two-pixel events are uniformly distributed along the axis that connects the two pixel centers shown in Fig. \ref{fig:two_pixel_event}. The scatter plot shown in Fig. \ref{fig:2pix_scatter} shows how the real impact position of two-pixel events are distributed. By observing the count distribution of these events projected onto the axes connecting the center of the central pixel with the outer ones, shown in Fig. \ref{fig:2pix_scatter} as well, it is possible to see that the events are not uniformly distributed.
 
 \begin{figure}
     \centering
@@ -682,29 +676,46 @@ Before calculating the $\eta$ distribution it is necessary to verify if two-pixe
     \caption{Scatter plot of Monte Carlo truth impact positions of two-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the relevant axes, shown with dashed lines (right panel).}
     \label{fig:2pix_scatter}
 \end{figure}
+%
+%To apply the geometrical correction to the $\eta$ distribution, an iterative procedure is adopted. In the initial step, the relationship between $\eta$ and the position $r$ is assumed to be linear, mapping the minimum and maximum observed values of $\eta$ to the boundaries of the $r$ interval. Using this preliminary $r(\eta)$ mapping, the $\eta$ distribution is corrected by weighting the counts in each $\eta$ bin by the inverse of the spatial density at the corresponding position $r$. The cumulative distribution function of this weighted $\eta$ histogram is then calculated, yielding an updated, non-linear calibration function $r(\eta)$. This new mapping is fed back into the previous step to re-evaluate the weights for the next iteration. The process is repeated until the relation $r(\eta)$ converges to a stable shape. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. For the final event reconstruction, the cumulative distribution is interpolated to obtain a continuous function $r(\eta)$.
+%
 
-To apply the correction on the $\eta$ distribution, an iterative method can be adopted. In the first step the relation between $\eta$ and $r$ is assumed to be linear, and the minimum and maximum observed values of $\eta$ correspond to the minimum and maximum values of $r$. The $\eta$ distribution is calculated by weighting each bin with the inverse of the $r$ distribution. Then, the second step consists of calculating the cumulative distribution of $\eta$, which gives a non-linear relation between $\eta$ and $r$. Using the latter relation, the first and the second steps are repeated for a certain number of iterations.
+To apply the geometrical correction on the $\eta$ distribution, an iterative approach can be adopted. Calling $g(\eta)$ the measured $\eta$ distribution and $\rho(r)$ the event spatial distribution along the reconstruction axis $r$. In the first step $n=0$, the relation between $\eta$ and $r$ is assumed to be linear, and the minimum and maximum observed values of $\eta$ correspond to the minimum and maximum values of $r$
 
-The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Considering that a single variable can only describe a uni-dimensional problem, the resulting coordinate is the distance from the central pixel center along the axis that connects the two pixel centers, as shown in Fig. \ref{fig:two_pixel_event}. 
+\begin{equation}
+r_0(\eta) = r_{\textrm{min}} + (\eta - \eta_{\textrm{min}}) \frac{r_{\textrm{max}} - r_{\textrm{min}}}{\eta_{\textrm{max}} - \eta_{\textrm{min}}}.
+\end{equation}
 
-\begin{figure}
+At a generic step $n$, using the relation $r_n(\eta)$ found in the previous iteration, the corrected distribution $g_{n+1}(\eta)$ is calculated. This is done by weighting the original distribution with the inverse of the spatial density evaluated at that position
+
+\begin{equation}
+g_{n+1}(\eta) = \frac{g(\eta)}{\rho(r_n(\eta))}.
+\end{equation}
+
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_hist}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_cumulative}
-    \caption{$\eta$ distribution (left panel) and its cumulative distribution (right panel) for two-pixel events. The two distributions are truncated near $\eta=0$ because of a zero-suppression threshold that is applied.}
+    \caption{$\eta$ distribution (left panel) after correcting for non-uniformity of event distribution and its cumulative distribution (right panel) for two-pixel events. The two distributions are truncated near $\eta=0$ because of a zero-suppression threshold that is applied.}
     \label{fig:eta_2pix}
 \end{figure}
 
-For event reconstruction, the cumulative distribution can be interpolated to get a continuos function $r(\eta)$.
+The cumulative distribution of this weighted histogram is calculated, which gives the updated non-linear relation $r_{n+1}(\eta)$
 
-This approach can be generalized to the case of three-pixels events as well. This is a two-dimensional problem, contrary to the two-pixels case. A single $\eta$ variable is not enough and the generalization of the previous case is to define the variables
+\begin{equation}
+r_{n+1}(\eta) = r_{\textrm{min}} + (r_{\textrm{max}} - r_{\textrm{min}}) \frac{\int_{\eta_{\textrm{min}}}^{\eta} g_{n+1}(\eta') \, d\eta'}{\int_{\eta_{\textrm{min}}}^{\eta_{\textrm{max}}} g_{n+1}(\eta') \, d\eta'}.
+\end{equation}
+
+Using this relation, the steps are repeated. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. Finally, for event reconstruction, the cumulative distribution is interpolated to get a continuous function $r(\eta)$.
+
+This approach can be generalized to the case of three-pixels events as well. Contrary to the two-pixels case, this is a two-dimensional problem. A single $\eta$ variable is not enough and the generalization of the previous case is to define the variables
 
 \begin{equation}
 \eta_1 = \frac{q_1}{q_0 + q_1 + q_2}, \quad \quad \eta_2 = \frac{q_2}{q_0 + q_1 + q_2}, \quad \quad q_0 > q_1 > q_2.
 \label{eq:eta_3pix}
 \end{equation}
 
-\begin{figure}[htbp]
+\begin{figure}[!b]
     \centering
     \begin{tikzpicture}[scale=3]
     \hexpix{\hexsize}
@@ -734,21 +745,29 @@ This approach can be generalized to the case of three-pixels events as well. Thi
     \label{fig:three_pixel_event}
 \end{figure}
 
-These two new variables are still not good enough, because it is not easy to parametrize the geometry of the problem with them. By looking at the geometry of the three pixel in Fig. \ref{fig:three_pixel_event}, a better parametrization can be employed to simplify the description of this type of events.
+These two new variables are still not good enough, because it is not easy to parametrize the geometry of the problem with them. By looking at the geometry of the three pixels in Fig. \ref{fig:three_pixel_event}, a better parametrization can be employed to simplify the description of this type of events.
 
 The idea is to decompose the two-dimensional problem into two one-dimensional problems that can be treated as two-pixel events, each describing a specific coordinate. The best coordinates for this problem 
-are a radial coordinate and an angular coordinate. The two coordinates, which are shown in Fig. \ref{fig:three_pixel_event}, are defined as follows:
+are a radial coordinate and an angular coordinate. The two coordinates are defined as follows:
 \begin{itemize}[label=-]
-\item $r$ is distance of the incident position projected onto the axis that passes through the middle point between the outer pixels centers;\\
+\item $r$ is distance of the incident position projected onto the axis that passes through the vertex of the central pixel and the middle point between the outer pixels centers;
 \item $\theta$ is the angle measured starting from the latter axis and oriented towards the outer pixel with the highest charge collected.
 \end{itemize}
 
-Considering the ASIX readout geometry, where the central pixel is always the one with the highest pixel and the other two pixels are neighbors, the radial component can be parametrized as a two-pixel event by considering the outer pixels as a single pixel with charge equal to the sum of the two. This automatically defines a new $\eta_+$ variable which is defined as
+Considering the ASIX readout geometry, where the central pixel is always the one with the highest pixel and the other two pixels are neighbors, the radial component can be parametrized as a two-pixel event by considering the outer pixels as a single pixel with charge equal to ther sum. This automatically defines a new $\eta_+$ variable which is defined as
 
 \begin{equation}
 \eta_+ = \eta_1 + \eta_2.
 \label{eq:eta_sum}
 \end{equation}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
+    \label{fig:3pix_scatter}
+\end{figure}
 
 The angular coordinate can be parametrized as a two-pixel event problem as well. In this case the relevant property is how the charge collected by the outer pixels is divided between them. As a consequence, a new variable can be defined as
 
@@ -757,21 +776,7 @@ The angular coordinate can be parametrized as a two-pixel event problem as well.
 \label{eq:eta_minus}
 \end{equation}
 
-As in the case of two-pixel events, the uniformity of the events along the relevant axes has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the radial axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
-
-Contrary to two-pixel events, for which the non-uniformity is primarily introduced by the zero-suppression threshold, for three-pixel events it is caused mainly by geometrical properties. Indeed, the events are uniformly spread across the pixel, but the width of the relevant sector significantly varies along the axis, reaching a peak after the center. This is exactly what is observed in the left panel of \ref{fig:3pix_scatter}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
-    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
-    \label{fig:3pix_scatter}
-\end{figure}
-
-A similar behaviour can be observed for $\eta_-$ projecting onto the axis perpendicular to the radial one. This non-uniformities heavily affect the shape of $\eta_+$ and $\eta_-$ distributions. Fig. \ref{fig:3pix_rad_eta} shows a comparison between the $\eta_+$ with and without the correction for uniformity.
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_uncorrected_hist}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_hist}
@@ -779,9 +784,9 @@ A similar behaviour can be observed for $\eta_-$ projecting onto the axis perpen
     \label{fig:3pix_rad_eta}
 \end{figure}
 
-After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions with the same iterative approach used for two-pixel events, the cumulative distributions can be calculated. The cumulative distributions are shown in Fig. \ref{fig:eta_3pix}.
+As in the case of two-pixel events, the uniformity of the events along the relevant axes has to be verified and, in case, corrected. The scatter plot of the Monte Carlo truth incidence positions and their distribution along the radial axis for three-pixel events are shown in Fig. \ref{fig:3pix_scatter}. It is possible to see that the distribution is highly non-uniform.
 
-\begin{figure}
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_rad_cumulative}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_ang_cumulative}
@@ -789,14 +794,10 @@ After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions wit
     \label{fig:eta_3pix}
 \end{figure}
 
-The $\eta$ algorithm presented for three-pixel events could also be generalized to all cluster sizes. The only necessary thing to do is identifying the symmetry axes of the specific cluster size and then opportunely define two combinations of the $\eta_i$. However, with an increasing number of pixels involved in an event the charge barycenter algorithm becomes better and the improvement of an $\eta$ algorithm could become negligible. For ASIX only events with up to three pixels have been analyzed, as it is designed to not have big cluster sizes.
 
-Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminate the detector.
+For three-pixel events, the non-uniformity of the spatial distribution is primarily a geometrical effect. Even though the events are uniformly spread across the two-dimensional surface of the pixel, the transverse width of the relevant sector significantly varies along the reconstruction axis, reaching a peak after the middle point. This variation directly shapes the projected distribution, which is exactly what is observed in the left panel of Fig. \ref{fig:3pix_scatter}.
 
-After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. 
-%Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_unmodeled_dx}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_unmodeled_dy}
@@ -804,7 +805,19 @@ After analyzing the same dataset as the previous algorithms, the residuals for t
     \label{fig:eta_dx_dy}
 \end{figure}
 
-\begin{figure}[htbp]
+A similar behaviour is observed for $\eta_-$ projecting onto the axis perpendicular to the radial one. These non-uniformities heavily affect the shape of $\eta_+$ and $\eta_-$ distributions. Fig. \ref{fig:3pix_rad_eta} shows a comparison between the $\eta_+$ with and without the correction for uniformity.
+
+After correcting non-uniformities in the $\eta_+$ and $\eta_-$ distributions with the same iterative approach used for two-pixel events, the cumulative distributions can be calculated. The cumulative distributions are shown in Fig. \ref{fig:eta_3pix}.
+
+The $\eta$ algorithm presented for three-pixel events could also be generalized to all cluster sizes. The only necessary thing to do is identifying the symmetry axes of the specific cluster size and then opportunely define two combinations of the $\eta_i$. However, with an increasing number of pixels involved in an event the charge barycenter algorithm becomes better and the improvement of an $\eta$ algorithm could become negligible. For ASIX only events with up to three pixels have been analyzed, as it is designed to not have big cluster sizes.
+
+Similarly to the likelihood reconstruction method, the $\eta$ algorithm requires a calibration before being able to use it. The relevant difference between the two methods is that the $\eta$ algorithm does not need Monte Carlo truth information, but it can be directly calibrated from observed data. The only condition that has to be satisfied is using a source that uniformly illuminates the detector.
+
+After analyzing the same dataset as the previous algorithms, the residuals for this reconstruction method are shown in Fig. \ref{fig:eta_dx_dy}. The residuals distributions are similar to those obtained with the MLE algorithm, but the tails are not as prevalent as for the MLE. This behavior is confirmed by the EEF, shown in Fig. \ref{fig:eta_unmodeled_eef}. 
+%Tab. \ref{tab:eef_eta_unmodeled} shows the distances at which the EEF contains 50\% and 90\% of the events.
+
+
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/eta_unmodeled_eef}
     \caption{Encircled energy fraction of the $\eta$ reconstruction algorithm for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
@@ -827,13 +840,11 @@ After analyzing the same dataset as the previous algorithms, the residuals for t
 %\label{tab:eef_eta_unmodeled}
 %\end{table}
 
-The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions. 
+The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions.  In this case it is required knowing the charge diffusion model, but contrary to the likelihood method there are some approximations that can be made, making possible to solve analytically the problem. 
 
-Knowing the charge diffusion model is required, but contrary to the likelihood method there are some approximations that can be made, making possible to solve analytically the problem. 
+In the case of two-pixel events the position can only be reconstructed along the line connecting the two pixel centers, thus it is one-dimensional problem, as already seen above. Considering a photon which impacts on this line, the charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel.
 
-In the case of two-pixel events the position can only be reconstructed along the line connecting the two pixel centers, thus it is one-dimensional problem, as already seen. Considering a photon which impacts on this line, the charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel.
-
-Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel is given by the integral of the Gaussian
+Given that the charge cloud dimension is small with respect to the pixel, all the charge is collected by these two pixels. As a consequence, the fraction of charge $\eta$ collected by the outer pixel, defined in Eq. \ref{eq:eta_2pix}, is a function of $r$ and can be calculated as the integral of the Gaussian
 
 \begin{equation}
 \eta(r) = \int ^{\infty}_{p/2} \frac{1}{\sqrt{2\pi}\sigma} \exp \left[ - \frac{(r' - r)^2}{2\sigma^2}  \right] dr' = \Phi \left( \frac{r - p/2}{\sigma} \right),
@@ -847,24 +858,21 @@ r(\eta) = \frac{p}{2} + \sigma \Phi^{-1}(\eta),
 \end{equation}
 where $\Phi^{-1}(p)$ is the percent point function of the standard normal distribution.
 
-The only unknown parameter in Eq. \ref{eq:eta_2pix_final} is $\sigma$, that could be estimated with Eq. \ref{eq:mean_diff_sigma}. However, this estimate would not take into account the presence events occuring far from the axis, as shown in Fig. \ref{fig:2pix_scatter}. For this reason Monte Carlo simulations can be used to estimate the parameter.
+The only unknown parameter in Eq. \ref{eq:eta_2pix_final} is $\sigma$, that could be estimated with Eq. \ref{eq:diff_sigma_dist}. However, this estimate would not take into account the presence of events occuring far from the axis, as shown in Fig. \ref{fig:2pix_scatter}. For this reason Monte Carlo simulations can be used to estimate the parameter.
 
 To estimate $\sigma$ the projected distance $r$ of the Monte Carlo truth position onto the axis connecting the two pixel centers is calculated. A two-dimensional histogram is calculated using the resulting projected distance and $\eta$, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
 
-A profile of this histogram is then obtained by calculating the median of the $r$ distribution for each value of $\eta$. The choice to use the median has been made because these distributions have long tails, thus the mean would not be the ideal location estimator.
-
-The resulting profile is fitted using Eq. \ref{eq:eta_2pix_final} as fit model, with $\sigma$ being the only free parameter. The profile and the corresponding fit are shown in Fig. \ref{fig:eta_2pix_r_distr}.
-
-
-This quantity is calculated for each two-pixel event, then they are binned in $\eta$ and, for each value of $\eta$, the median of the $r$ distribution is computed. The choice to use the median has been made because these distributions have long tails, as shown in Fig. \ref{fig:eta_2pix_r_distr}.
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_hist}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_2pix_fit}
     \caption{Two-dimensional histogram showing the distribution of $r$ as a function of $\eta$ (left panel) and profile calculated from the latter, using the median of the $r$ distributions for each $\eta$ (right panel). The profile is fitted using Eq. \ref{eq:eta_2pix_final} as fit model to find the best-fit value of $\sigma$. The simulation has an estimated $\langle \sigma \rangle / p = 0.15$.}
     \label{fig:eta_2pix_r_distr}
 \end{figure}
+
+A profile of this histogram is then obtained by calculating the median of the $r$ distribution for each $\eta$ bins. The choice to use the median has been made because these distributions have long tails, thus the mean would not be the ideal location estimator.
+
+The resulting profile is fitted using Eq. \ref{eq:eta_2pix_final} as fit model, with $\sigma$ being the only free parameter. The profile and the corresponding fit are shown in Fig. \ref{fig:eta_2pix_r_distr}.
 
 A similar approach can be used for three-pixels events. As already said above, this case requires to separate between the radial and the angular coordinates into two independent one-dimensional two-pixel problems.
 
@@ -881,15 +889,21 @@ r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}(\eta_+).
 \label{eq:eta_3pix_no_final}
 \end{equation}
 
-A small correction needs to be applied because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120 degrees. Indeed, if the charge would be equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$. As a consequence the impact point would not be reconstructed on the vertex, but outside of the central pixel.
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_radial_fit}
+    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_angular_fit}
+    \caption{Profile and best-fit curves for the radial and angular components using Eqs. \ref{eq:eta_3pix_final} and \ref{eq:eta_3pix_ang_final}. The simulation has an estimated $\langle \sigma \rangle / p = 0.15$.}
+    \label{fig:eta_3pix_fit}
+\end{figure}
 
-The solution is to normalize $\eta_+$ in order to satisfy $r(2/3) = 1/\sqrt{3}$, thus the final model is
+A small correction needs to be applied because Eq. \ref{eq:eta_3pix_no_final} does not take into account the hexagonal geometry of the pixels and that the internal angles of the hexagons are 120 degrees. Indeed, if a photon hits the vertex and the charge is equally divided between the three pixels, $\eta_+ = 2/3$ but $\Phi^{-1}(2/3) \neq 0$. As a consequence the impact point would not be reconstructed on the vertex, but outside the central pixel. The solution is to normalize $\eta_+$ in order to satisfy $r(2/3) = 1/\sqrt{3}$, thus the final model is
 \begin{equation}
 r(\eta_+) = \frac{p}{\sqrt{3}} + \sigma \Phi^{-1}\left( \frac{3}{4}\eta_+ \right).
 \label{eq:eta_3pix_final}
 \end{equation}
 
-To find the model for the angular coordinate it is possible to consider only the two outer pixels, because $\eta_-$ is normalized with respect to the charge collected by these two pixels. The charge diffusion between these two pixels can still be modeled as a one-dimensional Gaussian distribution centered in $y$, which is the distance from the midpoint of the pixels.
+To find the model for the angular coordinate it is possible to consider only the two outer pixels, because $\eta_-$ is normalized with respect to the charge collected by these two pixels. The charge diffusion between these two pixels can be modeled as a one-dimensional Gaussian distribution centered in $y$, which is the distance from the midpoint of the pixels.
 
 The relation between $\eta_-$ and $y$ can be found by calculating the fraction of Gaussian that falls inside each pixel, and is given by
 
@@ -906,27 +920,10 @@ Using the approximation of small angles, the relation between the angular coordi
 where it has been used that $\Phi^{-1}(1 - z) = - \Phi^{-1}(z)$.
 
 To calibrate the radial and angular coordinates the strategy is identical to the calibration of two-pixels events. The projection onto the $\hat{r}$ axis and the angle with respect to it are calculated from Monte Carlo truth data of three-pixels events, then are binned in $\eta_+$ and $\eta_-$, and the median of the respective distributions are calculated. The resulting data are fitted with the respective models in Eqs. \ref{eq:eta_3pix_final} and \ref{eq:eta_3pix_ang_final}. Data and best-fit curves are shown in Fig. \ref{fig:eta_3pix_fit}.
- 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_radial_fit}
-    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_angular_fit}
-    \caption{Profile and best-fit curves for the radial and angular components using Eqs. \ref{eq:eta_3pix_final} and \ref{eq:eta_3pix_ang_final}. The simulation has an estimated $\langle \sigma \rangle / p = 0.15$.}
-    \label{fig:eta_3pix_fit}
-\end{figure}
 
 As can be observed from Figs. \ref{fig:eta_2pix_r_distr} and \ref{fig:eta_3pix_fit}, the models describe very well the data, and the shape of the profiles are compatible with the cumulative distributions in Figs. \ref{fig:eta_2pix} and \ref{fig:eta_3pix} obtained with the unmodeled $\eta$ algorithm. This validates both the unmodeled and modeled algorithms, which converge to very similar results.
 
-However, it can be noted that the best-fit values of $\sigma$ for the three fits are different. The simulation was performed with an average ratio $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained from two-pixel events is compatible with the expected value. These discrepancies can be attributed to the spatial distribution of the events around the projection axes. Indeed, when this distribution is broad, as in the case of three-pixel events (Fig.~\ref{fig:3pix_scatter}), the deviation from the expected value is larger than for two-pixel events (Fig.~\ref{fig:2pix_scatter}).
-
-This must be taken into account, as calibration via Monte Carlo simulations becomes necessary, and the nominal value of $\langle \sigma \rangle /p$ estimated through Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist} cannot be directly used.
-
-Once the best-fit parameters have been estimated from simulations, a separate dataset can be analyzed and the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
-
-Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. 
-%The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_modeled_dx}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_modeled_dy}
@@ -934,7 +931,14 @@ Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less rel
     \label{fig:eta_modeled_dx_dy}
 \end{figure}
 
-\begin{figure}[htbp]
+However, it can be noted that the best-fit values of $\sigma$ for the three fits are different. The simulation was performed with an average ratio $\langle \sigma \rangle / p = 0.15$, and only the parameter obtained from two-pixel events is compatible with the expected value. These discrepancies can be attributed to the spatial distribution of the events around the projection axes. Indeed, when this distribution is broad, as in the case of three-pixel events (Fig.~\ref{fig:3pix_scatter}), the deviation from the expected value is larger than for two-pixel events (Fig.~\ref{fig:2pix_scatter}). This must be taken into account, as calibration via Monte Carlo simulations becomes necessary, and the nominal value of $\langle \sigma \rangle /p$ estimated through Eqs. \ref{eq:z_average} and \ref{eq:diff_sigma_dist} cannot be directly used.
+
+Once the best-fit parameters have been estimated from simulations, a separate dataset can be analyzed and the resulting residuals distributions are shown in Fig. \ref{fig:eta_modeled_dx_dy}. As for the other cases where the physics of charge diffusion has been taken into account, the resulting distributions are narrow and unimodal.
+
+Moreover, the EEF of the modeled $\eta$ algorithm is very steep and has less relevant tails with respect to the MLE algorithm, as visible in Fig. \ref{fig:eta_modeled_eef}. As expected, the EEF becomes steeper for larger diffusion widths. 
+%The distances at which the EEF contains 50\% and 90\% of the events are listed in Tab. \ref{tab:eta_modeled_eef}.
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/eta_modeled_eef}
     \caption{Encircled energy fraction of the modeled eta reconstruction for different values of the ratio between the diffused charge cloud and the pixel pitch as a function of the pitch normalized distance. The simulation is made with 20 ENC of noise.}
@@ -972,25 +976,64 @@ To summarize and compare the results of the different reconstruction algorithms,
 
 As visible in the left panel, the charge barycenter gives the worst core resolution for all diffusion regimes, with values of the EEF@50\% between 0.11 and 0.19 pitch. On the other hand, the MLE and the modeled $\eta$ algorithms achieve the best core containment, improving the EEF@50\% by up to a factor of four with respect to the charge barycenter. The unmodeled $\eta$ algorithm shows slightly worse results than the modeled one for small diffusion widths, but reaches identical values for broader diffusions.
 
-Considering the tails of the distributions, shown in the right panel with the EEF@90\%, the situation is different. For small values of $\langle \sigma \rangle / p$, the MLE has very long tails and its EEF@90\% is even worse than the charge barycenter. This does not happen for the $\eta$ algorithms, which maintain better tail containment across all diffusion regimes. Between the two, the modeled $\eta$ algorithm achieves the best overall performance, combining the narrow core of the MLE with the best EEF@90\% containment.
+Considering the tails of the distributions, shown in the right panel with the EEF@90\%, the situation is different. For small values of $\langle \sigma \rangle / p$, the MLE has very long tails and its EEF@90\% is even worse than the charge barycenter. This does not happen for the $\eta$ algorithms, which maintain better tail containment across all diffusion regimes. Between the two, the modeled $\eta$ algorithm achieves the best overall performance.
 
+%\begin{figure}[htbp]
+%    \centering
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/mle_systematics}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_unmodeled_systematics}
+%    \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_modeled_systematics}
+%    \caption{}
+%    \label{fig:eef_systematics}
+%\end{figure}
+
+Both the MLE and the modeled $\eta$ algorithms require an accurate calibration from Monte Carlo simulations, while the unmodeled $\eta$ relies on data from a uniform illumination. In a real scenario, systematic uncertainties in the Monte Carlo parameters can introduce an error in the assumed charge diffusion width.
+
+To quantify how this mismatch affects the spatial resolution, the simulated dataset with a true $\langle \sigma \rangle / p = 15\%$ has been analyzed using "wrong" calibrations generated for different values of $\langle \sigma \rangle / p$. The relative variation of the EEF is reported in Tab. \ref{tab:variation_eef}.
+
+The results show that the MLE and the modeled $\eta$ algorithms are very sensitive to calibration errors. If the diffusion width is not exact, the core resolution drastically worsens, with the EEF@50\% increasing up to almost 90\% for the MLE. On the other hand, the unmodeled $\eta$ algorithm is much more stable. Even with a large mismatch, its core resolution degrades by a maximum of 25\%, and its tails (EEF@90\%) are almost completely unaffected. This means that if Monte Carlo simulations are not perfectly tuned, the unmodeled $\eta$ algorithm is the most reliable choice.
+
+\begin{table}[!t]
+\centering
+\begin{tabularx}{\textwidth}{X ccccc}
+
+Reconstruction Algorithm & \multicolumn{5}{c}{$\langle \sigma \rangle / p$ [\%]} \\
+\cmidrule(l){2-6}
+ & 12 & 14 & 15 & 17 & 18 \\
+\midrule
+MLE & & & & & \\
+\quad EEF@50\% & 189\% & 133\% & 100\% & 98\%  & 122\% \\
+\quad EEF@90\% & 157\% & 124\% & 100\% & 89\%  & 88\%  \\
+\midrule
+Unmodeled $\eta$ & & & & & \\
+\quad EEF@50\% & 125\% & 112\% & 100\% & 101\% & 112\% \\
+\quad EEF@90\% & 103\% & 101\% & 100\% & 101\% & 103\% \\
+\midrule
+Modeled $\eta$ & & & & & \\
+\quad EEF@50\% & 194\% & 131\% & 100\% & 115\% & 172\% \\
+\quad EEF@90\% & 119\% & 106\% & 100\% & 102\% & 112\% \\
+\bottomrule
+\end{tabularx}
+\caption{Relative variation of the EEF@50\% and EEF@90\% obtained by analyzing a dataset with true $\langle \sigma \rangle / p = 15\%$ using calibrations generated with different diffusion widths. Values are normalized to the optimal calibration at 15\%, which corresponds to 100\%.}
+\label{tab:variation_eef}
+\end{table}
 
 \subsection{Modulation transfer function}
 \label{subsec:mtf}
 
-A method that is commonly applied in medical physics to characterize the imaging response of the detector is to produce the image of a linear object and study the detector response. This can be achieved using an absorber material plate, such as lead for X-rays, with a slit on it \cite{fujita1992}. The intensity profile of the image on the axis perpendicular to the slit as a function of the position is then calculated, and the result is called line spread function (LSF) \cite{med_imaging}. More precisely, the LSF is the convolution of the PSF with the slit
+A method that is commonly applied in medical physics to characterize the imaging response of the detector is to produce the image of a linear object and study the detector response. This can be achieved using an absorber material plate, such as lead for X-rays, with a slit on it \cite{fujita1992}. The intensity profile of the image on the axis perpendicular to the slit as a function of the position is then calculated, and the result is called Line Spread Function (LSF) \cite{med_imaging}. More precisely, the LSF is the convolution of the PSF with the slit
 
 \begin{equation}
 \operatorname{LSF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Slit}(x, y).
 \end{equation}
 
-To correctly characterize the LSF, the slit profile should approach a Dirac $\delta$ function, thus the slit width should be smaller than the expected resolution.
+To correctly characterize the LSF, the slit profile should approach a Dirac $\delta$-function, or at least the slit width should be much smaller than the expected resolution.
 
 Another requirement for a better characterization is that the slit should be inclined with respect to the detector principal axes and the reason for this varies depending on the detector type. In case of energy integrating detectors, like those commonly used in radiography, the reason is that a slit aligned to an axis would produce a narrow LSF profile only a few pixels wide, thus it would be under-sampled. Instead, using an inclined slit causes pixels in adjacent rows to be hit in different positions, allowing to sample the LSF with sub-pixel sampling, which is called presampled LSF.
 
-For single-photon driven readout detectors like ASIX, for which each photon is independently reconstructed with sub-pixel resolution, the reason to use an tilted slit is to uniformly sample the pixel. This enables to estimate the average resolution of the detector for the entire pixel, not only for a specific region of the pixel. An example of the geometry of the detector and the slits is shown if Fig. \ref{fig:hex_grid_slits}.
+For single-photon driven readout detectors like ASIX, for which each photon is independently reconstructed with sub-pixel resolution, the reason to use a tilted slit is to uniformly sample the pixel. This enables to estimate the average resolution of the detector for the entire pixel, not only for a specific region. An example of the geometry of the detector and the slits is shown if Fig. \ref{fig:hex_grid_slits}.
 
-The typical angle of the slit should be small, between 2 and 8 degrees, and should be far from all the possible main axes of the detector.
+The typical angle of the slit should be small, between 2 and 8 degrees, and should be far from being aligned to the main axes of the detector.
 
 \begin{figure}[htbp]
     \centering
@@ -1016,7 +1059,7 @@ The typical angle of the slit should be small, between 2 and 8 degrees, and shou
 
 Producing a slit with a width small enough for high-resolution detectors is not always possible. An alternative method to characterize the spatial resolution consists of using the sharp edge of a slab of absorber material.
 
-The profile image of the transition region around the edge is called edge spread function (ESF). As for the slit method, the edge method requires the edge to be slightly tilted with respect to the main axes of the detector. Similarly to the LSF, the ESF can be computed as
+The profile image of the transition region around the edge is called Edge Spread Function (ESF). As for the slit method, the edge method requires the edge to be slightly tilted with respect to the main axes of the detector. Similarly to the LSF, the ESF can be computed as
 
 \begin{equation}
 \operatorname{ESF}(x) = \operatorname{PSF}(x, y) \ast \operatorname{Edge}(x, y).
@@ -1029,9 +1072,9 @@ The ideal edge should be perfectly sharp to not introduce distortions, thus it c
 \label{eq:esf_lsf}
 \end{equation}
 
-This is true when the edge is not ideal as well.
+This relation holds also when the edge is not ideal.
 
-Eq. \ref{eq:esf_lsf} is useful because once the LSF has been sampled, either directly with a slit or indirectly with an edge, it is possible to characterize the profile to determine the spatial resolution, that can be defined as the full width at half maximum.
+Once the LSF has been sampled, either directly with a slit or indirectly with an edge using Eq. \ref{eq:esf_lsf}, it is possible to characterize the profile to determine the spatial resolution, that can be defined as the FWHM of the LSF.
 
 The LSF and ESF are defined in the spatial domain. There is another quantity that is commonly used to characterize the imaging properties of a detector which is defined in the frequency domain, the modulation transfer function (MTF). The MTF is defined as the Fourier transform of the LSF
 
@@ -1042,7 +1085,7 @@ The LSF and ESF are defined in the spatial domain. There is another quantity tha
 
 By definition, the amplitude of MTF is normalized in order to have $\operatorname{MTF}(0) = 1$, which can be achieved either by normalizing the LSF area to 1 or by dividing the resulting MTF by $\operatorname{MTF}(0)$.
 
-The MTF measures how the contrast is transfered as a function of the spatial frequency of the incoming signal. A high value of the MTF for higher frequencies means that the detector has high contrast, thus it can resolve small objects. For an ideal detector with infinite resolution the LSF is a Dirac $\delta$ function and the resulting MTF is a constant and equal to 1.
+The MTF measures how the contrast is transfered as a function of the spatial frequency of the incoming signal. A high value of the MTF for higher frequencies means that the detector has high contrast, thus it can resolve small objects. For an ideal detector with infinite resolution the LSF is a Dirac-$\delta$ function and the resulting MTF is constant and equal to 1.
 
 As for the LSF and the ESF, using a tilted slit or edge to increase the sampling frequency enables to compute the presampled MTF \cite{samei1998}. The usual metric used to determine the spatial resolution of a detector is related to the frequency $f_{10}$ for which $\operatorname{MTF}(f_{10}) = 0.1$.
 
@@ -1068,7 +1111,7 @@ In general the LSF is not Gaussian. A simple example is to consider an ideal det
 
 Eq. \ref{eq:mtf_square} describes the best spatial resolution achievable by a detector with square pixels and without sub-pixel reconstruction.
 
-Considering hexagonal instead of square pixels, it is possible to determine the intrinsic resolution achievable by ASIX assuming no sub-pixel reconstruction is employed and all the charge is assigned to the central pixel of the cluster.
+Considering hexagonal pixels instead of square ones, it is possible to determine the intrinsic resolution achievable by ASIX assuming no sub-pixel reconstruction is employed and all the charge is assigned to the central pixel of the cluster.
 
 The two-dimensional $\operatorname{MTF}(f_x, f_y)$ of an hexagonal pixel has been calculated in \cite{barnard1991} and the projections along the axes orthogonal to the side (0 degrees) and towards the vertex (30 degrees) for an hexagon with pitch $p$ are equal to
 
@@ -1079,65 +1122,60 @@ The two-dimensional $\operatorname{MTF}(f_x, f_y)$ of an hexagonal pixel has bee
 \end{split}
 \end{equation}
 
-Fig. \ref{fig:mtf_pixels} shows the comparison between the MTF of a square pixel and that of an hexagonal pixel with the same area. It is possible to see that the hexagonal geometry has a slightly better resolution than the square. This can be related to the highest degree of isotropy and symmetry of an hexagon with respect to a square.
-
-Even if no noise sources have been considered for this estimate, it can be interpreted as a lower limit on the resolution of ASIX, as sub-pixel reconstruction algorithms using charge-sharing and diffusion models enable to improve the detector performance.
-
-\begin{figure}
+\begin{figure}[!t]
     \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mtf_hex_square}
+    \includegraphics[width=0.6\linewidth]{figures/chapter4/position/mtf_hex_square}
     \caption{MTFs calculated for square and hexagonal pixels with same area. The hexagonal pixel pitch is $p = 50$ $\mu$m. The MTFs referred to the hexagonal pixel are calculated along the directions towards the vertex and orthogonal to the side.}
     \label{fig:mtf_pixels}
 \end{figure}
 
-An alternative and faster way to estimate the spatial resolution of a detector consists of using a line pair phantom, which is a plate with multiple sets of slits with different widths and spatial frequencies, which are expressed as line pair or cycles per millimeter (lp/mm or cycles/mm). The phantom is made of an high-$Z$ material, usually lead.
+Fig. \ref{fig:mtf_pixels} shows the comparison between the MTF of a square pixel and that of an hexagonal pixel with the same area. It is possible to see that the hexagonal geometry has a slightly better resolution than the square. This can be related to the highest degree of isotropy and symmetry of an hexagon with respect to a square.
 
-The resolution can be inferred from an image of the phantom by looking at which is the smallest set of slits that can be resolved. The only requirement to use this method is to have a set of slits with a frequency smaller or comparable to the spatial resolution of the detector, but this may not be possible for high resolution detectors.
+Even if no noise sources have been considered for this estimate, it can be interpreted as a lower limit on the resolution of ASIX, as sub-pixel reconstruction algorithms using charge-sharing and diffusion models enable to improve the detector performance.
 
-When using a tilted slit or edge to calculate the MTF, it is necessary to calculate the tilt angle to correctly project the LSF or ESF profile. The procedure to realign the image is described in the case of a slit, but it is the same for an edge.
+An alternative and faster way to estimate the spatial resolution of a detector consists of using a line pair phantom, which is a plate with multiple sets of slits with different widths and spatial frequencies, which are expressed as line pair or cycles per millimeter (lp/mm or cycles/mm). The phantom is made of an high-$Z$ material, usually lead. The resolution can be inferred from an image of the phantom by looking at which set of slits is the smallest that can be resolved. The only requirement to use this method is to have a set of slits with a frequency smaller or comparable to the spatial resolution of the detector, but this may not be possible for high resolution detectors.
 
-The angle is determined by the inclination of the slit with respect to the detector $x$-axis. The first step consists of detecting the slit edges in the image. This can be performed using the Canny edge detection algorithm \cite{canny1986}. This algorithm allows to detect the edges in an image and returns a binary image of the same size where a value of 1 means that a pixel is an edge and 0 if it is not.
 
-Before using this algorithm it is necessary to create an image by binning the reconstructed positions. The bin size can not be too large, otherwise the shape and orientation of the slit would be distorted.
-
-Another parameter to choose is the width of the Gaussian filter applied by the algorithm to smooth the image. This parameter can not be to small with respect to the slit width, otherwise quantization noise would lead to the detection of false edges. The ideal value should be of the order of the slit width. An example of how the filter width affects edge detection is shown in Fig. \ref{fig:mtf_canny}.
-
-\begin{figure}
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.8\linewidth]{figures/chapter4/position/mtf_canny}
     \caption{Example usage of the Canny edge detection algorithm on a simulated slit image. The simulated image (a) is binned with a $200 \times 200$ grid, while the slit has a Gaussian profile with a standard deviation of 5 pixels, a length of 160 pixels and a tilt angle of 5 degrees. Images from (b) to (f) show how the detected edges vary by changing the Gaussian filter width. A filter to small is very sensitive to low statistics and detects false edges. Increasing the filter width, this effect becomes less and less visible. If the filter is too wide with respect to the slit width, no edge is detected (case not shown).}
     \label{fig:mtf_canny}
 \end{figure}
 
+When using a tilted slit or edge to calculate the MTF, it is necessary to calculate the tilt angle to correctly project the LSF or ESF profile. The procedure to realign the image is described in the case of a slit, but it is the same for an edge.
+
+The angle is determined by the inclination of the slit with respect to the detector $x$-axis. The first step consists of detecting the slit edges in the image. This can be performed using the Canny edge detection algorithm \cite{canny1986}. This algorithm allows to detect the edges in an image and returns a binary image of the same size where a value of 1 means that a pixel is an edge and 0 if it is not.
+
+Before using this algorithm it is necessary to create an image by binning the reconstructed positions. The bin size can not be too large, otherwise the shape and orientation of the slit would be distorted. Another parameter to choose is the width of the Gaussian filter applied by the algorithm to smooth the image. This parameter can not be to small with respect to the slit width, otherwise quantization noise would lead to the detection of false edges. The ideal value should be of the order of the slit width. An example of how the filter width affects edge detection is shown in Fig. \ref{fig:mtf_canny}.
+
 The second step of the process consists of calculating the angle from the detected edges, which are sets of straight lines. This can be performed with the use of the Hough transform \cite{hough1959, duda1972}, which is a technique used to detect parameterizable curves, such as lines.
 
-A line in the plane is represented by a set of two parameters $(\rho, \theta)$, which define the Hough space, where $\rho$ is the distance of the line from the origin of the axes and $\theta$ is the angle between the $x$-axis and the distance vector. Within this representation, each point $(x, y)$ on a straight line follows
+A line in the plane is represented by a set of two parameters $(\rho, \theta)$, which define the Hough space, where $\rho$ is the distance of the line from the origin of the axes and $\theta$ is the angle between the $x$-axis and the distance vector. Within this representation, each point $(x, y)$ on a straight line is described by
 
 \begin{equation}
 \rho = x \cos \theta + y \sin \theta.
 \label{eq:hough}
 \end{equation}
 
-For each point of the edges, the algorithm scans a given range of $\theta$ values and for each one evaluates Eq. \ref{eq:hough}. The results are accumulated in a two-dimensional histogram, named accumulator space, where for each point and angle value an entry is added at the correspondent bin $(\rho, \theta)$.
-
-A straight line is detected when a peak is identified in the latter space, and the tilt angle can be calculated as $\theta_{peak} - \pi/2$. An example of the result of the Hough transform of the edges of a  slit is shown in Fig. \ref{fig:mtf_hough}. During the analysis, if multiple lines are present and multiple peaks are produced by the Hough transform, only the highest one is considered to calculate the tilt angle.
-
-\begin{figure}
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/chapter4/position/mtf_hough}
     \caption{Accumulator space resulting from the Hough transform of the slit edge image from Fig. \ref{fig:mtf_canny}(e). The two nearly identical peaks that are visible correspond to the two long edges of the slit.}
     \label{fig:mtf_hough}
 \end{figure}
 
+For each point of the edges, the algorithm scans a given range of $\theta$ values and for each one evaluates Eq. \ref{eq:hough}. The results are accumulated in a two-dimensional histogram, named accumulator space, where for each point and angle value an entry is added at the correspondent bin $(\rho, \theta)$. A straight line is detected when a peak is identified in the latter space, and the tilt angle can be calculated as $\theta_{peak} - \pi/2$. An example of the result of the Hough transform of the edges of a  slit is shown in Fig. \ref{fig:mtf_hough}. During the analysis, if multiple lines are present and multiple peaks are produced by the Hough transform, only the highest one is considered to calculate the tilt angle.
+
 To calculate the presampled LSF, the slit image has to be rotated by the angle found with the Hough transform. Once it has been aligned, the presampled LSF is calculated projecting all the points on the short side of the slit and calculating the histogram of the reconstructed positions. The bin size of this histogram must be smaller than the expected resolution of the detector, in order to not incur in aliasing effects, as stated by the Nyquist theorem, but large enough to not be sensitive to noise.
 
-A possible way to limit distortions from noise is to apply some smoothing algorithm on the LSF, but remembering that in frequency domain a smoothing acts as a low-pass filter, with the possible consequence of underestimating the actual detector resolution.
+A possible way to limit distortions from noise is to apply a smoothing algorithm on the LSF, but remembering that in frequency domain a smoothing acts as a low-pass filter, with the possible consequence of underestimating the actual detector resolution.
 
 The presampled MTF is then calculated from the LSF using a discrete fast Fourier transform algorithm. The LSF and MTF calculated from the previous examples are shown in Fig. \ref{fig:slit_lsf_mtf}.
 
-In conclusion, the MTF represents the only available way to characterize the spatial resolution of ASIX, and this analysis can be performed both on real and simulated data, in order to verify the consistency between the difference of the various implemented reconstruction algorithm and also the consistency between data and simulations.
+In conclusion, the MTF currently represents the only available way to characterize the spatial resolution of the ASIX prototypes, and this analysis can be performed both on real and simulated data, in order to verify the consistency between the difference of the various implemented reconstruction algorithm and also the consistency between data and simulations.
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/mtf_lsf}
 	\includegraphics[width=0.49\linewidth]{figures/chapter4/position/mtf}
@@ -1147,11 +1185,11 @@ In conclusion, the MTF represents the only available way to characterize the spa
 
 
 \section{Energy reconstruction}
-Using the calibration products it is possible to estimate the photon energy for each event and calculating the spectrum of a source. Depending on the calibration products, the energy can be expressed as ADC counts or eV, but the difference is only a scale factor, thus it is not relevant.
+Using the calibration products it is possible to estimate the photon energy for each event and calculating the spectrum of a source. If the absolute gain has been calibrated, the spectrum can be expressed in terms of eV instead of ADC counts if only the normalized gain has been calibrated. However, the difference is only a scale factor, thus it is not relevant.
 
-As for position reconstruction, there are different algorthms that can be employed in the energy reconstruction. For ASIX, two algorithms have been developed and they will be explained in this section.
+As for position reconstruction, there are different algorthms that can be employed in the energy reconstruction. Specifically, two algorithms have been developed and will be explained in this section.
 
-Contrary to the position, to estimate the energy resolution the Monte Carlo truth is not necessary, thus the performances of these algorithms will be shown in Chap. \ref{sec:results}, where laboratory data will be analyzed and the results are compared to simulations. The metric to determine the goodness of these algorithms is the FWHM of a given spectral line.
+The performances of these algorithms will be shown in Chap. \ref{sec:results}, where laboratory data will be analyzed and the results are compared to simulations. The metric to determine the goodness of these algorithms is the FWHM of a given spectral line.
 
 \subsection{Suppression algorithm}
 The first energy reconstruction method is based on the suppression algorithm described in Chap. \ref{sec:analysis}. This algorithm consists of suppressing some of the pixels in an event by using a charge and a geometrical constraint, in order to minimize the probability of including pixels with charge not produced by the photon.
@@ -1160,34 +1198,22 @@ The charge constraint consists of selecting a threshold value, expressed in term
 
 This is the same algorithm that is employed to determine an event cluster size and that is applied before position reconstruction when using charge barycentering and $\eta$ algorithms.
 
-After suppressing the pixels, the photon energy is calculated by summing the carge collected by all the unsuppressed pixels.
+After suppressing the pixels, the photon energy is calculated by summing the charge collected by all the unsuppressed pixels.
 
 This method has a free parameter that can be varied, which is the value of the zero-suppression threshold. The final energy resolution depends on this parameter, and it is important to find the best value. This dependence will be shown on laboratory data in the next section.
 
 \subsection{Likelihood estimator}
-The second method to estimate the photon energy is to use the likelihood estimator introduced in Chap. \ref{subsec:mle} for the position reconstruction. The likelihood which describes the charge diffusion after a photon hits the sensor depends both on the position and its energy, as shown in  Eq. \ref{eq:nll_multivariate}, thus the minimization performed to find the best-fit position enables to reconstruct the photon energy as well.
+The second method to estimate the photon energy is to use the likelihood estimator introduced in Chap. \ref{subsec:mle} for the position reconstruction. The likelihood that describes the charge diffusion depends both on the photon incident position and energy, as shown in  Eq. \ref{eq:nll_multivariate}.
 
-This algorithm has been already explained in detail in the previous section, and contrary to the suppression method it does not require to arbitrarily choose a threshold because the likelihood weights the pixel charge using the best-fit position found during the minimization.
+This algorithm has been already explained in detail in the previous section, and contrary to the suppression method it does not require an arbitrary threshold. Indeed, the likelihood model intrinsically weights the pixel charges through a simultaneous minimization of both the incident position and the photon energy.
 
 \section{Results}
 \label{sec:results}
-To gauge the above discussed methods performances in position and energy reconstruction, thus the imaging and spectral resolution of the detector, different data sets have been used in order to measure each of these properties.
+The detector's imaging and energy resolutions are directly determined by the performance of the position and energy reconstruction methods. To accurately assess these properties, specific datasets were employed for each task.
 
-These data sets have been collected in laboratory using ASIX prototypes. As already mentioned, at the moment the prototypes are using the XPOL-III ASIC, which differs in various aspects with respect to the design ASIC. The main difference is in the electronic noise, which at the moment is nearly four or five times larger than the design goal.
+These datasets were collected in the laboratory using ASIX prototypes. As previously mentioned, the current prototypes are equipped with the XPOL-III ASIC, which differs from the final design in several aspects. The most significant difference is the electronic noise, which is currently four to five times higher than the design goal.
 
-Indeed, this represents the major improvement in the design, enabling to achieve a very high resolution both for imaging and spectroscopy, given that at the moment the total noise is largely dominated by the electronic noise. However, even in a high-noise regime it is possible to verify the goodness of the developed algorithms and how the choice of the algorithm affects the resolution.
-
-Another important thing that can be performed is to check how good the Monte Carlo simulations are in simulating the detector. Indeed, simulations are important not only to understand the limits of the detector depending on the construction properties, but are essential for the calibration of some of the reconstruction methods.
-
-In this section the experimental setups employed to collect data to estimate the imaging and spectral resolution of ASIX are described. Furthermore, simulations to match the experimental setups are made in order to calibrate the different reconstruction methods and to compare the final resolution results.
-
- 
-\subsection{Imaging resolution}
-To estimate the detector imaging resolution a Huttner phantom similar to the one shown in Fig. \ref{fig:huttner} has been used. The phantom is made of a 50 $\mu$m thick lead slab with multiple sets of slits with different spatial frequencies, ranging from a minimum of 0.5 lp/mm up to a maximum of 10 lp/mm.
-
-The phantom portion with the highest frequencies is placed above the detector and it is irradiated with X-rays generated by an X-ray tube which is operated at 10 kV with a gold target \cite{minuti2025}. The X-ray tube is located 1 m from the phantom, in order to have a collimated photon beam. Operating the tube at a voltage of 10 kV with a gold target is not enough to observe fluorescence lines, thus the resulting spectrum is mainly due to Bremsstrahlung emission from accelerated electrons. 
-
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.4\linewidth]{figures/chapter4/results/huttner}
 	\includegraphics[width=0.59\linewidth]{figures/chapter4/results/slits_hist}
@@ -1195,11 +1221,17 @@ The phantom portion with the highest frequencies is placed above the detector an
     \label{fig:huttner}
 \end{figure}
 
-The tested prototype is the one with the silicon sensor, which have pixels with 50 $\mu$m pitch. Given that the expected resolution is smaller than the pixel pitch, the avalaible Hutnner phantom does not have a frequency large enough to be used for a visual estimate of the resolution. The solution is to use the edge of a large slit to calculate the ESF, from which the MTF can then be calculated.
+Reducing this noise is precisely the major improvement of the final design, which will allow the achievement of very high resolutions in both imaging and spectroscopy. In the current setup, in fact, the total noise is largely dominated by the electronics. However, even in this high-noise regime, the collected data allow us to verify the effectiveness of the developed algorithms and to study how the choice of the method affects the final resolution.
 
-Before the event reconstruction, the detector calibration is performed to estimate the noise level of the pixels. Given that for XPOL-III the pedestal subtraction is performed directly on the chip, the third noise calibration method described in \ref{sec:calibration} is adopted. Then, the normalized pixel gain is calibrated. The noise and normalized gain distributions are shown in Fig. \ref{fig:results_cal}.
+Additionally, these datasets provide a crucial opportunity to validate the Monte Carlo simulations against real data. Accurate simulations are not only important to understand the intrinsic limits of the detector based on its physical properties, but they are also strictly required for the calibration of some of the reconstruction methods.
 
-\begin{figure}
+In this section, the experimental setups used to collect the data for the imaging and spectral resolution estimation are described. Furthermore, dedicated Monte Carlo simulations matching these setups are presented- These simulations are used to calibrate the different reconstruction algorithms and to provide a baseline for comparing the final resolution results.
+
+ 
+\subsection{Imaging resolution}
+To estimate the detector imaging resolution a Huttner phantom similar to the one shown in Fig. \ref{fig:huttner} has been used. The phantom is made of a 50 $\mu$m thick lead slab with multiple sets of slits with different spatial frequencies, ranging from a minimum of 0.5 lp/mm up to a maximum of 10 lp/mm.
+
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/noise_hist}
 	\includegraphics[width=0.49\linewidth]{figures/chapter4/results/equalization_hist}
@@ -1207,31 +1239,17 @@ Before the event reconstruction, the detector calibration is performed to estima
     \label{fig:results_cal}
 \end{figure}
 
-Once the noise and gain of the detector are characterized, a simulated data set with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods.
+The phantom portion with the highest frequencies is placed above the detector and it is irradiated with X-rays generated by an X-ray tube which is operated at 10 kV with a gold target \cite{minuti2025}. The X-ray tube is located 1 m from the phantom, in order to have a collimated photon beam. Operating the tube at a voltage of 10 kV with a gold target is not enough to observe fluorescence lines, thus the resulting spectrum is mainly due to Bremsstrahlung emission from accelerated electrons. 
 
-After that, the laboratory data can be analyzed and the event positions can be estimated with the different alogirhtms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits.
 
-To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
+The tested prototype is the one with the silicon sensor, which have pixels with 50 $\mu$m pitch. Given that the expected resolution is smaller than the pixel pitch, the avalaible Hutnner phantom does not have a frequency large enough to be used for a visual estimate of the resolution. The solution is to use the edge of a large slit to calculate the ESF, from which the MTF can then be calculated.
 
-A new Monte Carlo data set with a slit of the same size of the one analyzed in the laboratory data is simulated to compare the obtained results with those expected from simulations. The data set is generated using the same distribution of noise and normalized gain.
+Before the event reconstruction, the detector calibration is performed to estimate the noise level of the pixels. Given that for XPOL-III the pedestal subtraction is performed directly on the chip, the first noise calibration method described in Chap. \ref{sec:calibration} is adopted. Then, the normalized pixel gain is calibrated. The noise and normalized gain distributions are shown in Fig. \ref{fig:results_cal}.
 
-After the data set is generated, it is analyzed with the same method used for laboratory data. The MTFs obtained with the different algorithms for laboratory data and simulated data are shown in Fig. \ref{fig:results_mtf} and the values for which MTF is 10\% are reported in Tab. \ref{tab:results_mtf}. 
-
-From the analysis of laboratory data, the improvement in the spatial resolution obtained using more complex algorithms than charge barycentering is not as big as expected. Indeed, from Monte Carlo simulations the resolution achieved with the best algorithm, the $\eta$ unmodeled, is about 30\% better than charge barycentering. 
-
-This behavior can be associated to different factors. An example is the possibility of having defects in the Huttner phantom slit edges. Indeed, the Huttner phantom is designed to have a quick estimate of the resolution and is not ideal to carry on a detailed analysis with the slanted edge. These defects can transmiss unwanted photons, thus producing a degraded edge image.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.7\linewidth]{figures/chapter4/results/slits_mtf}
-    \caption{Modulation transfer function obtained with different reconstruction methods for laboratory data and simulated data. Solid lines represent MTF calculated from laboratory data. Dashed lines represent MTF calculated from simulated data}
-    \label{fig:results_mtf}
-\end{figure}
-
-\begin{table}[htbp]
+\begin{table}[!t]
 \centering
 \begin{tabularx}{\textwidth}{X cc}
-Reconstruction Algorithm & MTF@10\% Lab. data [lp/mm] & MTF@10\% Sim. data [lp/mm]\\
+Reconstruction Algorithm & $f_{10}$ Lab. data [lp/mm] & $f_{10}$ Sim. data [lp/mm]\\
 \midrule
 Charge barycentering & 47.1 & 53.9 \\
 MLE                  & 51.7 & 68.0 \\
@@ -1239,21 +1257,38 @@ Unmodeled $\eta$     & 51.9 & 71.0 \\
 Modeled $\eta$       & 51.7 & 67.4 \\
 \bottomrule
 \end{tabularx}
-\caption{MTF@10\% for different reconstruction algorithm calculated for laboratory data and simulated data.}
+\caption{Values $f_{10}$ for which $\operatorname{MTF}(f_{10}) = 0.1$ for different reconstruction algorithm calculated for laboratory data and simulated data.}
 \label{tab:results_mtf}
 \end{table}
 
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/chapter4/results/slits_mtf}
+    \caption{Modulation transfer function obtained with different reconstruction methods for laboratory data and simulated data. Solid lines represent MTF calculated from laboratory data. Dashed lines represent MTF calculated from simulated data}
+    \label{fig:results_mtf}
+\end{figure}
+
+
+Once the noise and gain of the detector are characterized, a simulated dataset with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods.
+
+After that, the laboratory data can be analyzed and the event positions can be estimated with the different algorithms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits.
+
+To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
+
+A new Monte Carlo data set with a slit of the same size of the one analyzed in the laboratory data is simulated to compare the obtained results with those expected from simulations. The data set is generated using the same distribution of noise and normalized gain.
+
+After the data set is generated, it is analyzed with the same method used for laboratory data. The MTFs obtained with the different algorithms for laboratory data and simulated data are shown in Fig. \ref{fig:results_mtf} and the values $f_{10}$ for which MTF is 10\% are reported in Tab. \ref{tab:results_mtf}. 
+
+From the analysis of laboratory data, the improvement in the spatial resolution obtained using more complex algorithms than charge barycentering is not as big as expected. Indeed, from Monte Carlo simulations the resolution achieved with the best algorithm, the $\eta$ unmodeled, is about 30\% better than charge barycentering.
+
+This behavior can be associated to different factors. An example is the possibility of having defects in the Huttner phantom slit edges. Indeed, the Huttner phantom is designed to have a quick estimate of the resolution and is not ideal to carry on a detailed analysis with the slanted edge. These defects can transmiss unwanted photons, thus producing a degraded edge image.
 
 
 
+\subsection{Energy resolution}
+To estimate the energy resolution, a different experimental setup has been employed. For this purpose it is essential to produce a known spectrum with separated lines. To test the ASIX silicon prototype a gold target has been irradiated by an X-ray tube operated at 25 kV, in order to produce fluorescence lines.
 
-
-\subsection{Spectral resolution}
-To estimate the spectral resolution, a different experimental setup has been employed. For this purpose it is essential to produce a known spectrum with separated lines. To test the ASIX silicon prototype a gold target has been irradiated by an X-ray tube operated at 25 kV, in order to produce fluorescence lines.
-
-To suppress the Bremsstrahlung continuum spectrum and only detect fluorescence lines, the gold target is tilted with respect to the X-ray tube and only the fluorescence radiation, which is emitted isotropically, reaches the detector. The experimental setup is shown in Fig. \ref{fig:spectral_setup}. With this setup the beam is very small and collimated and it illuminates only an area of about 50 pixels.
-
-As a result, the observed spectrum shows fluorescence lines produced by $L$-shell transitions. In particular the dominant lines are the $L\alpha$ doublet at about 9.7 keV, the $L\beta$ doublet at 11.5 keV and the $L\gamma$ triplet at 13.4--13.8 keV.
+To suppress the Bremsstrahlung continuum spectrum and only detect fluorescence lines, the gold target is tilted with respect to the X-ray tube and only the fluorescence radiation, which is emitted isotropically, reaches the detector. The experimental setup is shown in Fig. \ref{fig:spectral_setup}. With this setup the beam is very small and collimated and it illuminates only an area of about 50 pixels. The observed spectrum shows fluorescence lines produced by $L$-shell transitions. In particular the dominant lines are the $L\alpha$ doublet at about 9.7 keV, the $L\beta$ doublet at 11.5 keV and the $L\gamma$ triplet at 13.4--13.8 keV.
 
 \begin{figure}[htbp]
   \centering
@@ -1325,9 +1360,9 @@ Before analyzing the data, the detector calibration procedure is performed in or
 
 Taking into account these variations, the event can be reconstructed with the two different methods described in the previous section.
 
-When using the suppression algorithm, different thresholds can be adopted and it is interesting to study how the threshold affects the resolution. To estimate the resolution, the $L\alpha$ and $L\beta$ lines are fitted simultaneously using a two Gaussians fit model. An example of spectrum with its best-fit curve is shown in Fig. \ref{fig:spectrum_fit}.
+When using the suppression algorithm, different thresholds can be adopted and it is interesting to study how the threshold affects the resolution. To estimate the resolution, the $L\alpha$ and $L\beta$ lines are fitted simultaneously using a model similar to that in Eq. \ref{eq:two_lines_fit}. An example of spectrum with its best-fit curve is shown in Fig. \ref{fig:spectrum_fit}.
 
-\begin{figure}
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/spectrum_example}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/zsup_dependence}
@@ -1335,15 +1370,11 @@ When using the suppression algorithm, different thresholds can be adopted and it
     \label{fig:spectrum_fit}
 \end{figure}
 
-The dependence of the detector resolution on the zero-suppresion threshold is estimated using the FWHM of the best-fit curve of the $L\alpha$ line.
-
-The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to observe that the best resolution is achieved for a value of the threshold around 2.5 and 3 times the noise level of the pixels and is about 12.5\% at 9.7 keV.
+The dependence of the detector resolution on the zero-suppresion threshold is estimated using the FWHM of the best-fit curve of the $L\alpha$ line. The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to observe that the best resolution is achieved for a value of the threshold around 2.5 and 3 times the noise level of the pixels and is about 12.5\% at 9.7 keV.
 
 Using the distributions obtained from the calibration products it is possible to run Monte Carlo simulations with the same noise levels and gain of the laboratory data. This enables to verify if the dependence of the energy resolution is the same of what is observed with laboratory data.
 
-The energy reconstruction is performed with the same thresholds used for laboratory data, and the energy resolution is estimated by fitting the spectrum with the same fit model used in the previous case.
-
-The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to see that in the case of Monte Carlo simulations the best energy resolution is achieved with the smallest threshold and it becomes worse with higher thresholds.
+The energy reconstruction is performed with the same thresholds used for laboratory data, and the energy resolution is estimated by fitting the spectrum with the same fit model used in the previous case. The results are shown in Fig. \ref{fig:spectrum_fit}. \fix{It is possible to see that in the case of Monte Carlo simulations the best energy resolution is achieved with the smallest threshold and it becomes worse with higher thresholds.}
 
 Both laboratory and simulated data sets have been analzyed using the MLE algorithm as well. When using this method, which is independent from the choice of a threshold, for laboratory data it is possible to observe that the estimated energy resolution is a bit worse than what is achievable with the suppression method. However, the results are good enough to not exclude the use of this method.
 
@@ -1355,11 +1386,7 @@ With the current chips, the noise is dominated by the electronic component. Usin
 
 This means that once the final ASIC is completed, the energy resolution will be approximately a factor 4 or 5 smaller then the current one, enabling to reach a relative energy resolution of about 3\% at 10 keV, or about 300 eV (FWHM).
 
-
-
-
-
-
+\fix{capire se si riesce a sistemare questa cosa della risoluzione e scrivere qualcosina sulla cluster size?.}
 
 
 
