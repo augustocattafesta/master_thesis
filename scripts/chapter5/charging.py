@@ -41,7 +41,9 @@ plt.sca(ax_main)
 ax_main.errorbar(times[mask], charging, yerr=charging_errors, fmt='.k', label='Charging')
 ax_main.errorbar(times[~mask], discharging, yerr=discharging_errors, fmt='vk', label='Discharging')
 scale = model._components[0].scale.ufloat()
+gamma = model._components[0].stretch.ufloat()
 label = f'Charging model\n' + rf"$\tau$ = {scale} h"
+label += "\n" + r"$\gamma$ = " + f"{gamma}"
 model.plot(label=label, plot_components=False)
 ax_main.set_ylabel('Norm. Gain @ 5.9 keV')
 ax_main.legend()
