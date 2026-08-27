@@ -3,9 +3,9 @@
 
 The current Gas Pixel Detectors that are employed on board of IXPE do not match the requirements of the next generation of X-ray polarimeters, such as eXTP. The strictest requirements that have to be satisfied concern the detector stability over time, the possibility of detecting photons at a much higher rate than IXPE and reducing the spurious modulation, as eXTP will not be able to perform dithering. 
 
-While progress in the development of a new ASIC to support higher rates have already been achieved with XPOL-III, as described in Chap. \ref{sec:xpol3}, solutions to improve detector stability and to have a more uniform response are currently under study.
+While progress in the development of a new ASIC to support higher rates has already been achieved with XPOL-III, as described in Chap. \ref{sec:xpol3}, solutions to improve detector stability and to have a more uniform response are currently under study.
 
-Current GPDs employ a finely pixelated ASIC to reconstruct the two-dimensional photoelectron track produced after X-ray absorption. This is fundamental for a photoelectric polarimeter, and thanks to the $50~\mu\text{m}$ pixels, the GPD achieves high spatial accuracy, which allows to achieve a higher polarization sensitivity than Bragg crystal prolarimeters.
+Current GPDs employ a finely pixelated ASIC to reconstruct the two-dimensional photoelectron track produced after X-ray absorption. This is fundamental for a photoelectric polarimeter, and thanks to the $50~\mu\text{m}$ pixels, the GPD achieves high spatial accuracy, which allows to achieve a higher polarization sensitivity than Bragg crystal polarimeters.
 
 As mentioned in Chap. \ref{chap:chapter3}, the main limitations of a GPD are the residual non-uniformities in the azimuthal response, also called spurious modulation, and rate-dependent gain variations. Both these problems can be attributed to the GEM, the GPD multiplication stage.
 
@@ -31,11 +31,11 @@ The $\mu$GPD represents a potential successor to the current GPD generation, rel
 
 The fundamental difference is in the multiplication stage, which in the $\mu$GPD final design consists of structures that are built on the upper-most layers of the wafer during the manufacturing of the ASIC. $\mu$GPD is therefore a monolithic detector with the multiplication stage integrated on the readout chip. A comparison between one of the proposed designs and the current GPD design is shown in Fig. \ref{fig:mugpd}. 
 
-The design and the idea behind it come from micro-gap chambers, which are based on two metal layers separated by a thin isolation layer. The upper-most layer is segmented in one-dimensional or two-dimensional structures only a few $\mu$m large an acts as the anode, while the bottom layer is usually a plane and acts as the cathode. Applying a potential difference between the two electrodes generates a strong electric field in a small volume just above the anode. The primary ionization electrons drift toward the anode, where they are accelerated by the electric field and produce an avalanche. The avalanche electrons are collected by the anode, while the positive ions are collected by the bottom cathode. An example of the avalanche process is shown in Fig. \ref{fig:avalanche}. 
+The design and the idea behind it come from micro-gap chambers, which are based on two metal layers separated by a thin isolation layer. The upper-most layer is segmented in one-dimensional or two-dimensional structures only a few $\mu$m large and acts as the anode, while the bottom layer is usually a plane and acts as the cathode. Applying a potential difference between the two electrodes generates a strong electric field in a small volume just above the anode. The primary ionization electrons drift toward the anode, where they are accelerated by the electric field and produce an avalanche. The avalanche electrons are collected by the anode, while the positive ions are collected by the bottom cathode. An example of the avalanche process is shown in Fig. \ref{fig:avalanche}. 
 
 This represents a crucial difference with respect to current GPDs. While in current GPDs the readout signal is provided by the electrons collected on the XPOL ASIC, in this novel architecture the signal is carried by the positive ions collected at the cathode. Because the existing XPOL family of chips is exclusively designed to process negative charges, it is necessary to develop a completely new ASIC to read the positive ion signals.
 
-This design is a good candidate to solve the issues of the current generation of GPD because the ASIC CMOS manufacturing processes allow to reach an accuracy on length scales of hundreds on nanometers, much smaller than the tolerances of the GEM manufacturing process. As a consequence gain non-uniformities across the sensor are likely to be strongly reduced. Furthermore, the surface of exposed dielectric can be small and the amount of charge that can be accumulated is reduced, improving detector stability over time and gain variations.
+This design is a good candidate to solve the issues of the current generation of GPD because the ASIC CMOS manufacturing processes allow to reach an accuracy on length scales of hundreds of nanometers, much smaller than the tolerances of the GEM manufacturing process. As a consequence gain non-uniformities across the sensor are likely to be strongly reduced. Furthermore, the surface of exposed dielectric can be small and the amount of charge that can be accumulated is reduced, improving detector stability over time and gain variations.
 
 
 \begin{figure}[!t]
@@ -191,7 +191,7 @@ The insulating layer consists of a high-dielectric-strength polyimide 2~$\mu$m t
 
 Once the basic functionality of the structures is verified, the next crucial step is to characterize the gain variations and the achievable energy resolution. Various experimental tests have been performed under different operating conditions to assess the feasibility of these anode structures as the multiplication stage for the next generation of GPDs.
 
-\subsection{Initial test on a dummy wafer}
+\subsection{Initial tests on a dummy wafer}
 The first test has been performed by depositing the structures on top of a high-resistivity silicon wafer which acts as the collection electrode, as shown in Fig. \ref{fig:mugpd_wafer}. This first demonstrator serves to verify the possibility of depositing these structures on top of a substrate similar to that of XPOL chips with photolithographic processes without deteriorating the material.
 
 To test the structures the metallic layer of a custom PCB is placed in contact with the back of the wafer to provide negative high voltage, while the anode structures are kept at 0 V. The signal coming from the anode is read through a single channel spectroscopic amplifier which in turn is connected to a Multi-Channel Analyzer (MCA).
@@ -206,7 +206,7 @@ To test the structures the metallic layer of a custom PCB is placed in contact w
 
 To simulate the working conditions of a GPD, the setup is placed inside a dedicated gas chamber, flushed with a mixture of Ar/Isobutane 80/20. The absorption and drift region are defined by a 1 cm thick spacer with an electrode placed on top of the structures. 
 
-X-ray photons are produced by a $^{55}$Fe source placed on top of the spacer, optionally with a collimator or an additional spacer to regulate the event rate. $^{55}$Fe is a radioactive isotope of iron which decays by electronic capture into $^{55}$Mn emitting fluorescence radiation. In most cases the electronic capture involves an electron in the $K$-shell, thus the resulting radiation belongs to the $K\alpha$ line at 5.9 keV ($\sim$90\% probability) and to the $K\beta$ line at 6.5 keV ($\sim$10\% probability).
+X-ray photons are produced by a $^{55}$Fe source placed on top of the spacer, optionally with a collimator or an additional spacer to regulate the event rate. $^{55}$Fe is a radioactive isotope of iron which decays by electron capture into $^{55}$Mn emitting fluorescence radiation. In most cases the electronic capture involves an electron in the $K$-shell, thus the resulting radiation belongs to the $K\alpha$ line at 5.9 keV ($\sim$90\% probability) and to the $K\beta$ line at 6.5 keV ($\sim$10\% probability).
 
 For this initial test a particular focus is on the one-dimensional structures. The 43.3 $\mu$m and 86.6 $\mu$m pitch one-dimensional designs are tested for different anode-cathode voltages, and can withstand up to 380--400 V.
 
@@ -278,20 +278,17 @@ Despite the morphological irregularities of the surface, all four designs descri
 
 Once the successful deposition of the layers on the irregular chip surface is confirmed via SEM inspection, the next step is to evaluate whether the post-processing damaged the underlying ASIC electronics.
 
-Before placing the device in the gas chamber and powering the multiplication structures, the first electrical test is performed by operating the ASIC stand-alone. Test charges are injected into the pixels to measure their readout noise and evaluate the impact of the post-processing deposition on the electronics.
+Before placing the device in the gas chamber and powering the multiplication structures, the first electrical test is performed by operating the ASIC without applying high voltage on the structures. Test charges are injected into the pixels to measure their readout noise and evaluate the impact of the post-processing deposition on the electronics.
 
-The measurements confirm that the chip survived the deposition process and is fully functional. Interestingly, mapping the pixel noise provides a sort of radiograph of the structures: pixels located under the dielectric and anode layers show a slight change in noise, which remains well within acceptable operational limits. This effect also serves as a useful diagnostic tool to inspect the structures and identify potential fabrication defects, such as disconnected segments or discontinuities along the strips. An example of noise acquisition is made shown in Fig. \ref{fig:deposition_noise}
+The measurements confirm that the chip survived the deposition process and is fully functional. Interestingly, mapping the pixel noise provides a sort of radiograph of the structures: pixels located under the dielectric and anode layers show a slight change in noise, which remains well within acceptable operational limits. This effect also serves as a useful diagnostic tool to inspect the structures and identify potential fabrication defects, such as disconnected segments or discontinuities along the strips. An example of noise acquisition is shown in Fig. \ref{fig:deposition_noise}
+
 
 \subsection{Detector characterization with powered structures}
-After proving that the structures can work as a multiplication stage, the successive step is to test detector prototypes with structures built directly on top of pre-existing chips to see if the results obtained on the silicon wafer are confirmed.
+After proving that the structures can act as a multiplication stage on a flat substrate and that the ASIC survives the fabrication process, the final two steps are the following: verifying that the structures operate properly on the chip and characterizing their performance, and confirming that the ASIC survives the active multiplication process. Both steps require applying a high voltage difference between the anode structures and the chip pixels while the detector is irradiated by a radioactive source.
 
-In this configuration the cathodic collection plane is represented by the pixels' uppermost metal electrode. An important thing that must be noted is that the current chips are designed to collect electrons, not ions, thus they are not able to read the signal produced by the avalanche generated by the micro-gaps.
+However, testing both aspects simultaneously is not possible with the current ASIC. In this micro-gap configuration, the chip acts as the cathodic collection plane, meaning it collects positive ions. Since the current XPOL chips are exclusively designed to collect electrons, they are intrinsically unable to read the avalanche signals produced by these structures. Therefore, the final validation must be decoupled into two different configurations.
 
-However, it is still possible to provide a voltage difference between the anode structures and the pixels to test if they can work as a multiplication stage. The charge readout is performed in the same way as the silicon wafer test, that is by connecting the anodes to a single channel spectroscopy amplifier and reading the output signal with an MCA.
-
-Before powering the detector with the radioactive source on, the first test to perform is to verify if the dielectric and anode deposition process has damaged the chip. This is performed by powering the chip outside the gas chamber and measuring the noise. The result is that the chip is not damaged and can still work properly.
-
-After having verified that the detector is working, the structures are tested as in the case of the silicon wafer by placing the chip inside a sealed box. A 1 cm thick spacer with an electrode is added to define the absorption and drift region and a $^{55}$Fe source is placed on top of a collimator to produce a collimated beam. The experimental setup is shown in Fig. \ref{fig:gembox}. The box is then tightly closed and fluxed with Ar/Isobutane 80/20 gas mixture. 
+Both tests are performed by placing the complete detector inside a sealed gas chamber, as shown in Fig. \ref{fig:gembox}. A 1 cm thick spacer with a top electrode defines the absorption and drift region, and the volume is continuously flushed with an Ar/Isobutane 80/20 gas mixture. X-ray photons are provided by a collimated $^{55}$Fe source placed on top of the chamber window.
 
 \begin{figure}[!b]
     \centering
@@ -300,21 +297,11 @@ After having verified that the detector is working, the structures are tested as
     \label{fig:gembox}
 \end{figure}
 
-It is worth noting that not all the tested structures on the chip survived the high-voltage characterization. Depending on the specific design, the breakdown voltage was found to be around 400 V, with the two-dimensional structures reaching slightly higher values up to 430 V. The breakdown process is driven by the very strong electric field localized in the narrow gaps between the electrodes. When the field exceeds the dielectric strength of the gas, it triggers destructive sparks that can cause irreversible short circuits and permanently damage both the anode structures and the underlying ASIC.
+The first test configuration is designed to evaluate the performance of the structures. To read the signal, the anode structures are kept at ground while a high negative voltage is applied to the chip. As for the silicon wafer test, the charge readout is performed by connecting the anodes to a single-channel spectroscopic amplifier and reading the output with a Multi-Channel Analyzer (MCA). Operating the chip at high voltage, a condition for which it is not designed, irreparably damages its electronics, but this configuration is strictly necessary to acquire the energy spectra and characterize the structures.
 
-Another factor contributing to these discharges is the presence of large unpassivated conductor regions on the chip. In particular, the main bus line that connects all the strips of the same design (visible in Fig. \ref{fig:mugpd_sem}b) and the connections to the readout pads create localized field enhancements at their edges. A standard solution to solve this problem is the passivation of these non-active conductive regions with an insulating layer.
+The second test configuration simulates the nominal operating conditions to verify if the chip can withstand the active multiplication process. The ASIC is kept at ground and the anode structures are powered with a high positive voltage. In this setup, it is impossible to read the avalanche signals on either the chip or the structures. However, this configuration allows the ASIC to operate normally. By injecting test charges into the pixels and studying the noise distribution, it is possible to monitor the front-end electronics and confirm that the chip survives without degradation while avalanches are generated right above it.
 
-During these tests, a preliminary passivation was made by depositing a layer of insulating glue over the main connections. This simple intervention effectively shielded the high-field regions at the edges, leading to a notable reduction in destructive spark events and allowing the structures to reach higher operating voltages. A picture showing the damage caused by a destructive discharge on the chip and the applied passivation layer is shown in Fig. \ref{fig:passivation}.
-
-\begin{figure}[htpb]
-    \centering
-    \includegraphics[width=0.49\linewidth]{figures/chapter5/discharge}
-    \includegraphics[width=0.49\linewidth]{figures/chapter5/passivation}
-    \caption{86.6 $\mu$m pitch one-dimensional structure with multiple aligned damages from discharges (left panel). The destructive events damage the anode, the dielectric layer and the ASIC. A possible solution is applying a layer of glue to passivate the exposed bus line electrode (right panel).}
-    \label{fig:passivation}
-\end{figure}
-
-To estimate gain and energy resolution the electronic chain is calibrated by injecting known amounts of charge using a circuit with a $1~\text{pF}$ capacitance. Square voltage pulses with different amplitudes are sent to the structures, and the resulting spectra are acquired with the MCA. Each peak is fitted with a Gaussian curve to get its mean position in ADC counts. Then, a linear fit of these mean ADC values as a function of the injected charge in Coulombs provides the calibration curve. An example of the calibration spectra is shown in Fig. \ref{fig:pulse}.
+Starting with the first test configuration, the electronic chain must be calibrated to properly estimate the effective gain and energy resolution. This is achieved by injecting known amounts of charge using a circuit with a test capacitance. Square voltage pulses with different amplitudes are sent to the structures, and the resulting spectra are acquired with the MCA. Each peak is fitted with a Gaussian curve to get its mean position in ADC counts. Then, a linear fit of these mean ADC values as a function of the injected charge provides the calibration curve. An example of the calibration spectra is shown in Fig.~\ref{fig:pulse}.
 
 \begin{figure}[htpb]
     \centering
@@ -325,7 +312,7 @@ To estimate gain and energy resolution the electronic chain is calibrated by inj
 
 To study the structures performance multiple data acquisitions have been taken varying the anode-cathode voltage difference. Some acquired spectra are shown in Fig. \ref{fig:spectra}. From the spectra it is possible to observe the asymmetry of the main $K\alpha$ emission line at 5.9 keV due to the presence of the $K\beta$ line, as well as the argon escape peak at about 3.0 keV. All the structures show an energy resolution good enough to clearly separate the main peak from the escape peak.
 
-\begin{figure}[!b]
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter5/1d_43p3_spectrum}
     \includegraphics[width=0.49\linewidth]{figures/chapter5/1d_spectrum}
@@ -347,15 +334,7 @@ The structure with 86.6 $\mu$m pitch shows a higher gain compared to the 43.3 $\
 
 In the same way that a smaller pitch decreases the gain, the two-dimensional hexagonal geometry pushes this effect even further. Since the anode runs all around the pixel perimeter, the amount of anode area is even larger, which further accentuates the effect described above. In fact, this is confirmed by the measurements, because to get enough gain to see a proper spectrum, the voltage difference has to be pushed above 400 V, and even with that, the effective gain is very low, around 40. It is worth noting that this is still a remarkable result, as these are the smallest micro-gap structures fabricated to date and the first two-dimensional ones to achieve enough gain to overcome the noise and observe a source spectrum. A spectrum acquired with this structure is shown in Fig. \ref{fig:spectrum_2d}.
 
-\begin{figure}[!b]
-    \centering
-    \includegraphics[width=0.6\linewidth]{figures/chapter5/2d_spectrum}
-    \caption{$^{55}$Fe spectrum acquired with the two-dimensional hexagonal structures, using an anode-cathode voltage difference of 436 V. The resolution is $\Delta E / E (\textrm{FWHM}) = 23.3 \pm 1.3$ \%.}
-    \label{fig:spectrum_2d}
-\end{figure}
-
-
-\begin{figure}[!b]
+\begin{figure}[!t]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter5/compare_gain}
     \includegraphics[width=0.49\linewidth]{figures/chapter5/compare_resolution}
@@ -363,11 +342,35 @@ In the same way that a smaller pitch decreases the gain, the two-dimensional hex
     \label{fig:compare_results}
 \end{figure}
 
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/chapter5/2d_spectrum}
+    \caption{$^{55}$Fe spectrum acquired with the two-dimensional hexagonal structures, using an anode-cathode voltage difference of 436 V. The resolution is $\Delta E / E (\textrm{FWHM}) = 23.3 \pm 1.3$ \%.}
+    \label{fig:spectrum_2d}
+\end{figure}
+
 As can be seen in Fig. \ref{fig:compare_results}, the energy resolution clearly depends on the applied voltage and gain. At low voltages, the resolution is quite poor because the signal is small and the electronic noise dominates. When the voltage increases, the gain grows and the signal becomes larger compared to the noise, improving the signal-to-noise ratio and making the energy resolution better. In particular, the 86.6 $\mu$m pitch structures show a significantly better energy resolution compared to the 43.3 $\mu$m ones, reaching an outstanding energy resolution of about 11.5\%, compared to 15\% achieved by the 43.3 $\mu$m.
 
 After a certain point, once the noise becomes negligible, the resolution reaches a plateau where it is limited only by the intrinsic statistical fluctuations of the gas ionization and avalanche. However, pushing the voltage even further causes the resolution to degrade again because of non-linearities and instabilities in the avalanche at very high gains.
 
 The same trend is visible for the two-dimensional hexagonal geometry. Since these structures operate at a much lower gain, the signal stays closer to the noise level, leading to a worse energy resolution that only reaches about 23\%.
+
+\fix{MANCA IL SECONDO TEST.}
+
+It is worth noting that not all the tested structures on the chip survived the high voltage differences during the two tests. Depending on the specific design, the breakdown voltage was found to be around 400 V, with the two-dimensional structures reaching slightly higher values up to 430 V. The breakdown process is driven by the very strong electric field localized in the narrow gaps between the electrodes. When the field exceeds the dielectric strength of the gas, it triggers destructive sparks that can cause irreversible short circuits and permanently damage both the anode structures and the underlying ASIC.
+
+Another factor contributing to these discharges is the presence of large unpassivated conductor regions on the chip. In particular, the main bus line that connects all the strips of the same design (visible in Fig. \ref{fig:mugpd_sem}b) and the connections to the readout pads create localized field enhancements at their edges. A standard solution to solve this problem is the passivation of these non-active conductive regions with an insulating layer.
+
+During additional tests, a preliminary passivation was made by depositing a layer of insulating glue over the main connections. This simple intervention effectively shielded the high-field regions at the edges, leading to a notable reduction in destructive spark events and allowing the structures to reach higher operating voltages. A picture showing the damage caused by a destructive discharge on the chip and the applied passivation layer is shown in Fig. \ref{fig:passivation}.
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/chapter5/discharge}
+    \includegraphics[width=0.49\linewidth]{figures/chapter5/passivation}
+    \caption{86.6 $\mu$m pitch one-dimensional structure with multiple aligned damages from discharges (left panel). The destructive events damage the anode, the dielectric layer and the ASIC. A possible solution is applying a layer of glue to passivate the exposed bus line electrode (right panel).}
+    \label{fig:passivation}
+\end{figure}
 
 \subsection{Gain variations}
 
@@ -394,14 +397,18 @@ The charging process characteristic time is $\tau = 0.711 \pm 0.026$ h.
 
 The fit of the discharging phase was not performed due to the limited amount of data, which does not allow for a clear identification of when the plateau is reached and the detector recovers its initial gain value.
 
-What can be observed is that the gain variation is quite large, reaching a decrease of more than 35\%. This is because these structures are only a prototype designed to test the feasibility of placing the amplification stage directly on top of the ASIC. In particular, the dielectric layer between the chip and the anode is much wider than the anode strip itself due to technical limitions of the employed deposition process. Consequently, a large dielectric surface is exposed and a significant amount of charge can accumulate on it, causing a strong variation in the electric field configuration and, as a result, in the gain.
+What can be observed is that the gain variation is quite large, reaching a decrease of more than 35\%. This is because these structures are only a prototype designed to test the feasibility of placing the amplification stage directly on top of the ASIC. In particular, the dielectric layer between the chip and the anode is much wider than the anode strip itself due to technical limitations of the employed deposition process. Consequently, a large dielectric surface is exposed and a significant amount of charge can accumulate on it, causing a strong variation in the electric field configuration and, as a result, in the gain.
 
 \subsection{Conclusions}
 
-The results obtained for gain and energy resolution show that the integration of the multiplication stage directly onto the ASIC is a promising solution for the next generation of GPDs. The micro-gap design guarantees a better uniformity across the detector, which is essential to minimize systematic effects in polarimetric measurements.
+At the current stage, the tests have demonstrated the feasibility of successfully printing and operating micro-gap structures directly on top of an XPOL ASIC without damaging the chip. This represents a breakthrough in the field of Micro-Pattern Gas Detectors, as the one-dimensional 43.3~$\mu$m layout represents the design with the smallest pitch ever operated.
 
-Further developments of these designs will lead to an improvement of the gain and charging properties. In particular, in the final design the dielectric layer width should match that of the anode, in order to reduce the exposed area. Furthermore, a smaller anode width should also improve the effective gain of the structures by reducing the electrode area and increasing the electric field strength near the anode. These changes will require further tests on the chip, to verify that it can withstand these modifications without causing destructive discharges.
+Beyond proving the feasibility of the design, the characterization of the structures has shown outstanding results in terms of gain and, most notably, energy resolution, reaching 11.5\% (FWHM) for the 86.6~$\mu$m pitch structures. This demonstrates that this architecture represents a promising solution for the next generation of GPDs, which should likely ensure better uniformity across the detector, essential for reducing systematic effects in polarimetry measurements.
 
-Another important change concerns the ASIC, which will need to be modified to work with the opposite polarity with respect to the current one. This will allow reading single pixels and reconstructing photoelectron tracks to test the polarimetric sensitivity of the $\mu$GPD, verifying if systematic effects similar to those introduced by the GEM are reduced.
+Further development of the post-processed structures will lead to improvements in gain and a reduction in charging effects. Specifically, this will be achieved by reducing the width of the dielectric layer to match that of the anode, minimizing the exposed insulating area. Furthermore, reducing the anode size itself will increase the gain by decreasing the electrode area, which consequently increases the electric field strength near the anode. These modifications will require further tests on the chip to verify that it can withstand these changes without incurring destructive discharges.
+
+However, the ultimate goal of this project remains the development of a fully monolithic chip where the multiplication structures are fabricated directly in the foundry during the ASIC production, utilizing a CMOS process. There are no fundamental obstacles preventing this integration, and the tests conducted strongly support the feasibility of this approach. While this monolithic design will eliminate several post-processing issues, such as the challenges of layer deposition on an irregular surface, and will provide an even better fabrication accuracy down to a scale of a few hundred nanometers or less, several open questions remain for the final design. In particular, it must be investigated whether the thin oxide layer deposited between the cathode and the anode will be able to withstand the high voltage without experiencing electrical breakdown, and whether the rest of the chip can survive these operational conditions.
+
+Another crucial step towards the final detector concerns the ASIC itself, which will need to be redesigned to operate with the opposite polarity compared to the current version. Collecting electrons instead of ions will allow the readout of individual pixels and the reconstruction of photoelectron tracks. Consequently, it will finally be possible to evaluate the polarimetric sensitivity of the $\mu$GPD, verifying whether the systematic effects typically introduced by the GEM are successfully mitigated as expected.
 
 
