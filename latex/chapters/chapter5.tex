@@ -35,7 +35,7 @@ The design and the idea behind it come from micro-gap chambers, which are based 
 
 This represents a crucial difference with respect to current GPDs. While in current GPDs the readout signal is provided by the electrons collected on the XPOL ASIC, in this novel architecture the signal is carried by the positive ions collected at the cathode. Because the existing XPOL family of chips is exclusively designed to process negative charges, it is necessary to develop a completely new ASIC to read the positive ion signals.
 
-This design is a good candidate to solve the issues of the current generation of GPD because the ASIC CMOS manufacturing processes allow to reach an accuracy on length scales of hundreds of nanometers, much smaller than the tolerances of the GEM manufacturing process. As a consequence gain non-uniformities across the sensor are likely to be strongly reduced. Furthermore, the surface of exposed dielectric can be small and the amount of charge that can be accumulated is reduced, improving detector stability over time and gain variations.
+This design is a good candidate to solve the issues of the current generation of GPD because the ASIC CMOS manufacturing processes allow to reach an accuracy on length scales of hundreds of nanometers, much smaller than the tolerances of the GEM manufacturing process. As a consequence, gain non-uniformities across the sensor are likely to be strongly reduced. Furthermore, the surface of exposed dielectric can be small and the amount of charge that can be accumulated is reduced, improving detector stability over time and gain variations.
 
 
 \begin{figure}[!t]
@@ -187,7 +187,7 @@ The final goal of this research is the development of a fully monolithic detecto
 
 To carry out these preliminary tests without relying on a full CMOS fabrication run, the current prototype structures are realized through a photolithographic post-processing technique. This approach allows depositing the insulating and anode layers directly on top of the substrate, closely replicating the operational conditions of the integrated architecture while drastically reducing development time and complexity.
 
-The insulating layer consists of a high-dielectric-strength material (polymide or SU--8) 2~$\mu$m thick and 13~$\mu$m wide, while the aluminum anode has a thickness of 2~$\mu$m and a width of 5~$\mu$m. It is worth noting that the current prototype leaves significantly more exposed dielectric surface than targeted in the final design. This is due to technical limitations in the photolithographic deposition process, which can be overcome by transitioning to standard CMOS fabrication.
+The insulating layer consists of a high-dielectric-strength material (polyimide or SU-8) 2~$\mu$m thick and 13~$\mu$m wide, while the aluminum anode has a thickness of 2~$\mu$m and a width of 5~$\mu$m. It is worth noting that the current prototype leaves significantly more exposed dielectric surface than targeted in the final design. This is due to technical limitations in the photolithographic deposition process, which can be overcome by transitioning to standard CMOS fabrication.
 
 Once the basic functionality of the structures is verified, the next crucial step is to characterize the gain variations and the achievable energy resolution. Various experimental tests have been performed under different operating conditions to assess the feasibility of these anode structures as the multiplication stage for the next generation of GPDs.
 
@@ -278,7 +278,7 @@ Despite the morphological irregularities of the surface, all four designs descri
     \label{fig:mugpd_sem}
 \end{figure}
 
-Once the successful deposition of the layers on the irregular chip surface is confirmed via SEM inspection, the next step is to evaluate whether the post-processing damaged the underlying ASIC electronics. For this purpose, preliminary electrical tests are carried out before placing the device in the gas chamber. By injecting test charges into the pixels, the readout is triggered and a large ROI is read. This procedure allows verifying the correct functionality of the pixels. It is worth noting that this diagnostic evaluation have been performed with the multiplication structures both with high voltage and at ground.
+Once the successful deposition of the layers on the irregular chip surface is confirmed via SEM inspection, the next step is to evaluate whether the post-processing damaged the underlying ASIC electronics. For this purpose, preliminary electrical tests are carried out before placing the device in the gas chamber. By injecting test charges into the pixels, the readout is triggered and a large ROI is read. This procedure allows verifying the correct functionality of the pixels. It is worth noting that this diagnostic evaluation has been performed with the multiplication structures both with high voltage and at ground.
 
 The measurements confirm that the chip survived the deposition process and is fully functional. Interestingly, mapping the pixel noise provides a sort of radiograph of the structures: pixels located under the structures show a slight change in the mean value. This effect also serves as a useful diagnostic tool to inspect the structures and identify potential fabrication defects, such as disconnected segments or discontinuities along the strips.
 
@@ -320,7 +320,7 @@ To study the structures performance multiple data acquisitions have been taken v
     \label{fig:spectra}
 \end{figure}
 
-To estimate gain and energy resolution of the structures the position and width of the $K\alpha$ line are employed. To take into account emission from both lines the spectra are fitted using a model with two Gaussians to deconvolve them. The model is
+To estimate gain and energy resolution of the structures, the position and width of the $K\alpha$ line are employed. To take into account emission from both lines the spectra are fitted using a model with two Gaussians to deconvolve them. The model is
 
 \begin{equation}
 f(x; a, \sigma, b, r) = \frac{ar}{\sqrt{2\pi}\sigma} e^{\frac{(x - E_{\alpha})^2}{2\sigma^2}} + \frac{a(1-r)}{\sqrt{2\pi}\sigma'} e^{\frac{(x - E_{\beta}/b)^2}{2\sigma'^2}}, \quad \quad \sigma' = \sigma \sqrt{\frac{E_{\alpha}}{E_{\beta}}},
