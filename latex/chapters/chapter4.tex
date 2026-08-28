@@ -139,7 +139,7 @@ Another critical property, essential for high-resolution spectroscopy, is the Eq
 
 All these requirements are achievable with a dedicated analog front-end ASIC. The proposed design features $50~\mu\text{m}$ pitch hexagonal pixels in a honeycomb array over a rectangular matrix, similar to the other XPOL family chips. However, unlike in GPDs, where the readout pixels are physically separated from the GEM, in the ASIX architecture the ASIC pixels are directly connected to the pixelated sensor via micro-bump soldering, aligning each ASIC pixel to the corresponding electrode on the sensor.
 
-Finally, to preserve detector versatility for applications such as X-ray polarimetry, the chip will designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
+Finally, to preserve detector versatility for applications such as X-ray polarimetry, the chip will be designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
 
 At the moment, the dedicated ASIC is still in the design phase and prototypes are not yet available.
 
@@ -171,7 +171,7 @@ The chip layout is described by the pixel pitch, the number of columns and rows 
 
 In the simulation, a photon with a given energy and incident position is generated according to the spectrum and beam distribution and then its absorption depth is sampled from Eq. \ref{eq:pdf_truncated}.
 
-At the moment, only on-axis photons generation is implemented. Furthermore the approximation that electron-hole pairs are produced in a point-like region located in the absorption point is adopted. As mentioned above, this approximation is valid in the case of a silicon sensor and photon energies below 10 keV.
+At the moment, only on-axis photons generation is implemented. Furthermore, the approximation that electron-hole pairs are produced in a point-like region located in the absorption point is adopted. As mentioned above, this approximation is valid in the case of a silicon sensor and photon energies below 10 keV.
 
 The diffusion is modeled as discussed in Chap. \ref{subsec:sensor}, assuming a two-dimensional Gaussian distribution centered on the impact point and with a standard deviation which depends on the absorption depth. Afterwards, the event readout is performed according to the chosen readout logic.
 
@@ -179,7 +179,7 @@ The simulation does not take into account some physical effects, such as the dis
 
 As mentioned above, the first effect becomes relevant at high photon energies, while the second effect depends on the photon energy and the sensor material, as fluorescence yield depends on the involved shell and on the atomic number $Z$. For silicon the fluorescence yield is smaller than 5\% for K-shell and almost 0\% for L-shell, while for cadmium and tellurium is between 83-88\% for K-shell and about 5-7\% for L-shell, as shown in Fig. \ref{fig:fluorescence_yield}.
 
-If fluorescence raditation is emitted, given the isotropic emission angle distribution, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photoelectron can be generated even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV.
+If fluorescence radiation is emitted, given the isotropic emission angle distribution, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photoelectron can be generated even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV.
 
 At the moment the goal of the simulation software is to validate and verify the feasibility of the silicon sensor design in the 6--8 keV energy range, thus all of these effects are negligible. In the future more detailed simulations will be performed by implementing this stage with Geant4 \cite{geant4}.
 
@@ -230,7 +230,7 @@ Noise and pedestal variations are introduced by small non-uniformities in the ma
 
 The noise and pedestal level are estimated by sampling the PHA distribution of a pixel in the absence of source signal. Under this condition, the PHA distribution of each pixel is a Gaussian distribution with a mean corresponding to the pedestal and a standard deviation equal to the noise of the pixel. During the readout the Gaussian is truncated before 0 ADC and digitized. In the optimal configuration, to estimate both quantities, the pedestal is much larger than the noise and thus the Gaussian can be fully sampled. 
 
-For the current prototypes, which are based on XPOL-III, it is possible to generate noise and pedestal maps from data acquisitions wth a source thta illuminates the chip.  As explained in Chap. \ref{sec:xpol3}, XPOL-III defines a ROT with triggered miniclusters and an additional padding can be added, with a large enough padding it is possible to have a lot pixels without source signal.
+For the current prototypes, which are based on XPOL-III, it is possible to generate noise and pedestal maps from data acquisitions with a source that illuminates the chip.  As explained in Chap. \ref{sec:xpol3}, XPOL-III defines a ROT with triggered miniclusters and an additional padding can be added, with a large enough padding it is possible to have a lot pixels without source signal.
 
 In the acquisitions used in the following the padding is large and the resulting ROI has a size of at least $10\times13$ pixels, as shown in Fig. \ref{fig:noise_pedestal_roi}. The true size depends on the number of miniclusters that triggered, thus it can be larger. Once the ROI is defined, pixels that belong to the ROT and all their neighbors are discarded in order to have the smallest probability of including pixels with source signal in the analysis. The number of pixels resulting from this selection is about 120, but it depends on the size of the ROT.
 
@@ -506,15 +506,13 @@ The total charge of the event is defined as $Q = \sum_{i=0}^6 q_i$, where $q_i$ 
 
 If electronic noise is present, the pure multinomial model no longer holds, especially in high-noise conditions, because the observed charge fluctuations become dominated by signal-independent electronic noise rather than charge-partition statistics. 
 
-An example to illustrate this situaiton is the case of a $8\text{ keV}$ photon absorbed in a silicon sensor, which generates approximately $Q \approx 2200\text{ e}^-$ electron-hole pairs. If the central pixel collects an expected fraction $f_0 = 40\%$ of the total charge, the variance associated with the binomial charge-sharing partition among the pixels is
+An example to illustrate this situation is the case of a $8\text{ keV}$ photon absorbed in a silicon sensor, which generates approximately $Q \approx 2200\text{ e}^-$ electron-hole pairs. If the central pixel collects an expected fraction $f_0 = 40\%$ of the total charge, the variance associated with the binomial charge-sharing partition among the pixels is
 
 \begin{equation}
 \sigma_{\text{s}}^2 = Q f_0 (1 - f_0) \approx 528.
 \end{equation}
 
-For the design goal electronics noise of $\sigma_n = 20\text{ ENC}$, the electronic noise variance is $\sigma_n^2 = 400$:
-
-Even for the pixel collecting the largest charge fraction, the statistical partition variance $\sigma_{\text{s}}^2$ and the electronic noise variance $\sigma_n^2$ are of comparable magnitude. For neighboring pixels collecting smaller fractions ($f_i \ll 1$), the partition variance scales as $\sigma_{\text{s}}^2 \approx Q f_i$ and becomes completely overwhelmed by the electronic noise
+For the design goal electronics noise of $\sigma_n = 20\text{ ENC}$, the electronic noise variance is $\sigma_n^2 = 400$. Even for the pixel collecting the largest charge fraction, the statistical partition variance $\sigma_{\text{s}}^2$ and the electronic noise variance $\sigma_n^2$ are of comparable magnitude. For neighboring pixels collecting smaller fractions ($f_i \ll 1$), the partition variance scales as $\sigma_{\text{s}}^2 \approx Q f_i$ and becomes completely overwhelmed by the electronic noise.
 
 To correct this model and adapt it to the presence of electronic noise it is necessary to consider how the noise affects the observations. As seen in Sec. \ref{sec:noise_calibration}, the noise is distributed according to a Gaussian distribution. As a consequence, each pixel charge distribution can be modeled with a Gaussian distribution for the following reasons:
 
@@ -533,7 +531,7 @@ p(q_i; \mu = f_i Q , \sigma^2) = \frac{1}{\sqrt{2\pi}\sigma} \exp \left[- \frac{
 
 where $\sigma$ is the standard deviation obtained from the squared sum of the two fluctuation components and $Q$ is the true total charge generated by the photon interaction. It is important to note that, unlike the electronic noise-free scenario, the true charge $Q$ is now an unknown parameter, because the independent electronic noise added to each pixel causes the sum of the measured charges $\sum_i q_i$ to deviate from the true value $Q$.
 
-Eq. \ref{eq:pdf_mle} lacks an important characteristic which is included in Eq. \ref{eq:mle_multinomial}, which is the correlation between the pixels. Indeed, this probability density function does not take into account the fact that if the incident position varies a bit, some pixels loose some of the charge, while others increase it, thus it cannot be assumed that the pixels are independent. To take the pixel correlation into account, a model that takes into account all the pixels at once has to be considered.
+Eq. \ref{eq:pdf_mle} lacks an important characteristic which is included in Eq. \ref{eq:mle_multinomial}, which is the correlation between the pixels. Indeed, this probability density function does not take into account the fact that if the incident position varies a bit, some pixels lose some of the charge, while others increase it, thus it cannot be assumed that the pixels are independent. To take the pixel correlation into account, a model that takes into account all the pixels at once has to be considered.
 
 To this end, the probability density function is a generic multivariate Gaussian distribution, described by
 
@@ -571,7 +569,7 @@ In order to be correctly used, this position reconstruction method requires a pr
 
 The charge-sharing model calibration is performed using a simulation without noise. A large number of monochromatic events are simulated, then the cluster central pixel is divided into a grid of square bins. For each position bin the average of the charge fraction collected by each of the seven pixels is calculated. The result of the calibration is a set of seven matrices, one for each pixel. Up to a reflection, the matrices of the outer pixels are identical, but for numerical simplicity they are saved and used independently. An example of the set of seven matrices is shown in Fig. \ref{fig:mle_calibration_and_nll}.
 
-During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further details on how the evaluation and minimization of the $\operatorname{NLL}$ are perfomred are provided in Appendix \ref{appendix:mle}.
+During the fit, the minimizer evaluates the $\operatorname{NLL}$ for various values of $(x, y, Q)$. An example of the $\operatorname{NLL}$ evaluated across the pixel for a fixed charge $Q$ is shown in Fig. \ref{fig:mle_calibration_and_nll}. Further details on how the evaluation and minimization of the $\operatorname{NLL}$ are performed are provided in Appendix \ref{appendix:mle}.
 
 \begin{figure}[!b]
     \centering
@@ -620,7 +618,7 @@ In the context of silicon microstrip detectors, a common and widely used algorit
 \eta = \frac{q_R}{q_L + q_R},
 \label{eq:def_eta}
 \end{equation}
-that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, that contrary to the charge baryecenter takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
+that for a microstrip detector is the ratio between the charge $q_R$ collected by the right strip and the total charge collected by the two strips (right and left) involved in the event. By characterizing the distribution of this variable and studying the relation with the incident position, it is possible to obtain a non-linear algorithm, that contrary to the charge barycenter takes into account how the charge diffuses, like the maximum likelihood estimator algorithm.
 
 Assuming that the events are uniformly distributed between the two strips, the typical distribution of $\eta$ is a U-shaped curve, peaked near $\eta = 0$ and $\eta = 1$ and symmetrical with respect to $\eta = 0.5$. The cumulative distribution of $\eta$ gives the relation between the distance from the left strip  of the impact point of the radiation and the observed value of $\eta$. The two distributions are shown in Fig. \ref{fig:belau_eta}.
 
@@ -636,7 +634,7 @@ This methodology can also be generalized to the case of hexagonal pixel detector
 
 These corrections can be calculated from a Monte Carlo simulation with a source that illuminates the detector with a uniform beam. Using Monte Carlo truth positions, the event distribution along the relevant axis for the event typology can be calculated. These distributions can be used to correctly weight the $\eta$ distributions as if the events were uniformly distributed along the axis. The approach that has been used for each event typology will be explained in the following paragraphs.
 
-As said for other the charge barycenter algorithm, for one-pixel events there is nothing that can be done, thus the reconstructed position must coincide with the pixel center.
+As said for the charge barycenter algorithm, for one-pixel events there is nothing that can be done, thus the reconstructed position must coincide with the pixel center.
 
 \begin{figure}[!t]
     \centering
@@ -754,7 +752,7 @@ are a radial coordinate and an angular coordinate. The two coordinates are defin
 \item $\theta$ is the angle measured starting from the latter axis and oriented towards the outer pixel with the highest charge collected.
 \end{itemize}
 
-Considering the ASIX readout geometry, where the central pixel is always the one with the highest pixel and the other two pixels are neighbors, the radial component can be parametrized as a two-pixel event by considering the outer pixels as a single pixel with charge equal to ther sum. This automatically defines a new $\eta_+$ variable which is defined as
+Considering the ASIX readout geometry, where the central pixel is always the one with the highest pixel and the other two pixels are neighbors, the radial component can be parametrized as a two-pixel event by considering the outer pixels as a single pixel with charge equal to their sum. This automatically defines a new $\eta_+$ variable which is defined as
 
 \begin{equation}
 \eta_+ = \eta_1 + \eta_2.
@@ -765,7 +763,7 @@ Considering the ASIX readout geometry, where the central pixel is always the one
     \centering
     \includegraphics[width=0.35\linewidth]{figures/chapter4/position/eta_3pix_scatter}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/position/eta_3pix_dr_hist}
-    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
+    \caption{Scatter plot of Monte Carlo truth impact positions of three-pixel events on the central pixel (left panel) and event count distribution of the events projected onto the radial axes, shown with dashed lines (right panel). The empty circular region at the center of the hexagon is where events are labeled as one-pixel events, and its radius depends on the zero-suppression threshold.}
     \label{fig:3pix_scatter}
 \end{figure}
 
@@ -840,7 +838,7 @@ After analyzing the same dataset as the previous algorithms, the residuals for t
 %\label{tab:eef_eta_unmodeled}
 %\end{table}
 
-The strenght of this method is that a Monte Carlo simulation is not necessary. However, in case it is avalaible, a different formulation of the $\eta$ algorithm can be made using the true incident positions.  In this case it is required knowing the charge diffusion model, but contrary to the likelihood method there are some approximations that can be made, making possible to solve analytically the problem. 
+The strength of this method is that a Monte Carlo simulation is not necessary. However, in case it is available, a different formulation of the $\eta$ algorithm can be made using the true incident positions.  In this case it is required knowing the charge diffusion model, but contrary to the likelihood method there are some approximations that can be made, making possible to solve analytically the problem. 
 
 In the case of two-pixel events the position can only be reconstructed along the line connecting the two pixel centers, thus it is one-dimensional problem, as already seen above. Considering a photon which impacts on this line, the charge diffusion can be modeled as a one-dimensional Gaussian distribution centered on the incident point at a distance $r$ from the central pixel.
 
@@ -1187,7 +1185,7 @@ In conclusion, the MTF currently represents the only available way to characteri
 \section{Energy reconstruction}
 Using the calibration products it is possible to estimate the photon energy for each event and calculating the spectrum of a source. If the absolute gain has been calibrated, the spectrum can be expressed in terms of eV instead of ADC counts if only the normalized gain has been calibrated. However, the difference is only a scale factor, thus it is not relevant.
 
-As for position reconstruction, there are different algorthms that can be employed in the energy reconstruction. Specifically, two algorithms have been developed and will be explained in this section.
+As for position reconstruction, there are different algorithms that can be employed in the energy reconstruction. Specifically, two algorithms have been developed and will be explained in this section.
 
 The performances of these algorithms will be shown in Chap. \ref{sec:results}, where laboratory data will be analyzed and the results are compared to simulations. The metric to determine the goodness of these algorithms is the FWHM of a given spectral line.
 
@@ -1225,7 +1223,7 @@ Reducing this noise is precisely the major improvement of the final design, whic
 
 Additionally, these datasets provide a crucial opportunity to validate the Monte Carlo simulations against real data. Accurate simulations are not only important to understand the intrinsic limits of the detector based on its physical properties, but they are also strictly required for the calibration of some of the reconstruction methods.
 
-In this section, the experimental setups used to collect the data for the imaging and spectral resolution estimation are described. Furthermore, dedicated Monte Carlo simulations matching these setups are presented- These simulations are used to calibrate the different reconstruction algorithms and to provide a baseline for comparing the final resolution results.
+In this section, the experimental setups used to collect the data for the imaging and spectral resolution estimation are described. Furthermore, dedicated Monte Carlo simulations matching these setups are presented. These simulations are used to calibrate the different reconstruction algorithms and to provide a baseline for comparing the final resolution results.
 
  
 \subsection{Imaging resolution}
@@ -1241,8 +1239,7 @@ To estimate the detector imaging resolution a Huttner phantom similar to the one
 
 The phantom portion with the highest frequencies is placed above the detector and it is irradiated with X-rays generated by an X-ray tube which is operated at 10 kV with a gold target \cite{minuti2025}. The X-ray tube is located 1 m from the phantom, in order to have a collimated photon beam. Operating the tube at a voltage of 10 kV with a gold target is not enough to observe fluorescence lines, thus the resulting spectrum is mainly due to Bremsstrahlung emission from accelerated electrons. 
 
-
-The tested prototype is the one with the silicon sensor, which have pixels with 50 $\mu$m pitch. Given that the expected resolution is smaller than the pixel pitch, the avalaible Hutnner phantom does not have a frequency large enough to be used for a visual estimate of the resolution. The solution is to use the edge of a large slit to calculate the ESF, from which the MTF can then be calculated.
+The tested prototype is the one with the silicon sensor, which have pixels with 50 $\mu$m pitch. Given that the expected resolution is smaller than the pixel pitch, the available Hutnner phantom does not have a frequency large enough to be used for a visual estimate of the resolution. The solution is to use the edge of a large slit to calculate the ESF, from which the MTF can then be calculated.
 
 Before the event reconstruction, the detector calibration is performed to estimate the noise level of the pixels. Given that for XPOL-III the pedestal subtraction is performed directly on the chip, the first noise calibration method described in Chap. \ref{sec:calibration} is adopted. Then, the normalized pixel gain is calibrated. The noise and normalized gain distributions are shown in Fig. \ref{fig:results_cal}.
 
@@ -1269,21 +1266,11 @@ Modeled $\eta$       & 51.7 & 67.4 \\
 \end{figure}
 
 
-Once the noise and gain of the detector are characterized, a simulated dataset with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods.
+Once the noise and gain of the detector are characterized, a simulated dataset with matching noise, gain and spectrum shape is generated to calibrate the reconstruction methods. After that, the laboratory data can be analyzed and the event positions can be estimated with the different algorithms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits. To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
 
-After that, the laboratory data can be analyzed and the event positions can be estimated with the different algorithms. The resulting positions are shown in Fig. \ref{fig:huttner} and it is possible to observe the distribution of the positions along the phantom slits.
+A new Monte Carlo data set with a slit of the same size of the one analyzed in the laboratory data is simulated to compare the obtained results with those expected from simulations. The data set is generated using the same distribution of noise and normalized gain. After the data set is generated, it is analyzed with the same method used for laboratory data. The MTFs obtained with the different algorithms for laboratory data and simulated data are shown in Fig. \ref{fig:results_mtf} and the values $f_{10}$ for which MTF is 10\% are reported in Tab. \ref{tab:results_mtf}. 
 
-To estimate the spatial resolution, the method described in Chap. \ref{subsec:mtf} to align and project the reconstructed positions along the axis perpendicular to the slanted slit is used to calculate the MTF.
-
-A new Monte Carlo data set with a slit of the same size of the one analyzed in the laboratory data is simulated to compare the obtained results with those expected from simulations. The data set is generated using the same distribution of noise and normalized gain.
-
-After the data set is generated, it is analyzed with the same method used for laboratory data. The MTFs obtained with the different algorithms for laboratory data and simulated data are shown in Fig. \ref{fig:results_mtf} and the values $f_{10}$ for which MTF is 10\% are reported in Tab. \ref{tab:results_mtf}. 
-
-From the analysis of laboratory data, the improvement in the spatial resolution obtained using more complex algorithms than charge barycentering is not as big as expected. Indeed, from Monte Carlo simulations the resolution achieved with the best algorithm, the $\eta$ unmodeled, is about 30\% better than charge barycentering.
-
-This behavior can be associated to different factors. An example is the possibility of having defects in the Huttner phantom slit edges. Indeed, the Huttner phantom is designed to have a quick estimate of the resolution and is not ideal to carry on a detailed analysis with the slanted edge. These defects can transmiss unwanted photons, thus producing a degraded edge image.
-
-
+From the analysis of laboratory data, the improvement in the spatial resolution obtained using more complex algorithms than charge barycentering is not as big as expected. Indeed, from Monte Carlo simulations the resolution achieved with the best algorithm, the $\eta$ unmodeled, is about 30\% better than charge barycentering. This behavior can be associated to different factors. An example is the possibility of having defects in the Huttner phantom slit edges. Indeed, the Huttner phantom is designed to have a quick estimate of the resolution and is not ideal to carry on a detailed analysis with the slanted edge. These defects can transmit unwanted photons, thus producing a degraded edge image.
 
 \subsection{Energy resolution}
 To estimate the energy resolution, a different experimental setup has been employed. For this purpose it is essential to produce a known spectrum with separated lines. To test the ASIX silicon prototype a gold target has been irradiated by an X-ray tube operated at 25 kV, in order to produce fluorescence lines.
@@ -1356,39 +1343,43 @@ To suppress the Bremsstrahlung continuum spectrum and only detect fluorescence l
   \label{fig:spectral_setup}
 \end{figure}
 
-Before analyzing the data, the detector calibration procedure is performed in order to compensate variations between the pixels. The noise level distribution is approximately a Gaussian with mean around 8 ADC counts and a standard deviation of about 1 ADC counts. The normalized gain is approximately uniform with a standard deviation of 3\%.
+Before analyzing the data, the detector calibration procedure is performed in order to compensate variations between the pixels. The noise level distribution is approximately a Gaussian with mean around 8 ADC counts and a standard deviation of about 1 ADC counts. The normalized gain is approximately uniform with a standard deviation of 3\%. The obtained calibration products are also used to run a Monte Carlo simulation with the $L\alpha$ and $L\beta$ gold lines and with the same noise and gain distributions of the detector, in order to compare the results between the two datasets.
 
-Taking into account these variations, the event can be reconstructed with the two different methods described in the previous section.
+The energy is then reconstructed using the two methods described in the previous section. When applying the suppression algorithm, different thresholds can be adopted, making it relevant to investigate how the threshold affects the energy resolution. To evaluate the resolution, the $L\alpha$ and $L\beta$ lines are fitted simultaneously using the model described in Eq.~\ref{eq:two_lines_fit}, and the resolution is derived from the FWHM of the $L\alpha$ peak. 
 
-When using the suppression algorithm, different thresholds can be adopted and it is interesting to study how the threshold affects the resolution. To estimate the resolution, the $L\alpha$ and $L\beta$ lines are fitted simultaneously using a model similar to that in Eq. \ref{eq:two_lines_fit}. An example of spectrum with its best-fit curve is shown in Fig. \ref{fig:spectrum_fit}.
+An example of a measured spectrum along with its best-fit curve, as well as the dependence of the energy resolution on the threshold for both experimental and simulated datasets, are shown in Fig.~\ref{fig:spectrum_fit}. While for laboratory data the best energy resolution is achieved at a threshold around 2.5--3.0\,$\sigma$, in the simulations the optimal resolution is obtained with zero threshold. The origin of this discrepancy is not fully understood, but it can likely be attributed to secondary, low-intensity lines present in the experimental gold spectrum that are not modeled in the simulation, as well as pixel-correlated noise sources present in the real setup. Despite this difference, the best energy resolution measured for both datasets, which is 13.5\% (1300 eV) for laboratory data and 12.5\% (1200 eV) for simulated data, does not differ significantly from the expected energy resolution at 9.7 keV of about 11\% (970 eV).
 
 \begin{figure}[!b]
     \centering
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/spectrum_example}
     \includegraphics[width=0.49\linewidth]{figures/chapter4/results/zsup_dependence}
-    \caption{Example of Au spectrum obtained from an X-ray tube  operated at 25 kV (left panel). The two dominant lines are gold fluorescence lines $L\alpha$ at 9.7 keV and $L\beta$ at 11.5 keV. The spectrum is obatined with a zero-suppression threshold of 2.5$\sigma$ of noise and shows all the events. The dependence of energy resolution on the threshold (right panel) shows that for laboratory data the best resolution is achieved at around 2.5--3.0$\sigma$, while for Monte Carlo simulations it is achieved with lower threshold values. The two dashed lines with the respective error bands show the energy resolution estimate with the MLE algorithm, which is indepenent from the suppression threshold.}
+    \caption{Example of Au spectrum obtained from an X-ray tube  operated at 25 kV (left panel). The two dominant lines are gold fluorescence lines $L\alpha$ at 9.7 keV and $L\beta$ at 11.5 keV. The spectrum is obtained with a zero-suppression threshold of 2.5$\sigma$ of noise and shows all the events. The dependence of energy resolution on the threshold (right panel) shows that for laboratory data the best resolution is achieved at around 2.5--3.0$\sigma$, while for Monte Carlo simulations it is achieved with lower threshold values. The two dashed lines with the respective error bands show the energy resolution estimate with the MLE algorithm, which is independent from the suppression threshold.}
     \label{fig:spectrum_fit}
 \end{figure}
 
-The dependence of the detector resolution on the zero-suppresion threshold is estimated using the FWHM of the best-fit curve of the $L\alpha$ line. The results are shown in Fig. \ref{fig:spectrum_fit}. It is possible to observe that the best resolution is achieved for a value of the threshold around 2.5 and 3 times the noise level of the pixels and is about 12.5\% at 9.7 keV.
+Both laboratory and simulated datasets were also analyzed using the MLE algorithm. For experimental data, the MLE achieves an energy resolution slightly worse than the optimal value obtained with the suppression method. This discrepancy arises from the algorithm's calibration, which relies on Monte Carlo simulations: differences between the simulated and real detector response degrade the reconstruction accuracy. On the other hand, when applied directly to simulated data, the MLE reaches an energy resolution comparable to the best performance achieved by the suppression method. Further measurements are required to determine whether the higher complexity of the MLE algorithm is justified, given that the simpler suppression algorithm achieves the same or even better results on real data.
 
-Using the distributions obtained from the calibration products it is possible to run Monte Carlo simulations with the same noise levels and gain of the laboratory data. This enables to verify if the dependence of the energy resolution is the same of what is observed with laboratory data.
+In conclusion, the current prototype is far from the design goal of 20\,$e^-$ ENC of noise per pixel, which can be achieved only with the ASIC that is currently being designed. At the moment, the single-pixel noise contribution is around 400\,eV. The results obtained with this prototype validate the reconstruction framework and demonstrate the effectiveness of both offline algorithms. Once the final low-noise front-end electronics is coupled to the active sensor, the energy resolution is expected to improve by a factor of 4--5, reaching the targeted $\sim$300\,eV FWHM at 10\,keV and enabling the separation of closely spaced fluorescence lines in applications such as XRD and astrophysical spectroscopy.
 
-The energy reconstruction is performed with the same thresholds used for laboratory data, and the energy resolution is estimated by fitting the spectrum with the same fit model used in the previous case. The results are shown in Fig. \ref{fig:spectrum_fit}. \fix{It is possible to see that in the case of Monte Carlo simulations the best energy resolution is achieved with the smallest threshold and it becomes worse with higher thresholds.}
+\subsection{Cluster size distribution}
 
-Both laboratory and simulated data sets have been analzyed using the MLE algorithm as well. When using this method, which is independent from the choice of a threshold, for laboratory data it is possible to observe that the estimated energy resolution is a bit worse than what is achievable with the suppression method. However, the results are good enough to not exclude the use of this method.
+\begin{figure}[!b]
+\centering
+	$\vcenter{\hbox{\includegraphics[width=0.55\linewidth]{figures/chapter4/results/cluster_size}}}$\hfill
+    $\vcenter{\hbox{\includegraphics[width=0.45\linewidth]{figures/chapter4/results/cluster_size_hist}}}$
+    	\caption{Average cluster size as a function of the zero-suppression threshold for laboratory data and Monte Carlo simulations generated with different diffusion coefficients ranging from 40 to 60 $\mu$m~cm$^{-0.5}$ (left panel). The experimental data points are best matched by the simulation with 55~$\mu$m~cm$^{-0.5}$. Normalized cluster size distribution for laboratory data compared to the Monte Carlo simulation with a diffusion coefficient of 55~$\mu$m~cm$^{-0.5}$, obtained with a zero-suppression threshold of 1.5\,$\sigma$ (right panel).}
+\label{fig:cluster_size}
+\end{figure}
 
-The problem of this method, as already discussed for position reconstruction, is the necessity of calibrating the algorithm from Monte Carlo simulations. If the simulations differ a bit, it is possible that the final results are worse than what could be achieved.
+In addition to comparing the spatial and energy resolutions between laboratory data and Monte Carlo simulations, another relevant quantity that can be evaluated is the cluster size. This metric depends primarily on the charge diffusion geometry and the pixel pitch. While the pixel pitch is precisely known, charge diffusion is harder to estimate accurately due to uncertainties in the diffusion coefficient. In fact, various physical effects, such as local electric field variations, doping non-uniformities, and temperature fluctuations, can introduce a significant uncertainty on its nominal value. Furthermore, pixel crosstalk acts as an additional charge-sharing mechanism, effectively spreading charge across adjacent pixels as if the diffusion coefficient were larger.
 
-This is clear when analyzing the simulations, where an energy resolution of 12.3\% is achieved, better than all the suppression thresholds tested. This shows that when the Monte Carlo simulations are refined, the MLE reconstruction can perform better than the other method.
+For this reason, the effective diffusion coefficient used in the Monte Carlo simulations is tuned by matching the laboratory data. Specifically, events are reconstructed with different zero-suppression thresholds, following the same procedure adopted for the energy reconstruction, to evaluate the average cluster size distribution. Multiple datasets matching the experimental source spectrum, noise, and gain are then simulated for different diffusion coefficients.
 
-With the current chips, the noise is dominated by the electronic component. Using the fit results the total noise standard deviation of each pixel is estimated to be around 400 eV, while the Fano limit is just about 60 eV. This means that the current electronic noise is about four or five times larger than the design goal.  
+The comparison between experimental and simulated data is shown in Fig.~\ref{fig:cluster_size}. For the gold spectrum dataset used to evaluate the energy resolution, the diffusion coefficient that best describes the experimental data is found to be around $55\,\mu\text{m}\,\text{cm}^{-0.5}$. This agreement is confirmed by comparing the cluster size distributions, particularly at a threshold of $1.5\,\sigma$.
 
-This means that once the final ASIC is completed, the energy resolution will be approximately a factor 4 or 5 smaller then the current one, enabling to reach a relative energy resolution of about 3\% at 10 keV, or about 300 eV (FWHM).
+\subsection{Conclusions}
+In summary, the characterization of the current ASIX prototypes has successfully validated both the proposed architecture and its dedicated simulation and analysis framework. By combining experimental measurements, using line pair phantoms for spatial resolution and fluorescence targets for spectroscopy, with Monte Carlo simulations, a complete data processing pipeline has been established and tested. This framework covers the entire analysis workflow: it starts from the fundamental calibration of detector non-uniformities, such as noise levels, baseline offsets, and normalized gain, and integrates these products into the event reconstruction process to improve the estimate of the photon energy and its sub-pixel incidence position.
 
-\fix{capire se si riesce a sistemare questa cosa della risoluzione e scrivere qualcosina sulla cluster size?}
+Although the experimental spatial and energy resolutions are currently constrained by the high electronic noise of the XPOL-III readout chip, the implementation of advanced reconstruction algorithms confirms the validity of the underlying physical models. In particular, both the maximum likelihood estimator and the $\eta$ algorithms have demonstrated their superiority over simple charge barycentering, proving that exploiting the charge sharing geometry is the key to achieving sub-pixel spatial resolution. Furthermore, the agreement found between experimental data and simulations, such as in the matching of the cluster size distributions, proves the reliability of the current simulation software for these preliminary studies. However, since the current Monte Carlo framework is based on a simplified physical model, it will need to be upgraded by integrating a full Geant4 simulation to accurately account for all the relevant physical processes.
 
-
-
-
-
+The integration of a new low-noise XPOL ASIC, with a target of less than $20\text{ e}^-$ ENC per pixel and the seven-pixel parallel readout logic, will finally overcome the current hardware limitations. In preparation for this upgrade, the analysis framework discussed in this work provides a validated environment, ready to be employed for the characterization of the final detector in the next development phases.
