@@ -1,6 +1,6 @@
 \appendix
 
-\chapter{Numerical Implementation of the MLE algorithm}
+\chapter{Numerical Implementation of the MLE Algorithm}
 \label{appendix:mle}
 The fit procedure described in Sec. \ref{subsec:mle} employs a set of seven discrete matrices to evaluate the charge fractions $\vec{f}(x, y)$ needed for the calculation of the negative log-likelihood in Eq. \ref{eq:nll_multivariate}. Performing the minimization on discrete matrices could lead to numerical problems, due to the possibility of having non-physical zero gradients in case of small steps of the minimizer. This can prevent the algorithm from finding the global minimum, leading to errors in the reconstructed position and energy.
 

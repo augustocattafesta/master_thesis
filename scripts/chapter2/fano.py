@@ -34,6 +34,7 @@ plt.xlabel("Energy [keV]")
 plt.ylabel(r"$\Delta$E/E (FWHM)")
 plt.legend(frameon=False)
 plt.xlim(1, 2e1)
+plt.ylim(0.)
 plt.xscale("log")
 plt.tight_layout()
 

@@ -161,7 +161,7 @@ This section illustrates the Monte Carlo simulation software and the calibration
 \end{figure}
 
 \subsection{Monte Carlo simulations}
-Monte Carlo simulations of the detector are essential to understand its capabilities depending on the design. As mentioned in the previous section, designing a detector which has both imaging and spectroscopical high-resolution capabilities requires to carefully tune the active sensor thickness, pixel pitch, working voltages and further properties to achieve the correct trade-off between energy and imaging resolution. 
+Monte Carlo simulations of the detector are essential to understand its capabilities depending on the design. As mentioned in the previous section, designing a detector which has both imaging and spectroscopical high-resolution capabilities requires to carefully tune the active sensor thickness, pixel pitch, working voltages and further properties to achieve the correct trade-off between energy and spatial resolution. 
 
 With the first prototypes it is also possible to validate the simulations with laboratory data, and if necessary finely tuning the Monte Carlo to match the data, in order to have a software that can reliably simulate the real detector. The simulation consists of different steps, each representing a different stage of the detector.
 
@@ -1226,8 +1226,8 @@ Additionally, these datasets provide a crucial opportunity to validate the Monte
 In this section, the experimental setups used to collect the data for the imaging and spectral resolution estimation are described. Furthermore, dedicated Monte Carlo simulations matching these setups are presented. These simulations are used to calibrate the different reconstruction algorithms and to provide a baseline for comparing the final resolution results.
 
  
-\subsection{Imaging resolution}
-To estimate the detector imaging resolution a Huttner phantom similar to the one shown in Fig. \ref{fig:huttner} has been used. The phantom is made of a 50 $\mu$m thick lead slab with multiple sets of slits with different spatial frequencies, ranging from a minimum of 0.5 lp/mm up to a maximum of 10 lp/mm.
+\subsection{Spatial resolution}
+To estimate the detector spatial resolution a Huttner phantom similar to the one shown in Fig. \ref{fig:huttner} has been used. The phantom is made of a 50 $\mu$m thick lead slab with multiple sets of slits with different spatial frequencies, ranging from a minimum of 0.5 lp/mm up to a maximum of 10 lp/mm.
 
 \begin{figure}[!b]
     \centering
@@ -1377,7 +1377,7 @@ For this reason, the effective diffusion coefficient used in the Monte Carlo sim
 
 The comparison between experimental and simulated data is shown in Fig.~\ref{fig:cluster_size}. For the gold spectrum dataset used to evaluate the energy resolution, the diffusion coefficient that best describes the experimental data is found to be around $55\,\mu\text{m}\,\text{cm}^{-0.5}$. This agreement is confirmed by comparing the cluster size distributions, particularly at a threshold of $1.5\,\sigma$.
 
-\subsection{Conclusions}
+\section{Conclusions}
 In summary, the characterization of the current ASIX prototypes has successfully validated both the proposed architecture and its dedicated simulation and analysis framework. By combining experimental measurements, using line pair phantoms for spatial resolution and fluorescence targets for spectroscopy, with Monte Carlo simulations, a complete data processing pipeline has been established and tested. This framework covers the entire analysis workflow: it starts from the fundamental calibration of detector non-uniformities, such as noise levels, baseline offsets, and normalized gain, and integrates these products into the event reconstruction process to improve the estimate of the photon energy and its sub-pixel incidence position.
 
 Although the experimental spatial and energy resolutions are currently constrained by the high electronic noise of the XPOL-III readout chip, the implementation of advanced reconstruction algorithms confirms the validity of the underlying physical models. In particular, both the maximum likelihood estimator and the $\eta$ algorithms have demonstrated their superiority over simple charge barycentering, proving that exploiting the charge sharing geometry is the key to achieving sub-pixel spatial resolution. Furthermore, the agreement found between experimental data and simulations, such as in the matching of the cluster size distributions, proves the reliability of the current simulation software for these preliminary studies. However, since the current Monte Carlo framework is based on a simplified physical model, it will need to be upgraded by integrating a full Geant4 simulation to accurately account for all the relevant physical processes.
