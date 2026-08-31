@@ -198,7 +198,7 @@ The second step applies a geometrical constraint, requiring all pixels above thr
 \section{Detector calibration}
 \label{sec:calibration}
 
-Raw PHA values recorded by
+Raw PHA values recorded by the detector need to be corrected for electronic baseline offsets (pedestal) and pixel-to-pixel gain variations (equalization) to retrieve the true deposited charge. Furthermore, characterizing the pixel noise is essential to define zero-suppression thresholds and to correctly weight PHA values during clustering and event reconstruction.
 
 Detector calibration is crucial to account for spatial non-uniformities across the active area, which arise from small imperfections in the readout electronics, sensor inhomogeneities, and non-uniformities in the bump-bonding connections with the ASIC. Correcting for these variations allows maximizing detector performance and improving both spatial and energy resolution.
 
