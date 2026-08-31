@@ -119,9 +119,7 @@ This represents a remarkable difference with respect to GPDs, requiring a comple
 \subsection{ASIC}
 \label{subsec:asic}
 
-The goal of developing a detector suitable for different applications under diverse operating conditions requires a readout chip capable of handling event rates significantly higher than those typical of astrophysical sources. 
-
-As a reference, the brightest extrasolar source in the 2--8~keV energy range yields a flux of about 30~ph~cm$^{-2}$~s$^{-1}$, whereas an XRD laboratory setup with a Copper source can easily exceed a flux of $2 \times 10^8$~ph~cm$^{-2}$~s$^{-1}$ \cite{bolze2019}.
+The goal of developing a detector suitable for different applications under diverse operating conditions requires a readout chip capable of handling event rates significantly higher than those typical of astrophysical sources. As a reference, the brightest extrasolar source in the 2--8~keV energy range yields a flux of about 30~ph~cm$^{-2}$~s$^{-1}$, whereas an XRD laboratory setup with a Cu source can easily exceed a flux of $2 \times 10^8$~ph~cm$^{-2}$~s$^{-1}$ \cite{bolze2019}.
 
 The key to speeding up the readout with respect to GPDs is exploiting the fixed event geometry. While reducing the number of pixels to read is essential to lower the dead time, the main architectural breakthrough is the ability to read all seven pixels in parallel. 
 
@@ -139,17 +137,13 @@ Another critical property, essential for high-resolution spectroscopy, is the Eq
 
 All these requirements are achievable with a dedicated analog front-end ASIC. The proposed design features $50~\mu\text{m}$ pitch hexagonal pixels in a honeycomb array over a rectangular matrix, similar to the other XPOL family chips. However, unlike in GPDs, where the readout pixels are physically separated from the GEM, in the ASIX architecture the ASIC pixels are directly connected to the pixelated sensor via micro-bump soldering, aligning each ASIC pixel to the corresponding electrode on the sensor.
 
-Finally, to preserve detector versatility for applications such as X-ray polarimetry, the chip will be designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
+Finally, to preserve the chip versatility for applications such as X-ray polarimetry, it will be designed to support an alternative triggering and readout logic similar to XPOL-III, based on a sequential readout within a rectangular ROI, as described in Chap. \ref{sec:xpol3}. While this mode operates at lower speeds and reduced maximum rates, it allows the acquisition and reconstruction of extended photoelectron tracks when required.
 
 At the moment, the dedicated ASIC is still in the design phase and prototypes are not yet available.
 
 \section{Simulations and analysis framework}
 
-To estimate the properties of different detector designs prior to the realization and then to characterize a prototype, a framework to generate Monte Carlo simulations of the detector and analyze collected data has been developed and is available at \cite{hexsample, tomaiuolo2024}. 
-
-The framework provides a suite of command-line tools that can be executed directly from the terminal or integrated into automated scripts. Data are stored using the Hierarchical Data Format (HDF5), which allows for efficient array storage and metadata tagging through file attributes.
-
-The core pipeline modules, illustrated in Fig.~\ref{fig:block_diagram}, are responsible for running Monte Carlo simulations, converting raw binary data collected with prototypes into HDF5 files, performing detector calibration, and executing event reconstruction.
+To estimate the properties of different detector designs prior to the realization and then to characterize a prototype, a framework to generate Monte Carlo simulations of the detector and analyze collected data has been developed and is available at \cite{hexsample, tomaiuolo2024}. The framework provides a suite of command-line tools that can be executed directly from the terminal or integrated into automated scripts. Data are stored using the Hierarchical Data Format (HDF5), which allows for efficient array storage and metadata tagging through file attributes. The core pipeline modules, illustrated in Fig.~\ref{fig:block_diagram}, are responsible for running Monte Carlo simulations, converting raw binary data collected with prototypes into HDF5 files, performing detector calibration, and executing event reconstruction.
 
 This section illustrates the Monte Carlo simulation software and the calibration and analysis pipeline.
 
@@ -181,7 +175,7 @@ As mentioned above, the first effect becomes relevant at high photon energies, w
 
 If fluorescence radiation is emitted, given the isotropic emission angle distribution, it travels through the sensor until it is absorbed and produces a new photo-electron. Depending on the photon energy, the new photoelectron can be generated even a pixel pitch far from the first electron. For CdTe sensor this drastically decreases the simulation accuracy, but only for energies above the K-edge, which is about 27 keV.
 
-At the moment the goal of the simulation software is to validate and verify the feasibility of the silicon sensor design in the 6--8 keV energy range, thus all of these effects are negligible. In the future more detailed simulations will be performed by implementing this stage with Geant4 \cite{geant4}.
+At the moment the goal of the simulation software is to validate and verify the feasibility of the silicon sensor design in the 6--10 keV energy range, thus all of these effects are negligible. In the future more detailed simulations will be performed by implementing this stage with Geant4 \cite{geant4}.
 
 Another effect that is not taken into account is pixel crosstalk, which represents an additional source of charge sharing between pixels. A simple way to partially solve this is to include this effect into the charge diffusion process, increasing the diffusion parameter calculated from Eq. \ref{eq:diff_sigma_dist}. The correct value of this parameter can be chosen comparing the cluster size distribution between laboratory data and simulation until they match.
 
@@ -199,12 +193,12 @@ For some algorithms all the PHA values of the seven-pixel cluster are necessary,
 
 The first step to create the cluster is choosing a zero-suppression threshold, which is defined for each pixel in terms of its noise standard deviation, measured during the calibration phase to build a dedicated noise map of the chip. The threshold is used to suppress all the pixels that are dominated by electronic noise.
 
-The second step applies a geometrical constraint, requiring all pixels above threshold to be adjacent. The central pixel is always kept as it triggered the event. The remaining pixels in the cluster are selected by evaluating the non-central pixels above threshold in descending order of signal amplitude, starting from the one with the highest PHA. A pixel is kept only if it is adjacent to a previously accepted pixel, otherwise it is suppressed. This process continues until a maximum of two neighboring pixels (plus the central one) is reached. Consequently, the final cluster size is strictly constrained to be between one and three pixels.
+The second step applies a geometrical constraint, requiring all pixels above threshold to be adjacent. The central pixel is always kept as it triggered the event. The remaining pixels in the cluster are selected by evaluating the non-central pixels above threshold in descending order of signal amplitude, starting from the one with the highest PHA. A pixel is kept only if it is adjacent to a previously accepted pixel, otherwise it is suppressed. This process continues until a maximum of two neighboring pixels (plus the central one) is reached. Consequently, the final cluster size is strictly constrained to be between one and three.
 
 \section{Detector calibration}
 \label{sec:calibration}
 
-Raw PHA values recorded by the detector need to be corrected for electronic baseline offsets (pedestal) and pixel-to-pixel gain variations (equalization) to retrieve the true deposited charge. Furthermore, characterizing the pixel noise is essential to define zero-suppression thresholds and to correctly weight PHA values during clustering and event reconstruction.
+Raw PHA values recorded by
 
 Detector calibration is crucial to account for spatial non-uniformities across the active area, which arise from small imperfections in the readout electronics, sensor inhomogeneities, and non-uniformities in the bump-bonding connections with the ASIC. Correcting for these variations allows maximizing detector performance and improving both spatial and energy resolution.
 
