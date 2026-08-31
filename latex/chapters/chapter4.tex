@@ -373,11 +373,11 @@ With all the necessary calibration products, it is possible to reconstruct all t
 
 As a consequence, different algorithms have been developed and compared to determine which one achieves the best spatial resolution. To estimate the performance of these algorithms, two distinct methods can be employed. 
 
-The first approach is typical for space applications, where a source with a known spatial profile, such as a point-like source, is used to directly compare the true incidence position with the reconstructed one. In this work, this method is implemented using the Monte Carlo ground truth. The metric used to gauge the spatial resolution is the encircled energy fraction (EEF). The EEF is the cumulative density function of the radial distance distribution between the true and the reconstructed positions \cite{longair2011}.
+The first approach is typical for space applications, where a source with a known spatial profile, such as a point-like source, is used to directly compare the true incidence position with the reconstructed one. In this work, this method is implemented using the Monte Carlo ground truth. The metric used to gauge the spatial resolution is the encircled energy fraction (EEF). The EEF is the cumulative density function of the distance distribution between the true and the reconstructed positions \cite{longair2011}.
 
 Usually, the EEF is calculated by integrating the Point Spread Function (PSF), which represents the response of a detector to a point-like source. In this case, given the availability of the Monte Carlo ground truth positions, it can be directly derived from the radial residuals distribution. Common metrics of the EEF are the radii corresponding to 50\% (Half-Energy Width, HEW) and 90\% encircled energy, which represent the customary standard for space telescopes. The HEW measures the core spatial resolution, while the latter is sensitive to the extended tails of the distribution.
 
-The second approach is standard in medical and industrial imaging and relies on evaluating the spatial response of the detector to an illuminated slit or a sharp edge. This method has been adopted to analyze laboratory experimental data.
+The second approach is standard in medical and industrial imaging and relies on evaluating the spatial response of the detector to an illuminated slit or a sharp edge. This method has been adopted to analyze laboratory experimental data, and will be expòained in detail in the following.
 
 \subsection{Charge barycenter}
 \label{subsec:barycenter}
@@ -399,7 +399,7 @@ where $x_i$ and $y_i$ are the coordinates of the $i$-th pixel and $q_i$ is the c
 
 This method assumes that the charge in each pixel is spread uniformly across it or, equivalently, that it is concentrated in its center. This method does not consider how the charge diffuses inside the active sensor. If the charge would spread on a large number of pixels, this assumption would be valid and the charge barycenter would be a good estimator of the incident position. However, as said above, the detectors are designed to have a small $\langle \sigma \rangle / p$ ratio and the cluster size is small, thus the charge barycenter is not ideal.
 
-It must be noted that for one-pixel events this is the only possible method that can be applied, as there is not enough information to reconstruct a position different from the pixel center. From this point on, it is assumed that every time a one-pixel event is analyzed, the incident position is reconstructed in the pixel center. While these events have the best energy resolution, as will be shown in the next section, they have the worst spatial resolution.
+It must be noted that for one-pixel events this is the only possible method that can be applied, as there is not enough information to reconstruct a position different from the pixel center. From this point on, it is assumed that every time a one-pixel event is analyzed, the incident position is reconstructed in the pixel center. While these events have the best energy resolution, they have the worst spatial resolution.
 
 Fig. \ref{fig:barycenter_dx_dy} shows the residuals distributions for the $x$ and $y$ components between the reconstructed and the Monte Carlo truth positions. It is visible how the hexagonal geometry affects the reconstruction, in particular for two-pixels and three-pixels events. The overall distributions are not gaussians and are broad.
 
@@ -423,7 +423,7 @@ Fig. \ref{fig:barycenter_eef} shows how the EEF of the barycenter algorithm vari
 %\label{tab:eef_barycenter}
 %\end{table}
 
-This algorithm does not require any specific position-calibration models, as it neglects the physical details of charge diffusion. Consequently, it represents a fast, straightforward approach that provides a robust first estimate of the interaction position, relying exclusively on basic noise and gain-corrected pixel data.
+This algorithm does not require any specific position-calibration models, as it neglects the physical details of charge diffusion. Consequently, it represents a fast, straightforward approach that provides a first estimate of the interaction position, relying exclusively on basic noise and gain-corrected pixel data.
 
 \begin{figure}[h]
     \centering
@@ -484,7 +484,7 @@ This algorithm does not require any specific position-calibration models, as it 
     \label{fig:mle_model}
 \end{figure}
 
-The simple barycenter algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Chap. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position and with a standard deviation $\sigma$ that can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
+The simple barycenter algorithm totally ignores how the charge diffuses inside the sensor, as it assumes that it uniformly spreads across the involved pixels. As mentioned in Chap. \ref{sec:semiconductors}, the charge diffusion inside the active sensor can be modeled with a bivariate Gaussian distribution centered on the incident position (Fig. \ref{fig:mle_model}) and with a standard deviation $\sigma$ that can be estimated using Eq. \ref{eq:z_average} and the working conditions of the sensor. By normalizing the total charge to 1, the integral of the bivariate distribution over each pixel $P_i$ represents the charge fraction $f_i$ that has been collected by it
 
 \begin{equation}
 f_i (x_0, y_0) = \int_{P_i} \frac{1}{2\pi \sigma^2} \exp \left[ - \frac{(x - x_0)^2 + (y - y_0)^2}{2\sigma^2} \right] \,dx\,dy.
@@ -508,7 +508,7 @@ An example to illustrate this situation is the case of a $8\text{ keV}$ photon a
 
 For the design goal electronics noise of $\sigma_n = 20\text{ ENC}$, the electronic noise variance is $\sigma_n^2 = 400$. Even for the pixel collecting the largest charge fraction, the statistical partition variance $\sigma_{\text{s}}^2$ and the electronic noise variance $\sigma_n^2$ are of comparable magnitude. For neighboring pixels collecting smaller fractions ($f_i \ll 1$), the partition variance scales as $\sigma_{\text{s}}^2 \approx Q f_i$ and becomes completely overwhelmed by the electronic noise.
 
-To correct this model and adapt it to the presence of electronic noise it is necessary to consider how the noise affects the observations. As seen in Sec. \ref{sec:noise_calibration}, the noise is distributed according to a Gaussian distribution. As a consequence, each pixel charge distribution can be modeled with a Gaussian distribution for the following reasons:
+To correct this model and adapt it to the presence of electronic noise it is necessary to consider how it affects the observations. As seen in Sec. \ref{sec:noise_calibration}, the noise is distributed according to a Gaussian distribution. As a consequence, each pixel charge distribution can be modeled with a Gaussian distribution for the following reasons:
 
 \begin{itemize}[label=-]
 \item if a pixel collects many charges, its probability distribution converges to a Gaussian distribution. When the noise is added, the resulting variable is still distributed according to a Gaussian distribution with variance $\sigma^2 = \sigma^2_s + \sigma^2_n$;
@@ -672,7 +672,7 @@ Before calculating the $\eta$ distribution it is necessary to verify if two-pixe
 %To apply the geometrical correction to the $\eta$ distribution, an iterative procedure is adopted. In the initial step, the relationship between $\eta$ and the position $r$ is assumed to be linear, mapping the minimum and maximum observed values of $\eta$ to the boundaries of the $r$ interval. Using this preliminary $r(\eta)$ mapping, the $\eta$ distribution is corrected by weighting the counts in each $\eta$ bin by the inverse of the spatial density at the corresponding position $r$. The cumulative distribution function of this weighted $\eta$ histogram is then calculated, yielding an updated, non-linear calibration function $r(\eta)$. This new mapping is fed back into the previous step to re-evaluate the weights for the next iteration. The process is repeated until the relation $r(\eta)$ converges to a stable shape. The resulting distributions are shown in Fig. \ref{fig:eta_2pix}. For the final event reconstruction, the cumulative distribution is interpolated to obtain a continuous function $r(\eta)$.
 %
 
-To apply the geometrical correction on the $\eta$ distribution, an iterative approach can be adopted. Calling $g(\eta)$ the measured $\eta$ distribution and $\rho(r)$ the event spatial distribution along the reconstruction axis $r$. In the first step $n=0$, the relation between $\eta$ and $r$ is assumed to be linear, and the minimum and maximum observed values of $\eta$ correspond to the minimum and maximum values of $r$
+To apply the geometrical correction on the $\eta$ distribution, an iterative approach can be adopted. Let $g(\eta)$ be the measured $\eta$ distribution and $\rho(r)$ the event spatial distribution along the reconstruction axis $r$. In the first step $n=0$, the relation between $\eta$ and $r$ is assumed to be linear, and the minimum and maximum observed values of $\eta$ correspond to the minimum and maximum values of $r$
 
 \begin{equation}
 r_0(\eta) = r_{\textrm{min}} + (\eta - \eta_{\textrm{min}}) \frac{r_{\textrm{max}} - r_{\textrm{min}}}{\eta_{\textrm{max}} - \eta_{\textrm{min}}}.
@@ -1369,7 +1369,7 @@ In addition to comparing the spatial and energy resolutions between laboratory d
 
 For this reason, the effective diffusion coefficient used in the Monte Carlo simulations is tuned by matching the laboratory data. Specifically, events are reconstructed with different zero-suppression thresholds, following the same procedure adopted for the energy reconstruction, to evaluate the average cluster size distribution. Multiple datasets matching the experimental source spectrum, noise, and gain are then simulated for different diffusion coefficients.
 
-The comparison between experimental and simulated data is shown in Fig.~\ref{fig:cluster_size}. For the gold spectrum dataset used to evaluate the energy resolution, the diffusion coefficient that best describes the experimental data is found to be around $55\,\mu\text{m}\,\text{cm}^{-0.5}$. This agreement is confirmed by comparing the cluster size distributions, particularly at a threshold of $1.5\,\sigma$.
+The comparison between experimental and simulated data is shown in Fig.~\ref{fig:cluster_size}. For the gold spectrum dataset used to evaluate the energy resolution, the diffusion coefficient that best describes the experimental data is found to be around $55\,\mu\text{m}\,\text{cm}^{-0.5}$, corresponding to a $\langle \sigma \rangle / p = 14$\%. This agreement is confirmed by comparing the cluster size distributions, particularly at a threshold of $1.5\,\sigma$.
 
 \section{Conclusions}
 In summary, the characterization of the current ASIX prototypes has successfully validated both the proposed architecture and its dedicated simulation and analysis framework. By combining experimental measurements, using line pair phantoms for spatial resolution and fluorescence targets for spectroscopy, with Monte Carlo simulations, a complete data processing pipeline has been established and tested. This framework covers the entire analysis workflow: it starts from the fundamental calibration of detector non-uniformities, such as noise levels, baseline offsets, and normalized gain, and integrates these products into the event reconstruction process to improve the estimate of the photon energy and its sub-pixel incidence position.
