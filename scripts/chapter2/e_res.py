@@ -38,6 +38,7 @@ plt.xlabel("ENC [e$^-$]")
 plt.ylabel(r"$\Delta$E/E@5.9 keV (FWHM)")
 plt.legend(frameon=False)
 plt.xlim(0, 150)
+plt.ylim(0.)
 plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter2/enc_limit.pdf", dpi=300, bbox_inches="tight")

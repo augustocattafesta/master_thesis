@@ -40,13 +40,20 @@ ax1.annotate('ISM', (ISM[0], ISM[1]), xytext=(0, 8), textcoords='offset points',
 ax1.scatter(IGM[0], IGM[1], color="k", s=20, edgecolors='black', zorder=3)
 ax1.annotate('IGM', (IGM[0], IGM[1]), xytext=(0, 8), textcoords='offset points', fontsize=10, ha='center')
 
+# --- LIMITI ESPLICITI SU AX1 ---
+# Fissa esplicitamente i limiti di ax1 in modo che non cambino con tight_layout()
+ax1.set_xlim(1e-10, 1e20)
+ax1.set_ylim(1e-2, 1e34)  # Adatta il range per contenere tutti i punti e i ticks
+
 # --- CONFIGURAZIONE ASSE DESTRO (ax2) ---
 ax2 = ax1.twinx()
 ax2.set_yscale("log")
-ax2.set_ylim(ax1.get_ylim()) # Devono avere gli stessi identici limiti!
+ax2.set_ylim(ax1.get_ylim())
 ax2.grid(False)
-# Definisci i tuoi ticks personalizzati (in cm) ed etichette
-ticks_y = [1e1, 1e3, 1e5, 3.086e18, 3.086e21, 3.086e24, 3.086e27]
+
+# Valori corretti in cm:
+# 1 cm = 1e0 cm, 1 m = 1e2 cm, 1 km = 1e5 cm
+ticks_y = [1e0, 1e2, 1e5, 3.086e18, 3.086e21, 3.086e24, 3.086e27]
 labels_y = ["1 cm", "1 m", "1 km", "1 pc", "1 kpc", "1 Mpc", "1 Gpc"]
 
 ax2.set_yticks(ticks_y)

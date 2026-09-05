@@ -31,7 +31,7 @@ Unlike imaging or spectroscopy observations, measuring the polarization of a sou
 \operatorname{MDP}_{99} = \frac{4.29}{\mu R} \sqrt{\frac{R + B}{T}},
 \label{eq:mdp}
 \end{equation} 
-where $R$ is the source rate, $B$ is the background rate, and $T$ is the total observation time. This relation is essential to estimate the required exposure time based on the source flux. Crucially, as $\operatorname{MDP}_{99}$ scales inversely with the square root of time, detecting increasingly smaller polarization levels requires significantly longer observations. An example of IXPE sensitivity is shown in Fig. \ref{fig:mdp_flux}, where it can be seen that detecting a polarization degree of a few percent requires exposure times of the order of $1000$ ks.
+where $R$ is the source rate, $B$ is the background rate, and $T$ is the total observation time. This relation is essential to estimate the required exposure time based on the source flux. Crucially, as $\operatorname{MDP}_{99}$ scales inversely with the square root of time, detecting increasingly smaller polarization levels can requires significantly longer observations. An example of IXPE sensitivity is shown in Fig. \ref{fig:mdp_flux}, where it can be seen that detecting a polarization degree of a few percent can require exposure times of the order of $1000$ ks.
 
 \begin{figure}[!b]
     \centering
@@ -54,7 +54,7 @@ In the future, IXPE will continue its observational program by targeting fainter
 
 IXPE consists of three identical and independent X-ray telescopes. Using three independent telescopes provides redundancy and increases the total effective area while keeping the focal spot small to minimize background noise. 
 
-Each telescope has its grazing incidence mirrors with Wolter-1 configuration and a focal length of 4 m. 
+Each telescope has its grazing-incidence mirrors with Wolter-1 configuration and a focal length of 4 m. 
 The mirrors, shown in Fig. \ref{fig:ixpe}, are made of 24 concentric and nested foils of nickel and cobalt separated by 2 mm. Each nested foil is 600 mm long, and it includes both the parabolic and hyperbolic segment of the Wolter-1 configuration. The entire layout and materials are optimized for high sensitivity in the energy range 2--8 keV.
 
 \begin{figure}[!b]
@@ -131,9 +131,7 @@ The GEM is the amplification stage of the GPD, where the primary ionization elec
 
 The GEM employed inside the GPD is made of liquid crystal polymers (LCP) with a 50 $\mu$m thickness, while the coating is made of copper and each side is 5 $\mu$m thick, for a total thickness of 60 $\mu$m. The holes have a diameter of 30 $\mu$m and follow a hexagonal grid pattern to match the ASIC pixel pattern, with 50 $\mu$m pitch on the horizontal direction and 43.3 $\mu$m on the vertical one. The voltage difference between the two opposite sides is 470 V, ensuring an effective gain of about 200.
 
-The GPD's GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the manufacturing process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area.
-
-These non-uniformities cause the appearance of systematic effects that affect the GPD performance, and will be discussed in Chap. \ref{subsec:sys_eff}.
+The GPD's GEM is shown in Fig. \ref{fig:gem}, and it is possible to observe the presence of eight equally spaced vertical lines. These lines are a result of the manufacturing process, which includes a step where the holes are drilled with a laser. The laser beam has a width smaller than the active region, and it needs multiple sweeps to complete the entire area. These non-uniformities cause the appearance of systematic effects that affect the GPD performance, and will be discussed in Chap. \ref{subsec:sys_eff}.
 
 \begin{figure}[hbtp]
     \centering
@@ -167,9 +165,7 @@ The ASIC calculates the coordinates of the upper-left and lower-right points of 
 
 A peculiar feature of XPOL-I is that the ROI is sequentially read two times in close succession. The first readout is used to read the pixel values, while the second one is used to perform online pedestal subtraction. Furthermore, the resulting data are zero-suppressed, allowing for a compression of the event size.
 
-The choice of performing an event-by-event online pedestal subtraction was made to cancel all time-dependent baseline drifts and transient systematic effects. These include small charge leakage effects in the hold capacitors during the serial readout delay, as well as transients induced by the ASIC digital activity. These systematic shifts cannot be corrected using a static, full-chip offline calibration map because the position, size, and shape of the ROI change for every event.
-
-Since the time at which a pixel is sampled relative to the trigger depends on its position within the specific ROI, the same pixel experiences different readout delays and digital transients depending on whether it is located at the beginning or at the end of the readout sequence. By reading the exact same ROI twice in close succession, these location and time-dependent baseline variations are effectively subtracted and canceled out.
+The choice of performing an event-by-event online pedestal subtraction was made to cancel all time-dependent baseline drifts and transient systematic effects. These include small charge leakage effects in the hold capacitors during the serial readout delay, as well as transients induced by the ASIC digital activity. These systematic shifts cannot be corrected using a static, full-chip offline calibration map because the position, size, and shape of the ROI change for every event. Since the time at which a pixel is sampled relative to the trigger depends on its position within the specific ROI, the same pixel experiences different readout delays and digital transients depending on whether it is located at the beginning or at the end of the readout sequence. By reading the exact same ROI twice in close succession, these location and time-dependent baseline variations are effectively subtracted and canceled out.
 
 The event readout capture timing of XPOL-I is shown in Fig. \ref{fig:xpol_timing}. In the basic self-triggering XPOL readout mode the \textit{TrigOut} signal is generated when at least a minicluster exceeds the trigger threshold and prevents additional triggers until it is externally reset. \textit{T$_{dh}$} is the time delay between the arrival of the event and the threshold crossing, and it is smaller than the shaper time \textit{T$_{pk}$}.
 

@@ -71,4 +71,5 @@ plt.tight_layout()
 
 plt.savefig(FIGURES_DIR / "chapter4/design/mean_diffusion.pdf", dpi=300, bbox_inches="tight")
 
+print(compute_mean_z(xraydb.material_mu("Si", 10000, density=2.33), D_semi))
 plt.show()
