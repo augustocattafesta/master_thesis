@@ -44,7 +44,15 @@ plt.ylim(0, 0.4)
 plt.xlim(min(x), max(x))
 plt.legend(frameon=False)
 
-fig50.savefig(FIGURES_DIR / "chapter4/position/eef50.png", bbox_inches="tight")
-fig90.savefig(FIGURES_DIR / "chapter4/position/eef90.png", bbox_inches="tight")
+# fig50.savefig(FIGURES_DIR / "chapter4/position/eef50.png", bbox_inches="tight")
+# fig90.savefig(FIGURES_DIR / "chapter4/position/eef90.png", bbox_inches="tight")
+
+print("EEF50 Barycenter:", eef50_bary[3] * 50)
+print("EEF90 Barycenter:", eef90_bary[3] * 90)
+print("EEF50 Likelihood:", eef50_lh[3] * 50)
+print("EEF90 Likelihood:", eef90_lh[3] * 90)
+print("EEF50 Eta modeled:", eef50_eta_mc[3] * 50)
+print("EEF90 Eta modeled:", eef90_eta_mc[3] * 90)
+
 
 plt.show()
