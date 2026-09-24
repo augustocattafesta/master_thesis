@@ -21,6 +21,8 @@ charging_errors = gain_errors[mask] / gains[mask][0]
 model = StretchedExponential() + Constant()
 model.fit(times[mask], charging, sigma=charging_errors)
 
+print(model)
+
 discharging = gains[~mask] / gains[mask][0]
 discharging_errors = gain_errors[~mask] / gains[mask][0]
 
@@ -43,7 +45,7 @@ ax_main.errorbar(times[~mask], discharging, yerr=discharging_errors, fmt='vk', l
 scale = model._components[0].scale.ufloat()
 gamma = model._components[0].stretch.ufloat()
 label = f'Charging model\n' + rf"$\tau$ = {scale} h"
-label += "\n" + r"$\gamma$ = " + f"{gamma}"
+label += "\n" + r"$\gamma$ = " + f"{gamma}" + f"\nc = {model._components[1].value.ufloat()}"
 model.plot(label=label, plot_components=False)
 ax_main.set_ylabel('Norm. Gain @ 5.9 keV')
 ax_main.legend()
